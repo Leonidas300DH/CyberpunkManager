@@ -1,13 +1,12 @@
 'use client';
 
+import { Campaign } from '@/types';
 import { useStore } from '@/store/useStore';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Check, AlertTriangle, Crosshair } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useTeamBuilder } from '@/hooks/useTeamBuilder';
-import { TEAM_bUILDER_TEXT } from '@/data/referenceData';
+import { TEAM_BUILDER_TEXT } from '@/data/referenceData';
 
 interface TeamBuilderProps {
     campaign: Campaign;
@@ -35,19 +34,19 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
             <div className="sticky top-0 z-30 pt-4 -mx-4 px-4 bg-background/95 border-b-2 border-primary/20 backdrop-blur pb-4">
                 <div className="flex justify-between items-end">
                     <div className="space-y-1">
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{TEAM_bUILDER_TEXT.superTitle}</div>
-                        <h2 className="font-black text-xl uppercase tracking-tighter text-primary glitch-text" data-text={TEAM_bUILDER_TEXT.title}>{TEAM_bUILDER_TEXT.title}</h2>
+                        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{TEAM_BUILDER_TEXT.superTitle}</div>
+                        <h2 className="font-black text-xl uppercase tracking-tighter text-primary glitch-text" data-text={TEAM_BUILDER_TEXT.title}>{TEAM_BUILDER_TEXT.title}</h2>
                         <div className="flex items-baseline space-x-2">
                             <span className={`text-4xl font-black font-mono tracking-tighter leading-none ${totalCost > targetEB ? 'text-destructive glitch-text' : 'text-foreground'}`} data-text={totalCost}>
                                 {totalCost}
                             </span>
-                            <span className="text-sm font-bold text-muted-foreground">/ {targetEB} {TEAM_bUILDER_TEXT.currency}</span>
+                            <span className="text-sm font-bold text-muted-foreground">/ {targetEB} {TEAM_BUILDER_TEXT.currency}</span>
                         </div>
                     </div>
 
                     <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center border border-muted bg-card px-2 py-1 cp-cut-bl">
-                            <span className="text-[10px] uppercase font-bold text-primary mr-2">{TEAM_bUILDER_TEXT.limitLabel}</span>
+                            <span className="text-[10px] uppercase font-bold text-primary mr-2">{TEAM_BUILDER_TEXT.limitLabel}</span>
                             <Input
                                 type="number"
                                 value={targetEB}
@@ -72,7 +71,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         `}
                     >
                         <Crosshair className="w-4 h-4 mr-2" />
-                        {isValid ? TEAM_bUILDER_TEXT.deployButton.valid : TEAM_bUILDER_TEXT.deployButton.invalid}
+                        {isValid ? TEAM_BUILDER_TEXT.deployButton.valid : TEAM_BUILDER_TEXT.deployButton.invalid}
                     </button>
                 </div>
 
@@ -80,7 +79,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     <div className="mt-3 bg-destructive/10 border-l-2 border-destructive p-2 animate-in slide-in-from-top-2">
                         <div className="flex items-center gap-2 text-destructive text-xs font-bold uppercase tracking-wider mb-1">
                             <AlertTriangle className="h-3 w-3" />
-                            <span>{TEAM_bUILDER_TEXT.errorTitle}</span>
+                            <span>{TEAM_BUILDER_TEXT.errorTitle}</span>
                         </div>
                         <ul className="list-disc list-inside text-[10px] text-destructive-foreground/80 font-mono">
                             {validationErrors.map((err, i) => <li key={i}>{err}</li>)}
@@ -92,11 +91,11 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
             <div className="space-y-3">
                 {campaign.hqRoster.length === 0 && (
                     <div className="border border-dashed border-muted p-8 text-center text-muted-foreground font-mono uppercase text-xs">
-                        {TEAM_bUILDER_TEXT.emptyState}
+                        {TEAM_BUILDER_TEXT.emptyState}
                     </div>
                 )}
                 {campaign.hqRoster.map(recruit => {
-                    const profile = getProfile(recruit.profileId);
+                    const profile = getProfile(recruit.currentProfileId);
                     const lineage = profile ? getLineage(profile.lineageId) : null;
                     if (!profile || !lineage) return null;
 
@@ -127,7 +126,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <h4 className={`font-bold text-sm uppercase tracking-tight ${isSelected ? 'text-primary' : 'text-foreground'}`}>
-                                                {recruit.name || lineage.name}
+                                                {lineage.name}
                                             </h4>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[9px] font-mono text-muted-foreground bg-muted px-1">

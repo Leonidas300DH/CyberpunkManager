@@ -1,8 +1,8 @@
-import { Campaign, MatchTeam, StoreState } from '@/types';
+import { Campaign, MatchTeam, CatalogData } from '@/types';
 import { MathService } from './math';
 
 export const ValidationService = {
-    validateRoster: (campaign: Campaign, team: MatchTeam, store: StoreState['catalog']): string[] => {
+    validateRoster: (team: MatchTeam, campaign: Campaign, store: CatalogData): string[] => {
         const errors: string[] = [];
 
         // Helper to get recruited models

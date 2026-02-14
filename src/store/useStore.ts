@@ -1,14 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { Faction, ModelLineage, ModelProfile, ItemCard, Campaign, MatchTeam } from '@/types'
+import { CatalogData, Campaign, MatchTeam } from '@/types'
 
 interface StoreState {
-    catalog: {
-        factions: Faction[];
-        lineages: ModelLineage[];
-        profiles: ModelProfile[];
-        items: ItemCard[];
-    };
+    catalog: CatalogData;
     campaigns: Campaign[];
     activeMatchTeam: MatchTeam | null;
 

@@ -1,4 +1,4 @@
-export const TEAM_bUILDER_TEXT = {
+export const TEAM_BUILDER_TEXT = {
     superTitle: "Combat Zone",
     title: "Mission Prep // v2.077",
     limitLabel: "Limit",

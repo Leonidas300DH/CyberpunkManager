@@ -18,7 +18,6 @@ export function ActiveMatchView() {
     const [wounds, setWounds] = useState<Record<string, number>>({});
 
     // Filter roster to only include selected recruits
-    // Moved up to fix Conditional Hook Call rule
     const matchRoster = useStore(state => {
         if (!state.activeMatchTeam) return [];
         const campaign = state.campaigns.find(c => c.id === state.activeMatchTeam!.campaignId);
@@ -70,7 +69,7 @@ export function ActiveMatchView() {
 
             <div className="space-y-3">
                 {matchRoster.map(recruit => {
-                    const profile = getProfile(recruit.profileId);
+                    const profile = getProfile(recruit.currentProfileId);
                     const lineage = profile ? getLineage(profile.lineageId) : null;
 
                     if (!profile || !lineage) return null;
@@ -90,8 +89,8 @@ export function ActiveMatchView() {
                                 <div className="flex-1 p-3">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <h4 className="font-bold text-sm">{recruit.name || lineage.name}</h4>
-                                            <div className="text-xs text-muted-foreground">{lineage.type} • Mv {profile.movement.yellow}&quot;/{profile.movement.green}&quot;</div>
+                                            <h4 className="font-bold text-sm">{lineage.name}</h4>
+                                            <div className="text-xs text-muted-foreground">{lineage.type} • Rank {profile.level}</div>
                                         </div>
                                         <div className="flex items-center space-x-1">
                                             <Shield className="w-3 h-3 text-muted-foreground" />

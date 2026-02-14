@@ -1,12 +1,7 @@
-import { Campaign, MatchTeam, StoreState } from '@/types';
-import { useStore } from '@/store/useStore';
+import { Campaign, MatchTeam, CatalogData } from '@/types';
 
 export const MathService = {
-    /**
-     * Calculates Total Campaign Street Cred (Stars).
-     * Sum of ModelProfile levels + Sum of Completed Objective bonuses.
-     */
-    calculateCampaignStreetCred: (campaign: Campaign, store: StoreState['catalog']): number => {
+    calculateCampaignStreetCred: (campaign: Campaign, store: CatalogData): number => {
         let totalCred = 0;
 
         // 1. Sum Profile Levels
@@ -28,11 +23,7 @@ export const MathService = {
         return totalCred;
     },
 
-    /**
-     * Calculates Total Campaign Influence.
-     * Sum of Influence skill of all Leaders/Characters in Roster.
-     */
-    calculateCampaignInfluence: (campaign: Campaign, store: StoreState['catalog']): number => {
+    calculateCampaignInfluence: (campaign: Campaign, store: CatalogData): number => {
         let totalInfluence = 0;
 
         campaign.hqRoster.forEach((recruit) => {
@@ -47,11 +38,7 @@ export const MathService = {
         return totalInfluence;
     },
 
-    /**
-     * Calculates Total Cost (EB) of a Match Team.
-     * Sum of Recruit Costs + Equipped Item Costs.
-     */
-    calculateTeamCost: (team: MatchTeam, campaign: Campaign, store: StoreState['catalog']): number => {
+    calculateTeamCost: (team: MatchTeam, campaign: Campaign, store: CatalogData): number => {
         let totalCost = 0;
 
         team.selectedRecruitIds.forEach((recruitId) => {

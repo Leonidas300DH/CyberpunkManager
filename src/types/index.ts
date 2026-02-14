@@ -94,3 +94,11 @@ export interface MatchTeam {
     targetEB: number; // e.g., 100, 150, or 200
     selectedRecruitIds: string[]; // Array of RecruitedModel IDs going to the match
 }
+
+// Store catalog shape used by services
+export interface CatalogData {
+    factions: Faction[];
+    lineages: ModelLineage[];
+    profiles: ModelProfile[];
+    items: ItemCard[];
+}

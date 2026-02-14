@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ValidationService } from './validation';
 import { MathService } from './math';
-import { Campaign, MatchTeam, StoreState, Faction, ModelLineage, ModelProfile } from '@/types';
+import { Campaign, MatchTeam, CatalogData, Faction, ModelLineage, ModelProfile } from '@/types';
 
 // Mock Data
 const mockFaction: Faction = { id: 'fac-1', name: 'Mock Gang' };
@@ -22,7 +22,7 @@ const mockGonkProfile: ModelProfile = {
     armor: 0, keywords: [], actions: [], passiveRules: ''
 };
 
-const mockStore: StoreState['catalog'] = {
+const mockStore: CatalogData = {
     factions: [mockFaction],
     lineages: [mockLeaderLineage, mockGonkLineage],
     profiles: [mockLeaderProfile, mockGonkProfile],
@@ -33,7 +33,7 @@ const mockStore: StoreState['catalog'] = {
 const runTest = (name: string, setup: () => { campaign: Campaign, team: MatchTeam }, expectedErrors: string[]) => {
     console.log(`\nRUNNING: ${name}`);
     const { campaign, team } = setup();
-    const errors = ValidationService.validateRoster(campaign, team, mockStore);
+    const errors = ValidationService.validateRoster(team, campaign, mockStore);
 
     const missing = expectedErrors.filter(e => !errors.some(err => err.includes(e)));
     const unexpected = errors.filter(e => !expectedErrors.some(exp => e.includes(exp)));

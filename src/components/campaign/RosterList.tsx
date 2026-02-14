@@ -1,8 +1,8 @@
 'use client';
 
-import { Campaign, Faction, ModelLineage, ModelProfile } from '@/types';
+import { Campaign } from '@/types';
 import { useStore } from '@/store/useStore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Edit } from 'lucide-react';
@@ -12,13 +12,10 @@ interface RosterListProps {
 }
 
 export function RosterList({ campaign }: RosterListProps) {
-    const { catalog, updateCampaign } = useStore();
+    const { catalog } = useStore();
 
     const getProfile = (profileId: string) => catalog.profiles.find(p => p.id === profileId);
     const getLineage = (lineageId: string) => catalog.lineages.find(l => l.id === lineageId);
-
-    // Group by Type (Leader, Elite, Trooper, Gonk, Specialist, etc)
-    // Or just flat list sorted by type priority?
 
     return (
         <div className="space-y-3">
@@ -28,7 +25,7 @@ export function RosterList({ campaign }: RosterListProps) {
             {campaign.hqRoster.length === 0 && <div className="text-center text-muted-foreground py-4">No models recruited.</div>}
 
             {campaign.hqRoster.map(recruit => {
-                const profile = getProfile(recruit.profileId);
+                const profile = getProfile(recruit.currentProfileId);
                 const lineage = profile ? getLineage(profile.lineageId) : null;
 
                 if (!profile || !lineage) return null;
@@ -42,12 +39,12 @@ export function RosterList({ campaign }: RosterListProps) {
                             <div className="flex-1 p-3">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <h4 className="font-bold text-sm">{recruit.name || lineage.name}</h4>
+                                        <h4 className="font-bold text-sm">{lineage.name}</h4>
                                         <div className="text-xs text-muted-foreground">{lineage.type} • Rank {profile.level}</div>
                                     </div>
                                     <div className="text-right">
                                         <span className="text-xs font-mono text-warning block">{profile.costEB} EB</span>
-                                        {recruit.injuries.length > 0 && <Badge variant="destructive" className="text-[10px] h-4 px-1">Injured</Badge>}
+                                        {recruit.hasMajorInjury && <Badge variant="destructive" className="text-[10px] h-4 px-1">Injured</Badge>}
                                     </div>
                                 </div>
                                 <div className="mt-2 flex justify-end gap-2">
