@@ -17,8 +17,11 @@ export function BottomNav() {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border pb-safe">
-            <div className="flex justify-around items-center h-16">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300">
+            {/* Glossy Backdrop with border-t highlight */}
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-t border-white/5 shadow-[0_-4px_20px_rgba(0,0,0,0.3)]"></div>
+
+            <div className="relative flex justify-around items-center h-20 pb-4">
                 {navItems.map((item) => {
                     const isActive = pathname.startsWith(item.href);
                     const Icon = item.icon;
@@ -28,14 +31,23 @@ export function BottomNav() {
                             key={item.name}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors",
+                                "group flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 relative",
                                 isActive
-                                    ? "text-primary"
-                                    : "text-muted-foreground hover:text-foreground"
+                                    ? "text-primary -translate-y-1"
+                                    : "text-muted-foreground hover:text-foreground hover:-translate-y-0.5"
                             )}
                         >
-                            <Icon className="w-6 h-6" />
-                            <span className="text-[10px] uppercase tracking-wider font-semibold">
+                            {/* Active Glow Indicator */}
+                            {isActive && (
+                                <div className="absolute top-1 w-8 h-8 bg-primary/20 blur-xl rounded-full animate-pulse pointer-events-none" />
+                            )}
+
+                            <Icon className={cn("w-6 h-6 transition-transform duration-300", isActive && "drop-shadow-[0_0_8px_rgba(252,238,10,0.6)]")} />
+
+                            <span className={cn(
+                                "text-[9px] uppercase tracking-widest font-bold transition-opacity duration-300",
+                                isActive ? "opacity-100 text-primary" : "opacity-70 group-hover:opacity-100"
+                            )}>
                                 {item.name}
                             </span>
                         </Link>

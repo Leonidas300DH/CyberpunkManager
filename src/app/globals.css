@@ -49,75 +49,127 @@
 
 @layer base {
   :root {
-    --background: 0 0% 7%; /* #121212 */
-    --foreground: 0 0% 100%;
-    
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
- 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 100%;
- 
-    --primary: 111 100% 54%; /* #39FF14 Neon Green */
-    --primary-foreground: 0 0% 0%;
- 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
- 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
- 
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 100%;
- 
-    --destructive: 346 100% 50%; /* #FF003C Neon Red */
-    --destructive-foreground: 0 0% 100%;
+    /* Apple-inspired Modern Dark with Cyberpunk Accents */
 
-    --warning: 51 100% 50%; /* #FFD700 Gold/Yellow */
- 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 111 100% 54%;
- 
-    --radius: 0.5rem;
-  }
- 
-  .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 100%;
- 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
- 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 100%;
- 
-    --primary: 111 100% 54%;
-    --primary-foreground: 0 0% 0%;
- 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
- 
+    /* Background: Deep Black/Grey (Apple Dark Mode) */
+    --background: 0 0% 5%;
+    /* #0D0D0D */
+    --foreground: 0 0% 98%;
+
+    /* Glassmorphic Surfaces (Blur-friendly) */
+    --card: 0 0% 9%;
+    /* #171717 */
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary: Cyberpunk Neon Yellow */
+    --primary: 56 100% 50%;
+    /* #FCEE0A */
+    --primary-foreground: 0 0% 5%;
+    /* Contrast Text */
+
+    /* Secondary: Cyberpunk Cyan used for Accents/Info */
+    --secondary: 180 100% 50%;
+    /* #00F0FF */
+    --secondary-foreground: 0 0% 5%;
+
+    /* Muted: Subtle Greys for non-critical text */
     --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
- 
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 100%;
- 
+    --muted-foreground: 0 0% 60%;
+
+    /* Accent: Glitched Purple or Electric Blue for Hover/Focus */
+    --accent: 260 100% 65%;
+    /* #7127BA (Purple) */
+    --accent-foreground: 0 0% 98%;
+
+    /* Destructive: Cyberpunk Neon Red */
     --destructive: 346 100% 50%;
-    --destructive-foreground: 0 0% 100%;
- 
+    /* #FF003C */
+    --destructive-foreground: 0 0% 98%;
+
+    /* Warning: Safety Orange */
+    --warning: 30 100% 50%;
+    /* #FF8000 */
+
+    /* Borders: Very subtle, almost invisible, rely on shadows/glows */
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 111 100% 54%;
+
+    /* Ring: Focus Glow Color (Cyan) */
+    --ring: 180 100% 50%;
+
+    /* Apple-style Radius: Smooth Corners */
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Same as root because we enforce dark mode, but good for completeness */
+    --background: 0 0% 5%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 56 100% 50%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 180 100% 50%;
+    --secondary-foreground: 0 0% 5%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 260 100% 65%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 346 100% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 180 100% 50%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground;
+    background-image: radial-gradient(circle at 50% 0%, rgba(252, 238, 10, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 0% 100%, rgba(0, 240, 255, 0.03) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  /* Custom Scrollbar for Cyberpunk Feel */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full hover:bg-primary/50 transition-colors;
+  }
+}
+
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass {
+    @apply bg-background/60 backdrop-blur-xl border border-white/5 shadow-lg;
+  }
+
+  .glass-card {
+    @apply bg-card/40 backdrop-blur-md border border-white/5 hover:border-primary/30 transition-all duration-300;
+  }
+
+  .neon-text {
+    text-shadow: 0 0 10px rgba(252, 238, 10, 0.5);
+  }
+
+  .neon-border {
+    box-shadow: 0 0 5px rgba(0, 240, 255, 0.5), inset 0 0 5px rgba(0, 240, 255, 0.1);
   }
 }

@@ -39,30 +39,33 @@ export default function HQPage() {
             />
 
             {selectedCampaign ? (
-                <>
+                <div className="space-y-6">
                     <CampaignHeader campaign={selectedCampaign} faction={selectedFaction} />
 
                     <Tabs defaultValue="roster" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="roster"><Users className="w-4 h-4" /></TabsTrigger>
-                            <TabsTrigger value="stash"><Briefcase className="w-4 h-4" /></TabsTrigger>
-                            <TabsTrigger value="ops"><Target className="w-4 h-4" /></TabsTrigger>
-                            <TabsTrigger value="med"><ShieldPlus className="w-4 h-4" /></TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="roster">
-                            <div className="text-center p-4 text-muted-foreground">Roster List Coming Soon</div>
+                        <div className="glass rounded-lg p-1 mb-4">
+                            <TabsList className="grid w-full grid-cols-4 bg-transparent h-10">
+                                <TabsTrigger value="roster" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:backdrop-blur-sm"><Users className="w-4 h-4 mr-2" /><span className="hidden xs:inline">Roster</span></TabsTrigger>
+                                <TabsTrigger value="stash" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary data-[state=active]:backdrop-blur-sm"><Briefcase className="w-4 h-4 mr-2" /><span className="hidden xs:inline">Stash</span></TabsTrigger>
+                                <TabsTrigger value="ops" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent data-[state=active]:backdrop-blur-sm"><Target className="w-4 h-4 mr-2" /><span className="hidden xs:inline">Ops</span></TabsTrigger>
+                                <TabsTrigger value="med" className="data-[state=active]:bg-destructive/20 data-[state=active]:text-destructive data-[state=active]:backdrop-blur-sm"><ShieldPlus className="w-4 h-4 mr-2" /><span className="hidden xs:inline">Med</span></TabsTrigger>
+                            </TabsList>
+                        </div>
+
+                        <TabsContent value="roster" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                            <RosterList campaign={selectedCampaign} />
                         </TabsContent>
-                        <TabsContent value="stash">
-                            <div className="text-center p-4 text-muted-foreground">Stash List Coming Soon</div>
+                        <TabsContent value="stash" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                            <StashList campaign={selectedCampaign} />
                         </TabsContent>
                         <TabsContent value="ops">
-                            <div className="text-center p-4 text-muted-foreground">Operations Coming Soon</div>
+                            <div className="glass-card rounded-lg p-8 text-center text-muted-foreground border-dashed">Operations Coming Soon</div>
                         </TabsContent>
                         <TabsContent value="med">
-                            <div className="text-center p-4 text-muted-foreground">Med Bay Coming Soon</div>
+                            <div className="glass-card rounded-lg p-8 text-center text-muted-foreground border-dashed">Med Bay Coming Soon</div>
                         </TabsContent>
                     </Tabs>
-                </>
+                </div>
             ) : (
                 <Card className="p-8 flex flex-col items-center text-center space-y-4 border-dashed">
                     <div className="text-muted-foreground">
