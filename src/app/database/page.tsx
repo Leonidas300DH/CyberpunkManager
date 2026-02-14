@@ -14,7 +14,7 @@ export default function DatabasePage() {
                 <div className="overflow-x-auto pb-2">
                     <TabsList className="w-full justify-start">
                         <TabsTrigger value="factions">Factions</TabsTrigger>
-                        <TabsTrigger value="models">Models</TabsTrigger>
+                        <TabsTrigger value="models">Characters</TabsTrigger>
                         <TabsTrigger value="items">Items</TabsTrigger>
                     </TabsList>
                 </div>

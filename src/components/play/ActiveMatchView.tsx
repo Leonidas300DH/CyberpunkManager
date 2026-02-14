@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress'; // Need to make sure Progress is installed or use custom
-import { Swords, Shield, Zap, Skull, RotateCcw } from 'lucide-react';
+import { Swords, Shield, Skull, RotateCcw } from 'lucide-react';
+import { PLAY_MODE_TEXT } from '@/data/referenceData';
 
 export function ActiveMatchView() {
     const router = useRouter();
@@ -16,6 +16,14 @@ export function ActiveMatchView() {
     // Local state for the match session
     const [activatedModels, setActivatedModels] = useState<Record<string, boolean>>({});
     const [wounds, setWounds] = useState<Record<string, number>>({});
+
+    // Filter roster to only include selected recruits
+    // Moved up to fix Conditional Hook Call rule
+    const matchRoster = useStore(state => {
+        if (!state.activeMatchTeam) return [];
+        const campaign = state.campaigns.find(c => c.id === state.activeMatchTeam!.campaignId);
+        return campaign?.hqRoster.filter(r => state.activeMatchTeam!.selectedRecruitIds.includes(r.id)) || [];
+    });
 
     if (!activeMatchTeam) {
         return (
@@ -31,12 +39,6 @@ export function ActiveMatchView() {
 
     const getProfile = (profileId: string) => catalog.profiles.find(p => p.id === profileId);
     const getLineage = (lineageId: string) => catalog.lineages.find(l => l.id === lineageId);
-
-    // Filter roster to only include selected recruits
-    const matchRoster = useStore(state => {
-        const campaign = state.campaigns.find(c => c.id === activeMatchTeam.campaignId);
-        return campaign?.hqRoster.filter(r => activeMatchTeam.selectedRecruitIds.includes(r.id)) || [];
-    });
 
     const handleEndMatch = () => {
         if (confirm("End the match? Progress will be lost (for now).")) {
@@ -61,9 +63,9 @@ export function ActiveMatchView() {
         <div className="space-y-4 pb-20">
             <div className="flex justify-between items-center sticky top-0 z-10 bg-background/95 backdrop-blur py-2 -mx-4 px-4 border-b">
                 <h2 className="font-bold text-lg text-primary flex items-center">
-                    <Swords className="w-5 h-5 mr-2" /> Match In Progress
+                    <Swords className="w-5 h-5 mr-2" /> {PLAY_MODE_TEXT.title}
                 </h2>
-                <Button variant="destructive" size="sm" onClick={handleEndMatch}>End Match</Button>
+                <Button variant="destructive" size="sm" onClick={handleEndMatch}>{PLAY_MODE_TEXT.endTurn}</Button>
             </div>
 
             <div className="space-y-3">
@@ -75,7 +77,7 @@ export function ActiveMatchView() {
 
                     const isActivated = activatedModels[recruit.id];
                     const currentWounds = wounds[recruit.id] || 0;
-                    const isCasualty = currentWounds >= 4; // Assuming 4 wounds is generically bad for now, rules vary
+                    const isCasualty = currentWounds >= 4;
 
                     return (
                         <Card key={recruit.id} className={`overflow-hidden transition-all ${isActivated ? 'opacity-60 saturate-0' : ''} ${isCasualty ? 'border-destructive bg-destructive/10' : ''}`}>
@@ -89,7 +91,7 @@ export function ActiveMatchView() {
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
                                             <h4 className="font-bold text-sm">{recruit.name || lineage.name}</h4>
-                                            <div className="text-xs text-muted-foreground">{lineage.type} • Mv {profile.movement.yellow}"/{profile.movement.green}"</div>
+                                            <div className="text-xs text-muted-foreground">{lineage.type} • Mv {profile.movement.yellow}&quot;/{profile.movement.green}&quot;</div>
                                         </div>
                                         <div className="flex items-center space-x-1">
                                             <Shield className="w-3 h-3 text-muted-foreground" />

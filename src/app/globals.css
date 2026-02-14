@@ -49,82 +49,78 @@
 
 @layer base {
   :root {
-    /* Apple-inspired Modern Dark with Cyberpunk Accents */
+    /* Night City Official Palette - High Contrast */
 
-    /* Background: Deep Black/Grey (Apple Dark Mode) */
-    --background: 0 0% 5%;
-    /* #0D0D0D */
+    /* Backgrounds: Absolute Black & Industrial Grey */
+    --background: 0 0% 0%;
+    /* #000000 */
     --foreground: 0 0% 98%;
 
-    /* Glassmorphic Surfaces (Blur-friendly) */
-    --card: 0 0% 9%;
-    /* #171717 */
+    /* Surfaces: Solid, Heavy, Industrial */
+    --card: 0 0% 5%;
+    /* #0D0D0D */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 9%;
+    --popover: 0 0% 5%;
     --popover-foreground: 0 0% 98%;
 
-    /* Primary: Cyberpunk Neon Yellow */
-    --primary: 56 100% 50%;
+    /* Primary: Cyberpunk Yellow (The icon) */
+    --primary: 56 96% 51%;
     /* #FCEE0A */
-    --primary-foreground: 0 0% 5%;
-    /* Contrast Text */
+    --primary-foreground: 0 0% 0%;
+    /* Black text on yellow */
 
-    /* Secondary: Cyberpunk Cyan used for Accents/Info */
+    /* Secondary: Holo Cyan */
     --secondary: 180 100% 50%;
     /* #00F0FF */
-    --secondary-foreground: 0 0% 5%;
+    --secondary-foreground: 0 0% 0%;
 
-    /* Muted: Subtle Greys for non-critical text */
-    --muted: 0 0% 15%;
+    /* Muted: Technical Grey */
+    --muted: 0 0% 20%;
     --muted-foreground: 0 0% 60%;
 
-    /* Accent: Glitched Purple or Electric Blue for Hover/Focus */
-    --accent: 260 100% 65%;
-    /* #7127BA (Purple) */
+    /* Accent: Glitch Red */
+    --accent: 346 100% 50%;
+    /* #FF003C */
     --accent-foreground: 0 0% 98%;
 
-    /* Destructive: Cyberpunk Neon Red */
+    /* Destructive: Same as Accent/Red */
     --destructive: 346 100% 50%;
-    /* #FF003C */
     --destructive-foreground: 0 0% 98%;
 
-    /* Warning: Safety Orange */
+    /* Warning: Hazard Orange */
     --warning: 30 100% 50%;
     /* #FF8000 */
 
-    /* Borders: Very subtle, almost invisible, rely on shadows/glows */
-    --border: 0 0% 20%;
+    /* Borders: High Contrast */
+    --border: 0 0% 30%;
     --input: 0 0% 20%;
+    --ring: 56 96% 51%;
 
-    /* Ring: Focus Glow Color (Cyan) */
-    --ring: 180 100% 50%;
-
-    /* Apple-style Radius: Smooth Corners */
-    --radius: 0.75rem;
+    /* Radius: ZERO. Sharp Edges. */
+    --radius: 0rem;
   }
 
   .dark {
-    /* Same as root because we enforce dark mode, but good for completeness */
-    --background: 0 0% 5%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 9%;
+    --card: 0 0% 5%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 9%;
+    --popover: 0 0% 5%;
     --popover-foreground: 0 0% 98%;
-    --primary: 56 100% 50%;
-    --primary-foreground: 0 0% 5%;
+    --primary: 56 96% 51%;
+    --primary-foreground: 0 0% 0%;
     --secondary: 180 100% 50%;
-    --secondary-foreground: 0 0% 5%;
-    --muted: 0 0% 15%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 20%;
     --muted-foreground: 0 0% 60%;
-    --accent: 260 100% 65%;
+    --accent: 346 100% 50%;
     --accent-foreground: 0 0% 98%;
     --destructive: 346 100% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
+    --border: 0 0% 30%;
     --input: 0 0% 20%;
-    --ring: 180 100% 50%;
+    --ring: 56 96% 51%;
   }
 }
 
@@ -134,42 +130,125 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground;
-    background-image: radial-gradient(circle at 50% 0%, rgba(252, 238, 10, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 0% 100%, rgba(0, 240, 255, 0.03) 0%, transparent 50%);
-    background-attachment: fixed;
+    @apply bg-background text-foreground antialiased selection:bg-primary selection:text-black;
+    /* Grid Background Pattern */
+    background-image:
+      linear-gradient(rgba(252, 238, 10, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(252, 238, 10, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-color: #000;
   }
 
-  /* Custom Scrollbar for Cyberpunk Feel */
+  /* Custom Scrollbar - Industrial Blocky */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
+    width: 10px;
+    background: #1a1a1a;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full hover:bg-primary/50 transition-colors;
+    background: var(--primary);
+    border: 2px solid #1a1a1a;
   }
 }
 
-/* Glassmorphism Utilities */
 @layer utilities {
-  .glass {
-    @apply bg-background/60 backdrop-blur-xl border border-white/5 shadow-lg;
+
+  /* Chamfered Edges */
+  .cp-cut-tr {
+    clip-path: polygon(0 0,
+        calc(100% - 10px) 0,
+        100% 10px,
+        100% 100%,
+        0 100%);
   }
 
-  .glass-card {
-    @apply bg-card/40 backdrop-blur-md border border-white/5 hover:border-primary/30 transition-all duration-300;
+  .cp-cut-bl {
+    clip-path: polygon(0 0,
+        100% 0,
+        100% 100%,
+        10px 100%,
+        0 calc(100% - 10px));
   }
 
-  .neon-text {
-    text-shadow: 0 0 10px rgba(252, 238, 10, 0.5);
+  /* Glitch Text Effect */
+  .glitch-text {
+    position: relative;
   }
 
-  .neon-border {
-    box-shadow: 0 0 5px rgba(0, 240, 255, 0.5), inset 0 0 5px rgba(0, 240, 255, 0.1);
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--background);
+  }
+
+  .glitch-text::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff003c;
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+  }
+
+  .glitch-text::after {
+    left: -2px;
+    text-shadow: -1px 0 #00f0ff;
+    clip: rect(85px, 550px, 140px, 0);
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+  }
+
+  @keyframes glitch-anim-1 {
+    0% {
+      clip: rect(20px, 9999px, 80px, 0);
+    }
+
+    20% {
+      clip: rect(60px, 9999px, 10px, 0);
+    }
+
+    40% {
+      clip: rect(80px, 9999px, 120px, 0);
+    }
+
+    60% {
+      clip: rect(10px, 9999px, 40px, 0);
+    }
+
+    80% {
+      clip: rect(50px, 9999px, 90px, 0);
+    }
+
+    100% {
+      clip: rect(30px, 9999px, 60px, 0);
+    }
+  }
+
+  @keyframes glitch-anim-2 {
+    0% {
+      clip: rect(90px, 9999px, 20px, 0);
+    }
+
+    20% {
+      clip: rect(10px, 9999px, 60px, 0);
+    }
+
+    40% {
+      clip: rect(40px, 9999px, 90px, 0);
+    }
+
+    60% {
+      clip: rect(70px, 9999px, 30px, 0);
+    }
+
+    80% {
+      clip: rect(20px, 9999px, 60px, 0);
+    }
+
+    100% {
+      clip: rect(50px, 9999px, 10px, 0);
+    }
   }
 }

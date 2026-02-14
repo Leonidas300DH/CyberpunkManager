@@ -10,49 +10,57 @@ export function BottomNav() {
 
     const navItems = [
         { name: 'HQ', href: '/hq', icon: Home },
+        { name: 'Characters', href: '/database', icon: Database },
+        { name: 'Team Builder', href: '/match', icon: Swords },
         { name: 'Armory', href: '/armory', icon: Sword },
-        { name: 'Match', href: '/match', icon: Swords },
         { name: 'Play', href: '/play', icon: TabletSmartphone },
-        { name: 'DB', href: '/database', icon: Database },
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300">
-            {/* Glossy Backdrop with border-t highlight */}
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-t border-white/5 shadow-[0_-4px_20px_rgba(0,0,0,0.3)]"></div>
+        <nav className="fixed bottom-0 left-0 right-0 z-50">
+            {/* Main Bar - Solid Black with Top Border Cyan */}
+            <div className="bg-background border-t-2 border-secondary relative h-20">
+                <div className="flex justify-around items-stretch h-full">
+                    {navItems.map((item) => {
+                        const isActive = pathname.startsWith(item.href);
+                        const Icon = item.icon;
 
-            <div className="relative flex justify-around items-center h-20 pb-4">
-                {navItems.map((item) => {
-                    const isActive = pathname.startsWith(item.href);
-                    const Icon = item.icon;
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={cn(
+                                    "flex-1 flex flex-col items-center justify-center space-y-1 transition-all duration-200 relative group overflow-hidden",
+                                    isActive
+                                        ? "bg-primary text-black"
+                                        : "text-muted-foreground hover:bg-muted hover:text-white"
+                                )}
+                            >
+                                {/* Active Indicator: Angled Corner or Block */}
+                                {isActive && (
+                                    <div className="absolute top-0 right-0 w-3 h-3 bg-black transform rotate-45 translate-x-1.5 -translate-y-1.5"></div>
+                                )}
 
-                    return (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className={cn(
-                                "group flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 relative",
-                                isActive
-                                    ? "text-primary -translate-y-1"
-                                    : "text-muted-foreground hover:text-foreground hover:-translate-y-0.5"
-                            )}
-                        >
-                            {/* Active Glow Indicator */}
-                            {isActive && (
-                                <div className="absolute top-1 w-8 h-8 bg-primary/20 blur-xl rounded-full animate-pulse pointer-events-none" />
-                            )}
+                                <Icon className={cn("w-5 h-5 z-10", isActive && "stroke-[2.5px]")} />
 
-                            <Icon className={cn("w-6 h-6 transition-transform duration-300", isActive && "drop-shadow-[0_0_8px_rgba(252,238,10,0.6)]")} />
+                                <span className={cn(
+                                    "text-[9px] uppercase font-black tracking-widest z-10",
+                                    isActive ? "opacity-100" : "opacity-70"
+                                )}>
+                                    {item.name}
+                                </span>
 
-                            <span className={cn(
-                                "text-[9px] uppercase tracking-widest font-bold transition-opacity duration-300",
-                                isActive ? "opacity-100 text-primary" : "opacity-70 group-hover:opacity-100"
-                            )}>
-                                {item.name}
-                            </span>
-                        </Link>
-                    );
-                })}
+                                {/* Glitch Overlay on Hover (Desktop) */}
+                                <div className="absolute inset-0 bg-secondary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-200 pointer-events-none"></div>
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* Decorative Bottom Line with "Scanner" scanline */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-black overflow-hidden">
+                    <div className="absolute inset-0 bg-secondary/30 animate-[pulse_2s_infinite]"></div>
+                </div>
             </div>
         </nav>
     );

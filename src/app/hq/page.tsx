@@ -28,9 +28,9 @@ export default function HQPage() {
         : undefined;
 
     return (
-        <div className="space-y-4 pb-20">
+        <div className="space-y-4 pb-28">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold tracking-tight text-primary">HQ Dashboard</h1>
+                <h1 className="text-3xl font-black tracking-tighter text-primary uppercase glitch-text" data-text="HQ Dashboard">HQ Dashboard</h1>
             </div>
 
             <CampaignSelector
@@ -43,37 +43,56 @@ export default function HQPage() {
                     <CampaignHeader campaign={selectedCampaign} faction={selectedFaction} />
 
                     <Tabs defaultValue="roster" className="w-full">
-                        <div className="glass rounded-lg p-1 mb-4">
-                            <TabsList className="grid w-full grid-cols-4 bg-transparent h-10">
-                                <TabsTrigger value="roster" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:backdrop-blur-sm"><Users className="w-4 h-4 mr-2" /><span className="hidden xs:inline">Roster</span></TabsTrigger>
-                                <TabsTrigger value="stash" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary data-[state=active]:backdrop-blur-sm"><Briefcase className="w-4 h-4 mr-2" /><span className="hidden xs:inline">Stash</span></TabsTrigger>
-                                <TabsTrigger value="ops" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent data-[state=active]:backdrop-blur-sm"><Target className="w-4 h-4 mr-2" /><span className="hidden xs:inline">Ops</span></TabsTrigger>
-                                <TabsTrigger value="med" className="data-[state=active]:bg-destructive/20 data-[state=active]:text-destructive data-[state=active]:backdrop-blur-sm"><ShieldPlus className="w-4 h-4 mr-2" /><span className="hidden xs:inline">Med</span></TabsTrigger>
+                        {/* Cyberpunk Tabs Container */}
+                        <div className="bg-card border border-muted p-1 mb-6 cp-cut-both">
+                            <TabsList className="grid w-full grid-cols-4 bg-black h-12 p-0 gap-1">
+                                <TabsTrigger value="roster" className="data-[state=active]:bg-primary data-[state=active]:text-black h-full rounded-none uppercase font-bold tracking-wider data-[state=active]:shadow-[0_0_10px_rgba(252,238,10,0.4)] transition-all">
+                                    <Users className="w-4 h-4 mr-2" />
+                                    <span className="hidden xs:inline">Roster</span>
+                                </TabsTrigger>
+                                <TabsTrigger value="stash" className="data-[state=active]:bg-secondary data-[state=active]:text-black h-full rounded-none uppercase font-bold tracking-wider data-[state=active]:shadow-[0_0_10px_rgba(0,240,255,0.4)] transition-all">
+                                    <Briefcase className="w-4 h-4 mr-2" />
+                                    <span className="hidden xs:inline">Stash</span>
+                                </TabsTrigger>
+                                <TabsTrigger value="ops" className="data-[state=active]:bg-accent data-[state=active]:text-white h-full rounded-none uppercase font-bold tracking-wider data-[state=active]:shadow-[0_0_10px_rgba(255,0,60,0.4)] transition-all">
+                                    <Target className="w-4 h-4 mr-2" />
+                                    <span className="hidden xs:inline">Ops</span>
+                                </TabsTrigger>
+                                <TabsTrigger value="med" className="data-[state=active]:bg-white data-[state=active]:text-black h-full rounded-none uppercase font-bold tracking-wider transition-all">
+                                    <ShieldPlus className="w-4 h-4 mr-2" />
+                                    <span className="hidden xs:inline">Med</span>
+                                </TabsTrigger>
                             </TabsList>
                         </div>
 
-                        <TabsContent value="roster" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <TabsContent value="roster" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <RosterList campaign={selectedCampaign} />
                         </TabsContent>
-                        <TabsContent value="stash" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <TabsContent value="stash" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <StashList campaign={selectedCampaign} />
                         </TabsContent>
                         <TabsContent value="ops">
-                            <div className="glass-card rounded-lg p-8 text-center text-muted-foreground border-dashed">Operations Coming Soon</div>
+                            <div className="border-2 border-dashed border-muted bg-card/50 p-12 text-center">
+                                <h3 className="text-xl font-bold uppercase text-muted-foreground mb-2">Operations Offline</h3>
+                                <p className="text-xs font-mono text-muted-foreground">System maintenance in progress.</p>
+                            </div>
                         </TabsContent>
                         <TabsContent value="med">
-                            <div className="glass-card rounded-lg p-8 text-center text-muted-foreground border-dashed">Med Bay Coming Soon</div>
+                            <div className="border-2 border-dashed border-muted bg-card/50 p-12 text-center">
+                                <h3 className="text-xl font-bold uppercase text-muted-foreground mb-2">MedBay Offline</h3>
+                                <p className="text-xs font-mono text-muted-foreground">Auto-doc disabled.</p>
+                            </div>
                         </TabsContent>
                     </Tabs>
                 </div>
             ) : (
-                <Card className="p-8 flex flex-col items-center text-center space-y-4 border-dashed">
-                    <div className="text-muted-foreground">
-                        <p>No active campaign found.</p>
-                        <p className="text-sm">Start your journey in the Combat Zone.</p>
+                <div className="p-8 flex flex-col items-center text-center space-y-6 border-2 border-dashed border-muted bg-card/20 rounded-none">
+                    <div className="text-muted-foreground space-y-2">
+                        <p className="font-bold uppercase tracking-widest">No Active Campaign</p>
+                        <p className="text-xs font-mono">Initialize new operation in the Combat Zone.</p>
                     </div>
                     <NewCampaignDialog onCampaignCreated={setSelectedCampaignId} />
-                </Card>
+                </div>
             )}
         </div>
     );
