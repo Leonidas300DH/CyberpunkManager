@@ -191,11 +191,15 @@ function WeaponImageUpload({ value, weaponName, onChange }: { value: string; wea
     );
 }
 
+const DEFAULT_WEAPON_IMAGE = '/images/weapons/default.png';
+
 const EMPTY_WEAPON: Partial<Weapon> = {
     name: '', cost: 0, isWeapon: true, isGear: false,
     rangeRed: false, rangeYellow: false, rangeGreen: false, rangeLong: false,
-    description: '', rarity: 99, keywords: [],
+    description: '', rarity: 99, keywords: [], imageUrl: DEFAULT_WEAPON_IMAGE,
 };
+
+const hasNoImage = (w: Weapon) => !w.imageUrl || w.imageUrl === DEFAULT_WEAPON_IMAGE;
 
 export default function ArmoryPage() {
     const { catalog, setCatalog } = useStore();
@@ -262,13 +266,13 @@ export default function ArmoryPage() {
     const weapons = catalog.weapons ?? [];
 
     const isWeaponHighlighted = (w: Weapon) =>
-        (highlightNoImage && !w.imageUrl) ||
+        (highlightNoImage && hasNoImage(w)) ||
         (highlightNoPrice && w.cost === 0) ||
         (highlightDefaultRarity && w.rarity === 99);
     const filteredWeapons = weapons.filter(w => {
         if (weaponTypeFilter === 'weapon' && !w.isWeapon) return false;
         if (weaponTypeFilter === 'gear' && !w.isGear) return false;
-        if (highlightNoImage && w.imageUrl) return false;
+        if (highlightNoImage && !hasNoImage(w)) return false;
         if (highlightNoPrice && w.cost !== 0) return false;
         if (highlightDefaultRarity && w.rarity !== 99) return false;
         if (search) {

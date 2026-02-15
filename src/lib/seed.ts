@@ -546,8 +546,8 @@ export const WEAPONS: Weapon[] = [
     { id: 'weapon-wolver', name: 'Wolver', cost: 0, isWeapon: true, isGear: false, rangeRed: true, rangeYellow: false, rangeGreen: false, rangeLong: false, description: 'Deadly Crits. [RE]actions made using this attack gain Accurate.', rarity: 99, keywords: [], imageUrl: '/images/weapons/wolver.png' },
 
     // --- NEW: Wave 2 characters ---
-    { id: 'weapon-heavy-pistols', name: 'Heavy Pistols', cost: 0, isWeapon: true, isGear: false, rangeRed: true, rangeYellow: true, rangeGreen: true, rangeLong: false, description: 'Deadly Crits. [RE]actions made using this attack gain Accurate.', rarity: 99, keywords: [], imageUrl: '/images/weapons/heavy-pistols.png' },
-    { id: 'weapon-sewer-savvy', name: 'Sewer-Savvy', cost: 0, isWeapon: true, isGear: false, rangeRed: true, rangeYellow: false, rangeGreen: false, rangeLong: false, description: 'Torrent.', rarity: 99, keywords: [], imageUrl: '/images/weapons/sewer-savvy.png' },
+    { id: 'weapon-heavy-pistols', name: 'Heavy Pistols', cost: 0, isWeapon: true, isGear: false, rangeRed: true, rangeYellow: true, rangeGreen: true, rangeLong: false, description: 'Deadly Crits. [RE]actions made using this attack gain Accurate.', rarity: 99, keywords: [], imageUrl: '/images/weapons/default.png' },
+    { id: 'weapon-sewer-savvy', name: 'Sewer-Savvy', cost: 0, isWeapon: true, isGear: false, rangeRed: true, rangeYellow: false, rangeGreen: false, rangeLong: false, description: 'Torrent.', rarity: 99, keywords: [], imageUrl: '/images/weapons/default.png' },
 ];
 
 // ============================================================
