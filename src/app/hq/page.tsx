@@ -2,13 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
-import { CampaignSelector } from '@/components/campaign/CampaignSelector';
 import { CampaignHeader } from '@/components/campaign/CampaignHeader';
 import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
 import { RosterList } from '@/components/campaign/RosterList';
 import { StashList } from '@/components/campaign/StashList';
 import { Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
+const FACTION_ACCENT: Record<string, string> = {
+    'faction-arasaka':     'border-red-600',
+    'faction-bozos':       'border-purple-500',
+    'faction-danger-gals': 'border-pink-400',
+    'faction-edgerunners': 'border-emerald-500',
+    'faction-gen-red':     'border-white',
+    'faction-lawmen':      'border-blue-500',
+    'faction-maelstrom':   'border-red-700',
+    'faction-trauma-team': 'border-white',
+    'faction-tyger-claws': 'border-cyan-400',
+    'faction-zoners':      'border-orange-500',
+};
 
 type TabId = 'roster' | 'stash' | 'ops' | 'med';
 
@@ -37,10 +49,60 @@ export default function HQPage() {
 
     return (
         <div className="pb-28">
-            <CampaignSelector
-                selectedId={selectedCampaignId}
-                onSelect={setSelectedCampaignId}
-            />
+            {/* Campaign List */}
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                {campaigns.map(c => {
+                    const faction = catalog.factions.find(f => f.id === c.factionId);
+                    const isActive = c.id === selectedCampaignId;
+                    const accent = FACTION_ACCENT[c.factionId] ?? 'border-gray-500';
+
+                    return (
+                        <button
+                            key={c.id}
+                            onClick={() => setSelectedCampaignId(c.id)}
+                            className={cn(
+                                'shrink-0 flex items-center gap-2 px-4 py-2 border-l-4 transition-all clip-corner-tr',
+                                accent,
+                                isActive
+                                    ? 'bg-surface-dark border-r border-t border-b border-border'
+                                    : 'bg-black/50 border-r border-t border-b border-transparent hover:bg-surface-dark/50 hover:border-border opacity-60 hover:opacity-100'
+                            )}
+                        >
+                            {faction?.imageUrl ? (
+                                <img src={faction.imageUrl} className="w-8 h-8 object-cover shrink-0" />
+                            ) : (
+                                <div className="w-8 h-8 bg-surface-dark flex items-center justify-center shrink-0">
+                                    <span className="font-display text-xs text-muted-foreground">{faction?.name?.[0] ?? '?'}</span>
+                                </div>
+                            )}
+                            <div className="text-left">
+                                <div className={cn(
+                                    'font-display text-sm uppercase tracking-wide leading-tight',
+                                    isActive ? 'text-white' : 'text-muted-foreground'
+                                )}>
+                                    {c.name}
+                                </div>
+                                <div className="font-mono-tech text-[9px] text-muted-foreground uppercase">
+                                    €${c.ebBank.toLocaleString()}
+                                </div>
+                            </div>
+                        </button>
+                    );
+                })}
+
+                {/* New Campaign button */}
+                <NewCampaignDialog
+                    onCampaignCreated={setSelectedCampaignId}
+                    trigger={
+                        <button className="shrink-0 flex items-center gap-2 px-4 py-2 border border-dashed border-border bg-black/30 hover:bg-surface-dark hover:border-primary transition-all clip-corner-tr">
+                            <Plus className="w-4 h-4 text-muted-foreground" />
+                            <span className="font-display text-sm uppercase tracking-wide text-muted-foreground">
+                                New
+                            </span>
+                        </button>
+                    }
+                />
+            </div>
 
             {selectedCampaign ? (
                 <div className="mt-4">
