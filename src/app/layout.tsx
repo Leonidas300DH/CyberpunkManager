@@ -3,6 +3,7 @@ import { Teko, Rajdhani, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AppInit } from "@/components/layout/AppInit";
+import { Providers } from "@/components/layout/Providers";
 
 export const viewport: Viewport = {
   themeColor: "#000000",
@@ -46,13 +47,15 @@ export default function RootLayout({
       <body
         className={`${teko.variable} ${rajdhani.variable} ${shareTechMono.variable} antialiased min-h-screen bg-background text-foreground pb-20 font-body`}
       >
-        <AppInit />
-        {/* Scanline overlay */}
-        <div className="fixed inset-0 z-50 pointer-events-none opacity-10 scanlines" />
-        <main className="container mx-auto px-4 py-4 min-h-screen">
-          {children}
-        </main>
-        <BottomNav />
+        <Providers>
+          <AppInit />
+          {/* Scanline overlay */}
+          <div className="fixed inset-0 z-50 pointer-events-none opacity-10 scanlines" />
+          <main className="container mx-auto px-4 py-4 min-h-screen">
+            {children}
+          </main>
+          <BottomNav />
+        </Providers>
       </body>
     </html>
   );
