@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Sword, Swords, TabletSmartphone, Database, User, LogOut, Cloud, CloudOff } from 'lucide-react';
+import { Home, Swords, TabletSmartphone, Database, Cloud, CloudOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DisplaySettings } from '@/components/ui/DisplaySettings';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,10 +16,9 @@ export function BottomNav() {
 
     const navItems = [
         { name: 'HQ', href: '/hq', icon: Home },
-        { name: 'Characters', href: '/database', icon: Database },
         { name: 'Team Builder', href: '/match', icon: Swords },
-        { name: 'Gear', href: '/armory', icon: Sword },
         { name: 'Play', href: '/play', icon: TabletSmartphone },
+        { name: 'Database', href: '/database', icon: Database },
     ];
 
     return (
