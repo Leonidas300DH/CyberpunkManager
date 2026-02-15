@@ -3,35 +3,42 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Swords, Shield, Skull, RotateCcw } from 'lucide-react';
-import { PLAY_MODE_TEXT } from '@/data/referenceData';
+import { Swords, Shield, Skull, RotateCcw, Minus, Plus, Crosshair, Cpu } from 'lucide-react';
+import { resolveEquipmentItem } from '@/lib/math';
 
 export function ActiveMatchView() {
     const router = useRouter();
     const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam } = useStore();
 
-    // Local state for the match session
     const [activatedModels, setActivatedModels] = useState<Record<string, boolean>>({});
     const [wounds, setWounds] = useState<Record<string, number>>({});
 
-    // Filter roster to only include selected recruits
-    const matchRoster = useMemo(() => {
-        if (!activeMatchTeam) return [];
-        const campaign = campaigns.find(c => c.id === activeMatchTeam.campaignId);
-        return campaign?.hqRoster.filter(r => activeMatchTeam.selectedRecruitIds.includes(r.id)) || [];
+    const campaign = useMemo(() => {
+        if (!activeMatchTeam) return null;
+        return campaigns.find(c => c.id === activeMatchTeam.campaignId) ?? null;
     }, [activeMatchTeam, campaigns]);
 
-    if (!activeMatchTeam) {
+    const matchRoster = useMemo(() => {
+        if (!activeMatchTeam || !campaign) return [];
+        return campaign.hqRoster.filter(r => activeMatchTeam.selectedRecruitIds.includes(r.id));
+    }, [activeMatchTeam, campaign]);
+
+    if (!activeMatchTeam || !campaign) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-                <h2 className="text-xl font-bold">No Active Match</h2>
-                <p className="text-muted-foreground">Go to Match Builder to start.</p>
-                <Button onClick={() => router.push('/match')}>
-                    <Swords className="w-4 h-4 mr-2" /> Build Team
-                </Button>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+                <div className="h-20 w-20 clip-corner-tr bg-surface-dark border border-border flex items-center justify-center">
+                    <Swords className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h2 className="font-display text-3xl text-muted-foreground uppercase tracking-widest">No Active Match</h2>
+                <p className="font-mono-tech text-xs text-muted-foreground uppercase tracking-wider">
+                    Go to Team Builder to deploy your squad
+                </p>
+                <button
+                    onClick={() => router.push('/match')}
+                    className="bg-primary text-black font-display font-bold text-sm px-6 py-3 clip-corner-br uppercase tracking-widest hover:bg-white transition-colors"
+                >
+                    Build Team
+                </button>
             </div>
         );
     }
@@ -40,7 +47,7 @@ export function ActiveMatchView() {
     const getLineage = (lineageId: string) => catalog.lineages.find(l => l.id === lineageId);
 
     const handleEndMatch = () => {
-        if (confirm("End the match? Progress will be lost (for now).")) {
+        if (confirm("End the match? Progress will be lost.")) {
             setActiveMatchTeam(null);
             router.push('/hq');
         }
@@ -58,20 +65,51 @@ export function ActiveMatchView() {
         setWounds(prev => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) - 1) }));
     };
 
+    const activatedCount = Object.values(activatedModels).filter(Boolean).length;
+
     return (
-        <div className="space-y-4 pb-20">
-            <div className="flex justify-between items-center sticky top-0 z-10 bg-background/95 backdrop-blur py-2 -mx-4 px-4 border-b">
-                <h2 className="font-bold text-lg text-primary flex items-center">
-                    <Swords className="w-5 h-5 mr-2" /> {PLAY_MODE_TEXT.title}
-                </h2>
-                <Button variant="destructive" size="sm" onClick={handleEndMatch}>{PLAY_MODE_TEXT.endTurn}</Button>
+        <div className="pb-28">
+            {/* === STICKY HEADER === */}
+            <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-border shadow-[0_4px_20px_rgba(0,0,0,0.8)] -mx-4 px-4 py-3">
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <Swords className="w-5 h-5 text-primary" />
+                        <div>
+                            <h2 className="font-display text-lg font-bold text-white uppercase tracking-wider leading-none">
+                                Active Match
+                            </h2>
+                            <span className="text-[9px] font-mono-tech text-secondary uppercase tracking-widest">
+                                {campaign.name} // {activatedCount}/{matchRoster.length} activated
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {/* Reset activations */}
+                        <button
+                            onClick={() => setActivatedModels({})}
+                            className="p-2 border border-border bg-surface-dark text-secondary hover:bg-secondary hover:text-black transition-colors clip-corner-tr"
+                            title="New round — reset activations"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                        </button>
+
+                        {/* End match */}
+                        <button
+                            onClick={handleEndMatch}
+                            className="px-4 py-2 bg-accent text-white font-display font-bold text-xs uppercase tracking-widest clip-corner-br hover:bg-red-700 transition-colors"
+                        >
+                            End Match
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div className="space-y-3">
+            {/* === UNIT CARDS === */}
+            <div className="mt-6 space-y-3">
                 {matchRoster.map(recruit => {
                     const profile = getProfile(recruit.currentProfileId);
                     const lineage = profile ? getLineage(profile.lineageId) : null;
-
                     if (!profile || !lineage) return null;
 
                     const isActivated = activatedModels[recruit.id];
@@ -79,52 +117,158 @@ export function ActiveMatchView() {
                     const isCasualty = currentWounds >= 4;
 
                     return (
-                        <Card key={recruit.id} className={`overflow-hidden transition-all ${isActivated ? 'opacity-60 saturate-0' : ''} ${isCasualty ? 'border-destructive bg-destructive/10' : ''}`}>
+                        <div
+                            key={recruit.id}
+                            className={`border bg-surface-dark clip-corner-tl-br overflow-hidden transition-all ${
+                                isCasualty
+                                    ? 'border-accent bg-accent/5'
+                                    : isActivated
+                                        ? 'border-border opacity-50 saturate-0'
+                                        : 'border-border'
+                            }`}
+                        >
                             <div className="flex">
-                                <div className="w-24 bg-muted shrink-0 relative" onClick={() => toggleActivation(recruit.id)}>
-                                    {lineage.imageUrl && <img src={lineage.imageUrl} className="w-full h-full object-cover" />}
-                                    {isActivated && <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-bold">DONE</div>}
-                                    {isCasualty && <div className="absolute inset-0 flex items-center justify-center bg-destructive/50 text-white font-bold"><Skull className="w-8 h-8" /></div>}
-                                </div>
-                                <div className="flex-1 p-3">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h4 className="font-bold text-sm">{lineage.name}</h4>
-                                            <div className="text-xs text-muted-foreground">{lineage.type} • Rank {profile.level}</div>
+                                {/* Portrait */}
+                                <div
+                                    className="w-24 shrink-0 relative cursor-pointer bg-black overflow-hidden"
+                                    onClick={() => toggleActivation(recruit.id)}
+                                >
+                                    {lineage.imageUrl && (
+                                        <img
+                                            src={lineage.imageUrl}
+                                            alt={lineage.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    )}
+
+                                    {/* Activated overlay */}
+                                    {isActivated && !isCasualty && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                                            <span className="font-display text-xs font-bold text-muted-foreground uppercase tracking-widest rotate-[-15deg]">
+                                                Done
+                                            </span>
                                         </div>
-                                        <div className="flex items-center space-x-1">
-                                            <Shield className="w-3 h-3 text-muted-foreground" />
-                                            <span className="font-mono text-sm">{profile.armor}</span>
+                                    )}
+
+                                    {/* Casualty overlay */}
+                                    {isCasualty && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-accent/60">
+                                            <Skull className="w-8 h-8 text-white" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Content */}
+                                <div className="flex-1 p-3 min-w-0">
+                                    {/* Name + Type + Armor */}
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="min-w-0">
+                                            <h4 className="font-display text-base font-bold text-white uppercase tracking-wider leading-none truncate">
+                                                {lineage.name}
+                                            </h4>
+                                            <span className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider">
+                                                {lineage.type}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                                            <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+                                            <span className="font-mono-tech text-sm font-bold text-white">{profile.armor}</span>
                                         </div>
                                     </div>
 
                                     {/* Action Tokens */}
-                                    <div className="flex gap-2 text-xs mb-3">
-                                        {profile.actionTokens.green > 0 && <Badge className="bg-green-600 hover:bg-green-700 h-5 px-1">{profile.actionTokens.green} Grn</Badge>}
-                                        {profile.actionTokens.yellow > 0 && <Badge className="bg-yellow-600 hover:bg-yellow-700 h-5 px-1">{profile.actionTokens.yellow} Yel</Badge>}
-                                        {profile.actionTokens.red > 0 && <Badge className="bg-red-600 hover:bg-red-700 h-5 px-1">{profile.actionTokens.red} Red</Badge>}
+                                    <div className="flex gap-1.5 mb-3">
+                                        {[...Array(profile.actionTokens.green)].map((_, i) => (
+                                            <div key={`g${i}`} className="w-4 h-4 bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+                                        ))}
+                                        {[...Array(profile.actionTokens.yellow)].map((_, i) => (
+                                            <div key={`y${i}`} className="w-4 h-4 bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.6)]" />
+                                        ))}
+                                        {[...Array(profile.actionTokens.red)].map((_, i) => (
+                                            <div key={`r${i}`} className="w-4 h-4 bg-red-600 shadow-[0_0_6px_rgba(220,38,38,0.6)]" />
+                                        ))}
                                     </div>
 
                                     {/* Wounds Tracker */}
-                                    <div className="flex items-center justify-between bg-muted/50 p-1 rounded">
-                                        <span className="text-xs font-semibold pl-1">Wounds</span>
-                                        <div className="flex items-center space-x-2">
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => healWound(recruit.id)}>-</Button>
-                                            <span className={`font-mono font-bold ${currentWounds > 0 ? 'text-destructive' : ''}`}>{currentWounds}</span>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => addWound(recruit.id)}>+</Button>
+                                    <div className="flex items-center justify-between bg-black/50 border border-border p-1.5">
+                                        <span className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider pl-1">
+                                            Wounds
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => healWound(recruit.id)}
+                                                className="w-6 h-6 border border-border bg-surface-dark flex items-center justify-center text-muted-foreground hover:text-secondary hover:border-secondary transition-colors"
+                                            >
+                                                <Minus className="w-3 h-3" />
+                                            </button>
+                                            <span className={`font-mono-tech text-sm font-bold w-4 text-center ${
+                                                isCasualty ? 'text-accent' : currentWounds > 0 ? 'text-primary' : 'text-white'
+                                            }`}>
+                                                {currentWounds}
+                                            </span>
+                                            <button
+                                                onClick={() => addWound(recruit.id)}
+                                                className="w-6 h-6 border border-border bg-surface-dark flex items-center justify-center text-muted-foreground hover:text-accent hover:border-accent transition-colors"
+                                            >
+                                                <Plus className="w-3 h-3" />
+                                            </button>
                                         </div>
                                     </div>
+
+                                    {/* Innate Actions */}
+                                    {profile.actions.length > 0 && (
+                                        <div className="mt-2 bg-black/50 border border-border p-1.5">
+                                            <div className="flex items-center gap-1 mb-1">
+                                                <Crosshair className="w-3 h-3 text-muted-foreground" />
+                                                <span className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-wider">
+                                                    Actions
+                                                </span>
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                {profile.actions.map(action => (
+                                                    <div key={action.id} className="flex items-center justify-between text-[10px] font-mono-tech">
+                                                        <span className="text-white truncate">{action.name}</span>
+                                                        <span className={`shrink-0 ml-1 px-1 ${
+                                                            action.range === 'Red' ? 'text-red-400' :
+                                                            action.range === 'Yellow' ? 'text-yellow-400' :
+                                                            action.range === 'Green' ? 'text-green-400' :
+                                                            'text-muted-foreground'
+                                                        }`}>
+                                                            {action.range}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Bonus Equipment */}
+                                    {activeMatchTeam.equipmentMap && activeMatchTeam.equipmentMap[recruit.id]?.length > 0 && (
+                                        <div className="mt-1 bg-black/50 border border-secondary/30 p-1.5">
+                                            <div className="flex items-center gap-1 mb-1">
+                                                <Cpu className="w-3 h-3 text-secondary" />
+                                                <span className="text-[9px] font-mono-tech text-secondary uppercase tracking-wider">
+                                                    Equipment
+                                                </span>
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                {activeMatchTeam.equipmentMap[recruit.id].map(itemId => {
+                                                    const resolved = resolveEquipmentItem(itemId, catalog);
+                                                    if (!resolved) return null;
+                                                    return (
+                                                        <div key={itemId} className="text-[10px] font-mono-tech text-white">
+                                                            {resolved.name}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        </Card>
+                        </div>
                     );
                 })}
-            </div>
-
-            <div className="fixed bottom-20 right-4">
-                <Button size="icon" className="h-12 w-12 rounded-full shadow-lg" onClick={() => setActivatedModels({})}>
-                    <RotateCcw className="w-6 h-6" />
-                </Button>
             </div>
         </div>
     );

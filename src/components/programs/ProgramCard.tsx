@@ -235,13 +235,13 @@ export function ProgramCard({ program, side }: ProgramCardProps) {
 
                     {/* Vertical name */}
                     <div
-                        className="flex flex-col items-center gap-2 flex-1 justify-center min-h-0"
+                        className="flex flex-col items-center gap-0 flex-1 justify-center min-h-0"
                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
                     >
-                        <span className="font-display font-black text-base uppercase tracking-widest text-black drop-shadow-sm truncate max-h-[60%]">
+                        <span className="font-display font-black text-base uppercase tracking-widest text-black drop-shadow-sm truncate max-h-[60%]" style={{ marginRight: '-2px' }}>
                             {program.name}
                         </span>
-                        <span className="font-mono-tech text-[8px] text-black/50 uppercase tracking-[0.15em] font-bold truncate max-h-[30%]">
+                        <span className="font-mono-tech text-[8px] text-black/50 uppercase tracking-[0.15em] font-bold truncate max-h-[30%]" style={{ marginLeft: '-2px' }}>
                             {factionName}
                         </span>
                     </div>
@@ -360,13 +360,13 @@ export function ProgramCard({ program, side }: ProgramCardProps) {
 
                 {/* Vertical name */}
                 <div
-                    className="flex flex-col items-center gap-2 flex-1 justify-center min-h-0"
+                    className="flex flex-col items-center gap-0 flex-1 justify-center min-h-0"
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
                 >
-                    <span className="font-display font-black text-base uppercase tracking-widest drop-shadow-sm truncate max-h-[60%]">
+                    <span className="font-display font-black text-base uppercase tracking-widest drop-shadow-sm truncate max-h-[60%]" style={{ marginRight: '-2px' }}>
                         {program.name}
                     </span>
-                    <span className="font-mono-tech text-[8px] text-black/50 uppercase tracking-[0.15em] font-bold truncate max-h-[30%]">
+                    <span className="font-mono-tech text-[8px] text-black/50 uppercase tracking-[0.15em] font-bold truncate max-h-[30%]" style={{ marginLeft: '-2px' }}>
                         {factionName}
                     </span>
                 </div>

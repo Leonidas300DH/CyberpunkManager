@@ -3,15 +3,13 @@
 import { useState } from 'react';
 import { FactionsTab } from "@/components/database/FactionsTab";
 import { ModelsTab } from "@/components/database/ModelsTab";
-import { ItemsTab } from "@/components/database/ItemsTab";
-import { DisplaySettings } from '@/components/ui/DisplaySettings';
 
-type TabId = 'factions' | 'models' | 'items';
+
+type TabId = 'factions' | 'models';
 
 const TABS: { id: TabId; label: string; activeClass: string }[] = [
     { id: 'factions', label: 'Factions', activeClass: 'bg-accent text-white' },
     { id: 'models', label: 'Characters', activeClass: 'bg-secondary text-black' },
-    { id: 'items', label: 'Items', activeClass: 'bg-primary text-black' },
 ];
 
 export default function DatabasePage() {
@@ -52,15 +50,11 @@ export default function DatabasePage() {
                         );
                     })}
                 </div>
-                <div className="mb-1">
-                    <DisplaySettings />
-                </div>
             </div>
 
             {/* Tab Content */}
             {activeTab === 'factions' && <FactionsTab />}
             {activeTab === 'models' && <ModelsTab />}
-            {activeTab === 'items' && <ItemsTab />}
         </div>
     );
 }

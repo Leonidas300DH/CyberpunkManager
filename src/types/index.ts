@@ -107,6 +107,7 @@ export interface Weapon {
     description: string;
     rarity: number;        // Max copies per team (99 = unlimited)
     keywords: string[];    // e.g., ['Bulky', 'Deadly']
+    grantsNetrunner?: boolean; // true = equipping this allows hacking programs
     imageUrl?: string;     // Illustration in /images/weapons/
 }
 
@@ -137,6 +138,7 @@ export interface MatchTeam {
     campaignId: string;
     targetEB: number; // e.g., 100, 150, or 200
     selectedRecruitIds: string[]; // Array of RecruitedModel IDs going to the match
+    equipmentMap: Record<string, string[]>; // recruitId → item IDs (prefix: weapon-* | program-*)
 }
 
 // Store catalog shape used by services

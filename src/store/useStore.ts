@@ -4,7 +4,7 @@ import { CatalogData, Campaign, MatchTeam, Weapon } from '@/types'
 import { FACTIONS, HACKING_PROGRAMS, ITEMS, LINEAGES, PROFILES, WEAPONS } from '@/lib/seed'
 
 // Bump this version whenever seed data changes to force a re-seed
-const SEED_VERSION = 21;
+const SEED_VERSION = 22;
 
 const STORAGE_KEY = 'combat-zone-storage';
 
@@ -13,11 +13,18 @@ interface DisplaySettings {
     fontScale: number;
 }
 
+export interface TeamBuilderDraft {
+    selectedIds: string[];
+    equipmentMap: Record<string, string[]>;
+    targetEB: number;
+}
+
 interface StoreState {
     catalog: CatalogData;
     campaigns: Campaign[];
     activeMatchTeam: MatchTeam | null;
     displaySettings: DisplaySettings;
+    teamBuilderDrafts: Record<string, TeamBuilderDraft>;
 
     // Actions
     setCatalog: (data: StoreState['catalog']) => void;
@@ -26,6 +33,8 @@ interface StoreState {
     deleteCampaign: (id: string) => void;
     setActiveMatchTeam: (team: MatchTeam | null) => void;
     setDisplaySettings: (updates: Partial<DisplaySettings>) => void;
+    setTeamBuilderDraft: (campaignId: string, draft: Partial<TeamBuilderDraft>) => void;
+    clearTeamBuilderDraft: (campaignId: string) => void;
     reset: () => void;
 }
 
@@ -95,6 +104,7 @@ export const useStore = create<StoreState>()(
             campaigns: [],
             activeMatchTeam: null,
             displaySettings: { cardColumns: 4, fontScale: 100 },
+            teamBuilderDrafts: {},
 
             setCatalog: (data) => set({ catalog: data }),
             addCampaign: (campaign) => set((state) => ({ campaigns: [...state.campaigns, campaign] })),
@@ -108,7 +118,21 @@ export const useStore = create<StoreState>()(
             setDisplaySettings: (updates) => set((state) => ({
                 displaySettings: { ...state.displaySettings, ...updates },
             })),
-            reset: () => set({ campaigns: [], activeMatchTeam: null }),
+            setTeamBuilderDraft: (campaignId, draft) => set((state) => ({
+                teamBuilderDrafts: {
+                    ...state.teamBuilderDrafts,
+                    [campaignId]: {
+                        ...(state.teamBuilderDrafts[campaignId] ?? { selectedIds: [], equipmentMap: {}, targetEB: 150 }),
+                        ...draft,
+                    },
+                },
+            })),
+            clearTeamBuilderDraft: (campaignId) => set((state) => {
+                const next = { ...state.teamBuilderDrafts };
+                delete next[campaignId];
+                return { teamBuilderDrafts: next };
+            }),
+            reset: () => set({ campaigns: [], activeMatchTeam: null, teamBuilderDrafts: {} }),
         }),
         {
             name: STORAGE_KEY,
@@ -116,9 +140,14 @@ export const useStore = create<StoreState>()(
                 const persistedState = persisted as Partial<StoreState> | undefined;
                 if (!persistedState) return current;
                 const defaultCatalog = current.catalog;
+                // Ensure activeMatchTeam.equipmentMap defaults for old data
+                const activeMatch = persistedState.activeMatchTeam
+                    ? { ...persistedState.activeMatchTeam, equipmentMap: persistedState.activeMatchTeam.equipmentMap ?? {} }
+                    : null;
                 return {
                     ...current,
                     ...persistedState,
+                    activeMatchTeam: activeMatch,
                     displaySettings: {
                         ...current.displaySettings,
                         ...(persistedState.displaySettings ?? {}),

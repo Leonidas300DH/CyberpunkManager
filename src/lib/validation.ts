@@ -90,21 +90,32 @@ export const ValidationService = {
                 }
             });
 
-            // 8. Netrunner Limit
+            // 8. Netrunner Limit — Netrunner keyword OR a grantsNetrunner weapon/gear
             const isNetrunner = profile.keywords.includes('Netrunner');
-            const programs = items.filter(i => i.category === 'Program');
-            if (programs.length > 0) {
-                if (!isNetrunner) {
-                    errors.push(`${lineage.name} is not a Netrunner, cannot equip Programs`);
-                } else {
-                    if (programs.length > profile.skills.Tech) {
-                        errors.push(`${lineage.name} has too many Programs (${programs.length}/${profile.skills.Tech})`);
-                    }
-                }
+            const matchEquipIds = team.equipmentMap[r.id] ?? [];
+            const hasNetDeck = matchEquipIds.some(eqId => {
+                if (!eqId.startsWith('weapon-')) return false;
+                const weapon = store.weapons.find(w => w.id === eqId.replace('weapon-', ''));
+                return weapon?.grantsNetrunner === true;
+            });
+            const canRunPrograms = isNetrunner || hasNetDeck;
+
+            // Count programs assigned via team builder equipmentMap
+            const matchProgramCount = matchEquipIds.filter(eqId => eqId.startsWith('program-')).length;
+            // Count programs from HQ equippedItemIds
+            const hqPrograms = items.filter(i => i.category === 'Program');
+            const totalProgramCount = matchProgramCount + hqPrograms.length;
+
+            if (totalProgramCount > 0 && !canRunPrograms) {
+                errors.push(`${lineage.name} cannot equip Programs (needs Netrunner keyword or a Net Deck)`);
+            }
+            if (totalProgramCount > 0 && canRunPrograms && totalProgramCount > profile.skills.Tech) {
+                errors.push(`${lineage.name} has too many Programs (${totalProgramCount}/${profile.skills.Tech})`);
             }
 
-            // 9. Faction Purity
-            if (!lineage.isMerc && !lineage.factionIds.includes(campaign.factionId)) {
+            // 9. Faction Purity — Edgerunners are recruitable by any faction
+            const isEdgerunner = lineage.factionIds.includes('faction-edgerunners');
+            if (!lineage.isMerc && !isEdgerunner && !lineage.factionIds.includes(campaign.factionId)) {
                 errors.push(`${lineage.name} belongs to wrong Faction!`);
             }
         });

@@ -8,7 +8,7 @@ import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
 import { RosterList } from '@/components/campaign/RosterList';
 import { StashList } from '@/components/campaign/StashList';
 import { Plus } from 'lucide-react';
-import { DisplaySettings } from '@/components/ui/DisplaySettings';
+
 
 type TabId = 'roster' | 'stash' | 'ops' | 'med';
 
@@ -65,9 +65,6 @@ export default function HQPage() {
                                     </button>
                                 );
                             })}
-                        </div>
-                        <div className="mb-1">
-                            <DisplaySettings />
                         </div>
                     </div>
 

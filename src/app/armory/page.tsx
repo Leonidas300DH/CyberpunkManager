@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
-import { DisplaySettings } from '@/components/ui/DisplaySettings';
 import { v4 as uuidv4 } from 'uuid';
 
 type ViewMode = 'list' | 'card' | 'double';
@@ -430,9 +429,6 @@ export default function ArmoryPage() {
                             </button>
                         );
                     })}
-                </div>
-                <div className="mb-1">
-                    <DisplaySettings />
                 </div>
             </div>
 

@@ -1,18 +1,124 @@
 'use client';
 
 import { useState } from 'react';
-import { Campaign, ModelLineage } from '@/types';
+import { Campaign, ModelLineage, Weapon, HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, Plus } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, Plus, Users, X, GripVertical, List, Maximize2 } from 'lucide-react';
 import { useTeamBuilder } from '@/hooks/useTeamBuilder';
-import { MercCard } from './MercCard';
+import { useCardGrid } from '@/hooks/useCardGrid';
+import { CharacterCard } from '@/components/characters/CharacterCard';
+import { WeaponTile } from '@/components/shared/WeaponTile';
+import { ProgramCard } from '@/components/programs/ProgramCard';
+import { ProgramTile } from '@/components/shared/ProgramTile';
+import {
+    DndContext,
+    DragOverlay,
+    useDraggable,
+    useDroppable,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragStartEvent,
+    type DragEndEvent,
+    type DragOverEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    useSortable,
+    arrayMove,
+    horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TeamBuilderProps {
     campaign: Campaign;
 }
 
 type FilterType = 'all' | ModelLineage['type'];
+
+// ── Draggable wrapper for equipment items ──
+function DraggableItem({ id, children }: { id: string; children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+    return (
+        <div
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
+            className={`touch-none ${isDragging ? 'opacity-30' : ''}`}
+        >
+            {children}
+        </div>
+    );
+}
+
+// ── Sortable squad card — draggable (reorder) + droppable (equipment) ──
+function SortableSquadCard({
+    id,
+    isEquipOver,
+    children,
+    cardContent,
+}: {
+    id: string;
+    isEquipOver: boolean;
+    children: React.ReactNode;
+    cardContent: React.ReactNode;
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef: setSortableRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id });
+
+    const { setNodeRef: setDropRef } = useDroppable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+        zIndex: isDragging ? 50 : undefined,
+    };
+
+    return (
+        <div
+            ref={(node) => { setSortableRef(node); setDropRef(node); }}
+            style={style}
+            className={`relative transition-shadow ${isEquipOver ? 'ring-2 ring-secondary shadow-[0_0_20px_rgba(0,240,255,0.4)]' : ''}`}
+        >
+            {/* Character card — entire card is the drag handle */}
+            <div
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing touch-none"
+            >
+                {cardContent}
+            </div>
+
+            {/* Equipment + other controls below (not part of drag handle) */}
+            {children}
+
+            {isEquipOver && (
+                <div className="absolute inset-0 bg-secondary/10 pointer-events-none z-20 flex items-center justify-center">
+                    <span className="font-mono-tech text-xs text-secondary uppercase tracking-widest bg-black/80 px-3 py-1 border border-secondary">
+                        Drop to equip
+                    </span>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ── Parse drag ID ──
+function parseDragId(id: string): { itemId: string; sourceRecruitId: string | null; isSquadDrag: boolean } {
+    if (id.startsWith('equipped:')) {
+        const parts = id.split(':');
+        return { sourceRecruitId: parts[1], itemId: parts.slice(2).join(':'), isSquadDrag: false };
+    }
+    return { itemId: id, sourceRecruitId: null, isSquadDrag: false };
+}
 
 export function TeamBuilder({ campaign }: TeamBuilderProps) {
     const {
@@ -22,26 +128,69 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
         isValid,
         validationErrors,
         selectedIds,
+        equipmentMap,
         toggleSelection,
+        assignEquip,
+        removeEquip,
+        moveEquip,
+        reorderEquip,
+        setSquadOrder,
         handleStartMatch
     } = useTeamBuilder(campaign);
 
     const { catalog } = useStore();
+    const { gridClass, cardStyle } = useCardGrid();
     const [filter, setFilter] = useState<FilterType>('all');
+    const [rosterOpen, setRosterOpen] = useState(true);
+    const [gearOpen, setGearOpen] = useState(true);
+    const [programsOpen, setProgramsOpen] = useState(true);
+    const [activeDragId, setActiveDragId] = useState<string | null>(null);
+    const [overId, setOverId] = useState<string | null>(null);
+    const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+    const [compactPrograms, setCompactPrograms] = useState<Set<string>>(new Set());
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    );
+
+    const toggleFlip = (id: string) => {
+        setFlippedCards(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
+    };
+
+    const toggleCompact = (id: string) => {
+        setCompactPrograms(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
+    };
 
     const getProfile = (profileId: string) => catalog.profiles.find(p => p.id === profileId);
     const getLineage = (lineageId: string) => catalog.lineages.find(l => l.id === lineageId);
+    const getFactionName = (factionId: string) => {
+        if (factionId === 'all') return 'All';
+        return catalog.factions.find(f => f.id === factionId)?.name ?? 'Unknown';
+    };
 
-    // Collect unique types from roster
+    // ── Squad and roster separation ──
+    // Maintain selectedIds order for squad display
+    const selectedRecruits = selectedIds
+        .map(id => campaign.hqRoster.find(r => r.id === id))
+        .filter(Boolean) as typeof campaign.hqRoster;
+    const unselectedRoster = campaign.hqRoster.filter(r => !selectedIds.includes(r.id));
+
     const rosterTypes = Array.from(new Set(
-        campaign.hqRoster.map(r => {
+        unselectedRoster.map(r => {
             const p = getProfile(r.currentProfileId);
             return p ? getLineage(p.lineageId)?.type : null;
         }).filter(Boolean)
     )) as ModelLineage['type'][];
 
-    // Filter roster
-    const filteredRoster = campaign.hqRoster.filter(recruit => {
+    const filteredRoster = unselectedRoster.filter(recruit => {
         if (filter === 'all') return true;
         const profile = getProfile(recruit.currentProfileId);
         if (!profile) return false;
@@ -49,194 +198,601 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
         return lineage?.type === filter;
     });
 
+    // ── Stash items from campaign ──
+    const stashWeapons: Weapon[] = [];
+    const stashPrograms: Array<{ program: HackingProgram; factionName: string }> = [];
+    campaign.hqStash.forEach(itemId => {
+        const weapon = catalog.weapons.find(w => w.id === itemId);
+        if (weapon) { stashWeapons.push(weapon); return; }
+        const program = catalog.programs.find(p => p.id === itemId);
+        if (program) {
+            stashPrograms.push({ program, factionName: getFactionName(program.factionId) });
+        }
+    });
+
+    const uniqueWeapons = Array.from(new Map(stashWeapons.map(w => [w.id, w])).values());
+    const uniquePrograms = Array.from(
+        new Map(stashPrograms.map(sp => [sp.program.id, sp])).values()
+    );
+
+    // ── Already-equipped item IDs ──
+    const allEquippedIds = new Set(Object.values(equipmentMap).flat());
+
+    // ── Available (non-equipped) items ──
+    const availableWeapons = uniqueWeapons.filter(w => !allEquippedIds.has(`weapon-${w.id}`));
+    const availablePrograms = uniquePrograms.filter(sp => !allEquippedIds.has(`program-${sp.program.id}`));
+
     const budgetPercent = Math.min(100, Math.round((totalCost / targetEB) * 100));
+    const overBudget = totalCost > targetEB;
+
+    // ── DnD handlers ──
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveDragId(event.active.id as string);
+    };
+
+    const handleDragOver = (event: DragOverEvent) => {
+        setOverId(event.over?.id != null ? String(event.over.id) : null);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveDragId(null);
+        setOverId(null);
+
+        if (!over) return;
+
+        const activeId = String(active.id);
+        const ovId = String(over.id);
+
+        // Case 1: Squad card reorder (sortable handles this when active IS a squad member)
+        if (selectedIds.includes(activeId) && selectedIds.includes(ovId) && activeId !== ovId) {
+            const oldIndex = selectedIds.indexOf(activeId);
+            const newIndex = selectedIds.indexOf(ovId);
+            setSquadOrder(arrayMove(selectedIds, oldIndex, newIndex));
+            return;
+        }
+
+        // Case 2: Equipment drop onto a squad card
+        if (!selectedIds.includes(ovId)) return;
+
+        const { itemId, sourceRecruitId } = parseDragId(activeId);
+
+        if (sourceRecruitId) {
+            if (sourceRecruitId !== ovId) {
+                moveEquip(sourceRecruitId, ovId, itemId);
+            }
+        } else {
+            assignEquip(ovId, itemId);
+        }
+    };
+
+    // ── Drag overlay content ──
+    const renderDragOverlay = () => {
+        if (!activeDragId) return null;
+
+        // If dragging a squad card, show the character card
+        if (selectedIds.includes(activeDragId)) {
+            const recruit = campaign.hqRoster.find(r => r.id === activeDragId);
+            if (recruit) {
+                const profile = getProfile(recruit.currentProfileId);
+                const lineage = profile ? getLineage(profile.lineageId) : null;
+                if (profile && lineage) {
+                    return (
+                        <div className="opacity-80 pointer-events-none" style={cardStyle}>
+                            <div className="border-2 border-primary shadow-[0_0_20px_rgba(252,238,10,0.4)]">
+                                <CharacterCard lineage={lineage} profile={profile} />
+                            </div>
+                        </div>
+                    );
+                }
+            }
+            return null;
+        }
+
+        const { itemId } = parseDragId(activeDragId);
+
+        if (itemId.startsWith('weapon-')) {
+            const weaponId = itemId.replace('weapon-', '');
+            const weapon = catalog.weapons.find(w => w.id === weaponId);
+            if (weapon) {
+                return (
+                    <div className="w-72 opacity-90 pointer-events-none">
+                        <WeaponTile weapon={weapon} />
+                    </div>
+                );
+            }
+        }
+
+        if (itemId.startsWith('program-')) {
+            const programId = itemId.replace('program-', '');
+            const program = catalog.programs.find(p => p.id === programId);
+            if (program) {
+                return (
+                    <div className="w-40 opacity-90 pointer-events-none">
+                        <ProgramCard program={program} side="front" />
+                    </div>
+                );
+            }
+        }
+
+        return null;
+    };
+
+    // Is the current over target receiving an equipment drag (not a squad reorder)?
+    const isEquipDragOver = (recruitId: string) => {
+        if (overId !== recruitId || !activeDragId) return false;
+        // If the active drag is a squad card, it's a reorder — not an equip drop
+        if (selectedIds.includes(activeDragId)) return false;
+        return true;
+    };
 
     return (
-        <div className="pb-28">
-            {/* === STICKY HEADER === */}
-            <header className="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-border shadow-[0_4px_20px_rgba(0,0,0,0.8)] -mx-4 px-4">
-                <div className="max-w-7xl mx-auto py-3 flex items-center justify-between gap-4">
-                    {/* Left: Logo + Title */}
-                    <div className="flex items-center space-x-3 shrink-0">
-                        <div className="h-10 w-10 bg-surface-dark border border-primary flex items-center justify-center clip-corner-tr hover:bg-primary group transition-colors duration-300">
-                            <svg className="w-5 h-5 text-primary group-hover:text-black transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                            </svg>
-                        </div>
-                        <div className="hidden sm:block">
-                            <h1 className="font-display text-2xl font-bold uppercase leading-none tracking-widest text-white">
-                                Combat Zone
-                            </h1>
-                            <p className="text-xs text-secondary font-mono-tech uppercase tracking-[0.2em]">
-                                Mission Prep // v2.077
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Center: Budget Tracker */}
-                    <div className="hidden md:flex flex-col items-center justify-center bg-surface-dark px-6 py-2 border border-secondary/50 relative overflow-hidden group clip-corner-br">
-                        <div className="absolute inset-0 bg-secondary/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                        <span className="text-secondary text-xs font-mono-tech uppercase tracking-widest mb-1">
-                            Squad Budget
-                        </span>
-                        <div className="flex items-end space-x-2">
-                            <span className={`text-3xl font-display font-bold leading-none tracking-wide ${totalCost > targetEB ? 'text-accent' : 'text-white'}`}>
-                                {totalCost}
-                            </span>
-                            <span className="text-xl font-display text-muted-foreground mb-0.5">/</span>
-                            <div className="flex items-center gap-1 mb-0.5">
+        <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+        >
+            <div>
+                {/* === STICKY BUDGET + DEPLOY BAR === */}
+                <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-border shadow-[0_4px_20px_rgba(0,0,0,0.8)] -mx-4 px-4 py-3">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest shrink-0">
+                                Match Budget
+                            </div>
+                            <div className="flex items-end gap-1">
+                                <span className={`text-2xl font-display font-bold leading-none ${overBudget ? 'text-accent' : 'text-white'}`}>
+                                    {totalCost}
+                                </span>
+                                <span className="text-lg font-display text-muted-foreground">/</span>
                                 <Input
                                     type="number"
                                     value={targetEB}
                                     onChange={(e) => setTargetEB(Number(e.target.value))}
-                                    className="w-14 h-6 text-center bg-transparent border-none p-0 text-xl font-display text-muted-foreground focus-visible:ring-0 focus-visible:text-white"
+                                    className="w-14 h-6 text-center bg-transparent border-none p-0 text-lg font-display text-muted-foreground focus-visible:ring-0 focus-visible:text-white"
                                 />
-                                <span className="text-xl font-display text-muted-foreground">EB</span>
+                                <span className="text-sm font-mono-tech text-muted-foreground">EB</span>
+                            </div>
+                            <div className="flex-1 h-1.5 bg-black border border-border min-w-[60px]">
+                                <div
+                                    className={`h-full transition-all duration-300 ${overBudget ? 'bg-accent shadow-[0_0_8px_rgba(255,0,60,0.8)]' : 'bg-secondary shadow-[0_0_8px_rgba(0,240,255,0.8)]'}`}
+                                    style={{ width: `${budgetPercent}%` }}
+                                />
                             </div>
                         </div>
-                        <div className="w-full h-1 bg-black mt-1 border border-border">
-                            <div
-                                className={`h-full transition-all duration-300 ${totalCost > targetEB ? 'bg-accent shadow-[0_0_8px_rgba(255,0,60,0.8)]' : 'bg-secondary shadow-[0_0_8px_rgba(0,240,255,0.8)]'}`}
-                                style={{ width: `${budgetPercent}%` }}
-                            />
-                        </div>
-                    </div>
 
-                    {/* Right: Deploy Button */}
-                    <button
-                        onClick={handleStartMatch}
-                        disabled={!isValid}
-                        className={`
-                            font-display font-bold text-xl px-6 py-2 clip-corner-br uppercase tracking-widest transition-all flex items-center gap-2 shrink-0
-                            ${isValid
-                                ? 'bg-primary hover:bg-white text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] active:scale-95'
-                                : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
-                            }
-                        `}
-                    >
-                        <span>{isValid ? 'Deploy' : 'Invalid'}</span>
-                        {isValid && (
-                            <svg className="w-5 h-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <button
+                            onClick={handleStartMatch}
+                            className={`font-display font-bold text-sm px-5 py-2 clip-corner-br uppercase tracking-widest transition-all flex items-center gap-2 shrink-0 ${
+                                isValid
+                                    ? 'bg-primary hover:bg-white text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] active:scale-95'
+                                    : 'bg-primary/70 hover:bg-primary text-black active:scale-95'
+                            }`}
+                        >
+                            {!isValid && <AlertTriangle className="w-4 h-4" />}
+                            <span>Deploy</span>
+                            <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
-                        )}
-                    </button>
+                        </button>
+                    </div>
+
+                    {validationErrors.length > 0 && (
+                        <div className="mt-2">
+                            <div className="bg-accent/10 border-l-2 border-accent p-2">
+                                <div className="flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-wider mb-1">
+                                    <AlertTriangle className="h-3 w-3" />
+                                    <span>Warnings</span>
+                                </div>
+                                <ul className="list-disc list-inside text-[10px] text-muted-foreground font-mono-tech">
+                                    {validationErrors.map((err, i) => <li key={i}>{err}</li>)}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                {/* Mobile budget bar */}
-                <div className="md:hidden pb-2 px-1">
-                    <div className="flex items-center justify-between text-xs font-mono-tech text-muted-foreground uppercase tracking-wider mb-1">
-                        <span className="text-secondary">Squad Budget</span>
-                        <span className={totalCost > targetEB ? 'text-accent' : ''}>
-                            {totalCost} / {targetEB} EB
+                {/* ═══════════════════════════════════════════
+                    SECTION 1 — SQUAD (sortable + droppable)
+                ═══════════════════════════════════════════ */}
+                <div className="mt-6 mb-6">
+                    <div className="flex items-center gap-3 mb-4 border-l-2 border-secondary pl-4">
+                        <Users className="w-4 h-4 text-secondary" />
+                        <h2 className="font-display text-2xl text-white uppercase tracking-wider">
+                            Squad
+                        </h2>
+                        <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-wider">
+                            {selectedIds.length} deployed
                         </span>
                     </div>
-                    <div className="w-full h-1 bg-black border border-border">
-                        <div
-                            className={`h-full transition-all ${totalCost > targetEB ? 'bg-accent' : 'bg-secondary shadow-[0_0_8px_rgba(0,240,255,0.8)]'}`}
-                            style={{ width: `${budgetPercent}%` }}
-                        />
-                    </div>
-                </div>
 
-                {/* Validation Errors */}
-                {validationErrors.length > 0 && (
-                    <div className="pb-3 px-1">
-                        <div className="bg-accent/10 border-l-2 border-accent p-2">
-                            <div className="flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-wider mb-1">
-                                <AlertTriangle className="h-3 w-3" />
-                                <span>Deployment Error</span>
+                    {selectedRecruits.length > 0 ? (
+                        <SortableContext items={selectedIds} strategy={horizontalListSortingStrategy}>
+                            <div className={gridClass}>
+                                {selectedRecruits.map(recruit => {
+                                    const profile = getProfile(recruit.currentProfileId);
+                                    const lineage = profile ? getLineage(profile.lineageId) : null;
+                                    if (!profile || !lineage) return null;
+
+                                    const equippedIds = equipmentMap[recruit.id] ?? [];
+
+                                    // Resolve equipped items in order
+                                    const equippedItems = equippedIds.map(eqId => {
+                                        if (eqId.startsWith('weapon-')) {
+                                            const weapon = catalog.weapons.find(w => w.id === eqId.replace('weapon-', ''));
+                                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, program: null } : null;
+                                        }
+                                        if (eqId.startsWith('program-')) {
+                                            const program = catalog.programs.find(p => p.id === eqId.replace('program-', ''));
+                                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, program } : null;
+                                        }
+                                        return null;
+                                    }).filter(Boolean) as Array<
+                                        | { equipId: string; type: 'weapon'; weapon: Weapon; program: null }
+                                        | { equipId: string; type: 'program'; weapon: null; program: HackingProgram }
+                                    >;
+
+                                    return (
+                                        <div key={recruit.id} style={cardStyle}>
+                                            <SortableSquadCard
+                                                id={recruit.id}
+                                                isEquipOver={isEquipDragOver(recruit.id)}
+                                                cardContent={
+                                                    <div className="relative">
+                                                        {/* X button to remove from squad */}
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); toggleSelection(recruit.id); }}
+                                                            onPointerDown={(e) => e.stopPropagation()}
+                                                            className="absolute -top-2 -right-2 z-30 bg-accent text-white p-1 clip-corner-tr shadow-lg border border-black hover:bg-red-500 hover:shadow-[0_0_10px_rgba(255,0,60,0.6)] transition-all"
+                                                            title="Remove from squad"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                        <div className="absolute -left-1 top-0 bottom-0 w-2 bg-primary z-10 glow-primary" />
+                                                        <div className="border-2 border-primary">
+                                                            <CharacterCard lineage={lineage} profile={profile} />
+                                                        </div>
+                                                    </div>
+                                                }
+                                            >
+                                                {/* Equipped items */}
+                                                <div className="mt-2 space-y-2">
+                                                    {equippedItems.map((item, idx) => {
+                                                        const dragId = `equipped:${recruit.id}:${item.equipId}`;
+                                                        const isFirst = idx === 0;
+                                                        const isLast = idx === equippedItems.length - 1;
+                                                        const showReorder = equippedItems.length > 1;
+                                                        const isCompact = item.type === 'program' && compactPrograms.has(`${recruit.id}:${item.equipId}`);
+
+                                                        return (
+                                                            <div key={item.equipId} className="relative group/eq">
+                                                                <DraggableItem id={dragId}>
+                                                                    {item.type === 'weapon' ? (
+                                                                        <WeaponTile
+                                                                            weapon={item.weapon}
+                                                                            overlay={
+                                                                                <div className="absolute top-1 left-10 z-20">
+                                                                                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
+                                                                                </div>
+                                                                            }
+                                                                        />
+                                                                    ) : isCompact ? (
+                                                                        <div className="relative">
+                                                                            <ProgramTile program={item.program} factionName={getFactionName(item.program.factionId)} />
+                                                                            <div className="absolute top-1 left-1 z-20">
+                                                                                <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="relative group/card">
+                                                                            <div
+                                                                                className="card-flip-container w-full cursor-pointer"
+                                                                                onClick={(e) => { e.stopPropagation(); toggleFlip(`eq-${item.equipId}`); }}
+                                                                            >
+                                                                                <div className={`card-flip-inner ${flippedCards.has(`eq-${item.equipId}`) ? 'flipped' : ''}`}>
+                                                                                    <div className="card-flip-front">
+                                                                                        <ProgramCard program={item.program} side="front" />
+                                                                                    </div>
+                                                                                    <div className="card-flip-back">
+                                                                                        <ProgramCard program={item.program} side="back" />
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="absolute top-1 left-1 z-20">
+                                                                                <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </DraggableItem>
+
+                                                                {/* Controls: compact toggle + reorder + remove */}
+                                                                <div className="absolute top-1 right-1 z-20 flex items-center gap-0.5 opacity-0 group-hover/eq:opacity-100 transition-opacity">
+                                                                    {item.type === 'program' && (
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); toggleCompact(`${recruit.id}:${item.equipId}`); }}
+                                                                            className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-cyber-purple hover:border-cyber-purple transition-colors"
+                                                                            title={isCompact ? 'Full card' : 'Compact'}
+                                                                        >
+                                                                            {isCompact ? <Maximize2 className="w-3 h-3" /> : <List className="w-3 h-3" />}
+                                                                        </button>
+                                                                    )}
+                                                                    {showReorder && !isFirst && (
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); reorderEquip(recruit.id, item.equipId, 'up'); }}
+                                                                            className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-white hover:border-white transition-colors"
+                                                                            title="Move up"
+                                                                        >
+                                                                            <ChevronUp className="w-3 h-3" />
+                                                                        </button>
+                                                                    )}
+                                                                    {showReorder && !isLast && (
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); reorderEquip(recruit.id, item.equipId, 'down'); }}
+                                                                            className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-white hover:border-white transition-colors"
+                                                                            title="Move down"
+                                                                        >
+                                                                            <ChevronDown className="w-3 h-3" />
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); removeEquip(recruit.id, item.equipId); }}
+                                                                        className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors"
+                                                                        title="Unequip"
+                                                                    >
+                                                                        <X className="w-3 h-3" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {equippedIds.length === 0 && (
+                                                        <div className="text-[10px] font-mono-tech text-muted-foreground text-center py-1 border border-dashed border-border">
+                                                            Drop equipment here
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </SortableSquadCard>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                            <ul className="list-disc list-inside text-[10px] text-muted-foreground font-mono-tech">
-                                {validationErrors.map((err, i) => <li key={i}>{err}</li>)}
-                            </ul>
+                        </SortableContext>
+                    ) : (
+                        <div className="border border-dashed border-border p-6 text-center">
+                            <div className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                Select characters from the roster below to build your squad
+                            </div>
                         </div>
-                    </div>
-                )}
-            </header>
-
-            {/* === SECTION HEADER + FILTERS === */}
-            <div className="mt-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-end border-l-2 border-primary pl-4 md:pl-6 py-3 bg-surface-dark/50 backdrop-blur-sm">
-                <div>
-                    <h2 className="font-display text-3xl md:text-5xl text-white uppercase tracking-wider mb-2">
-                        Available Mercs
-                    </h2>
-                    <div className="flex flex-wrap gap-3 md:gap-6 text-sm font-mono-tech text-muted-foreground uppercase tracking-widest">
-                        <button
-                            onClick={() => setFilter('all')}
-                            className={`transition-colors pb-0.5 ${filter === 'all' ? 'text-secondary border-b border-secondary' : 'hover:text-secondary hover:border-b hover:border-secondary'}`}
-                        >
-                            [ All ]
-                        </button>
-                        {rosterTypes.map(type => (
-                            <button
-                                key={type}
-                                onClick={() => setFilter(type)}
-                                className={`transition-colors pb-0.5 ${filter === type ? 'text-secondary border-b border-secondary' : 'hover:text-secondary hover:border-b hover:border-secondary'}`}
-                            >
-                                {type}s
-                            </button>
-                        ))}
-                    </div>
+                    )}
                 </div>
+
+                {/* ═══════════════════════════════════════════
+                    SECTION 2 — AVAILABLE ROSTER (collapsible)
+                ═══════════════════════════════════════════ */}
+                <section className="mb-6">
+                    <button
+                        onClick={() => setRosterOpen(v => !v)}
+                        className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
+                    >
+                        <ChevronDown className={`w-5 h-5 text-primary transition-transform ${rosterOpen ? '' : '-rotate-90'}`} />
+                        <div className="border-l-2 border-primary pl-3">
+                            <h2 className="font-display text-2xl text-white uppercase tracking-wider group-hover/collapse:text-primary transition-colors">
+                                Available Roster
+                            </h2>
+                            <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
+                                {unselectedRoster.length} available
+                            </span>
+                        </div>
+                    </button>
+
+                    {rosterOpen && (
+                        <>
+                            {rosterTypes.length > 1 && (
+                                <div className="flex flex-wrap gap-3 mb-4 text-sm font-mono-tech text-muted-foreground uppercase tracking-widest">
+                                    <button
+                                        onClick={() => setFilter('all')}
+                                        className={`transition-colors pb-0.5 ${filter === 'all' ? 'text-secondary border-b border-secondary' : 'hover:text-secondary'}`}
+                                    >
+                                        [ All ]
+                                    </button>
+                                    {rosterTypes.map(type => (
+                                        <button
+                                            key={type}
+                                            onClick={() => setFilter(type)}
+                                            className={`transition-colors pb-0.5 ${filter === type ? 'text-secondary border-b border-secondary' : 'hover:text-secondary'}`}
+                                        >
+                                            {type}s
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className={gridClass}>
+                                {filteredRoster.length === 0 && unselectedRoster.length === 0 && (
+                                    <div className="col-span-full border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
+                                        {campaign.hqRoster.length === 0
+                                            ? 'No Assets Available. Recruit mercs from HQ first.'
+                                            : 'All characters deployed to squad.'}
+                                    </div>
+                                )}
+
+                                {filteredRoster.length === 0 && unselectedRoster.length > 0 && filter !== 'all' && (
+                                    <div className="col-span-full border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
+                                        No {filter}s available
+                                    </div>
+                                )}
+
+                                {filteredRoster.map(recruit => {
+                                    const profile = getProfile(recruit.currentProfileId);
+                                    const lineage = profile ? getLineage(profile.lineageId) : null;
+                                    if (!profile || !lineage) return null;
+
+                                    return (
+                                        <div key={recruit.id} style={cardStyle}>
+                                            <div
+                                                className="cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                                                onClick={() => toggleSelection(recruit.id)}
+                                            >
+                                                <CharacterCard lineage={lineage} profile={profile} />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {campaign.hqRoster.length > 0 && (
+                                    <div style={cardStyle}>
+                                        <a
+                                            href="/hq"
+                                            className="relative group cursor-pointer border-2 border-dashed border-border hover:border-primary transition-all bg-black flex flex-col items-center justify-center aspect-[2/3] clip-corner-tl-br shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]"
+                                        >
+                                            <div className="h-16 w-16 clip-corner-tr bg-surface-dark border border-border flex items-center justify-center group-hover:scale-110 transition-transform mb-4 group-hover:border-primary group-hover:bg-primary group-hover:text-black">
+                                                <Plus className="w-8 h-8 text-muted-foreground group-hover:text-black transition-colors" />
+                                            </div>
+                                            <span className="font-display text-xl text-muted-foreground group-hover:text-white uppercase tracking-widest transition-colors">
+                                                Recruit More
+                                            </span>
+                                            <span className="font-mono-tech text-xs text-secondary mt-3 opacity-0 group-hover:opacity-100 uppercase tracking-wider transition-opacity bg-black px-2 py-1 border border-secondary/30">
+                                                Go to HQ Roster
+                                            </span>
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </section>
+
+                {/* Divider */}
+                <div className="border-t border-border mb-6" />
+
+                {/* ═══════════════════════════════════════════
+                    SECTION 3 — WEAPONS & GEAR (collapsible, draggable)
+                ═══════════════════════════════════════════ */}
+                <section className="mb-6">
+                    <button
+                        onClick={() => setGearOpen(v => !v)}
+                        className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
+                    >
+                        <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${gearOpen ? '' : '-rotate-90'}`} />
+                        <div className="border-l-2 border-secondary pl-3">
+                            <h2 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">
+                                Weapons & Gear
+                            </h2>
+                            <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
+                                {availableWeapons.length}/{uniqueWeapons.length} available
+                            </span>
+                        </div>
+                    </button>
+
+                    {gearOpen && (
+                        <>
+                            {uniqueWeapons.length === 0 ? (
+                                <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                    No weapons or gear in stash. Buy from HQ first.
+                                </div>
+                            ) : (
+                                <div className={gridClass}>
+                                    {availableWeapons.map(weapon => {
+                                        const dragId = `weapon-${weapon.id}`;
+
+                                        return (
+                                            <div key={weapon.id} style={cardStyle}>
+                                                <DraggableItem id={dragId}>
+                                                    <WeaponTile
+                                                        weapon={weapon}
+                                                        overlay={
+                                                            <div className="absolute top-1 left-10 z-20 flex items-center gap-1">
+                                                                <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/tile:opacity-60" />
+                                                            </div>
+                                                        }
+                                                    />
+                                                </DraggableItem>
+                                            </div>
+                                        );
+                                    })}
+                                    {availableWeapons.length === 0 && uniqueWeapons.length > 0 && (
+                                        <div className="col-span-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                            All gear equipped
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </section>
+
+                {/* ═══════════════════════════════════════════
+                    SECTION 4 — PROGRAMS (collapsible, draggable)
+                ═══════════════════════════════════════════ */}
+                <section className="mb-6">
+                    <button
+                        onClick={() => setProgramsOpen(v => !v)}
+                        className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
+                    >
+                        <ChevronDown className={`w-5 h-5 text-cyber-purple transition-transform ${programsOpen ? '' : '-rotate-90'}`} />
+                        <div className="border-l-2 border-cyber-purple pl-3">
+                            <h2 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">
+                                Programs
+                            </h2>
+                            <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
+                                {availablePrograms.length}/{uniquePrograms.length} available
+                            </span>
+                        </div>
+                    </button>
+
+                    {programsOpen && (
+                        <>
+                            {uniquePrograms.length === 0 ? (
+                                <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                    No programs in stash. Buy from HQ first.
+                                </div>
+                            ) : (
+                                <div className={gridClass}>
+                                    {availablePrograms.map(({ program }) => {
+                                        const dragId = `program-${program.id}`;
+
+                                        return (
+                                            <div key={program.id} style={cardStyle}>
+                                                <DraggableItem id={dragId}>
+                                                    <div className="relative group/card">
+                                                        <div
+                                                            className="card-flip-container w-full cursor-pointer"
+                                                            onClick={() => toggleFlip(program.id)}
+                                                        >
+                                                            <div className={`card-flip-inner ${flippedCards.has(program.id) ? 'flipped' : ''}`}>
+                                                                <div className="card-flip-front">
+                                                                    <ProgramCard program={program} side="front" />
+                                                                </div>
+                                                                <div className="card-flip-back">
+                                                                    <ProgramCard program={program} side="back" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="absolute top-1 right-1 z-20 flex items-center gap-1">
+                                                            <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/card:opacity-60" />
+                                                        </div>
+                                                    </div>
+                                                </DraggableItem>
+                                            </div>
+                                        );
+                                    })}
+                                    {availablePrograms.length === 0 && uniquePrograms.length > 0 && (
+                                        <div className="col-span-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                            All programs equipped
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </section>
             </div>
 
-            {/* === CARD GRID === */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredRoster.length === 0 && filter === 'all' && (
-                    <div className="col-span-full border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
-                        No Assets Available. Recruit mercs from HQ first.
-                    </div>
-                )}
-
-                {filteredRoster.map(recruit => {
-                    const profile = getProfile(recruit.currentProfileId);
-                    const lineage = profile ? getLineage(profile.lineageId) : null;
-                    if (!profile || !lineage) return null;
-
-                    return (
-                        <MercCard
-                            key={recruit.id}
-                            lineage={lineage}
-                            profile={profile}
-                            isSelected={selectedIds.includes(recruit.id)}
-                            onClick={() => toggleSelection(recruit.id)}
-                        />
-                    );
-                })}
-
-                {/* Recruit Merc CTA */}
-                <a
-                    href="/hq"
-                    className="relative group cursor-pointer border-2 border-dashed border-border hover:border-primary transition-all bg-black flex flex-col items-center justify-center min-h-[350px] clip-corner-tl-br shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]"
-                >
-                    <div className="h-20 w-20 clip-corner-tr bg-surface-dark border border-border flex items-center justify-center group-hover:scale-110 transition-transform mb-4 group-hover:border-primary group-hover:bg-primary group-hover:text-black">
-                        <Plus className="w-10 h-10 text-muted-foreground group-hover:text-black transition-colors" />
-                    </div>
-                    <span className="font-display text-2xl text-muted-foreground group-hover:text-white uppercase tracking-widest transition-colors">
-                        Recruit Merc
-                    </span>
-                    <span className="font-mono-tech text-xs text-secondary mt-3 opacity-0 group-hover:opacity-100 uppercase tracking-wider transition-opacity bg-black px-2 py-1 border border-secondary/30">
-                        Go to HQ Roster
-                    </span>
-                </a>
-            </div>
-
-            {/* === FOOTER DECORATION === */}
-            <div className="fixed bottom-24 left-4 hidden lg:block opacity-30 z-0 pointer-events-none">
-                <div className="w-32 h-32 border-l border-b border-primary/20 relative">
-                    <div className="absolute bottom-0 left-0 w-2 h-2 bg-primary" />
-                    <div className="text-[10px] text-primary font-mono-tech absolute bottom-2 left-4 tracking-[0.2em]">SYS.MONITORING</div>
-                </div>
-            </div>
-            <div className="fixed bottom-24 right-4 hidden lg:block opacity-30 z-0 text-right pointer-events-none">
-                <div className="text-secondary font-display text-6xl opacity-10 select-none tracking-tighter leading-none">2077</div>
-                <div className="flex justify-end gap-1 mt-2">
-                    <div className="w-16 h-1 bg-secondary/20" />
-                    <div className="w-4 h-1 bg-secondary/20" />
-                    <div className="w-2 h-1 bg-secondary/40 animate-pulse" />
-                </div>
-            </div>
-        </div>
+            {/* Drag overlay — follows pointer */}
+            <DragOverlay dropAnimation={null}>
+                {renderDragOverlay()}
+            </DragOverlay>
+        </DndContext>
     );
 }

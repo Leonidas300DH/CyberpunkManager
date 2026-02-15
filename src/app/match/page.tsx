@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { CampaignSelector } from '@/components/campaign/CampaignSelector';
+import { CampaignHeader } from '@/components/campaign/CampaignHeader';
 import { TeamBuilder } from '@/components/match/TeamBuilder';
 import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
 import { Plus } from 'lucide-react';
 
 export default function MatchPage() {
-    const { campaigns } = useStore();
+    const { campaigns, catalog } = useStore();
     const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -18,18 +19,24 @@ export default function MatchPage() {
     }, [campaigns, selectedCampaignId]);
 
     const selectedCampaign = campaigns.find(c => c.id === selectedCampaignId);
+    const selectedFaction = selectedCampaign
+        ? catalog.factions.find(f => f.id === selectedCampaign.factionId)
+        : undefined;
 
     return (
-        <div className="space-y-4">
+        <div className="pb-28">
             <CampaignSelector
                 selectedId={selectedCampaignId}
                 onSelect={setSelectedCampaignId}
             />
 
             {selectedCampaign ? (
-                <TeamBuilder campaign={selectedCampaign} />
+                <div className="mt-4">
+                    <CampaignHeader campaign={selectedCampaign} faction={selectedFaction} />
+                    <TeamBuilder campaign={selectedCampaign} />
+                </div>
             ) : (
-                <div className="border-2 border-dashed border-border bg-black flex flex-col items-center justify-center min-h-[400px] clip-corner-tl-br p-8 text-center">
+                <div className="mt-4 border-2 border-dashed border-border bg-black flex flex-col items-center justify-center min-h-[400px] clip-corner-tl-br p-8 text-center">
                     <div className="h-20 w-20 clip-corner-tr bg-surface-dark border border-border flex items-center justify-center mb-6">
                         <Plus className="w-10 h-10 text-muted-foreground" />
                     </div>

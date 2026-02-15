@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Sword, Swords, TabletSmartphone, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DisplaySettings } from '@/components/ui/DisplaySettings';
 
 export function BottomNav() {
     const pathname = usePathname();
@@ -55,6 +56,11 @@ export function BottomNav() {
                             </Link>
                         );
                     })}
+
+                    {/* Settings - always visible, opens upward */}
+                    <div className="flex-1 flex flex-col items-center justify-center relative">
+                        <DisplaySettings direction="up" />
+                    </div>
                 </div>
 
                 {/* Decorative Bottom Line with "Scanner" scanline */}
