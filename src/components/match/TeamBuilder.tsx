@@ -117,7 +117,9 @@ function parseDragId(id: string): { itemId: string; sourceRecruitId: string | nu
         const parts = id.split(':');
         return { sourceRecruitId: parts[1], itemId: parts.slice(2).join(':'), isSquadDrag: false };
     }
-    return { itemId: id, sourceRecruitId: null, isSquadDrag: false };
+    // Strip copy index suffix (e.g., weapon-abc#1 → weapon-abc)
+    const itemId = id.replace(/#\d+$/, '');
+    return { itemId, sourceRecruitId: null, isSquadDrag: false };
 }
 
 export function TeamBuilder({ campaign }: TeamBuilderProps) {
@@ -210,17 +212,35 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
         }
     });
 
-    const uniqueWeapons = Array.from(new Map(stashWeapons.map(w => [w.id, w])).values());
-    const uniquePrograms = Array.from(
-        new Map(stashPrograms.map(sp => [sp.program.id, sp])).values()
-    );
+    // ── Count stash copies per item ──
+    const stashWeaponCounts = new Map<string, { weapon: Weapon; count: number }>();
+    stashWeapons.forEach(w => {
+        const e = stashWeaponCounts.get(w.id);
+        if (e) e.count++; else stashWeaponCounts.set(w.id, { weapon: w, count: 1 });
+    });
+    const stashProgramCounts = new Map<string, { data: { program: HackingProgram; factionName: string }; count: number }>();
+    stashPrograms.forEach(sp => {
+        const e = stashProgramCounts.get(sp.program.id);
+        if (e) e.count++; else stashProgramCounts.set(sp.program.id, { data: sp, count: 1 });
+    });
 
-    // ── Already-equipped item IDs ──
-    const allEquippedIds = new Set(Object.values(equipmentMap).flat());
+    // ── Count equipped copies per item ──
+    const equippedCounts = new Map<string, number>();
+    Object.values(equipmentMap).flat().forEach(itemId => {
+        equippedCounts.set(itemId, (equippedCounts.get(itemId) ?? 0) + 1);
+    });
 
-    // ── Available (non-equipped) items ──
-    const availableWeapons = uniqueWeapons.filter(w => !allEquippedIds.has(`weapon-${w.id}`));
-    const availablePrograms = uniquePrograms.filter(sp => !allEquippedIds.has(`program-${sp.program.id}`));
+    // ── Available = stash copies minus equipped copies ──
+    const availableWeapons: Array<{ weapon: Weapon; copyIndex: number }> = [];
+    stashWeaponCounts.forEach(({ weapon, count }) => {
+        const equipped = equippedCounts.get(`weapon-${weapon.id}`) ?? 0;
+        for (let i = 0; i < count - equipped; i++) availableWeapons.push({ weapon, copyIndex: i });
+    });
+    const availablePrograms: Array<{ program: HackingProgram; factionName: string; copyIndex: number }> = [];
+    stashProgramCounts.forEach(({ data, count }) => {
+        const equipped = equippedCounts.get(`program-${data.program.id}`) ?? 0;
+        for (let i = 0; i < count - equipped; i++) availablePrograms.push({ ...data, copyIndex: i });
+    });
 
     const budgetPercent = Math.min(100, Math.round((totalCost / targetEB) * 100));
     const overBudget = totalCost > targetEB;
@@ -680,24 +700,24 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                 Weapons & Gear
                             </h2>
                             <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                                {availableWeapons.length}/{uniqueWeapons.length} available
+                                {availableWeapons.length}/{stashWeapons.length} available
                             </span>
                         </div>
                     </button>
 
                     {gearOpen && (
                         <>
-                            {uniqueWeapons.length === 0 ? (
+                            {stashWeapons.length === 0 ? (
                                 <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
                                     No weapons or gear in stash. Buy from HQ first.
                                 </div>
                             ) : (
                                 <div className={gridClass}>
-                                    {availableWeapons.map(weapon => {
-                                        const dragId = `weapon-${weapon.id}`;
+                                    {availableWeapons.map(({ weapon, copyIndex }) => {
+                                        const dragId = `weapon-${weapon.id}#${copyIndex}`;
 
                                         return (
-                                            <div key={weapon.id} style={cardStyle}>
+                                            <div key={`${weapon.id}-${copyIndex}`} style={cardStyle}>
                                                 <DraggableItem id={dragId}>
                                                     <WeaponTile
                                                         weapon={weapon}
@@ -711,7 +731,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                             </div>
                                         );
                                     })}
-                                    {availableWeapons.length === 0 && uniqueWeapons.length > 0 && (
+                                    {availableWeapons.length === 0 && stashWeapons.length > 0 && (
                                         <div className="col-span-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
                                             All gear equipped
                                         </div>
@@ -736,24 +756,24 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                 Programs
                             </h2>
                             <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                                {availablePrograms.length}/{uniquePrograms.length} available
+                                {availablePrograms.length}/{stashPrograms.length} available
                             </span>
                         </div>
                     </button>
 
                     {programsOpen && (
                         <>
-                            {uniquePrograms.length === 0 ? (
+                            {stashPrograms.length === 0 ? (
                                 <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
                                     No programs in stash. Buy from HQ first.
                                 </div>
                             ) : (
                                 <div className={gridClass}>
-                                    {availablePrograms.map(({ program }) => {
-                                        const dragId = `program-${program.id}`;
+                                    {availablePrograms.map(({ program, copyIndex }) => {
+                                        const dragId = `program-${program.id}#${copyIndex}`;
 
                                         return (
-                                            <div key={program.id} style={cardStyle}>
+                                            <div key={`${program.id}-${copyIndex}`} style={cardStyle}>
                                                 <DraggableItem id={dragId}>
                                                     <div className="relative group/card">
                                                         <div
@@ -777,7 +797,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                             </div>
                                         );
                                     })}
-                                    {availablePrograms.length === 0 && uniquePrograms.length > 0 && (
+                                    {availablePrograms.length === 0 && stashPrograms.length > 0 && (
                                         <div className="col-span-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
                                             All programs equipped
                                         </div>
