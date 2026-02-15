@@ -90,11 +90,11 @@ export function WeaponTile({ weapon, overlay, campaignStreetCred, equippedCount 
                     {weapon.name}
                 </h3>
                 {(weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong) && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                         {weapon.skillReq && SKILL_ICON[weapon.skillReq] && (
-                            <img src={SKILL_ICON[weapon.skillReq]} alt={weapon.skillReq} className="w-4 h-4 shrink-0 object-contain" />
+                            <img src={SKILL_ICON[weapon.skillReq]} alt={weapon.skillReq} className="w-8 h-8 shrink-0 object-contain" />
                         )}
-                        <div className="w-[75%]">
+                        <div className="w-[60%]">
                             <WeaponRangeArrows weapon={weapon} />
                         </div>
                     </div>

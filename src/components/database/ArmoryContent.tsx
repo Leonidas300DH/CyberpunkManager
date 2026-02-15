@@ -693,11 +693,11 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                             )}
                                         </div>
                                         {showRange && (
-                                            <div className="flex items-center gap-1.5">
+                                            <div className="flex items-center gap-2">
                                                 {skillIcon && (
-                                                    <img src={skillIcon} alt={weapon.skillReq!} className="w-4 h-4 shrink-0 object-contain" />
+                                                    <img src={skillIcon} alt={weapon.skillReq!} className="w-8 h-8 shrink-0 object-contain" />
                                                 )}
-                                                <div className="w-[75%]">
+                                                <div className="w-[60%]">
                                                     <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
                                                         <polygon points="1,1 54,1 59,11 54,21 6,21" fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
                                                         <polygon points="62,1 96,1 101,11 96,21 62,21 67,11" fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
