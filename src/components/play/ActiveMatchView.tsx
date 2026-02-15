@@ -380,7 +380,7 @@ export function ActiveMatchView() {
 
                                 {/* ── Interactive Token Strip (on card, top-right) ── */}
                                 {!isGonk && !dead && (
-                                    <div className="absolute top-2 left-[1%] z-30 flex flex-col items-start gap-[2px]">
+                                    <div className="absolute top-3 left-[8.5%] -translate-x-1/2 z-30 flex flex-col items-center gap-[2px]">
                                         {tokens.map((token, idx) => {
                                             const displayColor = getDisplayColor(token);
                                             const isSel = selectedToken?.recruitId === recruit.id && selectedToken?.index === idx;
