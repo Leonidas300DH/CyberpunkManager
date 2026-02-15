@@ -52,7 +52,7 @@ begin
   insert into public.user_data (user_id) values (new.id);
   return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql security definer;
 
 create trigger on_auth_user_created
   after insert on auth.users
