@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { CampaignHeader } from '@/components/campaign/CampaignHeader';
+import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
 import { RosterList } from '@/components/campaign/RosterList';
 import { StashList } from '@/components/campaign/StashList';
 import { cn } from '@/lib/utils';
@@ -172,9 +173,10 @@ export default function HQPage() {
                         <p className="font-display text-2xl text-white uppercase tracking-widest mb-2 drop-shadow-lg">
                             No Active Campaign
                         </p>
-                        <p className="font-mono-tech text-xs text-white/70 uppercase tracking-wider drop-shadow">
+                        <p className="font-mono-tech text-xs text-white/70 uppercase tracking-wider mb-6 drop-shadow">
                             Initialize new operation in the Combat Zone.
                         </p>
+                        <NewCampaignDialog onCampaignCreated={setSelectedCampaignId} />
                     </div>
                 </div>
             )}
