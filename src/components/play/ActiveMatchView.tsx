@@ -4,11 +4,22 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { Weapon, HackingProgram } from '@/types';
-import { Swords, Skull, RotateCcw, Zap, Heart, RotateCw, Cross, Minus, Plus, ArrowRightLeft, Clover } from 'lucide-react';
+import { Swords, Skull, RotateCcw, Zap, Heart, RotateCw, Cross, Minus, Plus, Clover, GripVertical } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { ProgramCard } from '@/components/programs/ProgramCard';
+import {
+    DndContext,
+    DragOverlay,
+    useDraggable,
+    useDroppable,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragStartEvent,
+    type DragEndEvent,
+} from '@dnd-kit/core';
 
 // ── Token State ──
 
@@ -107,6 +118,44 @@ function ActionBtn({
     );
 }
 
+// ── Draggable wrapper for equipped items ──
+
+function DraggableEquip({ id, children }: { id: string; children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+    return (
+        <div
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
+            className={`touch-none ${isDragging ? 'opacity-30' : ''}`}
+        >
+            {children}
+        </div>
+    );
+}
+
+// ── Droppable card wrapper ──
+
+function DroppableCard({ id, isOver, children }: { id: string; isOver: boolean; children: React.ReactNode }) {
+    const { setNodeRef } = useDroppable({ id });
+    return (
+        <div ref={setNodeRef} className={`relative transition-shadow ${isOver ? 'ring-2 ring-secondary shadow-[0_0_20px_rgba(0,240,255,0.4)]' : ''}`}>
+            {children}
+            {isOver && (
+                <div className="absolute inset-0 bg-secondary/10 pointer-events-none z-20" />
+            )}
+        </div>
+    );
+}
+
+// ── Parse drag ID ──
+
+function parseDragId(id: string): { itemId: string; sourceRecruitId: string } {
+    // Format: "equipped:{recruitId}:{equipId}"
+    const parts = id.split(':');
+    return { sourceRecruitId: parts[1], itemId: parts.slice(2).join(':') };
+}
+
 // ── Main Component ──
 
 export function ActiveMatchView() {
@@ -119,7 +168,10 @@ export function ActiveMatchView() {
     const [deadModels, setDeadModels] = useState<Set<string>>(new Set());
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
     const [luck, setLuck] = useState(0);
-    const [transferTarget, setTransferTarget] = useState<{ fromId: string; equipId: string } | null>(null);
+    const [activeDragId, setActiveDragId] = useState<string | null>(null);
+    const [overId, setOverId] = useState<string | null>(null);
+
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
     const campaign = useMemo(() => {
         if (!activeMatchTeam) return null;
@@ -203,20 +255,51 @@ export function ActiveMatchView() {
         });
     };
 
-    // ── Equipment Transfer ──
+    // ── DnD Handlers ──
 
-    const transferEquip = (fromRecruitId: string, toRecruitId: string, equipId: string) => {
-        if (!activeMatchTeam) return;
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveDragId(event.active.id as string);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveDragId(null);
+        setOverId(null);
+
+        if (!over || !activeMatchTeam) return;
+
+        const toRecruitId = over.id as string;
+        const { sourceRecruitId, itemId } = parseDragId(active.id as string);
+
+        // Only transfer if dropping on a different character
+        if (sourceRecruitId === toRecruitId) return;
+        // Only drop on squad members
+        if (!activeMatchTeam.selectedRecruitIds.includes(toRecruitId)) return;
+
         const map = { ...activeMatchTeam.equipmentMap };
         // Remove from source
-        const fromList = [...(map[fromRecruitId] ?? [])];
-        const idx = fromList.indexOf(equipId);
+        const fromList = [...(map[sourceRecruitId] ?? [])];
+        const idx = fromList.indexOf(itemId);
         if (idx >= 0) fromList.splice(idx, 1);
-        if (fromList.length === 0) delete map[fromRecruitId]; else map[fromRecruitId] = fromList;
+        if (fromList.length === 0) delete map[sourceRecruitId]; else map[sourceRecruitId] = fromList;
         // Add to target
-        map[toRecruitId] = [...(map[toRecruitId] ?? []), equipId];
+        map[toRecruitId] = [...(map[toRecruitId] ?? []), itemId];
         setActiveMatchTeam({ ...activeMatchTeam, equipmentMap: map });
-        setTransferTarget(null);
+    };
+
+    const renderDragOverlay = () => {
+        if (!activeDragId || !activeMatchTeam) return null;
+        const { itemId } = parseDragId(activeDragId);
+
+        if (itemId.startsWith('weapon-')) {
+            const weapon = catalog.weapons.find(w => w.id === itemId.replace('weapon-', ''));
+            if (weapon) return <div className="w-72 opacity-90 pointer-events-none"><WeaponTile weapon={weapon} /></div>;
+        }
+        if (itemId.startsWith('program-')) {
+            const program = catalog.programs.find(p => p.id === itemId.replace('program-', ''));
+            if (program) return <div className="w-40 opacity-90 pointer-events-none"><ProgramCard program={program} side="front" /></div>;
+        }
+        return null;
     };
 
     // ── Status Helpers ──
@@ -267,6 +350,12 @@ export function ActiveMatchView() {
     };
 
     return (
+        <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragOver={(event) => setOverId(event.over?.id as string ?? null)}
+            onDragEnd={handleDragEnd}
+        >
         <div className="pb-28" onClick={() => setSelectedToken(null)}>
             {/* === STICKY HEADER === */}
             <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-border shadow-[0_4px_20px_rgba(0,0,0,0.8)] -mx-4 px-4 py-3">
@@ -287,6 +376,7 @@ export function ActiveMatchView() {
                         {/* Luck counter */}
                         <div className="flex items-center gap-1 border border-border bg-surface-dark px-2 py-1">
                             <Clover className="w-3.5 h-3.5 text-primary" />
+                            <span className="font-mono-tech text-[9px] text-muted-foreground uppercase tracking-wider">Luck</span>
                             <button
                                 onClick={(e) => { e.stopPropagation(); setLuck(l => Math.max(0, l - 1)); }}
                                 className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-white transition-colors"
@@ -352,6 +442,7 @@ export function ActiveMatchView() {
                     return (
                         <div key={recruit.id} style={cardStyle} onClick={(e) => e.stopPropagation()}>
                             {/* ── Character Card with overlays ── */}
+                            <DroppableCard id={recruit.id} isOver={overId === recruit.id && !!activeDragId}>
                             <div className="relative">
                                 <div className={`transition-all ${
                                     dead
@@ -540,78 +631,59 @@ export function ActiveMatchView() {
                                 </div>
                             )}
 
-                            {/* ── Equipped Items ── */}
+                            {/* ── Equipped Items (draggable for transfer) ── */}
                             {equippedItems.length > 0 && (
                                 <div className="mt-2 space-y-2">
                                     {equippedItems.map(item => {
-                                        const isTransferOpen = transferTarget?.fromId === recruit.id && transferTarget?.equipId === item.equipId;
-                                        const otherMembers = matchRoster.filter(r => r.id !== recruit.id && !deadModels.has(r.id));
-
+                                        const dragId = `equipped:${recruit.id}:${item.equipId}`;
                                         return (
                                             <div key={item.equipId} className="relative group/equip">
-                                                {item.type === 'weapon' ? (
-                                                    <WeaponTile weapon={item.weapon} />
-                                                ) : (
-                                                    <div
-                                                        className="card-flip-container w-full cursor-pointer"
-                                                        onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}
-                                                    >
-                                                        <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
-                                                            <div className="card-flip-front">
-                                                                <ProgramCard program={item.program} side="front" />
+                                                <DraggableEquip id={dragId}>
+                                                    {item.type === 'weapon' ? (
+                                                        <WeaponTile
+                                                            weapon={item.weapon}
+                                                            overlay={
+                                                                <div className="absolute top-1 left-1 z-20">
+                                                                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" />
+                                                                </div>
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        <div className="relative">
+                                                            <div
+                                                                className="card-flip-container w-full cursor-pointer"
+                                                                onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}
+                                                            >
+                                                                <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
+                                                                    <div className="card-flip-front">
+                                                                        <ProgramCard program={item.program} side="front" />
+                                                                    </div>
+                                                                    <div className="card-flip-back">
+                                                                        <ProgramCard program={item.program} side="back" />
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div className="card-flip-back">
-                                                                <ProgramCard program={item.program} side="back" />
+                                                            <div className="absolute top-1 left-1 z-20">
+                                                                <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" />
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                )}
-
-                                                {/* Transfer button */}
-                                                {otherMembers.length > 0 && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (isTransferOpen) setTransferTarget(null);
-                                                            else setTransferTarget({ fromId: recruit.id, equipId: item.equipId });
-                                                        }}
-                                                        className="absolute top-1 right-1 z-20 w-6 h-6 bg-black/80 border border-border flex items-center justify-center text-muted-foreground opacity-0 group-hover/equip:opacity-100 hover:text-secondary hover:border-secondary transition-all"
-                                                        title="Transfer"
-                                                    >
-                                                        <ArrowRightLeft className="w-3 h-3" />
-                                                    </button>
-                                                )}
-
-                                                {/* Transfer target dropdown */}
-                                                {isTransferOpen && (
-                                                    <div className="absolute top-0 right-8 z-40 bg-black/95 border border-secondary/50 shadow-lg min-w-[120px]">
-                                                        {otherMembers.map(target => {
-                                                            const tp = getProfile(target.currentProfileId);
-                                                            const tl = tp ? getLineage(tp.lineageId) : null;
-                                                            return (
-                                                                <button
-                                                                    key={target.id}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        transferEquip(recruit.id, target.id, item.equipId);
-                                                                    }}
-                                                                    className="w-full text-left px-3 py-1.5 text-xs font-mono-tech text-white hover:bg-secondary/20 hover:text-secondary transition-colors truncate"
-                                                                >
-                                                                    {tl?.name ?? 'Unknown'}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )}
+                                                    )}
+                                                </DraggableEquip>
                                             </div>
                                         );
                                     })}
                                 </div>
                             )}
+                            </DroppableCard>
                         </div>
                     );
                 })}
             </div>
+
+            <DragOverlay dropAnimation={null}>
+                {renderDragOverlay()}
+            </DragOverlay>
         </div>
+        </DndContext>
     );
 }
