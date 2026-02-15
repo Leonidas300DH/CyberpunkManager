@@ -12,6 +12,7 @@ import { useCardGrid } from '@/hooks/useCardGrid';
 import { FACTIONS } from '@/lib/seed';
 import { v4 as uuidv4 } from 'uuid';
 import { Plus, Trash2, Edit, ChevronRight } from 'lucide-react';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 // Per-faction signature colors (border + bg variants)
 const FACTION_COLOR_MAP: Record<string, { border: string; bg: string }> = {
@@ -42,6 +43,7 @@ const BASE_FACTION_IDS = new Set(FACTIONS.map(f => f.id));
 export function FactionsTab() {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
+    const isAdmin = useIsAdmin();
     const [isOpen, setIsOpen] = useState(false);
     const [editingFaction, setEditingFaction] = useState<Faction | null>(null);
     const [formData, setFormData] = useState<Partial<Faction>>({});
@@ -145,6 +147,7 @@ export function FactionsTab() {
                     </button>
                     <div className="w-px h-6 bg-border mx-1" />
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                        {isAdmin && (
                         <DialogTrigger asChild>
                             <button
                                 onClick={() => { setEditingFaction(null); setFormData({}); }}
@@ -153,6 +156,7 @@ export function FactionsTab() {
                                 <Plus className="w-4 h-4" /> Faction
                             </button>
                         </DialogTrigger>
+                        )}
                         <DialogContent className="bg-surface-dark border-border">
                             <DialogHeader>
                                 <DialogTitle className="font-display uppercase tracking-wider text-primary">
@@ -245,13 +249,15 @@ export function FactionsTab() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); openEdit(faction); }}
-                                        className="p-1 text-muted-foreground hover:text-secondary transition-colors"
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                    </button>
-                                    {!isBase && (
+                                    {isAdmin && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); openEdit(faction); }}
+                                            className="p-1 text-muted-foreground hover:text-secondary transition-colors"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                    {isAdmin && !isBase && (
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleDelete(faction.id); }}
                                             className="p-1 text-muted-foreground hover:text-accent transition-colors"
