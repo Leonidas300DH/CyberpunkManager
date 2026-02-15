@@ -421,11 +421,11 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                             clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)',
                         }}
                     >
-                        <div className="font-display font-black text-sm text-[#22c55e] uppercase tracking-wide mb-0.5">
+                        <div className="font-display font-black text-sm text-[#22c55e] uppercase tracking-wide">
                             {action.name}
                         </div>
                         {action.range !== 'Self' && action.range !== 'Reach' && (
-                            <div className="flex items-center gap-1.5 mb-0.5">
+                            <div className="flex items-center gap-1.5">
                                 {(action.skillReq === 'Melee' || action.skillReq === 'Ranged') && SKILL_ICONS[action.skillReq] && (
                                     <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-11 h-11 shrink-0 object-contain" />
                                 )}
