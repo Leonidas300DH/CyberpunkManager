@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { Weapon, HackingProgram } from '@/types';
-import { Swords, Skull, RotateCcw, Zap, Heart, RotateCw, Droplets, Cross } from 'lucide-react';
+import { Swords, Skull, RotateCcw, Zap, Heart, RotateCw, Cross, Minus, Plus, ArrowRightLeft, Clover } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
@@ -118,6 +118,8 @@ export function ActiveMatchView() {
     const [selectedToken, setSelectedToken] = useState<{ recruitId: string; index: number } | null>(null);
     const [deadModels, setDeadModels] = useState<Set<string>>(new Set());
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+    const [luck, setLuck] = useState(0);
+    const [transferTarget, setTransferTarget] = useState<{ fromId: string; equipId: string } | null>(null);
 
     const campaign = useMemo(() => {
         if (!activeMatchTeam) return null;
@@ -201,6 +203,22 @@ export function ActiveMatchView() {
         });
     };
 
+    // ── Equipment Transfer ──
+
+    const transferEquip = (fromRecruitId: string, toRecruitId: string, equipId: string) => {
+        if (!activeMatchTeam) return;
+        const map = { ...activeMatchTeam.equipmentMap };
+        // Remove from source
+        const fromList = [...(map[fromRecruitId] ?? [])];
+        const idx = fromList.indexOf(equipId);
+        if (idx >= 0) fromList.splice(idx, 1);
+        if (fromList.length === 0) delete map[fromRecruitId]; else map[fromRecruitId] = fromList;
+        // Add to target
+        map[toRecruitId] = [...(map[toRecruitId] ?? []), equipId];
+        setActiveMatchTeam({ ...activeMatchTeam, equipmentMap: map });
+        setTransferTarget(null);
+    };
+
     // ── Status Helpers ──
 
     const getDisplayColor = (t: TokenState): 'green' | 'yellow' | 'red' => {
@@ -266,6 +284,24 @@ export function ActiveMatchView() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {/* Luck counter */}
+                        <div className="flex items-center gap-1 border border-border bg-surface-dark px-2 py-1">
+                            <Clover className="w-3.5 h-3.5 text-primary" />
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setLuck(l => Math.max(0, l - 1)); }}
+                                className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-white transition-colors"
+                            >
+                                <Minus className="w-3 h-3" />
+                            </button>
+                            <span className="font-mono-tech text-sm font-bold text-primary w-4 text-center">{luck}</span>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setLuck(l => l + 1); }}
+                                className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-white transition-colors"
+                            >
+                                <Plus className="w-3 h-3" />
+                            </button>
+                        </div>
+
                         <button
                             onClick={(e) => { e.stopPropagation(); inspireTeam(); }}
                             className="p-2 border border-border bg-surface-dark text-secondary hover:bg-secondary hover:text-black transition-colors clip-corner-tr"
@@ -508,24 +544,65 @@ export function ActiveMatchView() {
                             {equippedItems.length > 0 && (
                                 <div className="mt-2 space-y-2">
                                     {equippedItems.map(item => {
-                                        if (item.type === 'weapon') {
-                                            return <WeaponTile key={item.equipId} weapon={item.weapon} />;
-                                        }
-                                        const flipKey = `play-${recruit.id}-${item.equipId}`;
+                                        const isTransferOpen = transferTarget?.fromId === recruit.id && transferTarget?.equipId === item.equipId;
+                                        const otherMembers = matchRoster.filter(r => r.id !== recruit.id && !deadModels.has(r.id));
+
                                         return (
-                                            <div
-                                                key={item.equipId}
-                                                className="card-flip-container w-full cursor-pointer"
-                                                onClick={() => toggleFlip(flipKey)}
-                                            >
-                                                <div className={`card-flip-inner ${flippedCards.has(flipKey) ? 'flipped' : ''}`}>
-                                                    <div className="card-flip-front">
-                                                        <ProgramCard program={item.program} side="front" />
+                                            <div key={item.equipId} className="relative group/equip">
+                                                {item.type === 'weapon' ? (
+                                                    <WeaponTile weapon={item.weapon} />
+                                                ) : (
+                                                    <div
+                                                        className="card-flip-container w-full cursor-pointer"
+                                                        onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}
+                                                    >
+                                                        <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
+                                                            <div className="card-flip-front">
+                                                                <ProgramCard program={item.program} side="front" />
+                                                            </div>
+                                                            <div className="card-flip-back">
+                                                                <ProgramCard program={item.program} side="back" />
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div className="card-flip-back">
-                                                        <ProgramCard program={item.program} side="back" />
+                                                )}
+
+                                                {/* Transfer button */}
+                                                {otherMembers.length > 0 && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (isTransferOpen) setTransferTarget(null);
+                                                            else setTransferTarget({ fromId: recruit.id, equipId: item.equipId });
+                                                        }}
+                                                        className="absolute top-1 right-1 z-20 w-6 h-6 bg-black/80 border border-border flex items-center justify-center text-muted-foreground opacity-0 group-hover/equip:opacity-100 hover:text-secondary hover:border-secondary transition-all"
+                                                        title="Transfer"
+                                                    >
+                                                        <ArrowRightLeft className="w-3 h-3" />
+                                                    </button>
+                                                )}
+
+                                                {/* Transfer target dropdown */}
+                                                {isTransferOpen && (
+                                                    <div className="absolute top-0 right-8 z-40 bg-black/95 border border-secondary/50 shadow-lg min-w-[120px]">
+                                                        {otherMembers.map(target => {
+                                                            const tp = getProfile(target.currentProfileId);
+                                                            const tl = tp ? getLineage(tp.lineageId) : null;
+                                                            return (
+                                                                <button
+                                                                    key={target.id}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        transferEquip(recruit.id, target.id, item.equipId);
+                                                                    }}
+                                                                    className="w-full text-left px-3 py-1.5 text-xs font-mono-tech text-white hover:bg-secondary/20 hover:text-secondary transition-colors truncate"
+                                                                >
+                                                                    {tl?.name ?? 'Unknown'}
+                                                                </button>
+                                                            );
+                                                        })}
                                                     </div>
-                                                </div>
+                                                )}
                                             </div>
                                         );
                                     })}
