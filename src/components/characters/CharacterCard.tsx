@@ -168,7 +168,22 @@ function ActionTokenShape({ color, size = 26 }: { color: 'green' | 'yellow' | 'r
     );
 }
 
-/** Range arrows (interlocking chevrons) — same system as ProgramCard */
+// 3-chevron layout (no Long) — full size in viewBox 180
+const RA3 = {
+    red:    '1,1 54,1 59,11 54,21 6,21',
+    yellow: '62,1 96,1 101,11 96,21 62,21 67,11',
+    green:  '104,1 138,1 143,11 138,21 104,21 109,11',
+};
+// 4-chevron layout (with Long) — proportionally scaled so Long is the longest
+const RA4 = {
+    red:    '1,1 44,1 49,11 44,21 5,21',
+    yellow: '52,1 79,1 84,11 79,21 52,21 57,11',
+    green:  '87,1 113,1 118,11 113,21 87,21 92,11',
+    long:   '121,1 171,1 176,11 171,21 121,21 126,11',
+    plusCx: 151,
+};
+
+/** Range arrows (interlocking chevrons) */
 function RangeArrows({ range }: { range: RangeType }) {
     if (range === 'Self' || range === 'Reach') return null;
 
@@ -179,25 +194,26 @@ function RangeArrows({ range }: { range: RangeType }) {
     const yellowActive = ['Yellow', 'Green', 'Long'].includes(range);
     const greenActive = ['Green', 'Long'].includes(range);
     const hasLong = range === 'Long';
+    const p = hasLong ? RA4 : RA3;
 
     return (
         <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
-            <polygon points="1,1 54,1 59,11 54,21 6,21"
+            <polygon points={p.red}
                 fill="#dc2626" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-            <polygon points="62,1 96,1 101,11 96,21 62,21 67,11"
+            <polygon points={p.yellow}
                 fill={yellowActive ? '#eab308' : OFF}
                 stroke={yellowActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                 opacity={yellowActive ? 1 : 0.5} />
-            <polygon points="104,1 138,1 143,11 138,21 104,21 109,11"
+            <polygon points={p.green}
                 fill={greenActive ? '#22c55e' : OFF}
                 stroke={greenActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                 opacity={greenActive ? 1 : 0.5} />
             {hasLong && (
                 <>
-                    <polygon points="146,1 170,1 175,11 170,21 146,21 151,11"
+                    <polygon points={RA4.long}
                         fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                    <line x1="162" y1="8" x2="162" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                    <line x1="159" y1="11" x2="165" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1={RA4.plusCx} y1="8" x2={RA4.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1={RA4.plusCx - 3} y1="11" x2={RA4.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                 </>
             )}
         </svg>
@@ -419,9 +435,9 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                         {action.range !== 'Self' && action.range !== 'Reach' && (
                             <div className="flex items-center gap-1.5 mb-1">
                                 {(action.skillReq === 'Melee' || action.skillReq === 'Ranged') && SKILL_ICONS[action.skillReq] && (
-                                    <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-7 h-7 shrink-0 object-contain" />
+                                    <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-11 h-11 shrink-0 object-contain" />
                                 )}
-                                <div className="w-[70%]">
+                                <div className="w-[60%]">
                                     <RangeArrows range={action.range} />
                                 </div>
                             </div>

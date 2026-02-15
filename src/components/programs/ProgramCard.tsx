@@ -276,22 +276,25 @@ export function ProgramCard({ program, side }: ProgramCardProps) {
                                 : ['Green', 'Long', 'GreenLong'].includes(r) ? '#22c55e' : OFF;
                             const greenActive = !(r === 'LongOnly') && ['Green', 'Long', 'GreenLong'].includes(r);
                             const longFill = hasLong ? '#111111' : OFF;
+                            const pp = hasLong
+                                ? { red: '1,1 44,1 49,11 44,21 5,21', yellow: '52,1 79,1 84,11 79,21 52,21 57,11', green: '87,1 113,1 118,11 113,21 87,21 92,11' }
+                                : { red: '1,1 54,1 59,11 54,21 6,21', yellow: '62,1 96,1 101,11 96,21 62,21 67,11', green: '104,1 138,1 143,11 138,21 104,21 109,11' };
                             return (
                                 <svg viewBox="0 0 180 22" className="w-[65%] h-auto" fill="none">
-                                    <polygon points="1,1 54,1 59,11 54,21 6,21"
+                                    <polygon points={pp.red}
                                         fill={redFill} stroke={redActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                                         opacity={redActive ? 1 : 0.5} />
-                                    <polygon points="62,1 96,1 101,11 96,21 62,21 67,11"
+                                    <polygon points={pp.yellow}
                                         fill={yellowFill} stroke={yellowActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                                         opacity={yellowActive ? 1 : 0.5} />
-                                    <polygon points="104,1 138,1 143,11 138,21 104,21 109,11"
+                                    <polygon points={pp.green}
                                         fill={greenFill} stroke={greenActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                                         opacity={greenActive ? 1 : 0.5} />
                                     {hasLong && (<>
-                                        <polygon points="146,1 170,1 175,11 170,21 146,21 151,11"
+                                        <polygon points="121,1 171,1 176,11 171,21 121,21 126,11"
                                             fill={longFill} stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                        <line x1="162" y1="11" x2="165" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                        <line x1="162" y1="8" x2="162" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                        <line x1="151" y1="8" x2="151" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                        <line x1="148" y1="11" x2="154" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                                     </>)}
                                 </svg>
                             );
