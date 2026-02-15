@@ -700,7 +700,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                             )}
                                         </div>
                                         {showRange && (
-                                            <div className="flex items-center gap-2">
+                                            <div className="-ml-2 flex items-center gap-2">
                                                 {skillIcon && (
                                                     <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] shrink-0 object-contain" />
                                                 )}
