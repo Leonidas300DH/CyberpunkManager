@@ -651,8 +651,8 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 {/* Weapons grid */}
                 <div className={gridClass}>
                     {filteredWeapons.map(weapon => {
-                        const showRange = weapon.isWeapon && (weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong);
-                        const isMelee = weapon.isWeapon && !weapon.rangeRed && !weapon.rangeYellow && !weapon.rangeGreen && !weapon.rangeLong;
+                        const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
+                        const skillIcon = weapon.skillReq === 'Melee' ? '/images/Skills Icons/melee.png' : weapon.skillReq === 'Ranged' ? '/images/Skills Icons/ranged.png' : null;
                         return (
                             <div key={weapon.id} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
                                 {weapon.imageUrl ? (
@@ -672,12 +672,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                     </div>
                                     <div className="flex-1 px-3 py-2 flex flex-col gap-1.5">
                                         <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
-                                                <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${weapon.isWeapon ? 'text-secondary' : 'text-cyan-400'}`}>
-                                                    {weapon.isWeapon ? (isMelee ? 'Melee' : 'Ranged') : 'Equipment'}
-                                                </span>
-                                            </div>
+                                            <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors flex-1">{weapon.name}</h3>
                                             {isAdmin && (
                                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button onClick={() => openWeaponEdit(weapon)} className="p-1 text-muted-foreground hover:text-secondary transition-colors"><Edit className="w-3.5 h-3.5" /></button>
@@ -686,19 +681,24 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                             )}
                                         </div>
                                         {showRange && (
-                                            <div className="w-[80%]">
-                                                <svg viewBox="0 0 220 22" className="w-full h-auto" fill="none">
-                                                    <polygon points="1,1 54,1 59,11 54,21 6,21" fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
-                                                    <polygon points="62,1 96,1 101,11 96,21 62,21 67,11" fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
-                                                    <polygon points="104,1 138,1 143,11 138,21 104,21 109,11" fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
-                                                    {weapon.rangeLong && (
-                                                        <>
-                                                            <polygon points="146,1 210,1 215,11 210,21 146,21 151,11" fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                                            <line x1="181" y1="8" x2="181" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                            <line x1="178" y1="11" x2="184" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                        </>
-                                                    )}
-                                                </svg>
+                                            <div className="flex items-center gap-1.5">
+                                                {skillIcon && (
+                                                    <img src={skillIcon} alt={weapon.skillReq!} className="w-4 h-4 shrink-0 object-contain" />
+                                                )}
+                                                <div className="w-[75%]">
+                                                    <svg viewBox="0 0 220 22" className="w-full h-auto" fill="none">
+                                                        <polygon points="1,1 54,1 59,11 54,21 6,21" fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
+                                                        <polygon points="62,1 96,1 101,11 96,21 62,21 67,11" fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
+                                                        <polygon points="104,1 138,1 143,11 138,21 104,21 109,11" fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
+                                                        {weapon.rangeLong && (
+                                                            <>
+                                                                <polygon points="146,1 210,1 215,11 210,21 146,21 151,11" fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
+                                                                <line x1="181" y1="8" x2="181" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                                <line x1="178" y1="11" x2="184" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                            </>
+                                                        )}
+                                                    </svg>
+                                                </div>
                                             </div>
                                         )}
                                         <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
