@@ -417,8 +417,13 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                             {action.name}
                         </div>
                         {action.range !== 'Self' && action.range !== 'Reach' && (
-                            <div className="w-[90%] mb-1">
-                                <RangeArrows range={action.range} />
+                            <div className="flex items-center gap-1 mb-1">
+                                {(action.skillReq === 'Melee' || action.skillReq === 'Ranged') && SKILL_ICONS[action.skillReq] && (
+                                    <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-3.5 h-3.5 shrink-0 object-contain" />
+                                )}
+                                <div className="w-[85%]">
+                                    <RangeArrows range={action.range} />
+                                </div>
                             </div>
                         )}
                         <div className="font-body text-[11px] leading-snug text-white/90">

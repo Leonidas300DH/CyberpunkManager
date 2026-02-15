@@ -35,8 +35,26 @@ export function WeaponRangeArrows({ weapon }: { weapon: Weapon }) {
     );
 }
 
-export function WeaponTile({ weapon, overlay }: { weapon: Weapon; overlay?: React.ReactNode }) {
-    const isMelee = weapon.rangeRed && !weapon.rangeYellow && !weapon.rangeGreen && !weapon.rangeLong;
+interface WeaponTileProps {
+    weapon: Weapon;
+    overlay?: React.ReactNode;
+    /** Current campaign street cred — when provided, enables street cred warning */
+    campaignStreetCred?: number;
+    /** How many copies of this weapon are already in the team — when provided, enables rarity warning */
+    equippedCount?: number;
+}
+
+const SKILL_ICON: Record<string, string> = {
+    Melee: '/images/Skills Icons/melee.png',
+    Ranged: '/images/Skills Icons/ranged.png',
+};
+
+export function WeaponTile({ weapon, overlay, campaignStreetCred, equippedCount }: WeaponTileProps) {
+    const showRarity = weapon.rarity < 99;
+    const showStreetCred = (weapon.reqStreetCred ?? 0) > 0;
+    const rarityExceeded = showRarity && equippedCount != null && equippedCount >= weapon.rarity;
+    const streetCredInsufficient = showStreetCred && campaignStreetCred != null && campaignStreetCred < weapon.reqStreetCred;
+
     return (
         <div className="relative group/tile bg-surface-dark border border-border hover:border-secondary transition-all overflow-hidden flex">
             {weapon.imageUrl && (
@@ -51,22 +69,36 @@ export function WeaponTile({ weapon, overlay }: { weapon: Weapon; overlay?: Reac
                     }}
                 />
             )}
-            <div className={`relative z-10 w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1`}>
+            <div className={`relative z-10 w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
                 <div className="font-display font-black text-sm text-black leading-none">{weapon.cost}</div>
                 <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
+                {showRarity && (
+                    <div className={`font-mono-tech text-[8px] font-bold leading-none mt-0.5 ${rarityExceeded ? 'text-red-600' : 'text-black/60'}`}
+                        title={`Rarity: max ${weapon.rarity} per team`}>
+                        ×{weapon.rarity}
+                    </div>
+                )}
+                {showStreetCred && (
+                    <div className={`font-mono-tech text-[7px] font-bold leading-none ${streetCredInsufficient ? 'text-red-600' : 'text-black/60'}`}
+                        title={`Requires Street Cred ${weapon.reqStreetCred}`}>
+                        SC{weapon.reqStreetCred}
+                    </div>
+                )}
             </div>
             <div className="relative z-10 flex-1 px-3 py-2 flex flex-col gap-1">
-                <div>
-                    <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover/tile:text-secondary transition-colors">
-                        {weapon.name}
-                    </h3>
-                    <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${weapon.isWeapon ? 'text-secondary' : 'text-cyan-400'}`}>
-                        {weapon.isWeapon ? (isMelee ? 'Melee' : 'Ranged') : 'Equipment'}
-                    </span>
-                </div>
-                <div className="w-[80%]">
-                    <WeaponRangeArrows weapon={weapon} />
-                </div>
+                <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover/tile:text-secondary transition-colors">
+                    {weapon.name}
+                </h3>
+                {(weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong) && (
+                    <div className="flex items-center gap-1.5">
+                        {weapon.skillReq && SKILL_ICON[weapon.skillReq] && (
+                            <img src={SKILL_ICON[weapon.skillReq]} alt={weapon.skillReq} className="w-4 h-4 shrink-0 object-contain" />
+                        )}
+                        <div className="w-[75%]">
+                            <WeaponRangeArrows weapon={weapon} />
+                        </div>
+                    </div>
+                )}
                 <p className="font-body text-[11px] text-white/70 leading-snug line-clamp-2">{weapon.description}</p>
             </div>
             {overlay}

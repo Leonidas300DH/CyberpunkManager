@@ -33,11 +33,12 @@ export const MathService = {
     calculateCampaignStreetCred: (campaign: Campaign, store: CatalogData): number => {
         let totalCred = 0;
 
-        // 1. Sum Profile Levels
+        // 1. Sum Profile Levels + Character Street Cred
         campaign.hqRoster.forEach((recruit) => {
             const profile = store.profiles.find((p) => p.id === recruit.currentProfileId);
             if (profile) {
                 totalCred += profile.level;
+                totalCred += profile.streetCred ?? 0;
             }
         });
 

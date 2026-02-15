@@ -300,6 +300,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 rangeLong: weaponForm.rangeLong ?? false,
                 description: weaponForm.description ?? '',
                 rarity: weaponForm.rarity ?? 99,
+                reqStreetCred: weaponForm.reqStreetCred ?? 0,
                 keywords: weaponForm.keywords ?? [],
                 imageUrl: weaponForm.imageUrl,
             };

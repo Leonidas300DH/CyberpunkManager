@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Campaign, ModelLineage, Weapon, HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
+import { MathService } from '@/lib/math';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, ChevronDown, ChevronUp, Plus, Users, X, GripVertical, List, Maximize2 } from 'lucide-react';
 import { useTeamBuilder } from '@/hooks/useTeamBuilder';
@@ -141,6 +142,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
     } = useTeamBuilder(campaign);
 
     const { catalog } = useStore();
+    const campaignStreetCred = MathService.calculateCampaignStreetCred(campaign, catalog);
     const { gridClass, cardStyle } = useCardGrid();
     const [filter, setFilter] = useState<FilterType>('all');
     const [rosterOpen, setRosterOpen] = useState(true);
@@ -491,6 +493,8 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                                     {item.type === 'weapon' ? (
                                                                         <WeaponTile
                                                                             weapon={item.weapon}
+                                                                            campaignStreetCred={campaignStreetCred}
+                                                                            equippedCount={equippedCounts.get(`weapon-${item.weapon.id}`) ?? 0}
                                                                             overlay={
                                                                                 <div className="absolute top-1 left-10 z-20">
                                                                                     <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
@@ -721,6 +725,8 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                 <DraggableItem id={dragId}>
                                                     <WeaponTile
                                                         weapon={weapon}
+                                                        campaignStreetCred={campaignStreetCred}
+                                                        equippedCount={equippedCounts.get(`weapon-${weapon.id}`) ?? 0}
                                                         overlay={
                                                             <div className="absolute top-1 left-10 z-20 flex items-center gap-1">
                                                                 <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/tile:opacity-60" />

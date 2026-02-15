@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Campaign, Weapon, HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
+import { MathService } from '@/lib/math';
 import { Plus, Search, X, Trash2, List, Square, Columns2, ChevronDown } from 'lucide-react';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
@@ -99,6 +100,7 @@ export function StashList({ campaign }: StashListProps) {
         return true;
     });
 
+    const campaignStreetCred = MathService.calculateCampaignStreetCred(campaign, catalog);
     const stashCountOf = (id: string) => campaign.hqStash.filter(s => s === id).length;
 
     return (
@@ -134,6 +136,8 @@ export function StashList({ campaign }: StashListProps) {
                                         <WeaponTile
                                             key={`owned-${stashIdx}`}
                                             weapon={weapon}
+                                            campaignStreetCred={campaignStreetCred}
+                                            equippedCount={stashCountOf(weapon.id)}
                                             overlay={
                                                 <button
                                                     onClick={() => handleRemove(stashIdx)}
@@ -251,6 +255,8 @@ export function StashList({ campaign }: StashListProps) {
                             <div key={weapon.id} className={`${cantAfford ? 'opacity-35' : ''} transition-all`}>
                                 <WeaponTile
                                     weapon={weapon}
+                                    campaignStreetCred={campaignStreetCred}
+                                    equippedCount={owned}
                                     overlay={
                                         <button
                                             disabled={cantAfford}

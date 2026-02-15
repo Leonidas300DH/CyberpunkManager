@@ -49,6 +49,7 @@ export interface ModelProfile {
     keywords: string[]; // e.g., ['Netrunner', 'Cyber-Character']
     actions: GameAction[]; // Innate actions
     passiveRules: string;
+    streetCred: number; // 0 = Normal, 1 = Veteran, 2 = Elite
 }
 
 // --- ITEMS (GEAR, PROGRAMS, LOOT) ---
@@ -100,12 +101,14 @@ export interface Weapon {
     cost: number;
     isWeapon: boolean;
     isGear: boolean;
+    skillReq?: 'Melee' | 'Ranged'; // Skill used — undefined for gear/equipment
     rangeRed: boolean;
     rangeYellow: boolean;
     rangeGreen: boolean;
     rangeLong: boolean;
     description: string;
     rarity: number;        // Max copies per team (99 = unlimited)
+    reqStreetCred: number; // Minimum Campaign Street Cred required to buy/equip
     keywords: string[];    // e.g., ['Bulky', 'Deadly']
     grantsNetrunner?: boolean; // true = equipping this allows hacking programs
     imageUrl?: string;     // Illustration in /images/weapons/
