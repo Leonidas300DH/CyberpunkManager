@@ -387,7 +387,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
 
             {/* 5. Bottom Ability Panels */}
             <div
-                className="absolute bottom-2 right-2 left-[19%] z-20 flex flex-col gap-1"
+                className="absolute bottom-1 right-2 left-[19%] z-20 flex flex-col gap-px"
                 style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.5)) drop-shadow(0 0 14px rgba(255,255,255,0.25))' }}
             >
                 {/* Passive Rules */}
@@ -401,7 +401,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                             }}
                         >
                             {passive.name && (
-                                <div className="font-display font-black text-sm text-[#22c55e] uppercase tracking-wide mb-0.5">
+                                <div className="font-display font-black text-sm text-[#22c55e] uppercase tracking-wide">
                                     {formatCardText(passive.name, i * 100)}
                                 </div>
                             )}
