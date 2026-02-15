@@ -4,7 +4,7 @@ import { CatalogData, Campaign, MatchTeam, Weapon } from '@/types'
 import { FACTIONS, HACKING_PROGRAMS, ITEMS, LINEAGES, PROFILES, WEAPONS } from '@/lib/seed'
 
 // Bump this version whenever seed data changes to force a re-seed
-const SEED_VERSION = 23;
+const SEED_VERSION = 24;
 
 const STORAGE_KEY = 'combat-zone-storage';
 
