@@ -395,7 +395,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                     passive.description && (
                         <div
                             key={`p${i}`}
-                            className="bg-black/80 backdrop-blur-sm border-[0.5px] border-white/30 px-3 py-1.5"
+                            className="bg-black/80 backdrop-blur-sm border-[0.5px] border-white/30 px-3 py-0.5"
                             style={{
                                 clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)',
                             }}
@@ -416,7 +416,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                 {profile.actions.map((action, i) => (
                     <div
                         key={action.id}
-                        className="bg-black/80 backdrop-blur-sm border-[0.5px] border-white/30 px-3 py-1.5"
+                        className="bg-black/80 backdrop-blur-sm border-[0.5px] border-white/30 px-3 py-0.5"
                         style={{
                             clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)',
                         }}
