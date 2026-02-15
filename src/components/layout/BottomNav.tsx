@@ -12,7 +12,7 @@ export function BottomNav() {
         { name: 'HQ', href: '/hq', icon: Home },
         { name: 'Characters', href: '/database', icon: Database },
         { name: 'Team Builder', href: '/match', icon: Swords },
-        { name: 'Armory', href: '/armory', icon: Sword },
+        { name: 'Gear', href: '/armory', icon: Sword },
         { name: 'Play', href: '/play', icon: TabletSmartphone },
     ];
 

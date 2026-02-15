@@ -1,34 +1,60 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+'use client';
+
+import { useState } from 'react';
 import { FactionsTab } from "@/components/database/FactionsTab";
 import { ModelsTab } from "@/components/database/ModelsTab";
 import { ItemsTab } from "@/components/database/ItemsTab";
 
+type TabId = 'factions' | 'models' | 'items';
+
+const TABS: { id: TabId; label: string; activeClass: string }[] = [
+    { id: 'factions', label: 'Factions', activeClass: 'bg-accent text-white' },
+    { id: 'models', label: 'Characters', activeClass: 'bg-secondary text-black' },
+    { id: 'items', label: 'Items', activeClass: 'bg-primary text-black' },
+];
+
 export default function DatabasePage() {
+    const [activeTab, setActiveTab] = useState<TabId>('factions');
+
     return (
-        <div className="space-y-4 pb-20">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold tracking-tight text-primary">Database</h1>
+        <div className="pb-28">
+            {/* Page Title */}
+            <div className="border-l-4 border-primary pl-6 py-2 mb-8">
+                <h1
+                    className="text-5xl md:text-6xl font-display font-bold text-white uppercase tracking-tighter mb-2 glitch-text"
+                    data-text="Faction Registry"
+                >
+                    Faction <span className="text-primary">Registry</span>
+                </h1>
+                <p className="font-mono-tech text-secondary text-sm uppercase tracking-widest">
+                    Accessing Night City PD Database... Encrypted files decrypted.
+                </p>
             </div>
 
-            <Tabs defaultValue="factions" className="w-full">
-                <div className="overflow-x-auto pb-2">
-                    <TabsList className="w-full justify-start">
-                        <TabsTrigger value="factions">Factions</TabsTrigger>
-                        <TabsTrigger value="models">Characters</TabsTrigger>
-                        <TabsTrigger value="items">Items</TabsTrigger>
-                    </TabsList>
-                </div>
+            {/* Tab Navigation */}
+            <div className="flex flex-wrap border-b-2 border-border mb-8 gap-1">
+                {TABS.map(tab => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`clip-tab px-6 md:px-10 py-3 font-display font-bold text-lg uppercase tracking-wider transition-all ${
+                                isActive
+                                    ? tab.activeClass
+                                    : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    );
+                })}
+            </div>
 
-                <TabsContent value="factions">
-                    <FactionsTab />
-                </TabsContent>
-                <TabsContent value="models">
-                    <ModelsTab />
-                </TabsContent>
-                <TabsContent value="items">
-                    <ItemsTab />
-                </TabsContent>
-            </Tabs>
+            {/* Tab Content */}
+            {activeTab === 'factions' && <FactionsTab />}
+            {activeTab === 'models' && <ModelsTab />}
+            {activeTab === 'items' && <ItemsTab />}
         </div>
     );
 }

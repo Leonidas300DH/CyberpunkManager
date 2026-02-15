@@ -4,14 +4,13 @@ import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { CampaignSelector } from '@/components/campaign/CampaignSelector';
 import { TeamBuilder } from '@/components/match/TeamBuilder';
-import { Card } from '@/components/ui/card';
 import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
+import { Plus } from 'lucide-react';
 
 export default function MatchPage() {
     const { campaigns } = useStore();
     const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
 
-    // Auto-select first campaign
     useEffect(() => {
         if (!selectedCampaignId && campaigns.length > 0) {
             setSelectedCampaignId(campaigns[0].id);
@@ -22,10 +21,6 @@ export default function MatchPage() {
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold tracking-tight text-primary">Match Builder</h1>
-            </div>
-
             <CampaignSelector
                 selectedId={selectedCampaignId}
                 onSelect={setSelectedCampaignId}
@@ -34,13 +29,18 @@ export default function MatchPage() {
             {selectedCampaign ? (
                 <TeamBuilder campaign={selectedCampaign} />
             ) : (
-                <Card className="p-8 flex flex-col items-center text-center space-y-4 border-dashed">
-                    <div className="text-muted-foreground">
-                        <p>No active campaign found.</p>
-                        <p className="text-sm">Create a campaign first.</p>
+                <div className="border-2 border-dashed border-border bg-black flex flex-col items-center justify-center min-h-[400px] clip-corner-tl-br p-8 text-center">
+                    <div className="h-20 w-20 clip-corner-tr bg-surface-dark border border-border flex items-center justify-center mb-6">
+                        <Plus className="w-10 h-10 text-muted-foreground" />
                     </div>
+                    <p className="font-display text-2xl text-muted-foreground uppercase tracking-widest mb-2">
+                        No Campaign Found
+                    </p>
+                    <p className="font-mono-tech text-xs text-muted-foreground uppercase tracking-wider mb-6">
+                        Create a campaign to start building your team
+                    </p>
                     <NewCampaignDialog onCampaignCreated={setSelectedCampaignId} />
-                </Card>
+                </div>
             )}
         </div>
     );

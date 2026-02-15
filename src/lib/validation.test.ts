@@ -26,7 +26,9 @@ const mockStore: CatalogData = {
     factions: [mockFaction],
     lineages: [mockLeaderLineage, mockGonkLineage],
     profiles: [mockLeaderProfile, mockGonkProfile],
-    items: []
+    items: [],
+    programs: [],
+    weapons: []
 };
 
 // Test Helpers

@@ -7,6 +7,7 @@ export type ItemCategory = 'Gear' | 'Program' | 'Loot' | 'Objective';
 export interface Faction {
     id: string;
     name: string; // e.g., "Tyger Claws", "Custom Gang"
+    description?: string;
     imageUrl?: string; // Rendered as aspect-square
 }
 
@@ -64,6 +65,49 @@ export interface ItemCard {
     grantsStreetCredBonus?: number; // Used mainly for Completed Objectives
     summonsDroneLineageId?: string; // FK to ModelLineage if this program deploys a Drone
     imageUrl?: string; // Rendered as aspect-square
+    // Program-specific fields
+    programDifficulty?: ActionColor; // Green, Yellow, Red — required difficulty to run
+    programFactionId?: string; // FK to Faction, undefined = "All" factions
+}
+
+// --- HACKING PROGRAMS (Netrunner) ---
+export type ProgramQuality = 'Red' | 'Yellow' | 'Green';
+export type ProgramRange = 'Red' | 'Yellow' | 'Green' | 'Long' | 'LongOnly' | 'GreenLong' | 'Self';
+export type ReloadCondition = 'Inspire' | 'TakenOut' | 'Wounded' | 'Discard' | 'Manual';
+
+export interface HackingProgram {
+    id: string;
+    name: string;
+    factionId: string;           // FK to Faction, 'all' = universal
+    costEB: number;
+    reqStreetCred: number;
+    rarity: number;
+    imageUrl: string;            // Illustration in /images/programs/
+    quality: ProgramQuality;     // Card color theme (Red/Yellow/Green)
+    range: ProgramRange;         // Range indicator
+    techTest: boolean;           // Requires a Tech skill test
+    flavorText: string;           // Flavor/ambiance text (italics + quotes on front)
+    loadedText: string;          // Front card rules text
+    vulnerable: boolean;         // Grants Vulnerable keyword
+    runningEffect: string;       // Back card effect text
+    reloadCondition: ReloadCondition; // How to reload/flip the card back
+}
+
+// --- WEAPONS & GEAR ---
+export interface Weapon {
+    id: string;
+    name: string;
+    cost: number;
+    isWeapon: boolean;
+    isGear: boolean;
+    rangeRed: boolean;
+    rangeYellow: boolean;
+    rangeGreen: boolean;
+    rangeLong: boolean;
+    description: string;
+    rarity: number;        // Max copies per team (99 = unlimited)
+    keywords: string[];    // e.g., ['Bulky', 'Deadly']
+    imageUrl?: string;     // Illustration in /images/weapons/
 }
 
 // --- CAMPAIGN & ROSTER MODELLING ---
@@ -101,4 +145,6 @@ export interface CatalogData {
     lineages: ModelLineage[];
     profiles: ModelProfile[];
     items: ItemCard[];
+    programs: HackingProgram[];
+    weapons: Weapon[];
 }
