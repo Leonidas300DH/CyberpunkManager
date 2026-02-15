@@ -3,10 +3,12 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
+import { Weapon, HackingProgram } from '@/types';
 import { Swords, Skull, RotateCcw, Minus, Plus } from 'lucide-react';
-import { resolveEquipmentItem } from '@/lib/math';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
+import { WeaponTile } from '@/components/shared/WeaponTile';
+import { ProgramCard } from '@/components/programs/ProgramCard';
 
 export function ActiveMatchView() {
     const router = useRouter();
@@ -15,6 +17,15 @@ export function ActiveMatchView() {
 
     const [activatedModels, setActivatedModels] = useState<Record<string, boolean>>({});
     const [wounds, setWounds] = useState<Record<string, number>>({});
+    const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+
+    const toggleFlip = (key: string) => {
+        setFlippedCards(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key); else next.add(key);
+            return next;
+        });
+    };
 
     const campaign = useMemo(() => {
         if (!activeMatchTeam) return null;
@@ -118,6 +129,22 @@ export function ActiveMatchView() {
 
                     const equippedIds = activeMatchTeam.equipmentMap?.[recruit.id] ?? [];
 
+                    // Resolve equipped items into full objects
+                    const equippedItems = equippedIds.map(eqId => {
+                        if (eqId.startsWith('weapon-')) {
+                            const weapon = catalog.weapons.find(w => w.id === eqId.replace('weapon-', ''));
+                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, program: null } : null;
+                        }
+                        if (eqId.startsWith('program-')) {
+                            const program = catalog.programs.find(p => p.id === eqId.replace('program-', ''));
+                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, program } : null;
+                        }
+                        return null;
+                    }).filter(Boolean) as Array<
+                        | { equipId: string; type: 'weapon'; weapon: Weapon; program: null }
+                        | { equipId: string; type: 'program'; weapon: null; program: HackingProgram }
+                    >;
+
                     return (
                         <div key={recruit.id} style={cardStyle}>
                             {/* Card + overlays */}
@@ -178,23 +205,33 @@ export function ActiveMatchView() {
                                 </div>
                             </div>
 
-                            {/* Equipped items */}
-                            {equippedIds.length > 0 && (
-                                <div className="bg-black/80 border border-secondary/30 mt-1 p-1.5">
-                                    <div className="flex flex-wrap gap-1">
-                                        {equippedIds.map((itemId, idx) => {
-                                            const resolved = resolveEquipmentItem(itemId, catalog);
-                                            if (!resolved) return null;
+                            {/* Equipped items — full cards */}
+                            {equippedItems.length > 0 && (
+                                <div className="mt-2 space-y-2">
+                                    {equippedItems.map(item => {
+                                        if (item.type === 'weapon') {
                                             return (
-                                                <span
-                                                    key={`${itemId}-${idx}`}
-                                                    className="inline-block text-[9px] font-mono-tech text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 uppercase tracking-wider"
-                                                >
-                                                    {resolved.name}
-                                                </span>
+                                                <WeaponTile key={item.equipId} weapon={item.weapon} />
                                             );
-                                        })}
-                                    </div>
+                                        }
+                                        const flipKey = `play-${recruit.id}-${item.equipId}`;
+                                        return (
+                                            <div
+                                                key={item.equipId}
+                                                className="card-flip-container w-full cursor-pointer"
+                                                onClick={(e) => { e.stopPropagation(); toggleFlip(flipKey); }}
+                                            >
+                                                <div className={`card-flip-inner ${flippedCards.has(flipKey) ? 'flipped' : ''}`}>
+                                                    <div className="card-flip-front">
+                                                        <ProgramCard program={item.program} side="front" />
+                                                    </div>
+                                                    <div className="card-flip-back">
+                                                        <ProgramCard program={item.program} side="back" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
