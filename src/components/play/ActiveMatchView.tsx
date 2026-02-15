@@ -403,10 +403,11 @@ export function ActiveMatchView() {
 
                         <button
                             onClick={(e) => { e.stopPropagation(); inspireTeam(); }}
-                            className="p-2 border border-border bg-surface-dark text-secondary hover:bg-secondary hover:text-black transition-colors clip-corner-tr"
-                            title="New round — reactivate all tokens"
+                            className="flex items-center gap-1.5 px-3 py-2 border border-secondary bg-secondary/20 text-secondary font-display font-bold text-xs uppercase tracking-wider hover:bg-secondary hover:text-black transition-colors clip-corner-tr"
+                            title="Inspire — reactivate all tokens"
                         >
-                            <RotateCcw className="w-4 h-4" />
+                            <Zap className="w-4 h-4" />
+                            Inspire
                         </button>
                         <button
                             onClick={handleEndMatch}
