@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# stitch temp files
+.stitch-assets/
+.stitch-skills-temp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
