@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Campaign, Weapon, HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
-import { Plus, Search, X, Trash2, List, Square, Columns2 } from 'lucide-react';
+import { Plus, Search, X, Trash2, List, Square, Columns2, ChevronDown } from 'lucide-react';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
 
@@ -147,7 +147,9 @@ export function StashList({ campaign }: StashListProps) {
     const [gearTypeFilter, setGearTypeFilter] = useState<'all' | 'weapon' | 'gear'>('all');
     const [programSearch, setProgramSearch] = useState('');
     const [programQualityFilter, setProgramQualityFilter] = useState<'all' | 'Green' | 'Yellow' | 'Red'>('all');
-    const [programViewMode, setProgramViewMode] = useState<ViewMode>('list');
+    const [programViewMode, setProgramViewMode] = useState<ViewMode>('card');
+    const [gearOpen, setGearOpen] = useState(true);
+    const [programsOpen, setProgramsOpen] = useState(true);
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
 
     const toggleFlip = (id: string) => {
@@ -318,43 +320,50 @@ export function StashList({ campaign }: StashListProps) {
                 SECTION 2 — AVAILABLE GEAR
             ═══════════════════════════════════════════ */}
             <section>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                <button
+                    onClick={() => setGearOpen(v => !v)}
+                    className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
+                >
+                    <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${gearOpen ? '' : '-rotate-90'}`} />
                     <div className="border-l-2 border-secondary pl-3">
-                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white">Available Gear</h3>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">Available Gear</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            Click to buy
+                            {filteredWeapons.length} item{filteredWeapons.length !== 1 ? 's' : ''}
                         </span>
                     </div>
-                    <div className="flex gap-2 items-center flex-wrap">
-                        {/* Search */}
-                        <div className="relative w-full sm:w-52">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <input
-                                value={gearSearch}
-                                onChange={(e) => setGearSearch(e.target.value)}
-                                placeholder="SEARCH..."
-                                className="w-full bg-black border border-border pl-10 pr-8 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none"
-                            />
-                            {gearSearch && (
-                                <button onClick={() => setGearSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-                                    <X className="w-4 h-4 text-muted-foreground hover:text-white" />
-                                </button>
-                            )}
-                        </div>
-                        {/* Type filter */}
-                        <div className="flex gap-1 font-mono-tech text-xs">
-                            {(['all', 'weapon', 'gear'] as const).map(f => (
-                                <button
-                                    key={f}
-                                    onClick={() => setGearTypeFilter(f)}
-                                    className={`px-3 py-2 font-bold uppercase tracking-wider transition-colors ${
-                                        gearTypeFilter === f ? 'bg-secondary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
-                                    }`}
-                                >
-                                    {f === 'all' ? 'All' : f === 'weapon' ? 'Weapons' : 'Equipment'}
-                                </button>
-                            ))}
-                        </div>
+                </button>
+
+                {gearOpen && (
+                <>
+                <div className="flex gap-2 items-center flex-wrap mb-4">
+                    {/* Search */}
+                    <div className="relative w-full sm:w-52">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                            value={gearSearch}
+                            onChange={(e) => setGearSearch(e.target.value)}
+                            placeholder="SEARCH..."
+                            className="w-full bg-black border border-border pl-10 pr-8 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none"
+                        />
+                        {gearSearch && (
+                            <button onClick={() => setGearSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <X className="w-4 h-4 text-muted-foreground hover:text-white" />
+                            </button>
+                        )}
+                    </div>
+                    {/* Type filter */}
+                    <div className="flex gap-1 font-mono-tech text-xs">
+                        {(['all', 'weapon', 'gear'] as const).map(f => (
+                            <button
+                                key={f}
+                                onClick={() => setGearTypeFilter(f)}
+                                className={`px-3 py-2 font-bold uppercase tracking-wider transition-colors ${
+                                    gearTypeFilter === f ? 'bg-secondary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
+                                }`}
+                            >
+                                {f === 'all' ? 'All' : f === 'weapon' ? 'Weapons' : 'Equipment'}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
@@ -401,6 +410,8 @@ export function StashList({ campaign }: StashListProps) {
                         <div className="col-span-full text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">No gear found.</div>
                     )}
                 </div>
+                </>
+                )}
             </section>
 
             {/* Divider */}
@@ -410,13 +421,22 @@ export function StashList({ campaign }: StashListProps) {
                 SECTION 3 — NETRUNNING PROGRAMS
             ═══════════════════════════════════════════ */}
             <section>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                <button
+                    onClick={() => setProgramsOpen(v => !v)}
+                    className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
+                >
+                    <ChevronDown className={`w-5 h-5 text-cyber-purple transition-transform ${programsOpen ? '' : '-rotate-90'}`} />
                     <div className="border-l-2 border-cyber-purple pl-3">
-                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white">Netrunning Programs</h3>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">Netrunning Programs</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
                             {filteredPrograms.length} program{filteredPrograms.length !== 1 ? 's' : ''}
                         </span>
                     </div>
+                </button>
+
+                {programsOpen && (
+                <>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
                     <div className="flex gap-2 items-center flex-wrap">
                         {/* Search */}
                         <div className="relative w-full sm:w-52">
@@ -604,6 +624,8 @@ export function StashList({ campaign }: StashListProps) {
 
                 {filteredPrograms.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">No programs available.</div>
+                )}
+                </>
                 )}
             </section>
         </div>
