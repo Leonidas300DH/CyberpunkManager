@@ -38,7 +38,7 @@ export function BottomNav() {
                                     className={cn(
                                         "flex-1 flex flex-col items-center justify-center space-y-1 transition-all duration-200 relative group overflow-hidden",
                                         isActive
-                                            ? "bg-primary text-black"
+                                            ? "bg-primary/40 text-primary"
                                             : "text-muted-foreground hover:bg-muted hover:text-white"
                                     )}
                                 >
@@ -48,14 +48,14 @@ export function BottomNav() {
                                         alt=""
                                         className={cn(
                                             "absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-200",
-                                            isActive ? "opacity-30" : "opacity-15 group-hover:opacity-25"
+                                            isActive ? "opacity-50" : "opacity-15 group-hover:opacity-25"
                                         )}
                                     />
                                     {/* Gradient overlay for text readability */}
                                     <div className={cn(
                                         "absolute inset-0 pointer-events-none",
                                         isActive
-                                            ? "bg-gradient-to-t from-primary/60 via-primary/30 to-transparent"
+                                            ? "bg-gradient-to-t from-primary/30 via-transparent to-transparent"
                                             : "bg-gradient-to-t from-black/80 via-black/40 to-black/20"
                                     )} />
 
