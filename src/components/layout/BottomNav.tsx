@@ -15,10 +15,10 @@ export function BottomNav() {
     const [authOpen, setAuthOpen] = useState(false);
 
     const navItems = [
-        { name: 'HQ', href: '/hq', icon: Home },
-        { name: 'Team Builder', href: '/match', icon: Swords },
-        { name: 'Play', href: '/play', icon: TabletSmartphone },
-        { name: 'Database', href: '/database', icon: Database },
+        { name: 'HQ', href: '/hq', icon: Home, bg: '/images/Menus/HQ.png' },
+        { name: 'Team Builder', href: '/match', icon: Swords, bg: '/images/Menus/team.png' },
+        { name: 'Play', href: '/play', icon: TabletSmartphone, bg: '/images/Menus/battle.png' },
+        { name: 'Database', href: '/database', icon: Database, bg: '/images/Menus/database.png' },
     ];
 
     return (
@@ -42,9 +42,26 @@ export function BottomNav() {
                                             : "text-muted-foreground hover:bg-muted hover:text-white"
                                     )}
                                 >
+                                    {/* Background image */}
+                                    <img
+                                        src={item.bg}
+                                        alt=""
+                                        className={cn(
+                                            "absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-200",
+                                            isActive ? "opacity-30" : "opacity-15 group-hover:opacity-25"
+                                        )}
+                                    />
+                                    {/* Gradient overlay for text readability */}
+                                    <div className={cn(
+                                        "absolute inset-0 pointer-events-none",
+                                        isActive
+                                            ? "bg-gradient-to-t from-primary/60 via-primary/30 to-transparent"
+                                            : "bg-gradient-to-t from-black/80 via-black/40 to-black/20"
+                                    )} />
+
                                     {/* Active Indicator: Angled Corner or Block */}
                                     {isActive && (
-                                        <div className="absolute top-0 right-0 w-3 h-3 bg-black transform rotate-45 translate-x-1.5 -translate-y-1.5"></div>
+                                        <div className="absolute top-0 right-0 w-3 h-3 bg-black transform rotate-45 translate-x-1.5 -translate-y-1.5 z-20"></div>
                                     )}
 
                                     <Icon className={cn("w-5 h-5 z-10", isActive && "stroke-[2.5px]")} />
@@ -56,8 +73,6 @@ export function BottomNav() {
                                         {item.name}
                                     </span>
 
-                                    {/* Glitch Overlay on Hover (Desktop) */}
-                                    <div className="absolute inset-0 bg-secondary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-200 pointer-events-none"></div>
                                 </Link>
                             );
                         })}
