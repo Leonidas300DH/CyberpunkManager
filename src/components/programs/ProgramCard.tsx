@@ -277,7 +277,7 @@ export function ProgramCard({ program, side }: ProgramCardProps) {
                             const greenActive = !(r === 'LongOnly') && ['Green', 'Long', 'GreenLong'].includes(r);
                             const longFill = hasLong ? '#111111' : OFF;
                             return (
-                                <svg viewBox="0 0 225 22" className="w-[65%] h-auto" fill="none">
+                                <svg viewBox="0 0 180 22" className="w-[65%] h-auto" fill="none">
                                     <polygon points="1,1 54,1 59,11 54,21 6,21"
                                         fill={redFill} stroke={redActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                                         opacity={redActive ? 1 : 0.5} />
@@ -288,10 +288,10 @@ export function ProgramCard({ program, side }: ProgramCardProps) {
                                         fill={greenFill} stroke={greenActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                                         opacity={greenActive ? 1 : 0.5} />
                                     {hasLong && (<>
-                                        <polygon points="146,1 217,1 222,11 217,21 146,21 151,11"
+                                        <polygon points="146,1 170,1 175,11 170,21 146,21 151,11"
                                             fill={longFill} stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                        <line x1="181" y1="11" x2="187" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                        <line x1="184" y1="8" x2="184" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                        <line x1="162" y1="11" x2="165" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                        <line x1="162" y1="8" x2="162" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                                     </>)}
                                 </svg>
                             );

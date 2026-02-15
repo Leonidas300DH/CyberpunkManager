@@ -10,7 +10,7 @@ export function WeaponRangeArrows({ weapon }: { weapon: Weapon }) {
     const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
     if (!showRange) return null;
     return (
-        <svg viewBox="0 0 220 22" className="w-full h-auto" fill="none">
+        <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
             <polygon points="1,1 54,1 59,11 54,21 6,21"
                 fill={weapon.rangeRed ? '#dc2626' : OFF}
                 stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
@@ -25,10 +25,10 @@ export function WeaponRangeArrows({ weapon }: { weapon: Weapon }) {
                 opacity={weapon.rangeGreen ? 1 : 0.5} />
             {weapon.rangeLong && (
                 <>
-                    <polygon points="146,1 210,1 215,11 210,21 146,21 151,11"
+                    <polygon points="146,1 170,1 175,11 170,21 146,21 151,11"
                         fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                    <line x1="181" y1="8" x2="181" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                    <line x1="178" y1="11" x2="184" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1="162" y1="8" x2="162" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1="159" y1="11" x2="165" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                 </>
             )}
         </svg>
