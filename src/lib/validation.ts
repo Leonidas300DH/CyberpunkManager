@@ -104,7 +104,7 @@ export const ValidationService = {
             }
 
             // 9. Faction Purity
-            if (!lineage.isMerc && lineage.factionId !== campaign.factionId) {
+            if (!lineage.isMerc && !lineage.factionIds.includes(campaign.factionId)) {
                 errors.push(`${lineage.name} belongs to wrong Faction!`);
             }
         });

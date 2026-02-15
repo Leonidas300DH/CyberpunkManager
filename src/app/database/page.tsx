@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FactionsTab } from "@/components/database/FactionsTab";
 import { ModelsTab } from "@/components/database/ModelsTab";
 import { ItemsTab } from "@/components/database/ItemsTab";
+import { DisplaySettings } from '@/components/ui/DisplaySettings';
 
 type TabId = 'factions' | 'models' | 'items';
 
@@ -32,23 +33,28 @@ export default function DatabasePage() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex flex-wrap border-b-2 border-border mb-8 gap-1">
-                {TABS.map(tab => {
-                    const isActive = activeTab === tab.id;
-                    return (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`clip-tab px-6 md:px-10 py-3 font-display font-bold text-lg uppercase tracking-wider transition-all ${
-                                isActive
-                                    ? tab.activeClass
-                                    : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    );
-                })}
+            <div className="flex items-end border-b-2 border-border mb-8 gap-1">
+                <div className="flex flex-wrap gap-1 flex-1">
+                    {TABS.map(tab => {
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`clip-tab px-6 md:px-10 py-3 font-display font-bold text-lg uppercase tracking-wider transition-all ${
+                                    isActive
+                                        ? tab.activeClass
+                                        : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'
+                                }`}
+                            >
+                                {tab.label}
+                            </button>
+                        );
+                    })}
+                </div>
+                <div className="mb-1">
+                    <DisplaySettings />
+                </div>
             </div>
 
             {/* Tab Content */}

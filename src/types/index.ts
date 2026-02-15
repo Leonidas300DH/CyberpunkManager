@@ -26,7 +26,7 @@ export interface GameAction {
 export interface ModelLineage {
     id: string;
     name: string; // e.g., "Ronin Sniper", "Media Drone"
-    factionId: string; // FK to Faction
+    factionIds: string[]; // FK to Faction(s) — supports multi-faction lineages
     type: 'Leader' | 'Character' | 'Gonk' | 'Specialist' | 'Drone';
     isMerc: boolean;
     imageUrl?: string; // Rendered as aspect-square

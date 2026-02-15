@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ImageInput } from '@/components/ui/image-input';
 import { CharacterCard } from '@/components/characters/CharacterCard';
+import { useCardGrid } from '@/hooks/useCardGrid';
 import { FACTIONS } from '@/lib/seed';
 import { v4 as uuidv4 } from 'uuid';
 import { Plus, Trash2, Edit, ChevronRight } from 'lucide-react';
@@ -40,6 +41,7 @@ const BASE_FACTION_IDS = new Set(FACTIONS.map(f => f.id));
 
 export function FactionsTab() {
     const { catalog, setCatalog } = useStore();
+    const { gridClass, cardStyle } = useCardGrid();
     const [isOpen, setIsOpen] = useState(false);
     const [editingFaction, setEditingFaction] = useState<Faction | null>(null);
     const [formData, setFormData] = useState<Partial<Faction>>({});
@@ -87,7 +89,7 @@ export function FactionsTab() {
         .sort((a, b) => a.name.localeCompare(b.name));
 
     const getLineagesForFaction = (factionId: string) =>
-        catalog.lineages.filter(l => l.factionId === factionId);
+        catalog.lineages.filter(l => l.factionIds.includes(factionId));
 
     const getProfilesForLineage = (lineageId: string) =>
         catalog.profiles.filter(p => p.lineageId === lineageId).sort((a, b) => a.level - b.level);
@@ -213,9 +215,12 @@ export function FactionsTab() {
                     return (
                         <div key={faction.id} className={`group ${!isExpanded ? 'opacity-90 hover:opacity-100' : ''} transition-opacity`}>
                             {/* Faction Row */}
-                            <button
+                            <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => setExpandedId(isExpanded ? null : faction.id)}
-                                className={`w-full bg-surface-dark hover:bg-tech-gray border-l-4 ${factionColor.border} px-4 py-0 flex items-center justify-between transition-all duration-300 clip-corner-br`}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedId(isExpanded ? null : faction.id); } }}
+                                className={`w-full bg-surface-dark hover:bg-tech-gray border-l-4 ${factionColor.border} px-4 py-0 flex items-center justify-between transition-all duration-300 clip-corner-br cursor-pointer`}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className={`h-32 w-32 md:h-40 md:w-40 ${factionColor.bg} flex items-center justify-center text-black font-bold font-display text-4xl overflow-hidden shrink-0`}>
@@ -256,7 +261,7 @@ export function FactionsTab() {
                                     )}
                                     <ChevronRight className={`w-6 h-6 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
                                 </div>
-                            </button>
+                            </div>
 
                             {/* Expanded Panel */}
                             <div
@@ -271,11 +276,11 @@ export function FactionsTab() {
                                         </div>
                                     ) : viewMode === 'card' ? (
                                         /* ── Card View ── */
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                        <div className={gridClass}>
                                             {filtered.map(lineage => {
                                                 const profiles = getProfilesForLineage(lineage.id);
                                                 return profiles.map(profile => (
-                                                    <div key={profile.id} className="w-full max-w-[240px]">
+                                                    <div key={profile.id} className="w-full" style={cardStyle}>
                                                         <CharacterCard lineage={lineage} profile={profile} />
                                                         {profiles.length > 1 && (
                                                             <div className="text-center mt-1">
@@ -290,7 +295,7 @@ export function FactionsTab() {
                                         </div>
                                     ) : (
                                         /* ── List View (ProgramCard-inspired) ── */
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                        <div className={gridClass}>
                                             {filtered.map(lineage => {
                                                 const profiles = getProfilesForLineage(lineage.id);
                                                 const baseProfile = profiles[0];
@@ -298,7 +303,7 @@ export function FactionsTab() {
                                                 const isSelected = selectedCard === lineage.id;
 
                                                 return (
-                                                    <div key={lineage.id} className="w-full max-w-[240px]">
+                                                    <div key={lineage.id} className="w-full" style={cardStyle}>
                                                         <button
                                                             onClick={() => setSelectedCard(isSelected ? null : lineage.id)}
                                                             className="relative w-full aspect-[3/2] overflow-hidden border border-border hover:border-secondary transition-all group/tile rounded-sm"
@@ -338,7 +343,7 @@ export function FactionsTab() {
                                                         {isSelected && (
                                                             <div className="mt-2 space-y-2">
                                                                 {profiles.map(profile => (
-                                                                    <div key={profile.id} className="w-full max-w-[240px]">
+                                                                    <div key={profile.id} className="w-full">
                                                                         <CharacterCard lineage={lineage} profile={profile} />
                                                                         {profiles.length > 1 && (
                                                                             <div className="text-center mt-1">

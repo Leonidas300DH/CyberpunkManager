@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { ModelLineage } from '@/types';
 import { CharacterCard } from '@/components/characters/CharacterCard';
+import { useCardGrid } from '@/hooks/useCardGrid';
 
 const TYPE_COLORS: Record<ModelLineage['type'], string> = {
     Leader: 'text-accent',
@@ -29,6 +30,7 @@ const DEFAULT_FACTION_ICON = { bg: 'bg-gray-500', border: 'border-gray-500', tex
 
 export function ModelsTab() {
     const { catalog } = useStore();
+    const { gridClass, cardStyle } = useCardGrid();
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState<ModelLineage['type'] | 'all'>('all');
     const [factionFilter, setFactionFilter] = useState<string | 'all'>('all');
@@ -46,7 +48,7 @@ export function ModelsTab() {
     const filtered = catalog.lineages.filter(l => {
         const matchSearch = l.name.toLowerCase().includes(search.toLowerCase());
         const matchType = typeFilter === 'all' || l.type === typeFilter;
-        const matchFaction = factionFilter === 'all' || l.factionId === factionFilter;
+        const matchFaction = factionFilter === 'all' || l.factionIds.includes(factionFilter);
         return matchSearch && matchType && matchFaction;
     });
 
@@ -129,11 +131,11 @@ export function ModelsTab() {
                     No units found.
                 </div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className={gridClass}>
                     {filtered.map(lineage => {
                         const profiles = getProfilesForLineage(lineage.id);
                         return profiles.map(profile => (
-                            <div key={profile.id} className="w-full max-w-[240px]">
+                            <div key={profile.id} className="w-full" style={cardStyle}>
                                 <CharacterCard lineage={lineage} profile={profile} />
                                 {profiles.length > 1 && (
                                     <div className="text-center mt-1">

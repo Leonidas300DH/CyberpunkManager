@@ -266,7 +266,7 @@ interface CharacterCardProps {
 
 export function CharacterCard({ lineage, profile }: CharacterCardProps) {
     // Faction rail color
-    const rail = FACTION_RAIL_COLORS[lineage.factionId] ?? DEFAULT_RAIL;
+    const rail = FACTION_RAIL_COLORS[lineage.factionIds[0]] ?? DEFAULT_RAIL;
 
     // Archetype label: first keyword or lineage type
     const archetype = profile.keywords[0] || lineage.type;

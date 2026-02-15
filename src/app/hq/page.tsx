@@ -8,6 +8,7 @@ import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
 import { RosterList } from '@/components/campaign/RosterList';
 import { StashList } from '@/components/campaign/StashList';
 import { Plus } from 'lucide-react';
+import { DisplaySettings } from '@/components/ui/DisplaySettings';
 
 type TabId = 'roster' | 'stash' | 'ops' | 'med';
 
@@ -46,23 +47,28 @@ export default function HQPage() {
                     <CampaignHeader campaign={selectedCampaign} faction={selectedFaction} />
 
                     {/* Tab Navigation */}
-                    <div className="flex flex-wrap border-b-2 border-border mb-8 gap-1">
-                        {TABS.map(tab => {
-                            const isActive = activeTab === tab.id;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`clip-tab px-6 md:px-10 py-3 font-display font-bold text-lg uppercase tracking-wider transition-all ${
-                                        isActive
-                                            ? tab.activeClass
-                                            : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'
-                                    }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
+                    <div className="flex items-end border-b-2 border-border mb-8 gap-1">
+                        <div className="flex flex-wrap gap-1 flex-1">
+                            {TABS.map(tab => {
+                                const isActive = activeTab === tab.id;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`clip-tab px-6 md:px-10 py-3 font-display font-bold text-lg uppercase tracking-wider transition-all ${
+                                            isActive
+                                                ? tab.activeClass
+                                                : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'
+                                        }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <div className="mb-1">
+                            <DisplaySettings />
+                        </div>
                     </div>
 
                     {/* Tab Content */}

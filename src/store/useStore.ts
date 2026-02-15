@@ -4,14 +4,20 @@ import { CatalogData, Campaign, MatchTeam, Weapon } from '@/types'
 import { FACTIONS, HACKING_PROGRAMS, ITEMS, LINEAGES, PROFILES, WEAPONS } from '@/lib/seed'
 
 // Bump this version whenever seed data changes to force a re-seed
-const SEED_VERSION = 19;
+const SEED_VERSION = 20;
 
 const STORAGE_KEY = 'combat-zone-storage';
+
+interface DisplaySettings {
+    cardColumns: number;
+    fontScale: number;
+}
 
 interface StoreState {
     catalog: CatalogData;
     campaigns: Campaign[];
     activeMatchTeam: MatchTeam | null;
+    displaySettings: DisplaySettings;
 
     // Actions
     setCatalog: (data: StoreState['catalog']) => void;
@@ -19,6 +25,7 @@ interface StoreState {
     updateCampaign: (id: string, updates: Partial<Campaign>) => void;
     deleteCampaign: (id: string) => void;
     setActiveMatchTeam: (team: MatchTeam | null) => void;
+    setDisplaySettings: (updates: Partial<DisplaySettings>) => void;
     reset: () => void;
 }
 
@@ -87,6 +94,7 @@ export const useStore = create<StoreState>()(
             catalog: emptyCatalog,
             campaigns: [],
             activeMatchTeam: null,
+            displaySettings: { cardColumns: 4, fontScale: 100 },
 
             setCatalog: (data) => set({ catalog: data }),
             addCampaign: (campaign) => set((state) => ({ campaigns: [...state.campaigns, campaign] })),
@@ -97,6 +105,9 @@ export const useStore = create<StoreState>()(
                 campaigns: state.campaigns.filter((c) => c.id !== id),
             })),
             setActiveMatchTeam: (team) => set({ activeMatchTeam: team }),
+            setDisplaySettings: (updates) => set((state) => ({
+                displaySettings: { ...state.displaySettings, ...updates },
+            })),
             reset: () => set({ campaigns: [], activeMatchTeam: null }),
         }),
         {
@@ -108,6 +119,10 @@ export const useStore = create<StoreState>()(
                 return {
                     ...current,
                     ...persistedState,
+                    displaySettings: {
+                        ...current.displaySettings,
+                        ...(persistedState.displaySettings ?? {}),
+                    },
                     catalog: {
                         ...defaultCatalog,
                         ...(persistedState.catalog ?? {}),

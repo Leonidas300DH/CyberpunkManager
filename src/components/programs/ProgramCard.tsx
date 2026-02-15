@@ -133,8 +133,8 @@ interface ProgramCardProps {
     side: 'front' | 'back';
 }
 
-const BASE_FONT = 15;
-const MIN_FONT = 9;
+const BASE_FONT = 16;
+const MIN_FONT = 10;
 const BOTTOM_MARGIN = 5;  // % of card height
 const MAX_BOX_PCT = 80;   // % of card height (minus margins) before shrinking font
 

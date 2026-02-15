@@ -1,8 +1,24 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { Campaign, Faction } from '@/types';
 import { useStore } from '@/store/useStore';
 import { MathService } from '@/lib/math';
+import { Pencil } from 'lucide-react';
+
+const FACTION_COLORS: Record<string, { border: string; text: string; bg: string; glow: string }> = {
+    'faction-arasaka':    { border: 'border-red-600',     text: 'text-red-500',     bg: 'bg-red-600',     glow: 'shadow-[0_0_20px_rgba(220,38,38,0.4)]' },
+    'faction-bozos':      { border: 'border-purple-500',  text: 'text-purple-400',  bg: 'bg-purple-500',  glow: 'shadow-[0_0_20px_rgba(168,85,247,0.4)]' },
+    'faction-danger-gals':{ border: 'border-pink-400',    text: 'text-pink-400',    bg: 'bg-pink-400',    glow: 'shadow-[0_0_20px_rgba(244,114,182,0.4)]' },
+    'faction-edgerunners':{ border: 'border-emerald-500', text: 'text-emerald-400', bg: 'bg-emerald-500', glow: 'shadow-[0_0_20px_rgba(16,185,129,0.4)]' },
+    'faction-gen-red':    { border: 'border-white',       text: 'text-white',       bg: 'bg-white',       glow: 'shadow-[0_0_20px_rgba(255,255,255,0.3)]' },
+    'faction-lawmen':     { border: 'border-blue-500',    text: 'text-blue-400',    bg: 'bg-blue-500',    glow: 'shadow-[0_0_20px_rgba(59,130,246,0.4)]' },
+    'faction-maelstrom':  { border: 'border-red-700',     text: 'text-red-600',     bg: 'bg-red-700',     glow: 'shadow-[0_0_20px_rgba(185,28,28,0.4)]' },
+    'faction-trauma-team':{ border: 'border-white',       text: 'text-white',       bg: 'bg-white',       glow: 'shadow-[0_0_20px_rgba(255,255,255,0.3)]' },
+    'faction-tyger-claws':{ border: 'border-cyan-400',    text: 'text-cyan-400',    bg: 'bg-cyan-400',    glow: 'shadow-[0_0_20px_rgba(34,211,238,0.4)]' },
+    'faction-zoners':     { border: 'border-orange-500',  text: 'text-orange-400',  bg: 'bg-orange-500',  glow: 'shadow-[0_0_20px_rgba(249,115,22,0.4)]' },
+};
+const DEFAULT_FC = { border: 'border-primary', text: 'text-primary', bg: 'bg-primary', glow: 'glow-primary' };
 
 interface CampaignHeaderProps {
     campaign: Campaign;
@@ -10,118 +26,104 @@ interface CampaignHeaderProps {
 }
 
 export function CampaignHeader({ campaign, faction }: CampaignHeaderProps) {
-    const { catalog } = useStore();
+    const { catalog, updateCampaign } = useStore();
     const streetCred = MathService.calculateCampaignStreetCred(campaign, catalog);
     const influence = MathService.calculateCampaignInfluence(campaign, catalog);
+    const fc = (faction ? FACTION_COLORS[faction.id] : null) ?? DEFAULT_FC;
+
+    // Editable name
+    const [editing, setEditing] = useState(false);
+    const [nameValue, setNameValue] = useState(campaign.name);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => { setNameValue(campaign.name); }, [campaign.name]);
+    useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+    const commitName = () => {
+        const trimmed = nameValue.trim();
+        if (trimmed && trimmed !== campaign.name) {
+            updateCampaign(campaign.id, { name: trimmed });
+        } else {
+            setNameValue(campaign.name);
+        }
+        setEditing(false);
+    };
 
     return (
-        <div className="relative z-10">
-            {/* Title Row */}
-            <div className="flex flex-col md:flex-row justify-between items-end border-b-2 border-surface-dark pb-4 mb-4 relative">
-                <div>
-                    <div className="inline-block bg-surface-dark px-2 py-1 mb-2 border-l-2 border-secondary">
-                        <div className="text-xs font-mono-tech text-secondary tracking-widest uppercase flex items-center gap-2 font-bold">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                            </svg>
-                            Campaign Datashard_v2.04
-                        </div>
+        <div className="relative z-10 mb-6">
+            <div className="flex items-start gap-4">
+                {/* Left: Title + Stats */}
+                <div className="flex-1 min-w-0">
+                    {/* Editable Campaign Name */}
+                    <div className="group/name flex items-center gap-2 mb-3">
+                        {editing ? (
+                            <input
+                                ref={inputRef}
+                                value={nameValue}
+                                onChange={(e) => setNameValue(e.target.value)}
+                                onBlur={commitName}
+                                onKeyDown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') { setNameValue(campaign.name); setEditing(false); } }}
+                                className="text-3xl md:text-5xl font-display font-bold uppercase text-white tracking-tighter leading-none bg-transparent border-b-2 border-secondary focus:outline-none w-full"
+                            />
+                        ) : (
+                            <h1
+                                className="text-3xl md:text-5xl font-display font-bold uppercase text-white tracking-tighter leading-none glitch-text cursor-pointer truncate"
+                                data-text={campaign.name}
+                                onClick={() => setEditing(true)}
+                            >
+                                {campaign.name}
+                            </h1>
+                        )}
+                        {!editing && (
+                            <button onClick={() => setEditing(true)} className="opacity-0 group-hover/name:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-secondary">
+                                <Pencil className="w-4 h-4" />
+                            </button>
+                        )}
                     </div>
-                    <h1
-                        className="text-5xl md:text-7xl font-display font-bold uppercase text-white tracking-tighter leading-none glitch-text mb-2"
-                        data-text={campaign.name}
-                    >
-                        {campaign.name}
-                    </h1>
-                </div>
 
-                {/* Faction Badge */}
-                <div className="mt-4 md:mt-0 relative">
-                    <div className="clip-corner-both bg-black border border-border p-1 shadow-lg">
-                        <div className="bg-surface-dark border border-border p-4 flex items-center gap-4 clip-corner-both">
-                            <div className="text-right">
-                                <div className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-widest mb-1">Faction Allegiance</div>
-                                <div className="text-xl font-display font-bold text-primary uppercase tracking-wide">{faction?.name ?? 'Unknown'}</div>
+                    {/* Compact Stats Row */}
+                    <div className="flex flex-wrap gap-4 md:gap-6">
+                        {/* Funds */}
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-8 bg-primary" />
+                            <div>
+                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">Funds</div>
+                                <div className="text-xl font-mono-tech font-bold text-primary leading-tight">€${campaign.ebBank.toLocaleString()}</div>
                             </div>
-                            <div className="w-40 h-40 md:w-48 md:h-48 bg-black border-2 border-primary flex items-center justify-center relative overflow-hidden glow-primary">
-                                {faction?.imageUrl ? (
-                                    <img src={faction.imageUrl} className="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all" />
-                                ) : (
-                                    <span className="font-display text-primary text-2xl font-bold">{faction?.name?.[0] ?? '?'}</span>
-                                )}
-                                <div className="absolute inset-0 bg-primary opacity-10" />
+                        </div>
+                        {/* Street Cred */}
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-8 bg-secondary" />
+                            <div>
+                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">Street Cred</div>
+                                <div className="text-xl font-mono-tech font-bold text-secondary leading-tight">LVL {streetCred}</div>
+                            </div>
+                        </div>
+                        {/* Influence */}
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-8 bg-accent" />
+                            <div className="text-center">
+                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">Influence</div>
+                                <div className="text-xl font-mono-tech font-bold text-accent leading-tight">{influence}</div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* System Status Bar */}
-            <div className="flex justify-between items-center text-xs font-mono-tech text-muted-foreground uppercase tracking-wider bg-black/50 p-2 border-l-2 border-border mb-6">
-                <div>System: <span className="text-cyber-green font-bold">Online</span> // Connection: <span className="text-cyber-green font-bold">Secure</span></div>
-                <div className="hidden md:block">Night City Time: <span className="text-white">23:42:09</span></div>
-            </div>
-
-            {/* Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {/* Funds */}
-                <div className="bg-black border border-border p-6 relative overflow-hidden clip-corner-tr group hover:border-muted-foreground transition-colors">
-                    <div className="absolute inset-0 bg-surface-dark -z-10" />
-                    <div className="flex justify-between items-start mb-4">
-                        <span className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest font-bold">Funds (EB)</span>
-                        <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div className="text-4xl font-mono-tech font-bold text-white mb-4 tracking-tight">
-                        €$ {campaign.ebBank.toLocaleString()}
-                    </div>
-                    <div className="w-full bg-black h-2 border border-border">
-                        <div className="bg-primary h-full w-3/4 shadow-[0_0_15px_rgba(252,238,10,0.4)] relative">
-                            <div className="absolute right-0 top-0 bottom-0 w-px bg-white" />
+                {/* Right: Faction Badge (compact) */}
+                <div className="shrink-0">
+                    <div className={`bg-black border-2 ${fc.border} flex flex-col items-center overflow-hidden ${fc.glow}`}>
+                        <div className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center">
+                            {faction?.imageUrl ? (
+                                <img src={faction.imageUrl} className="w-full h-full object-cover" />
+                            ) : (
+                                <span className={`font-display ${fc.text} text-2xl font-bold`}>{faction?.name?.[0] ?? '?'}</span>
+                            )}
+                        </div>
+                        <div className={`w-full text-center py-0.5 text-[8px] font-mono-tech ${fc.text} uppercase tracking-wider font-bold bg-black/80 border-t ${fc.border}`}>
+                            {faction?.name ?? 'Unknown'}
                         </div>
                     </div>
-                    <div className="absolute top-0 right-0 p-1"><div className="w-3 h-3 bg-primary" /></div>
-                </div>
-
-                {/* Street Cred */}
-                <div className="bg-black border border-border p-6 relative overflow-hidden clip-corner-tr group hover:border-muted-foreground transition-colors">
-                    <div className="absolute inset-0 bg-surface-dark -z-10" />
-                    <div className="flex justify-between items-start mb-4">
-                        <span className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest font-bold">Street Cred</span>
-                        <svg className="w-5 h-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
-                        </svg>
-                    </div>
-                    <div className="text-4xl font-mono-tech font-bold text-white mb-4 tracking-tight">
-                        LVL {streetCred}
-                    </div>
-                    <div className="w-full bg-black h-2 border border-border">
-                        <div className="bg-secondary h-full w-1/2 shadow-[0_0_15px_rgba(0,240,255,0.4)] relative">
-                            <div className="absolute right-0 top-0 bottom-0 w-px bg-white" />
-                        </div>
-                    </div>
-                    <div className="absolute top-0 right-0 p-1"><div className="w-3 h-3 bg-secondary" /></div>
-                </div>
-
-                {/* Influence */}
-                <div className="bg-black border border-border p-6 relative overflow-hidden clip-corner-tr group hover:border-muted-foreground transition-colors">
-                    <div className="absolute inset-0 bg-surface-dark -z-10" />
-                    <div className="flex justify-between items-start mb-4">
-                        <span className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest font-bold">Influence</span>
-                        <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
-                        </svg>
-                    </div>
-                    <div className="text-4xl font-mono-tech font-bold text-white mb-4 tracking-tight">
-                        {influence > 5 ? 'HIGH' : influence > 2 ? 'MED' : 'LOW'}
-                    </div>
-                    <div className="w-full bg-black h-2 border border-border">
-                        <div className="bg-accent h-full shadow-[0_0_15px_rgba(255,0,60,0.4)] relative" style={{ width: `${Math.min(100, influence * 15)}%` }}>
-                            <div className="absolute right-0 top-0 bottom-0 w-px bg-white" />
-                        </div>
-                    </div>
-                    <div className="absolute top-0 right-0 p-1"><div className="w-3 h-3 bg-accent" /></div>
                 </div>
             </div>
         </div>

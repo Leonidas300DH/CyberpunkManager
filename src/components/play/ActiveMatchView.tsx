@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { Card } from '@/components/ui/card';
@@ -11,18 +11,18 @@ import { PLAY_MODE_TEXT } from '@/data/referenceData';
 
 export function ActiveMatchView() {
     const router = useRouter();
-    const { catalog, activeMatchTeam, setActiveMatchTeam } = useStore();
+    const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam } = useStore();
 
     // Local state for the match session
     const [activatedModels, setActivatedModels] = useState<Record<string, boolean>>({});
     const [wounds, setWounds] = useState<Record<string, number>>({});
 
     // Filter roster to only include selected recruits
-    const matchRoster = useStore(state => {
-        if (!state.activeMatchTeam) return [];
-        const campaign = state.campaigns.find(c => c.id === state.activeMatchTeam!.campaignId);
-        return campaign?.hqRoster.filter(r => state.activeMatchTeam!.selectedRecruitIds.includes(r.id)) || [];
-    });
+    const matchRoster = useMemo(() => {
+        if (!activeMatchTeam) return [];
+        const campaign = campaigns.find(c => c.id === activeMatchTeam.campaignId);
+        return campaign?.hqRoster.filter(r => activeMatchTeam.selectedRecruitIds.includes(r.id)) || [];
+    }, [activeMatchTeam, campaigns]);
 
     if (!activeMatchTeam) {
         return (

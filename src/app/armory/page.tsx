@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
+import { useCardGrid } from '@/hooks/useCardGrid';
+import { DisplaySettings } from '@/components/ui/DisplaySettings';
 import { v4 as uuidv4 } from 'uuid';
 
 type ViewMode = 'list' | 'card' | 'double';
@@ -197,6 +199,7 @@ const EMPTY_WEAPON: Partial<Weapon> = {
 
 export default function ArmoryPage() {
     const { catalog, setCatalog } = useStore();
+    const { gridClass, cardStyle } = useCardGrid();
     const [activeTab, setActiveTab] = useState<TabId>('Gear');
     const [search, setSearch] = useState('');
     // Program filters
@@ -403,25 +406,30 @@ export default function ArmoryPage() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex flex-wrap border-b-2 border-border mb-6 gap-1">
-                {TABS.map(t => {
-                    const isActive = activeTab === t.id;
-                    return (
-                        <button
-                            key={t.id}
-                            onClick={() => { setActiveTab(t.id); setSearch(''); setSelectedProgram(null); }}
-                            className={`clip-tab px-6 md:px-10 py-3 font-display font-bold text-lg uppercase tracking-wider transition-all ${
-                                isActive
-                                    ? t.activeClass
-                                    : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'
-                            }`}
-                        >
-                            {t.label}
-                            {t.id === 'Gear' && <span className="ml-2 text-xs opacity-70">{weapons.length}</span>}
-                            {t.id === 'Program' && <span className="ml-2 text-xs opacity-70">{programs.length}</span>}
-                        </button>
-                    );
-                })}
+            <div className="flex items-end border-b-2 border-border mb-6 gap-1">
+                <div className="flex flex-wrap gap-1 flex-1">
+                    {TABS.map(t => {
+                        const isActive = activeTab === t.id;
+                        return (
+                            <button
+                                key={t.id}
+                                onClick={() => { setActiveTab(t.id); setSearch(''); setSelectedProgram(null); }}
+                                className={`clip-tab px-6 md:px-10 py-3 font-display font-bold text-lg uppercase tracking-wider transition-all ${
+                                    isActive
+                                        ? t.activeClass
+                                        : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'
+                                }`}
+                            >
+                                {t.label}
+                                {t.id === 'Gear' && <span className="ml-2 text-xs opacity-70">{weapons.length}</span>}
+                                {t.id === 'Program' && <span className="ml-2 text-xs opacity-70">{programs.length}</span>}
+                            </button>
+                        );
+                    })}
+                </div>
+                <div className="mb-1">
+                    <DisplaySettings />
+                </div>
             </div>
 
             {/* PROGRAMS TAB */}
@@ -560,7 +568,7 @@ export default function ArmoryPage() {
 
                     {/* === LIST VIEW === */}
                     {viewMode === 'list' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <div className={gridClass}>
                             {filteredPrograms.map(prog => {
                                 const qs = QUALITY_STYLES[prog.quality];
                                 const factionName = getFactionName(prog.factionId);
@@ -570,6 +578,7 @@ export default function ArmoryPage() {
                                     <button
                                         key={prog.id}
                                         onClick={() => setSelectedProgram(prog)}
+                                        style={cardStyle}
                                         className={`group relative text-left bg-surface-dark border border-border hover:${qs.border} transition-all duration-200 overflow-hidden`}
                                     >
                                         {/* Background illustration */}
@@ -616,11 +625,12 @@ export default function ArmoryPage() {
 
                     {/* === CARD VIEW — front, click to flip with 3D animation === */}
                     {viewMode === 'card' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <div className={gridClass}>
                             {filteredPrograms.map(prog => (
                                 <div
                                     key={prog.id}
                                     className="card-flip-container w-full cursor-pointer"
+                                    style={cardStyle}
                                     onClick={() => toggleFlip(prog.id)}
                                 >
                                     <div className={`card-flip-inner ${flippedCards.has(prog.id) ? 'flipped' : ''}`}>
@@ -819,7 +829,7 @@ export default function ArmoryPage() {
                     </Dialog>
 
                     {/* Weapons grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div className={gridClass}>
                         {filteredWeapons.map(weapon => {
                             const showRange = weapon.isWeapon && (weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong);
                             const isMelee = weapon.isWeapon && !weapon.rangeRed && !weapon.rangeYellow && !weapon.rangeGreen && !weapon.rangeLong;
@@ -832,6 +842,7 @@ export default function ArmoryPage() {
                             return (
                                 <div
                                     key={weapon.id}
+                                    style={cardStyle}
                                     className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${
                                         isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'
                                     }`}
@@ -972,9 +983,9 @@ export default function ArmoryPage() {
                     </div>
 
                     {/* Standard list layout for Loot, Objectives */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className={gridClass}>
                         {filteredItems.map(item => (
-                            <div key={item.id} className={`group bg-surface-dark border border-border hover:${tab.border} transition-all ${tab.glow} relative flex overflow-hidden`}>
+                            <div key={item.id} style={cardStyle} className={`group bg-surface-dark border border-border hover:${tab.border} transition-all ${tab.glow} relative flex overflow-hidden`}>
                                 {/* Colored sidebar */}
                                 <div className={`w-2 shrink-0 bg-gradient-to-b ${tab.gradient}`} />
 
