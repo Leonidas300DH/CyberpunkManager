@@ -168,13 +168,12 @@ function ActionTokenShape({ color, size = 26 }: { color: 'green' | 'yellow' | 'r
     );
 }
 
-// Single consistent chevron coordinates — same sizes everywhere
 const RA = {
     red:    '1,1 44,1 49,11 44,21 5,21',
-    yellow: '52,1 79,1 84,11 79,21 52,21 57,11',
-    green:  '87,1 113,1 118,11 113,21 87,21 92,11',
-    long:   '121,1 171,1 176,11 171,21 121,21 126,11',
-    plusCx: 151,
+    yellow: '52,1 95,1 100,11 95,21 52,21 57,11',
+    green:  '103,1 145,1 150,11 145,21 103,21 108,11',
+    long:   '153,1 218,1 223,11 218,21 153,21 158,11',
+    plusCx: 188,
 };
 
 /** Range arrows (interlocking chevrons) */
@@ -190,7 +189,7 @@ function RangeArrows({ range }: { range: RangeType }) {
     const hasLong = range === 'Long';
 
     return (
-        <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
+        <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
             <polygon points={RA.red}
                 fill="#dc2626" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
             <polygon points={RA.yellow}
@@ -426,7 +425,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                             {action.name}
                         </div>
                         {action.range !== 'Self' && action.range !== 'Reach' && (
-                            <div className="flex items-center gap-1.5 mb-1">
+                            <div className="flex items-center gap-1.5 mb-0.5">
                                 {(action.skillReq === 'Melee' || action.skillReq === 'Ranged') && SKILL_ICONS[action.skillReq] && (
                                     <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-11 h-11 shrink-0 object-contain" />
                                 )}

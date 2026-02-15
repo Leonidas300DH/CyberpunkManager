@@ -277,21 +277,21 @@ export function ProgramCard({ program, side }: ProgramCardProps) {
                             const greenActive = !(r === 'LongOnly') && ['Green', 'Long', 'GreenLong'].includes(r);
                             const longFill = hasLong ? '#111111' : OFF;
                             return (
-                                <svg viewBox="0 0 180 22" className="w-[65%] h-auto" fill="none">
+                                <svg viewBox="0 0 228 22" className="w-[65%] h-auto" fill="none">
                                     <polygon points="1,1 44,1 49,11 44,21 5,21"
                                         fill={redFill} stroke={redActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                                         opacity={redActive ? 1 : 0.5} />
-                                    <polygon points="52,1 79,1 84,11 79,21 52,21 57,11"
+                                    <polygon points="52,1 95,1 100,11 95,21 52,21 57,11"
                                         fill={yellowFill} stroke={yellowActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                                         opacity={yellowActive ? 1 : 0.5} />
-                                    <polygon points="87,1 113,1 118,11 113,21 87,21 92,11"
+                                    <polygon points="103,1 145,1 150,11 145,21 103,21 108,11"
                                         fill={greenFill} stroke={greenActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                                         opacity={greenActive ? 1 : 0.5} />
                                     {hasLong && (<>
-                                        <polygon points="121,1 171,1 176,11 171,21 121,21 126,11"
+                                        <polygon points="153,1 218,1 223,11 218,21 153,21 158,11"
                                             fill={longFill} stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                        <line x1="151" y1="8" x2="151" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                        <line x1="148" y1="11" x2="154" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                        <line x1="188" y1="8" x2="188" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                        <line x1="185" y1="11" x2="191" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                                     </>)}
                                 </svg>
                             );

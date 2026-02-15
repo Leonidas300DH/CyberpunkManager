@@ -6,20 +6,20 @@ const OFF = 'rgba(100,100,100,0.35)';
 const OFF_STROKE = 'rgba(255,255,255,0.3)';
 const ON_STROKE = 'white';
 
-// Single consistent layout — all chevrons always same size, Long is the widest
+// Single consistent layout — Red 48px, Yellow 48px, Green 47px, Long 70px (the widest)
 const PTS = {
     red:    '1,1 44,1 49,11 44,21 5,21',
-    yellow: '52,1 79,1 84,11 79,21 52,21 57,11',
-    green:  '87,1 113,1 118,11 113,21 87,21 92,11',
-    long:   '121,1 171,1 176,11 171,21 121,21 126,11',
-    plusCx: 151,
+    yellow: '52,1 95,1 100,11 95,21 52,21 57,11',
+    green:  '103,1 145,1 150,11 145,21 103,21 108,11',
+    long:   '153,1 218,1 223,11 218,21 153,21 158,11',
+    plusCx: 188,
 };
 
 export function WeaponRangeArrows({ weapon }: { weapon: Weapon }) {
     const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
     if (!showRange) return null;
     return (
-        <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
+        <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
             <polygon points={PTS.red}
                 fill={weapon.rangeRed ? '#dc2626' : OFF}
                 stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
@@ -92,7 +92,7 @@ export function WeaponTile({ weapon, overlay, campaignStreetCred, equippedCount 
                     </div>
                 )}
             </div>
-            <div className="relative z-10 flex-1 px-3 py-2 flex flex-col gap-1">
+            <div className="relative z-10 flex-1 px-3 py-2 flex flex-col gap-0.5">
                 <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover/tile:text-secondary transition-colors">
                     {weapon.name}
                 </h3>

@@ -326,13 +326,12 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const OFF = 'rgba(100,100,100,0.35)';
     const OFF_STROKE = 'rgba(255,255,255,0.3)';
     const ON_STROKE = 'white';
-    // Single consistent chevron coordinates
     const AP = {
         red:    '1,1 44,1 49,11 44,21 5,21',
-        yellow: '52,1 79,1 84,11 79,21 52,21 57,11',
-        green:  '87,1 113,1 118,11 113,21 87,21 92,11',
-        long:   '121,1 171,1 176,11 171,21 121,21 126,11',
-        plusCx: 151,
+        yellow: '52,1 95,1 100,11 95,21 52,21 57,11',
+        green:  '103,1 145,1 150,11 145,21 103,21 108,11',
+        long:   '153,1 218,1 223,11 218,21 153,21 158,11',
+        plusCx: 188,
     };
 
     if (activeTab === 'Program') {
@@ -690,7 +689,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="flex-1 px-3 py-2 flex flex-col gap-1.5">
+                                    <div className="flex-1 px-3 py-2 flex flex-col gap-0.5">
                                         <div className="flex justify-between items-start">
                                             <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors flex-1">{weapon.name}</h3>
                                             {isAdmin && (
@@ -706,7 +705,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                                     <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 shrink-0 object-contain" />
                                                 )}
                                                 <div className="w-[60%]">
-                                                    <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
+                                                    <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
                                                         <polygon points={AP.red} fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
                                                         <polygon points={AP.yellow} fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
                                                         <polygon points={AP.green} fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
