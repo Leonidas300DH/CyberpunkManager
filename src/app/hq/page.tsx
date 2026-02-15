@@ -3,10 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { CampaignHeader } from '@/components/campaign/CampaignHeader';
-import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
 import { RosterList } from '@/components/campaign/RosterList';
 import { StashList } from '@/components/campaign/StashList';
-import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const FACTION_ACCENT: Record<string, string> = {
@@ -116,18 +114,6 @@ export default function HQPage() {
                     );
                 })}
 
-                {/* New Campaign button */}
-                <NewCampaignDialog
-                    onCampaignCreated={setSelectedCampaignId}
-                    trigger={
-                        <button className="shrink-0 flex items-center gap-2 px-4 py-2 border border-dashed border-border bg-black/30 hover:bg-surface-dark hover:border-primary transition-all clip-corner-tr">
-                            <Plus className="w-4 h-4 text-muted-foreground" />
-                            <span className="font-display text-sm uppercase tracking-wide text-muted-foreground">
-                                New
-                            </span>
-                        </button>
-                    }
-                />
             </div>
 
             {selectedCampaign ? (
@@ -183,16 +169,12 @@ export default function HQPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/60" />
 
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="h-20 w-20 clip-corner-tr bg-black/60 border border-border flex items-center justify-center mb-6 backdrop-blur-sm">
-                            <Plus className="w-10 h-10 text-muted-foreground" />
-                        </div>
                         <p className="font-display text-2xl text-white uppercase tracking-widest mb-2 drop-shadow-lg">
                             No Active Campaign
                         </p>
-                        <p className="font-mono-tech text-xs text-white/70 uppercase tracking-wider mb-6 drop-shadow">
+                        <p className="font-mono-tech text-xs text-white/70 uppercase tracking-wider drop-shadow">
                             Initialize new operation in the Combat Zone.
                         </p>
-                        <NewCampaignDialog onCampaignCreated={setSelectedCampaignId} />
                     </div>
                 </div>
             )}
