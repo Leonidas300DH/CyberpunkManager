@@ -427,7 +427,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                         {action.range !== 'Self' && action.range !== 'Reach' && (
                             <div className="-ml-2 flex items-center gap-1.5">
                                 {(action.skillReq === 'Melee' || action.skillReq === 'Ranged') && SKILL_ICONS[action.skillReq] && (
-                                    <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-11 h-11 shrink-0 object-contain" />
+                                    <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-11 h-11 -my-[3px] shrink-0 object-contain" />
                                 )}
                                 <div className="w-[60%]">
                                     <RangeArrows range={action.range} />
