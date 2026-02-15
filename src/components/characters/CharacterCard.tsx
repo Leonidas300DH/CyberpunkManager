@@ -262,9 +262,10 @@ function parsePassiveRules(text: string): Array<{ name: string; description: str
 interface CharacterCardProps {
     lineage: ModelLineage;
     profile: ModelProfile;
+    hideTokens?: boolean;
 }
 
-export function CharacterCard({ lineage, profile }: CharacterCardProps) {
+export function CharacterCard({ lineage, profile, hideTokens = false }: CharacterCardProps) {
     // Faction rail color
     const rail = FACTION_RAIL_COLORS[lineage.factionIds[0]] ?? DEFAULT_RAIL;
 
@@ -334,7 +335,7 @@ export function CharacterCard({ lineage, profile }: CharacterCardProps) {
             </div>
 
             {/* 3. Action Token Chain (centered on rail) */}
-            {tokens.length > 0 && (
+            {!hideTokens && tokens.length > 0 && (
                 <div className="absolute top-3 left-[8.5%] -translate-x-1/2 z-20 flex flex-col items-center">
                     {tokens.map((color, i) => (
                         <React.Fragment key={i}>

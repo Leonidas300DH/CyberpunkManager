@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { Weapon, HackingProgram } from '@/types';
-import { Swords, Skull, RotateCcw, Zap, Heart } from 'lucide-react';
+import { Swords, Skull, RotateCcw, Zap, Heart, RotateCw, Droplets, Cross } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
@@ -18,12 +18,12 @@ type TokenState = {
     spent: boolean;
 };
 
-// ── Token Shape (interactive) ──
+// ── Token Shape (interactive, rendered on card) ──
 
 function TokenShape({
     color,
     spent,
-    size = 30,
+    size = 26,
     selected = false,
     onClick,
 }: {
@@ -31,7 +31,7 @@ function TokenShape({
     spent: boolean;
     size?: number;
     selected?: boolean;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent) => void;
 }) {
     const fills: Record<string, { active: string; dim: string; stroke: string }> = {
         green:  { active: '#22c55e', dim: '#0f3d1e', stroke: '#166534' },
@@ -41,15 +41,8 @@ function TokenShape({
     const { active, dim, stroke } = fills[color];
     const fill = spent ? dim : active;
     const strokeColor = spent ? stroke : 'black';
-    const glow = !spent ? `drop-shadow(0 0 4px ${active}80)` : 'none';
-
-    const cls = [
-        'inline-flex items-center justify-center transition-all',
-        selected ? 'scale-125 z-10' : 'hover:scale-110',
-    ].join(' ');
-
-    // Selected ring (drawn inside SVG for pixel-perfect alignment)
-    const ringOffset = 3;
+    const glow = !spent ? `drop-shadow(0 0 3px ${active}80)` : 'none';
+    const selGlow = selected ? `drop-shadow(0 0 6px white)` : glow;
 
     if (color === 'green') {
         const cx = size / 2, cy = size / 2, r = size * 0.42;
@@ -58,12 +51,8 @@ function TokenShape({
             return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
         }).join(' ');
         return (
-            <button className={cls} onClick={onClick}>
-                <svg width={size + ringOffset * 2} height={size + ringOffset * 2}
-                    viewBox={`${-ringOffset} ${-ringOffset} ${size + ringOffset * 2} ${size + ringOffset * 2}`}
-                    style={{ filter: glow }}
-                >
-                    {selected && <circle cx={size / 2} cy={size / 2} r={size * 0.52} fill="none" stroke="white" strokeWidth="1.5" opacity="0.8" />}
+            <button className="transition-transform" style={{ transform: selected ? 'scale(1.2)' : undefined }} onClick={onClick}>
+                <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: selGlow }}>
                     <polygon points={pts} fill={fill} stroke={strokeColor} strokeWidth="1.2" />
                 </svg>
             </button>
@@ -74,12 +63,8 @@ function TokenShape({
         const s = size;
         const pts = `${s * 0.1},${s * 0.15} ${s * 0.9},${s * 0.15} ${s * 0.5},${s * 0.88}`;
         return (
-            <button className={cls} onClick={onClick}>
-                <svg width={size + ringOffset * 2} height={size + ringOffset * 2}
-                    viewBox={`${-ringOffset} ${-ringOffset} ${size + ringOffset * 2} ${size + ringOffset * 2}`}
-                    style={{ filter: glow }}
-                >
-                    {selected && <circle cx={size / 2} cy={size / 2} r={size * 0.52} fill="none" stroke="white" strokeWidth="1.5" opacity="0.8" />}
+            <button className="transition-transform" style={{ transform: selected ? 'scale(1.2)' : undefined }} onClick={onClick}>
+                <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: selGlow }}>
                     <polygon points={pts} fill={fill} stroke={strokeColor} strokeWidth="1.2" />
                 </svg>
             </button>
@@ -89,15 +74,35 @@ function TokenShape({
     // Red: square
     const inset = size * 0.12;
     return (
-        <button className={cls} onClick={onClick}>
-            <svg width={size + ringOffset * 2} height={size + ringOffset * 2}
-                viewBox={`${-ringOffset} ${-ringOffset} ${size + ringOffset * 2} ${size + ringOffset * 2}`}
-                style={{ filter: glow }}
-            >
-                {selected && <circle cx={size / 2} cy={size / 2} r={size * 0.52} fill="none" stroke="white" strokeWidth="1.5" opacity="0.8" />}
+        <button className="transition-transform" style={{ transform: selected ? 'scale(1.2)' : undefined }} onClick={onClick}>
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: selGlow }}>
                 <rect x={inset} y={inset} width={size - inset * 2} height={size - inset * 2}
                     fill={fill} stroke={strokeColor} strokeWidth="1.2" rx="2" />
             </svg>
+        </button>
+    );
+}
+
+// ── Tiny Action Button ──
+
+function ActionBtn({
+    onClick,
+    title,
+    borderColor,
+    children,
+}: {
+    onClick: (e: React.MouseEvent) => void;
+    title: string;
+    borderColor: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <button
+            onClick={onClick}
+            title={title}
+            className={`w-[22px] h-[22px] bg-black/90 border flex items-center justify-center transition-colors hover:brightness-150 ${borderColor}`}
+        >
+            {children}
         </button>
     );
 }
@@ -207,7 +212,6 @@ export function ActiveMatchView() {
     const isRedLined = (tokens: TokenState[]) =>
         tokens.length > 0 && tokens.every(t => t.wounded || t.baseColor === 'red');
 
-    // Header counters (exclude Gonks)
     const nonGonkRoster = matchRoster.filter(r => {
         const p = getProfile(r.currentProfileId);
         const l = p ? getLineage(p.lineageId) : null;
@@ -245,7 +249,7 @@ export function ActiveMatchView() {
     };
 
     return (
-        <div className="pb-28">
+        <div className="pb-28" onClick={() => setSelectedToken(null)}>
             {/* === STICKY HEADER === */}
             <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-border shadow-[0_4px_20px_rgba(0,0,0,0.8)] -mx-4 px-4 py-3">
                 <div className="flex items-center justify-between gap-4">
@@ -263,7 +267,7 @@ export function ActiveMatchView() {
 
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={inspireTeam}
+                            onClick={(e) => { e.stopPropagation(); inspireTeam(); }}
                             className="p-2 border border-border bg-surface-dark text-secondary hover:bg-secondary hover:text-black transition-colors clip-corner-tr"
                             title="New round — reactivate all tokens"
                         >
@@ -310,8 +314,8 @@ export function ActiveMatchView() {
                     >;
 
                     return (
-                        <div key={recruit.id} style={cardStyle}>
-                            {/* ── Character Card ── */}
+                        <div key={recruit.id} style={cardStyle} onClick={(e) => e.stopPropagation()}>
+                            {/* ── Character Card with overlays ── */}
                             <div className="relative">
                                 <div className={`transition-all ${
                                     dead
@@ -322,7 +326,7 @@ export function ActiveMatchView() {
                                                 ? 'border-2 border-border opacity-50 saturate-0'
                                                 : 'border-2 border-transparent'
                                 }`}>
-                                    <CharacterCard lineage={lineage} profile={profile} />
+                                    <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} />
                                 </div>
 
                                 {/* Dead overlay */}
@@ -341,10 +345,10 @@ export function ActiveMatchView() {
                                     </div>
                                 )}
 
-                                {/* Red Lined overlay */}
+                                {/* Red Lined overlay — at TOP of card */}
                                 {redLined && !dead && (
-                                    <div className="absolute inset-x-0 bottom-0 z-30 pointer-events-none">
-                                        <div className="bg-gradient-to-t from-red-950/80 to-transparent px-3 py-4 flex items-end justify-center">
+                                    <div className="absolute inset-x-0 top-0 z-30 pointer-events-none">
+                                        <div className="bg-gradient-to-b from-red-950/80 to-transparent px-3 pt-4 pb-8 flex items-start justify-center">
                                             <span
                                                 className="font-display text-lg font-black uppercase tracking-[0.25em]"
                                                 style={{
@@ -357,6 +361,76 @@ export function ActiveMatchView() {
                                         </div>
                                     </div>
                                 )}
+
+                                {/* ── Interactive Token Strip (on card, top-right) ── */}
+                                {!isGonk && !dead && (
+                                    <div className="absolute top-2 left-[1%] z-30 flex flex-col items-start gap-[2px]">
+                                        {tokens.map((token, idx) => {
+                                            const displayColor = getDisplayColor(token);
+                                            const isSel = selectedToken?.recruitId === recruit.id && selectedToken?.index === idx;
+                                            const canWound = token.baseColor !== 'red' && !token.wounded;
+
+                                            return (
+                                                <div key={idx} className="relative flex items-center">
+                                                    <TokenShape
+                                                        color={displayColor}
+                                                        spent={token.spent}
+                                                        selected={isSel}
+                                                        size={26}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (isSel) setSelectedToken(null);
+                                                            else setSelectedToken({ recruitId: recruit.id, index: idx });
+                                                        }}
+                                                    />
+
+                                                    {/* Action buttons — appear to the right of selected token */}
+                                                    {isSel && (
+                                                        <div className="absolute left-full ml-1 flex gap-[3px] z-40">
+                                                            {!token.spent ? (
+                                                                <ActionBtn
+                                                                    onClick={(e) => { e.stopPropagation(); spendToken(recruit.id, idx); }}
+                                                                    title="Spend"
+                                                                    borderColor="border-white/40"
+                                                                >
+                                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                                                        <path d="M2 6.5L5 9.5L10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+                                                                    </svg>
+                                                                </ActionBtn>
+                                                            ) : (
+                                                                <ActionBtn
+                                                                    onClick={(e) => { e.stopPropagation(); reactivateToken(recruit.id, idx); }}
+                                                                    title="Reactivate"
+                                                                    borderColor="border-secondary/50"
+                                                                >
+                                                                    <RotateCw className="w-3 h-3 text-secondary" />
+                                                                </ActionBtn>
+                                                            )}
+                                                            {canWound && (
+                                                                <ActionBtn
+                                                                    onClick={(e) => { e.stopPropagation(); woundToken(recruit.id, idx); }}
+                                                                    title="Wound"
+                                                                    borderColor="border-accent/50"
+                                                                >
+                                                                    <Cross className="w-3 h-3 text-accent" />
+                                                                </ActionBtn>
+                                                            )}
+                                                            {token.wounded && (
+                                                                <ActionBtn
+                                                                    onClick={(e) => { e.stopPropagation(); healToken(recruit.id, idx); }}
+                                                                    title="Heal"
+                                                                    borderColor="border-green-500/50"
+                                                                >
+                                                                    <Heart className="w-3 h-3 text-green-500" />
+                                                                </ActionBtn>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
 
                             {/* ── Gonk Controls ── */}
@@ -365,7 +439,7 @@ export function ActiveMatchView() {
                                     {!dead ? (
                                         <>
                                             <button
-                                                onClick={inspireTeam}
+                                                onClick={() => inspireTeam()}
                                                 className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-secondary/20 border border-secondary text-secondary font-display font-bold text-xs uppercase tracking-wider hover:bg-secondary hover:text-black transition-all clip-corner-tr"
                                             >
                                                 <Zap className="w-3.5 h-3.5" />
@@ -388,74 +462,6 @@ export function ActiveMatchView() {
                                             Revive
                                         </button>
                                     )}
-                                </div>
-                            )}
-
-                            {/* ── Token Strip (non-Gonk) ── */}
-                            {!isGonk && (
-                                <div className="mt-1 bg-surface-dark border border-border p-2">
-                                    {/* Tokens */}
-                                    <div className="flex items-center gap-1 flex-wrap">
-                                        {tokens.map((token, idx) => {
-                                            const displayColor = getDisplayColor(token);
-                                            const isSel = selectedToken?.recruitId === recruit.id && selectedToken?.index === idx;
-                                            return (
-                                                <TokenShape
-                                                    key={idx}
-                                                    color={displayColor}
-                                                    spent={token.spent}
-                                                    selected={isSel}
-                                                    size={30}
-                                                    onClick={() => {
-                                                        if (isSel) setSelectedToken(null);
-                                                        else setSelectedToken({ recruitId: recruit.id, index: idx });
-                                                    }}
-                                                />
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Context actions for selected token */}
-                                    {selectedToken?.recruitId === recruit.id && tokens[selectedToken.index] && (() => {
-                                        const t = tokens[selectedToken.index];
-                                        const idx = selectedToken.index;
-                                        const canWound = t.baseColor !== 'red' && !t.wounded;
-                                        return (
-                                            <div className="flex gap-1.5 mt-2 flex-wrap">
-                                                {!t.spent ? (
-                                                    <button
-                                                        onClick={() => spendToken(recruit.id, idx)}
-                                                        className="px-2.5 py-1 text-[10px] font-mono-tech uppercase tracking-wider bg-black border border-border text-muted-foreground hover:text-white hover:border-white transition-colors"
-                                                    >
-                                                        Spend
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => reactivateToken(recruit.id, idx)}
-                                                        className="px-2.5 py-1 text-[10px] font-mono-tech uppercase tracking-wider bg-black border border-secondary/50 text-secondary hover:bg-secondary/20 transition-colors"
-                                                    >
-                                                        Reactivate
-                                                    </button>
-                                                )}
-                                                {canWound && (
-                                                    <button
-                                                        onClick={() => woundToken(recruit.id, idx)}
-                                                        className="px-2.5 py-1 text-[10px] font-mono-tech uppercase tracking-wider bg-black border border-accent/50 text-accent hover:bg-accent/20 transition-colors"
-                                                    >
-                                                        Wound
-                                                    </button>
-                                                )}
-                                                {t.wounded && (
-                                                    <button
-                                                        onClick={() => healToken(recruit.id, idx)}
-                                                        className="px-2.5 py-1 text-[10px] font-mono-tech uppercase tracking-wider bg-black border border-green-500/50 text-green-500 hover:bg-green-500/20 transition-colors"
-                                                    >
-                                                        Heal
-                                                    </button>
-                                                )}
-                                            </div>
-                                        );
-                                    })()}
                                 </div>
                             )}
 
