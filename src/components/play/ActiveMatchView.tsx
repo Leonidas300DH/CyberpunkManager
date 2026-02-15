@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { Weapon, HackingProgram } from '@/types';
+import { Weapon, HackingProgram, TokenState } from '@/types';
 import { Swords, Skull, RotateCcw, Zap, Heart, RotateCw, Cross, Minus, Plus, Clover, GripVertical } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
@@ -20,14 +20,6 @@ import {
     type DragStartEvent,
     type DragEndEvent,
 } from '@dnd-kit/core';
-
-// ── Token State ──
-
-type TokenState = {
-    baseColor: 'green' | 'yellow' | 'red';
-    wounded: boolean;
-    spent: boolean;
-};
 
 // ── Token Shape (interactive, rendered on card) ──
 
@@ -163,11 +155,28 @@ export function ActiveMatchView() {
     const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
 
-    const [tokenStates, setTokenStates] = useState<Record<string, TokenState[]>>({});
+    // Persisted play state — read from store, write back on change
+    const tokenStates = activeMatchTeam?.tokenStates ?? {};
+    const deadModelIds = activeMatchTeam?.deadModelIds ?? [];
+    const deadModels = useMemo(() => new Set(deadModelIds), [deadModelIds]);
+    const luck = activeMatchTeam?.luck ?? 0;
+
+    const updatePlayState = useCallback((patch: Partial<Pick<NonNullable<typeof activeMatchTeam>, 'tokenStates' | 'deadModelIds' | 'luck'>>) => {
+        if (!activeMatchTeam) return;
+        setActiveMatchTeam({ ...activeMatchTeam, ...patch });
+    }, [activeMatchTeam, setActiveMatchTeam]);
+
+    const setTokenStates = useCallback((updater: (prev: Record<string, TokenState[]>) => Record<string, TokenState[]>) => {
+        updatePlayState({ tokenStates: updater(tokenStates) });
+    }, [tokenStates, updatePlayState]);
+
+    const setLuck = useCallback((updater: (prev: number) => number) => {
+        updatePlayState({ luck: updater(luck) });
+    }, [luck, updatePlayState]);
+
+    // UI-only state (not persisted)
     const [selectedToken, setSelectedToken] = useState<{ recruitId: string; index: number } | null>(null);
-    const [deadModels, setDeadModels] = useState<Set<string>>(new Set());
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
-    const [luck, setLuck] = useState(0);
     const [activeDragId, setActiveDragId] = useState<string | null>(null);
     const [overId, setOverId] = useState<string | null>(null);
 
@@ -192,7 +201,7 @@ export function ActiveMatchView() {
         [catalog.lineages],
     );
 
-    // Initialize token states once
+    // Initialize token states once (only if not already persisted)
     useEffect(() => {
         if (matchRoster.length > 0 && Object.keys(tokenStates).length === 0) {
             const states: Record<string, TokenState[]> = {};
@@ -208,9 +217,9 @@ export function ActiveMatchView() {
                     tokens.push({ baseColor: 'red', wounded: false, spent: false });
                 states[recruit.id] = tokens;
             });
-            setTokenStates(states);
+            setTokenStates(() => states);
         }
-    }, [matchRoster, getProfile, tokenStates]);
+    }, [matchRoster, getProfile, tokenStates, setTokenStates]);
 
     // ── Token Actions ──
 
@@ -240,11 +249,11 @@ export function ActiveMatchView() {
     };
 
     const toggleKill = (id: string) => {
-        setDeadModels(prev => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id); else next.add(id);
-            return next;
-        });
+        if (deadModels.has(id)) {
+            updatePlayState({ deadModelIds: deadModelIds.filter(d => d !== id) });
+        } else {
+            updatePlayState({ deadModelIds: [...deadModelIds, id] });
+        }
     };
 
     const toggleFlip = (key: string) => {

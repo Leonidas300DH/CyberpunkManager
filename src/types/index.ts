@@ -132,6 +132,13 @@ export interface Campaign {
     completedObjectives: string[]; // IDs of Objective ItemCards
 }
 
+// Token state during active play
+export interface TokenState {
+    baseColor: 'green' | 'yellow' | 'red';
+    wounded: boolean;
+    spent: boolean;
+}
+
 // A specific Match list built from the Campaign HQ
 export interface MatchTeam {
     id: string;
@@ -139,6 +146,10 @@ export interface MatchTeam {
     targetEB: number; // e.g., 100, 150, or 200
     selectedRecruitIds: string[]; // Array of RecruitedModel IDs going to the match
     equipmentMap: Record<string, string[]>; // recruitId → item IDs (prefix: weapon-* | program-*)
+    // Play state (persisted across navigation)
+    tokenStates?: Record<string, TokenState[]>;
+    deadModelIds?: string[];
+    luck?: number;
 }
 
 // Store catalog shape used by services

@@ -140,9 +140,15 @@ export const useStore = create<StoreState>()(
                 const persistedState = persisted as Partial<StoreState> | undefined;
                 if (!persistedState) return current;
                 const defaultCatalog = current.catalog;
-                // Ensure activeMatchTeam.equipmentMap defaults for old data
+                // Ensure activeMatchTeam defaults for old data
                 const activeMatch = persistedState.activeMatchTeam
-                    ? { ...persistedState.activeMatchTeam, equipmentMap: persistedState.activeMatchTeam.equipmentMap ?? {} }
+                    ? {
+                        ...persistedState.activeMatchTeam,
+                        equipmentMap: persistedState.activeMatchTeam.equipmentMap ?? {},
+                        tokenStates: persistedState.activeMatchTeam.tokenStates ?? undefined,
+                        deadModelIds: persistedState.activeMatchTeam.deadModelIds ?? undefined,
+                        luck: persistedState.activeMatchTeam.luck ?? undefined,
+                    }
                     : null;
                 return {
                     ...current,
