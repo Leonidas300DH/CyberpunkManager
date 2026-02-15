@@ -319,7 +319,7 @@ export function ActiveMatchView() {
                             <div className="relative">
                                 <div className={`transition-all ${
                                     dead
-                                        ? 'border-2 border-accent'
+                                        ? 'border-2 border-accent/60 grayscale'
                                         : redLined
                                             ? 'border-2 border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5),0_0_40px_rgba(220,38,38,0.2)]'
                                             : done
@@ -329,10 +329,26 @@ export function ActiveMatchView() {
                                     <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} />
                                 </div>
 
-                                {/* Dead overlay */}
+                                {/* KIA overlay — rubber stamp effect */}
                                 {dead && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-accent/50 z-30">
-                                        <Skull className="w-16 h-16 text-white drop-shadow-lg" />
+                                    <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+                                        <div
+                                            className="border-[3px] border-red-600 px-4 py-2 rounded-sm"
+                                            style={{
+                                                transform: 'rotate(-30deg)',
+                                                boxShadow: '0 0 12px rgba(220,38,38,0.5), inset 0 0 12px rgba(220,38,38,0.15)',
+                                            }}
+                                        >
+                                            <span
+                                                className="font-display text-base font-black uppercase tracking-[0.2em] leading-none whitespace-nowrap"
+                                                style={{
+                                                    color: '#dc2626',
+                                                    textShadow: '0 0 6px rgba(220,38,38,0.6)',
+                                                }}
+                                            >
+                                                Killed<br/>In Action
+                                            </span>
+                                        </div>
                                     </div>
                                 )}
 
@@ -457,6 +473,29 @@ export function ActiveMatchView() {
                                         <button
                                             onClick={() => toggleKill(recruit.id)}
                                             className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-surface-dark border border-border text-muted-foreground font-display font-bold text-xs uppercase tracking-wider hover:text-white hover:border-white transition-all"
+                                        >
+                                            <Heart className="w-3.5 h-3.5" />
+                                            Revive
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ── Kill / Revive (non-Gonk, Red Lined or Dead) ── */}
+                            {!isGonk && (redLined || dead) && (
+                                <div className="mt-1">
+                                    {!dead ? (
+                                        <button
+                                            onClick={() => toggleKill(recruit.id)}
+                                            className="w-full flex items-center justify-center gap-1.5 py-2 bg-accent/20 border border-accent text-accent font-display font-bold text-xs uppercase tracking-wider hover:bg-accent hover:text-white transition-all clip-corner-br"
+                                        >
+                                            <Skull className="w-3.5 h-3.5" />
+                                            Kill
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => toggleKill(recruit.id)}
+                                            className="w-full flex items-center justify-center gap-1.5 py-2 bg-surface-dark border border-border text-muted-foreground font-display font-bold text-xs uppercase tracking-wider hover:text-white hover:border-white transition-all"
                                         >
                                             <Heart className="w-3.5 h-3.5" />
                                             Revive
