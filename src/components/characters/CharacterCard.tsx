@@ -181,7 +181,7 @@ function RangeArrows({ range }: { range: RangeType }) {
     const hasLong = range === 'Long';
 
     return (
-        <svg viewBox={`0 0 ${hasLong ? 220 : 180} 22`} className="w-full h-auto" fill="none">
+        <svg viewBox="0 0 220 22" className="w-full h-auto" fill="none">
             <polygon points="1,1 54,1 59,11 54,21 6,21"
                 fill="#dc2626" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
             <polygon points="62,1 96,1 101,11 96,21 62,21 67,11"

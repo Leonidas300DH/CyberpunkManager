@@ -666,9 +666,21 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                     </div>
                                 )}
                                 <div className="relative z-10 flex flex-1">
-                                    <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1`}>
+                                    <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
                                         <div className="font-display font-black text-sm text-black leading-none">{weapon.cost}</div>
                                         <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
+                                        {weapon.rarity < 99 && (
+                                            <div className="font-mono-tech text-[8px] font-bold leading-none mt-0.5 text-black/60"
+                                                title={`Rarity: max ${weapon.rarity} per team`}>
+                                                ×{weapon.rarity}
+                                            </div>
+                                        )}
+                                        {(weapon.reqStreetCred ?? 0) > 0 && (
+                                            <div className="font-mono-tech text-[7px] font-bold leading-none text-black/60"
+                                                title={`Requires Street Cred ${weapon.reqStreetCred}`}>
+                                                SC{weapon.reqStreetCred}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex-1 px-3 py-2 flex flex-col gap-1.5">
                                         <div className="flex justify-between items-start">
@@ -702,7 +714,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                             </div>
                                         )}
                                         <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
-                                        {weapon.rarity < 99 && <span className="text-[9px] font-mono-tech text-muted-foreground">RAR. {weapon.rarity}</span>}
                                     </div>
                                 </div>
                             </div>
