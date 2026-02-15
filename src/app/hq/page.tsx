@@ -7,6 +7,7 @@ import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
 import { RosterList } from '@/components/campaign/RosterList';
 import { StashList } from '@/components/campaign/StashList';
 import { cn } from '@/lib/utils';
+import { Plus } from 'lucide-react';
 
 const FACTION_ACCENT: Record<string, string> = {
     'faction-arasaka':     'border-red-600',
@@ -74,8 +75,9 @@ export default function HQPage() {
 
     return (
         <div className="pb-28">
-            {/* Campaign List */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {/* ── Campaign Selector Bar ── */}
+            <div className="flex items-stretch gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                {/* Existing campaigns */}
                 {campaigns.map(c => {
                     const faction = catalog.factions.find(f => f.id === c.factionId);
                     const isActive = c.id === selectedCampaignId;
@@ -115,8 +117,23 @@ export default function HQPage() {
                     );
                 })}
 
+                {/* New Campaign button */}
+                <NewCampaignDialog
+                    onCampaignCreated={setSelectedCampaignId}
+                    trigger={
+                        <button className="shrink-0 flex items-center gap-2 px-4 py-2 border border-dashed border-border bg-black/50 hover:border-primary hover:bg-surface-dark transition-all clip-corner-tr">
+                            <div className="w-8 h-8 border border-border bg-black flex items-center justify-center">
+                                <Plus className="w-4 h-4 text-primary" />
+                            </div>
+                            <span className="font-display text-sm text-muted-foreground uppercase tracking-wide hover:text-primary transition-colors">
+                                New Campaign
+                            </span>
+                        </button>
+                    }
+                />
             </div>
 
+            {/* ── Campaign Content ── */}
             {selectedCampaign ? (
                 <div className="mt-4">
                     <CampaignHeader campaign={selectedCampaign} faction={selectedFaction} />
@@ -161,14 +178,8 @@ export default function HQPage() {
                 </div>
             ) : (
                 <div className="mt-4 relative overflow-hidden border-2 border-dashed border-border bg-black flex flex-col items-center justify-center min-h-[400px] clip-corner-tl-br p-8 text-center">
-                    {/* Background image */}
-                    <img
-                        src={starterImage}
-                        alt=""
-                        className="absolute inset-0 w-full h-full object-cover opacity-30"
-                    />
+                    <img src={starterImage} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/60" />
-
                     <div className="relative z-10 flex flex-col items-center">
                         <p className="font-display text-2xl text-white uppercase tracking-widest mb-2 drop-shadow-lg">
                             No Active Campaign
