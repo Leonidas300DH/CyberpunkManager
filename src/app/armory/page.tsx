@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { v4 as uuidv4 } from 'uuid';
 
 type ViewMode = 'list' | 'card' | 'double';
@@ -203,6 +204,7 @@ const hasNoImage = (w: Weapon) => !w.imageUrl || w.imageUrl === DEFAULT_WEAPON_I
 export default function ArmoryPage() {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
+    const isAdmin = useIsAdmin();
     const [activeTab, setActiveTab] = useState<TabId>('Gear');
     const [search, setSearch] = useState('');
     // Program filters
@@ -698,30 +700,34 @@ export default function ArmoryPage() {
                             <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest ml-auto hidden md:block">
                                 <span className="text-secondary">{filteredWeapons.length}</span> / {weapons.length}
                             </span>
-                            <div className="w-px h-6 bg-border mx-1" />
-                            {([
-                                { label: 'No Image', active: highlightNoImage, toggle: () => setHighlightNoImage(v => !v) },
-                                { label: 'No Price', active: highlightNoPrice, toggle: () => setHighlightNoPrice(v => !v) },
-                                { label: 'No Rarity', active: highlightDefaultRarity, toggle: () => setHighlightDefaultRarity(v => !v) },
-                            ] as const).map(({ label, active, toggle }) => (
-                                <button
-                                    key={label}
-                                    onClick={toggle}
-                                    className={`px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
-                                        active
-                                            ? 'bg-accent text-white font-bold border border-accent'
-                                            : 'bg-black border border-border text-muted-foreground hover:text-white'
-                                    }`}
-                                >
-                                    {label}
-                                </button>
-                            ))}
-                            <button
-                                onClick={openWeaponCreate}
-                                className="bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider px-4 py-2 clip-corner-br transition-colors flex items-center gap-2 text-sm"
-                            >
-                                <Plus className="w-4 h-4" /> Add
-                            </button>
+                            {isAdmin && (
+                                <>
+                                    <div className="w-px h-6 bg-border mx-1" />
+                                    {([
+                                        { label: 'No Image', active: highlightNoImage, toggle: () => setHighlightNoImage(v => !v) },
+                                        { label: 'No Price', active: highlightNoPrice, toggle: () => setHighlightNoPrice(v => !v) },
+                                        { label: 'No Rarity', active: highlightDefaultRarity, toggle: () => setHighlightDefaultRarity(v => !v) },
+                                    ] as const).map(({ label, active, toggle }) => (
+                                        <button
+                                            key={label}
+                                            onClick={toggle}
+                                            className={`px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
+                                                active
+                                                    ? 'bg-accent text-white font-bold border border-accent'
+                                                    : 'bg-black border border-border text-muted-foreground hover:text-white'
+                                            }`}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={openWeaponCreate}
+                                        className="bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider px-4 py-2 clip-corner-br transition-colors flex items-center gap-2 text-sm"
+                                    >
+                                        <Plus className="w-4 h-4" /> Add
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -899,21 +905,23 @@ export default function ArmoryPage() {
                                                         {weapon.isWeapon ? (isMelee ? 'Melee' : 'Ranged') : 'Equipment'}
                                                     </span>
                                                 </div>
-                                                {/* Edit / Delete */}
-                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={() => openWeaponEdit(weapon)}
-                                                        className="p-1 text-muted-foreground hover:text-secondary transition-colors"
-                                                    >
-                                                        <Edit className="w-3.5 h-3.5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => deleteWeapon(weapon.id)}
-                                                        className="p-1 text-muted-foreground hover:text-accent transition-colors"
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </button>
-                                                </div>
+                                                {/* Edit / Delete (admin only) */}
+                                                {isAdmin && (
+                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button
+                                                            onClick={() => openWeaponEdit(weapon)}
+                                                            className="p-1 text-muted-foreground hover:text-secondary transition-colors"
+                                                        >
+                                                            <Edit className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteWeapon(weapon.id)}
+                                                            className="p-1 text-muted-foreground hover:text-accent transition-colors"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Range Arrows (interlocking chevrons) */}
