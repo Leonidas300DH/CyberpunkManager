@@ -1,31 +1,118 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { Weapon, HackingProgram } from '@/types';
-import { Swords, Skull, RotateCcw, Minus, Plus } from 'lucide-react';
+import { Swords, Skull, RotateCcw, Zap, Heart } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { ProgramCard } from '@/components/programs/ProgramCard';
+
+// ── Token State ──
+
+type TokenState = {
+    baseColor: 'green' | 'yellow' | 'red';
+    wounded: boolean;
+    spent: boolean;
+};
+
+// ── Token Shape (interactive) ──
+
+function TokenShape({
+    color,
+    spent,
+    size = 30,
+    selected = false,
+    onClick,
+}: {
+    color: 'green' | 'yellow' | 'red';
+    spent: boolean;
+    size?: number;
+    selected?: boolean;
+    onClick?: () => void;
+}) {
+    const fills: Record<string, { active: string; dim: string; stroke: string }> = {
+        green:  { active: '#22c55e', dim: '#0f3d1e', stroke: '#166534' },
+        yellow: { active: '#eab308', dim: '#3d3003', stroke: '#854d0e' },
+        red:    { active: '#dc2626', dim: '#3d0a0a', stroke: '#991b1b' },
+    };
+    const { active, dim, stroke } = fills[color];
+    const fill = spent ? dim : active;
+    const strokeColor = spent ? stroke : 'black';
+    const glow = !spent ? `drop-shadow(0 0 4px ${active}80)` : 'none';
+
+    const cls = [
+        'inline-flex items-center justify-center transition-all',
+        selected ? 'scale-125 z-10' : 'hover:scale-110',
+    ].join(' ');
+
+    // Selected ring (drawn inside SVG for pixel-perfect alignment)
+    const ringOffset = 3;
+
+    if (color === 'green') {
+        const cx = size / 2, cy = size / 2, r = size * 0.42;
+        const pts = Array.from({ length: 5 }, (_, i) => {
+            const angle = (2 * Math.PI / 5) * i + Math.PI / 2;
+            return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+        }).join(' ');
+        return (
+            <button className={cls} onClick={onClick}>
+                <svg width={size + ringOffset * 2} height={size + ringOffset * 2}
+                    viewBox={`${-ringOffset} ${-ringOffset} ${size + ringOffset * 2} ${size + ringOffset * 2}`}
+                    style={{ filter: glow }}
+                >
+                    {selected && <circle cx={size / 2} cy={size / 2} r={size * 0.52} fill="none" stroke="white" strokeWidth="1.5" opacity="0.8" />}
+                    <polygon points={pts} fill={fill} stroke={strokeColor} strokeWidth="1.2" />
+                </svg>
+            </button>
+        );
+    }
+
+    if (color === 'yellow') {
+        const s = size;
+        const pts = `${s * 0.1},${s * 0.15} ${s * 0.9},${s * 0.15} ${s * 0.5},${s * 0.88}`;
+        return (
+            <button className={cls} onClick={onClick}>
+                <svg width={size + ringOffset * 2} height={size + ringOffset * 2}
+                    viewBox={`${-ringOffset} ${-ringOffset} ${size + ringOffset * 2} ${size + ringOffset * 2}`}
+                    style={{ filter: glow }}
+                >
+                    {selected && <circle cx={size / 2} cy={size / 2} r={size * 0.52} fill="none" stroke="white" strokeWidth="1.5" opacity="0.8" />}
+                    <polygon points={pts} fill={fill} stroke={strokeColor} strokeWidth="1.2" />
+                </svg>
+            </button>
+        );
+    }
+
+    // Red: square
+    const inset = size * 0.12;
+    return (
+        <button className={cls} onClick={onClick}>
+            <svg width={size + ringOffset * 2} height={size + ringOffset * 2}
+                viewBox={`${-ringOffset} ${-ringOffset} ${size + ringOffset * 2} ${size + ringOffset * 2}`}
+                style={{ filter: glow }}
+            >
+                {selected && <circle cx={size / 2} cy={size / 2} r={size * 0.52} fill="none" stroke="white" strokeWidth="1.5" opacity="0.8" />}
+                <rect x={inset} y={inset} width={size - inset * 2} height={size - inset * 2}
+                    fill={fill} stroke={strokeColor} strokeWidth="1.2" rx="2" />
+            </svg>
+        </button>
+    );
+}
+
+// ── Main Component ──
 
 export function ActiveMatchView() {
     const router = useRouter();
     const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
 
-    const [activatedModels, setActivatedModels] = useState<Record<string, boolean>>({});
-    const [wounds, setWounds] = useState<Record<string, number>>({});
+    const [tokenStates, setTokenStates] = useState<Record<string, TokenState[]>>({});
+    const [selectedToken, setSelectedToken] = useState<{ recruitId: string; index: number } | null>(null);
+    const [deadModels, setDeadModels] = useState<Set<string>>(new Set());
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
-
-    const toggleFlip = (key: string) => {
-        setFlippedCards(prev => {
-            const next = new Set(prev);
-            if (next.has(key)) next.delete(key); else next.add(key);
-            return next;
-        });
-    };
 
     const campaign = useMemo(() => {
         if (!activeMatchTeam) return null;
@@ -36,6 +123,99 @@ export function ActiveMatchView() {
         if (!activeMatchTeam || !campaign) return [];
         return campaign.hqRoster.filter(r => activeMatchTeam.selectedRecruitIds.includes(r.id));
     }, [activeMatchTeam, campaign]);
+
+    const getProfile = useCallback(
+        (profileId: string) => catalog.profiles.find(p => p.id === profileId),
+        [catalog.profiles],
+    );
+    const getLineage = useCallback(
+        (lineageId: string) => catalog.lineages.find(l => l.id === lineageId),
+        [catalog.lineages],
+    );
+
+    // Initialize token states once
+    useEffect(() => {
+        if (matchRoster.length > 0 && Object.keys(tokenStates).length === 0) {
+            const states: Record<string, TokenState[]> = {};
+            matchRoster.forEach(recruit => {
+                const profile = getProfile(recruit.currentProfileId);
+                if (!profile) return;
+                const tokens: TokenState[] = [];
+                for (let i = 0; i < profile.actionTokens.green; i++)
+                    tokens.push({ baseColor: 'green', wounded: false, spent: false });
+                for (let i = 0; i < profile.actionTokens.yellow; i++)
+                    tokens.push({ baseColor: 'yellow', wounded: false, spent: false });
+                for (let i = 0; i < profile.actionTokens.red; i++)
+                    tokens.push({ baseColor: 'red', wounded: false, spent: false });
+                states[recruit.id] = tokens;
+            });
+            setTokenStates(states);
+        }
+    }, [matchRoster, getProfile, tokenStates]);
+
+    // ── Token Actions ──
+
+    const updateToken = (recruitId: string, index: number, update: Partial<TokenState>) => {
+        setTokenStates(prev => {
+            const tokens = [...(prev[recruitId] ?? [])];
+            tokens[index] = { ...tokens[index], ...update };
+            return { ...prev, [recruitId]: tokens };
+        });
+        setSelectedToken(null);
+    };
+
+    const spendToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { spent: true });
+    const reactivateToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { spent: false });
+    const woundToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { wounded: true });
+    const healToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { wounded: false });
+
+    const inspireTeam = () => {
+        setTokenStates(prev => {
+            const next: Record<string, TokenState[]> = {};
+            for (const [id, tokens] of Object.entries(prev)) {
+                next[id] = tokens.map(t => ({ ...t, spent: false }));
+            }
+            return next;
+        });
+        setSelectedToken(null);
+    };
+
+    const toggleKill = (id: string) => {
+        setDeadModels(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
+    };
+
+    const toggleFlip = (key: string) => {
+        setFlippedCards(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key); else next.add(key);
+            return next;
+        });
+    };
+
+    // ── Status Helpers ──
+
+    const getDisplayColor = (t: TokenState): 'green' | 'yellow' | 'red' => {
+        if (t.wounded || t.baseColor === 'red') return 'red';
+        return t.baseColor;
+    };
+
+    const isDone = (tokens: TokenState[]) => tokens.length > 0 && tokens.every(t => t.spent);
+    const isRedLined = (tokens: TokenState[]) =>
+        tokens.length > 0 && tokens.every(t => t.wounded || t.baseColor === 'red');
+
+    // Header counters (exclude Gonks)
+    const nonGonkRoster = matchRoster.filter(r => {
+        const p = getProfile(r.currentProfileId);
+        const l = p ? getLineage(p.lineageId) : null;
+        return l?.type !== 'Gonk';
+    });
+    const doneCount = nonGonkRoster.filter(r => isDone(tokenStates[r.id] ?? [])).length;
+
+    // ── Empty state ──
 
     if (!activeMatchTeam || !campaign) {
         return (
@@ -57,29 +237,12 @@ export function ActiveMatchView() {
         );
     }
 
-    const getProfile = (profileId: string) => catalog.profiles.find(p => p.id === profileId);
-    const getLineage = (lineageId: string) => catalog.lineages.find(l => l.id === lineageId);
-
     const handleEndMatch = () => {
         if (confirm("End the match? Progress will be lost.")) {
             setActiveMatchTeam(null);
             router.push('/hq');
         }
     };
-
-    const toggleActivation = (id: string) => {
-        setActivatedModels(prev => ({ ...prev, [id]: !prev[id] }));
-    };
-
-    const addWound = (id: string) => {
-        setWounds(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
-    };
-
-    const healWound = (id: string) => {
-        setWounds(prev => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) - 1) }));
-    };
-
-    const activatedCount = Object.values(activatedModels).filter(Boolean).length;
 
     return (
         <div className="pb-28">
@@ -93,16 +256,16 @@ export function ActiveMatchView() {
                                 Active Match
                             </h2>
                             <span className="text-[9px] font-mono-tech text-secondary uppercase tracking-widest">
-                                {campaign.name} // {activatedCount}/{matchRoster.length} activated
+                                {campaign.name} // {doneCount}/{nonGonkRoster.length} done
                             </span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={() => setActivatedModels({})}
+                            onClick={inspireTeam}
                             className="p-2 border border-border bg-surface-dark text-secondary hover:bg-secondary hover:text-black transition-colors clip-corner-tr"
-                            title="New round — reset activations"
+                            title="New round — reactivate all tokens"
                         >
                             <RotateCcw className="w-4 h-4" />
                         </button>
@@ -123,13 +286,14 @@ export function ActiveMatchView() {
                     const lineage = profile ? getLineage(profile.lineageId) : null;
                     if (!profile || !lineage) return null;
 
-                    const isActivated = activatedModels[recruit.id];
-                    const currentWounds = wounds[recruit.id] || 0;
-                    const isCasualty = currentWounds >= 4;
+                    const isGonk = lineage.type === 'Gonk';
+                    const dead = deadModels.has(recruit.id);
+                    const tokens = tokenStates[recruit.id] ?? [];
+                    const done = !isGonk && isDone(tokens);
+                    const redLined = !isGonk && isRedLined(tokens);
 
+                    // Resolve equipment
                     const equippedIds = activeMatchTeam.equipmentMap?.[recruit.id] ?? [];
-
-                    // Resolve equipped items into full objects
                     const equippedItems = equippedIds.map(eqId => {
                         if (eqId.startsWith('weapon-')) {
                             const weapon = catalog.weapons.find(w => w.id === eqId.replace('weapon-', ''));
@@ -147,23 +311,29 @@ export function ActiveMatchView() {
 
                     return (
                         <div key={recruit.id} style={cardStyle}>
-                            {/* Card + overlays */}
-                            <div
-                                className="relative cursor-pointer"
-                                onClick={() => toggleActivation(recruit.id)}
-                            >
+                            {/* ── Character Card ── */}
+                            <div className="relative">
                                 <div className={`transition-all ${
-                                    isCasualty
+                                    dead
                                         ? 'border-2 border-accent'
-                                        : isActivated
-                                            ? 'border-2 border-border opacity-50 saturate-0'
-                                            : 'border-2 border-transparent'
+                                        : redLined
+                                            ? 'border-2 border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5),0_0_40px_rgba(220,38,38,0.2)]'
+                                            : done
+                                                ? 'border-2 border-border opacity-50 saturate-0'
+                                                : 'border-2 border-transparent'
                                 }`}>
                                     <CharacterCard lineage={lineage} profile={profile} />
                                 </div>
 
-                                {/* Activated overlay */}
-                                {isActivated && !isCasualty && (
+                                {/* Dead overlay */}
+                                {dead && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-accent/50 z-30">
+                                        <Skull className="w-16 h-16 text-white drop-shadow-lg" />
+                                    </div>
+                                )}
+
+                                {/* Done overlay (non-Red Lined) */}
+                                {done && !dead && !redLined && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-30">
                                         <span className="font-display text-2xl font-bold text-muted-foreground uppercase tracking-[0.3em] rotate-[-15deg] drop-shadow-lg">
                                             Done
@@ -171,55 +341,137 @@ export function ActiveMatchView() {
                                     </div>
                                 )}
 
-                                {/* Casualty overlay */}
-                                {isCasualty && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-accent/40 z-30">
-                                        <Skull className="w-16 h-16 text-white drop-shadow-lg" />
+                                {/* Red Lined overlay */}
+                                {redLined && !dead && (
+                                    <div className="absolute inset-x-0 bottom-0 z-30 pointer-events-none">
+                                        <div className="bg-gradient-to-t from-red-950/80 to-transparent px-3 py-4 flex items-end justify-center">
+                                            <span
+                                                className="font-display text-lg font-black uppercase tracking-[0.25em]"
+                                                style={{
+                                                    color: '#ff2020',
+                                                    textShadow: '0 0 8px rgba(255,0,0,0.8), 0 0 20px rgba(255,0,0,0.4), 0 0 40px rgba(255,0,0,0.2)',
+                                                }}
+                                            >
+                                                Red Lined
+                                            </span>
+                                        </div>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Wounds tracker */}
-                            <div className="flex items-center justify-between bg-surface-dark border border-border mt-1 p-1.5">
-                                <span className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider pl-1">
-                                    Wounds
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => healWound(recruit.id)}
-                                        className="w-7 h-7 border border-border bg-black flex items-center justify-center text-muted-foreground hover:text-secondary hover:border-secondary transition-colors"
-                                    >
-                                        <Minus className="w-3.5 h-3.5" />
-                                    </button>
-                                    <span className={`font-mono-tech text-sm font-bold w-4 text-center ${
-                                        isCasualty ? 'text-accent' : currentWounds > 0 ? 'text-primary' : 'text-white'
-                                    }`}>
-                                        {currentWounds}
-                                    </span>
-                                    <button
-                                        onClick={() => addWound(recruit.id)}
-                                        className="w-7 h-7 border border-border bg-black flex items-center justify-center text-muted-foreground hover:text-accent hover:border-accent transition-colors"
-                                    >
-                                        <Plus className="w-3.5 h-3.5" />
-                                    </button>
+                            {/* ── Gonk Controls ── */}
+                            {isGonk && (
+                                <div className="flex gap-2 mt-1">
+                                    {!dead ? (
+                                        <>
+                                            <button
+                                                onClick={inspireTeam}
+                                                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-secondary/20 border border-secondary text-secondary font-display font-bold text-xs uppercase tracking-wider hover:bg-secondary hover:text-black transition-all clip-corner-tr"
+                                            >
+                                                <Zap className="w-3.5 h-3.5" />
+                                                Inspire
+                                            </button>
+                                            <button
+                                                onClick={() => toggleKill(recruit.id)}
+                                                className="px-3 py-2 bg-accent/20 border border-accent text-accent font-display font-bold text-xs uppercase tracking-wider hover:bg-accent hover:text-white transition-all clip-corner-br"
+                                                title="Kill Gonk"
+                                            >
+                                                <Skull className="w-3.5 h-3.5" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            onClick={() => toggleKill(recruit.id)}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-surface-dark border border-border text-muted-foreground font-display font-bold text-xs uppercase tracking-wider hover:text-white hover:border-white transition-all"
+                                        >
+                                            <Heart className="w-3.5 h-3.5" />
+                                            Revive
+                                        </button>
+                                    )}
                                 </div>
-                            </div>
+                            )}
 
-                            {/* Equipped items — full cards */}
+                            {/* ── Token Strip (non-Gonk) ── */}
+                            {!isGonk && (
+                                <div className="mt-1 bg-surface-dark border border-border p-2">
+                                    {/* Tokens */}
+                                    <div className="flex items-center gap-1 flex-wrap">
+                                        {tokens.map((token, idx) => {
+                                            const displayColor = getDisplayColor(token);
+                                            const isSel = selectedToken?.recruitId === recruit.id && selectedToken?.index === idx;
+                                            return (
+                                                <TokenShape
+                                                    key={idx}
+                                                    color={displayColor}
+                                                    spent={token.spent}
+                                                    selected={isSel}
+                                                    size={30}
+                                                    onClick={() => {
+                                                        if (isSel) setSelectedToken(null);
+                                                        else setSelectedToken({ recruitId: recruit.id, index: idx });
+                                                    }}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Context actions for selected token */}
+                                    {selectedToken?.recruitId === recruit.id && tokens[selectedToken.index] && (() => {
+                                        const t = tokens[selectedToken.index];
+                                        const idx = selectedToken.index;
+                                        const canWound = t.baseColor !== 'red' && !t.wounded;
+                                        return (
+                                            <div className="flex gap-1.5 mt-2 flex-wrap">
+                                                {!t.spent ? (
+                                                    <button
+                                                        onClick={() => spendToken(recruit.id, idx)}
+                                                        className="px-2.5 py-1 text-[10px] font-mono-tech uppercase tracking-wider bg-black border border-border text-muted-foreground hover:text-white hover:border-white transition-colors"
+                                                    >
+                                                        Spend
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => reactivateToken(recruit.id, idx)}
+                                                        className="px-2.5 py-1 text-[10px] font-mono-tech uppercase tracking-wider bg-black border border-secondary/50 text-secondary hover:bg-secondary/20 transition-colors"
+                                                    >
+                                                        Reactivate
+                                                    </button>
+                                                )}
+                                                {canWound && (
+                                                    <button
+                                                        onClick={() => woundToken(recruit.id, idx)}
+                                                        className="px-2.5 py-1 text-[10px] font-mono-tech uppercase tracking-wider bg-black border border-accent/50 text-accent hover:bg-accent/20 transition-colors"
+                                                    >
+                                                        Wound
+                                                    </button>
+                                                )}
+                                                {t.wounded && (
+                                                    <button
+                                                        onClick={() => healToken(recruit.id, idx)}
+                                                        className="px-2.5 py-1 text-[10px] font-mono-tech uppercase tracking-wider bg-black border border-green-500/50 text-green-500 hover:bg-green-500/20 transition-colors"
+                                                    >
+                                                        Heal
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            )}
+
+                            {/* ── Equipped Items ── */}
                             {equippedItems.length > 0 && (
                                 <div className="mt-2 space-y-2">
                                     {equippedItems.map(item => {
                                         if (item.type === 'weapon') {
-                                            return (
-                                                <WeaponTile key={item.equipId} weapon={item.weapon} />
-                                            );
+                                            return <WeaponTile key={item.equipId} weapon={item.weapon} />;
                                         }
                                         const flipKey = `play-${recruit.id}-${item.equipId}`;
                                         return (
                                             <div
                                                 key={item.equipId}
                                                 className="card-flip-container w-full cursor-pointer"
-                                                onClick={(e) => { e.stopPropagation(); toggleFlip(flipKey); }}
+                                                onClick={() => toggleFlip(flipKey)}
                                             >
                                                 <div className={`card-flip-inner ${flippedCards.has(flipKey) ? 'flipped' : ''}`}>
                                                     <div className="card-flip-front">
