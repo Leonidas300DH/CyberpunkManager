@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { CampaignHeader } from '@/components/campaign/CampaignHeader';
 import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
@@ -22,6 +22,30 @@ const FACTION_ACCENT: Record<string, string> = {
     'faction-zoners':      'border-orange-500',
 };
 
+const STARTER_IMAGES = Array.from({ length: 18 }, (_, i) => {
+    const ids = [
+        '35427469-67fa-4ba3-be22-b0685991a472_0',
+        '35427469-67fa-4ba3-be22-b0685991a472_1',
+        '35427469-67fa-4ba3-be22-b0685991a472_2',
+        '35427469-67fa-4ba3-be22-b0685991a472_3',
+        '577136d2-0f2c-4b0b-bfff-959d38cacd8f_0',
+        '577136d2-0f2c-4b0b-bfff-959d38cacd8f_1',
+        '59686ec5-e1e1-49fc-8263-c285b3a91287_0',
+        '59686ec5-e1e1-49fc-8263-c285b3a91287_1',
+        '59686ec5-e1e1-49fc-8263-c285b3a91287_2',
+        '59686ec5-e1e1-49fc-8263-c285b3a91287_3',
+        'edc97f40-b13d-4274-b7d3-c1911dc54eec_0',
+        'edc97f40-b13d-4274-b7d3-c1911dc54eec_1',
+        'edc97f40-b13d-4274-b7d3-c1911dc54eec_2',
+        'edc97f40-b13d-4274-b7d3-c1911dc54eec_3',
+        'f4c34555-ee61-4e42-be29-316794e0cb20_0',
+        'f4c34555-ee61-4e42-be29-316794e0cb20_1',
+        'f4c34555-ee61-4e42-be29-316794e0cb20_2',
+        'f4c34555-ee61-4e42-be29-316794e0cb20_3',
+    ];
+    return `/images/Campaign Starter/leonidas300_Static_wide_shot_of_the_streets_of_Neo-Tokyo_at_n_${ids[i]}.png`;
+});
+
 type TabId = 'roster' | 'stash' | 'ops' | 'med';
 
 const TABS: { id: TabId; label: string; activeClass: string }[] = [
@@ -41,6 +65,8 @@ export default function HQPage() {
             setSelectedCampaignId(campaigns[0].id);
         }
     }, [campaigns, selectedCampaignId]);
+
+    const starterImage = useMemo(() => STARTER_IMAGES[Math.floor(Math.random() * STARTER_IMAGES.length)], []);
 
     const selectedCampaign = campaigns.find(c => c.id === selectedCampaignId);
     const selectedFaction = selectedCampaign
@@ -147,17 +173,27 @@ export default function HQPage() {
                     )}
                 </div>
             ) : (
-                <div className="mt-4 border-2 border-dashed border-border bg-black flex flex-col items-center justify-center min-h-[400px] clip-corner-tl-br p-8 text-center">
-                    <div className="h-20 w-20 clip-corner-tr bg-surface-dark border border-border flex items-center justify-center mb-6">
-                        <Plus className="w-10 h-10 text-muted-foreground" />
+                <div className="mt-4 relative overflow-hidden border-2 border-dashed border-border bg-black flex flex-col items-center justify-center min-h-[400px] clip-corner-tl-br p-8 text-center">
+                    {/* Background image */}
+                    <img
+                        src={starterImage}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover opacity-30"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/60" />
+
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="h-20 w-20 clip-corner-tr bg-black/60 border border-border flex items-center justify-center mb-6 backdrop-blur-sm">
+                            <Plus className="w-10 h-10 text-muted-foreground" />
+                        </div>
+                        <p className="font-display text-2xl text-white uppercase tracking-widest mb-2 drop-shadow-lg">
+                            No Active Campaign
+                        </p>
+                        <p className="font-mono-tech text-xs text-white/70 uppercase tracking-wider mb-6 drop-shadow">
+                            Initialize new operation in the Combat Zone.
+                        </p>
+                        <NewCampaignDialog onCampaignCreated={setSelectedCampaignId} />
                     </div>
-                    <p className="font-display text-2xl text-muted-foreground uppercase tracking-widest mb-2">
-                        No Active Campaign
-                    </p>
-                    <p className="font-mono-tech text-xs text-muted-foreground uppercase tracking-wider mb-6">
-                        Initialize new operation in the Combat Zone.
-                    </p>
-                    <NewCampaignDialog onCampaignCreated={setSelectedCampaignId} />
                 </div>
             )}
         </div>
