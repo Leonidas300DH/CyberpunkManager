@@ -168,14 +168,8 @@ function ActionTokenShape({ color, size = 26 }: { color: 'green' | 'yellow' | 'r
     );
 }
 
-// 3-chevron layout (no Long) — full size in viewBox 180
-const RA3 = {
-    red:    '1,1 54,1 59,11 54,21 6,21',
-    yellow: '62,1 96,1 101,11 96,21 62,21 67,11',
-    green:  '104,1 138,1 143,11 138,21 104,21 109,11',
-};
-// 4-chevron layout (with Long) — proportionally scaled so Long is the longest
-const RA4 = {
+// Single consistent chevron coordinates — same sizes everywhere
+const RA = {
     red:    '1,1 44,1 49,11 44,21 5,21',
     yellow: '52,1 79,1 84,11 79,21 52,21 57,11',
     green:  '87,1 113,1 118,11 113,21 87,21 92,11',
@@ -194,26 +188,25 @@ function RangeArrows({ range }: { range: RangeType }) {
     const yellowActive = ['Yellow', 'Green', 'Long'].includes(range);
     const greenActive = ['Green', 'Long'].includes(range);
     const hasLong = range === 'Long';
-    const p = hasLong ? RA4 : RA3;
 
     return (
         <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
-            <polygon points={p.red}
+            <polygon points={RA.red}
                 fill="#dc2626" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-            <polygon points={p.yellow}
+            <polygon points={RA.yellow}
                 fill={yellowActive ? '#eab308' : OFF}
                 stroke={yellowActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                 opacity={yellowActive ? 1 : 0.5} />
-            <polygon points={p.green}
+            <polygon points={RA.green}
                 fill={greenActive ? '#22c55e' : OFF}
                 stroke={greenActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
                 opacity={greenActive ? 1 : 0.5} />
             {hasLong && (
                 <>
-                    <polygon points={RA4.long}
+                    <polygon points={RA.long}
                         fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                    <line x1={RA4.plusCx} y1="8" x2={RA4.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                    <line x1={RA4.plusCx - 3} y1="11" x2={RA4.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1={RA.plusCx} y1="8" x2={RA.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1={RA.plusCx - 3} y1="11" x2={RA.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                 </>
             )}
         </svg>

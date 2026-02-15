@@ -326,14 +326,8 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const OFF = 'rgba(100,100,100,0.35)';
     const OFF_STROKE = 'rgba(255,255,255,0.3)';
     const ON_STROKE = 'white';
-    // 3-chevron layout (no Long)
-    const AP3 = {
-        red:    '1,1 54,1 59,11 54,21 6,21',
-        yellow: '62,1 96,1 101,11 96,21 62,21 67,11',
-        green:  '104,1 138,1 143,11 138,21 104,21 109,11',
-    };
-    // 4-chevron layout (with Long) — proportionally scaled so Long is the longest
-    const AP4 = {
+    // Single consistent chevron coordinates
+    const AP = {
         red:    '1,1 44,1 49,11 44,21 5,21',
         yellow: '52,1 79,1 84,11 79,21 52,21 57,11',
         green:  '87,1 113,1 118,11 113,21 87,21 92,11',
@@ -706,30 +700,27 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                                 </div>
                                             )}
                                         </div>
-                                        {showRange && (() => {
-                                            const ap = weapon.rangeLong ? AP4 : AP3;
-                                            return (
-                                                <div className="flex items-center gap-2">
-                                                    {skillIcon && (
-                                                        <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 shrink-0 object-contain" />
-                                                    )}
-                                                    <div className="w-[60%]">
-                                                        <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
-                                                            <polygon points={ap.red} fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
-                                                            <polygon points={ap.yellow} fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
-                                                            <polygon points={ap.green} fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
-                                                            {weapon.rangeLong && (
-                                                                <>
-                                                                    <polygon points={AP4.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                                                    <line x1={AP4.plusCx} y1="8" x2={AP4.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                    <line x1={AP4.plusCx - 3} y1="11" x2={AP4.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                </>
-                                                            )}
-                                                        </svg>
-                                                    </div>
+                                        {showRange && (
+                                            <div className="flex items-center gap-2">
+                                                {skillIcon && (
+                                                    <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 shrink-0 object-contain" />
+                                                )}
+                                                <div className="w-[60%]">
+                                                    <svg viewBox="0 0 180 22" className="w-full h-auto" fill="none">
+                                                        <polygon points={AP.red} fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
+                                                        <polygon points={AP.yellow} fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
+                                                        <polygon points={AP.green} fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
+                                                        {weapon.rangeLong && (
+                                                            <>
+                                                                <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
+                                                                <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                                <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                            </>
+                                                        )}
+                                                    </svg>
                                                 </div>
-                                            );
-                                        })()}
+                                            </div>
+                                        )}
                                         <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
                                     </div>
                                 </div>
