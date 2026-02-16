@@ -692,14 +692,18 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                     <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
                                         <div className="font-display font-black text-sm text-black leading-none">{weapon.cost}</div>
                                         <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
-                                        <div className={`font-mono-tech text-[8px] font-bold leading-none mt-0.5 ${weapon.rarity < 99 ? 'text-black/60' : 'text-black/30'}`}
-                                            title={`Rarity: max ${weapon.rarity} per team`}>
-                                            ×{weapon.rarity}
-                                        </div>
-                                        <div className={`font-mono-tech text-[7px] font-bold leading-none ${(weapon.reqStreetCred ?? 0) > 0 ? 'text-black/60' : 'text-black/30'}`}
-                                            title={`Requires Street Cred ${weapon.reqStreetCred ?? 0}`}>
-                                            SC{weapon.reqStreetCred ?? 0}
-                                        </div>
+                                        {weapon.rarity < 99 && (
+                                            <div className="font-mono-tech text-[8px] font-bold leading-none mt-0.5 text-black/60"
+                                                title={`Rarity: max ${weapon.rarity} per team`}>
+                                                ×{weapon.rarity}
+                                            </div>
+                                        )}
+                                        {(weapon.reqStreetCred ?? 0) > 0 && (
+                                            <div className="font-mono-tech text-[7px] font-bold leading-none text-black/60"
+                                                title={`Requires Street Cred ${weapon.reqStreetCred}`}>
+                                                SC{weapon.reqStreetCred}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex-1 px-3 py-2 flex flex-col gap-0.5">
                                         <div className="flex justify-between items-start">
