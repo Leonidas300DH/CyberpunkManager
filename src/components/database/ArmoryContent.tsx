@@ -301,6 +301,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 description: weaponForm.description ?? '',
                 rarity: weaponForm.rarity ?? 99,
                 reqStreetCred: weaponForm.reqStreetCred ?? 0,
+                skillReq: weaponForm.skillReq,
                 keywords: weaponForm.keywords ?? [],
                 imageUrl: weaponForm.imageUrl,
             };
@@ -604,7 +605,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                 <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
                                 <Input value={weaponForm.name || ''} onChange={(e) => setWeaponForm({ ...weaponForm, name: e.target.value })} placeholder="Weapon Name" className="bg-black border-border font-mono-tech" />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-3 gap-4">
                                 <div className="space-y-2">
                                     <Label className="font-mono-tech text-xs uppercase tracking-widest">Cost (EB)</Label>
                                     <Input type="number" value={weaponForm.cost ?? 0} onChange={(e) => setWeaponForm({ ...weaponForm, cost: Number(e.target.value) })} className="bg-black border-border font-mono-tech" />
@@ -613,8 +614,12 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                     <Label className="font-mono-tech text-xs uppercase tracking-widest">Rarity</Label>
                                     <Input type="number" value={weaponForm.rarity ?? 99} onChange={(e) => setWeaponForm({ ...weaponForm, rarity: Number(e.target.value) })} className="bg-black border-border font-mono-tech" />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Req. Street Cred</Label>
+                                    <Input type="number" value={weaponForm.reqStreetCred ?? 0} onChange={(e) => setWeaponForm({ ...weaponForm, reqStreetCred: Number(e.target.value) })} className="bg-black border-border font-mono-tech" />
+                                </div>
                             </div>
-                            <div className="flex gap-4">
+                            <div className="flex gap-4 items-center">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" checked={weaponForm.isWeapon ?? true} onChange={(e) => setWeaponForm({ ...weaponForm, isWeapon: e.target.checked })} className="accent-secondary" />
                                     <span className="font-mono-tech text-xs uppercase text-white">Weapon</span>
@@ -623,6 +628,17 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                     <input type="checkbox" checked={weaponForm.isGear ?? false} onChange={(e) => setWeaponForm({ ...weaponForm, isGear: e.target.checked })} className="accent-cyan-400" />
                                     <span className="font-mono-tech text-xs uppercase text-white">Gear</span>
                                 </label>
+                                <div className="w-px h-5 bg-border" />
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">Skill</Label>
+                                <select
+                                    value={weaponForm.skillReq ?? ''}
+                                    onChange={(e) => setWeaponForm({ ...weaponForm, skillReq: (e.target.value as 'Melee' | 'Ranged') || undefined })}
+                                    className="bg-black border border-border px-2 py-1 font-mono-tech text-xs uppercase text-white"
+                                >
+                                    <option value="">None</option>
+                                    <option value="Melee">Melee</option>
+                                    <option value="Ranged">Ranged</option>
+                                </select>
                             </div>
                             <div className="space-y-2">
                                 <Label className="font-mono-tech text-xs uppercase tracking-widest">Range</Label>
