@@ -590,7 +590,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
 
                 {/* Weapon Edit/Create Dialog */}
                 <Dialog open={weaponDialogOpen} onOpenChange={setWeaponDialogOpen}>
-                    <DialogContent className="bg-surface-dark border-border max-w-sm max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="bg-surface-dark border-border max-w-sm max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
                         <DialogHeader>
                             <DialogTitle className="font-display uppercase tracking-wider text-primary">
                                 {editingWeapon ? 'Edit Weapon' : 'New Weapon'}
