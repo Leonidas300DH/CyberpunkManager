@@ -85,44 +85,40 @@ function WeaponImageUpload({ value, weaponName, onChange }: { value: string; wea
     };
 
     return (
-        <div className="space-y-2">
-            <Label className="font-mono-tech text-xs uppercase tracking-widest">Illustration</Label>
-            <div className="flex items-center gap-4">
-                <div className="w-16 h-16 shrink-0 border border-border bg-black flex items-center justify-center overflow-hidden">
-                    {value ? (
-                        <img src={value} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                        <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                    )}
-                </div>
-                <div className="flex-1 space-y-2">
-                    <input
-                        ref={fileRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) handleFile(f);
-                        }}
-                    />
-                    <button
-                        type="button"
-                        onClick={() => fileRef.current?.click()}
-                        disabled={uploading}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-black border border-border text-white font-mono-tech text-xs uppercase tracking-wider hover:border-secondary transition-colors disabled:opacity-50"
-                    >
-                        <Upload className="w-3.5 h-3.5" />
-                        {uploading ? 'Uploading...' : 'Upload Image'}
-                    </button>
-                    <Input
-                        value={value}
-                        onChange={(e) => onChange(e.target.value)}
-                        placeholder="Or paste URL..."
-                        className="bg-black border-border font-mono-tech text-xs"
-                    />
-                </div>
-            </div>
+        <div>
+            <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleFile(f);
+                }}
+            />
+            <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="relative w-full aspect-[16/9] border border-border bg-black flex items-center justify-center overflow-hidden cursor-pointer hover:border-secondary transition-colors group disabled:opacity-50"
+            >
+                {value ? (
+                    <img src={value} alt="" className="w-full h-full object-cover" />
+                ) : (
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-secondary transition-colors">
+                        <Upload className="w-8 h-8" />
+                        <span className="font-mono-tech text-[10px] uppercase tracking-widest">Click to upload</span>
+                    </div>
+                )}
+                {value && (
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="flex items-center gap-2 text-white">
+                            <Upload className="w-5 h-5" />
+                            <span className="font-mono-tech text-xs uppercase tracking-wider">{uploading ? 'Uploading...' : 'Replace'}</span>
+                        </div>
+                    </div>
+                )}
+            </button>
         </div>
     );
 }
@@ -594,29 +590,30 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
 
                 {/* Weapon Edit/Create Dialog */}
                 <Dialog open={weaponDialogOpen} onOpenChange={setWeaponDialogOpen}>
-                    <DialogContent className="bg-surface-dark border-border max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="bg-surface-dark border-border max-w-sm max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle className="font-display uppercase tracking-wider text-primary">
                                 {editingWeapon ? 'Edit Weapon' : 'New Weapon'}
                             </DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4 py-4">
+                        <div className="space-y-3 py-2">
+                            <WeaponImageUpload value={weaponForm.imageUrl || ''} weaponName={weaponForm.name || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} />
                             <div className="space-y-2">
                                 <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
                                 <Input value={weaponForm.name || ''} onChange={(e) => setWeaponForm({ ...weaponForm, name: e.target.value })} placeholder="Weapon Name" className="bg-black border-border font-mono-tech" />
                             </div>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Cost (EB)</Label>
-                                    <Input type="number" value={weaponForm.cost ?? 0} onChange={(e) => setWeaponForm({ ...weaponForm, cost: Number(e.target.value) })} className="bg-black border-border font-mono-tech" />
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-1">
+                                    <Label className="font-mono-tech text-[10px] uppercase tracking-widest">Cost (EB)</Label>
+                                    <Input type="number" value={weaponForm.cost ?? 0} onChange={(e) => setWeaponForm({ ...weaponForm, cost: Number(e.target.value) })} className="bg-black border-border font-mono-tech text-sm" />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Rarity</Label>
-                                    <Input type="number" value={weaponForm.rarity ?? 99} onChange={(e) => setWeaponForm({ ...weaponForm, rarity: Number(e.target.value) })} className="bg-black border-border font-mono-tech" />
+                                <div className="space-y-1">
+                                    <Label className="font-mono-tech text-[10px] uppercase tracking-widest">Rarity</Label>
+                                    <Input type="number" value={weaponForm.rarity ?? 99} onChange={(e) => setWeaponForm({ ...weaponForm, rarity: Number(e.target.value) })} className="bg-black border-border font-mono-tech text-sm" />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Req. Street Cred</Label>
-                                    <Input type="number" value={weaponForm.reqStreetCred ?? 0} onChange={(e) => setWeaponForm({ ...weaponForm, reqStreetCred: Number(e.target.value) })} className="bg-black border-border font-mono-tech" />
+                                <div className="space-y-1">
+                                    <Label className="font-mono-tech text-[10px] uppercase tracking-widest">Req. SC</Label>
+                                    <Input type="number" value={weaponForm.reqStreetCred ?? 0} onChange={(e) => setWeaponForm({ ...weaponForm, reqStreetCred: Number(e.target.value) })} className="bg-black border-border font-mono-tech text-sm" />
                                 </div>
                             </div>
                             <div className="flex gap-4 items-center">
@@ -665,7 +662,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                     className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-sm text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none resize-none"
                                 />
                             </div>
-                            <WeaponImageUpload value={weaponForm.imageUrl || ''} weaponName={weaponForm.name || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} />
                             <button onClick={saveWeapon} className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors">Save</button>
                         </div>
                     </DialogContent>
