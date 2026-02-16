@@ -100,7 +100,7 @@ function WeaponImageUpload({ value, weaponName, onChange }: { value: string; wea
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
-                className="relative w-full aspect-[16/9] border border-border bg-black flex items-center justify-center overflow-hidden cursor-pointer hover:border-secondary transition-colors group disabled:opacity-50"
+                className="relative w-full aspect-square border border-border bg-black flex items-center justify-center overflow-hidden cursor-pointer hover:border-secondary transition-colors group disabled:opacity-50"
             >
                 {value ? (
                     <img src={value} alt="" className="w-full h-full object-cover" />
