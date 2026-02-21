@@ -1,5 +1,6 @@
 import { Campaign, MatchTeam, CatalogData } from '@/types';
 import { MathService } from './math';
+import { resolveVariant, parseEquipmentId } from './variants';
 
 export const ValidationService = {
     validateRoster: (team: MatchTeam, campaign: Campaign, store: CatalogData): string[] => {
@@ -43,8 +44,11 @@ export const ValidationService = {
         recruits.forEach(r => {
             r.equippedItemIds.forEach(itemId => {
                 const item = store.items.find(i => i.id === itemId);
-                if (item && item.reqStreetCred > campaignStreetCred) {
-                    errors.push(`Item '${item.name}' requires Street Cred ${item.reqStreetCred} (Have: ${campaignStreetCred})`);
+                if (item) {
+                    const variant = resolveVariant(item.factionVariants, campaign.factionId);
+                    if (variant.reqStreetCred > campaignStreetCred) {
+                        errors.push(`Item '${item.name}' requires Street Cred ${variant.reqStreetCred} (Have: ${campaignStreetCred})`);
+                    }
                 }
             });
         });
@@ -59,8 +63,11 @@ export const ValidationService = {
 
         itemCounts.forEach((count, itemId) => {
             const item = store.items.find(i => i.id === itemId);
-            if (item && count > item.rarity) {
-                errors.push(`Item '${item.name}' exceeds rarity limit (${count}/${item.rarity})`);
+            if (item) {
+                const variant = resolveVariant(item.factionVariants, campaign.factionId);
+                if (count > variant.rarity) {
+                    errors.push(`Item '${item.name}' exceeds rarity limit (${count}/${variant.rarity})`);
+                }
             }
         });
 
@@ -94,8 +101,9 @@ export const ValidationService = {
             const isNetrunner = profile.keywords.includes('Netrunner');
             const matchEquipIds = team.equipmentMap[r.id] ?? [];
             const hasNetDeck = matchEquipIds.some(eqId => {
-                if (!eqId.startsWith('weapon-')) return false;
-                const weapon = store.weapons.find(w => w.id === eqId.replace('weapon-', ''));
+                const parsed = parseEquipmentId(eqId);
+                if (parsed.prefix !== 'weapon') return false;
+                const weapon = store.weapons.find(w => w.id === parsed.baseId);
                 return weapon?.grantsNetrunner === true;
             });
             const canRunPrograms = isNetrunner || hasNetDeck;

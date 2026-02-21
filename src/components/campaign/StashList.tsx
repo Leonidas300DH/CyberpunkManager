@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Campaign, Weapon, HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
 import { MathService } from '@/lib/math';
+import { parseStashEntry, buildStashEntry, resolveVariant, getAvailableVariants } from '@/lib/variants';
 import { Plus, Search, X, Trash2, List, Square, Columns2, ChevronDown } from 'lucide-react';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
@@ -42,22 +43,24 @@ export function StashList({ campaign }: StashListProps) {
     };
 
     // ── Resolve stash items ──
-    const stashWeapons: Array<{ weapon: Weapon; stashIdx: number }> = [];
+    const stashWeapons: Array<{ weapon: Weapon; variantFactionId: string; stashIdx: number }> = [];
     const stashPrograms: Array<{ program: HackingProgram; stashIdx: number }> = [];
 
-    campaign.hqStash.forEach((itemId, idx) => {
+    campaign.hqStash.forEach((entry, idx) => {
+        const { itemId, variantFactionId } = parseStashEntry(entry);
         const weapon = catalog.weapons.find(w => w.id === itemId);
-        if (weapon) { stashWeapons.push({ weapon, stashIdx: idx }); return; }
+        if (weapon) { stashWeapons.push({ weapon, variantFactionId, stashIdx: idx }); return; }
         const program = catalog.programs.find(p => p.id === itemId);
         if (program) { stashPrograms.push({ program, stashIdx: idx }); }
     });
 
     // ── Remove from stash ──
     const handleRemove = (stashIdx: number) => {
-        const itemId = campaign.hqStash[stashIdx];
+        const entry = campaign.hqStash[stashIdx];
+        const { itemId, variantFactionId } = parseStashEntry(entry);
         const weapon = catalog.weapons.find(w => w.id === itemId);
         const program = catalog.programs.find(p => p.id === itemId);
-        const refund = weapon?.cost ?? program?.costEB ?? 0;
+        const refund = weapon ? resolveVariant(weapon.factionVariants, variantFactionId).cost : program?.costEB ?? 0;
 
         const newStash = [...campaign.hqStash];
         newStash.splice(stashIdx, 1);
@@ -68,10 +71,10 @@ export function StashList({ campaign }: StashListProps) {
     };
 
     // ── Buy handlers ──
-    const handleBuyWeapon = (weaponId: string, cost: number) => {
+    const handleBuyWeapon = (weaponId: string, variantFactionId: string, cost: number) => {
         if (campaign.ebBank < cost) return;
         updateCampaign(campaign.id, {
-            hqStash: [...campaign.hqStash, weaponId],
+            hqStash: [...campaign.hqStash, buildStashEntry(weaponId, variantFactionId)],
             ebBank: campaign.ebBank - cost,
         });
     };
@@ -101,7 +104,7 @@ export function StashList({ campaign }: StashListProps) {
     });
 
     const campaignStreetCred = MathService.calculateCampaignStreetCred(campaign, catalog);
-    const stashCountOf = (id: string) => campaign.hqStash.filter(s => s === id).length;
+    const stashCountOf = (id: string) => campaign.hqStash.filter(s => parseStashEntry(s).itemId === id).length;
 
     return (
         <div className="space-y-10">
@@ -132,23 +135,27 @@ export function StashList({ campaign }: StashListProps) {
                                     Gear — {stashWeapons.length} item{stashWeapons.length !== 1 ? 's' : ''}
                                 </div>
                                 <div className={gridClass}>
-                                    {stashWeapons.map(({ weapon, stashIdx }) => (
-                                        <WeaponTile
-                                            key={`owned-${stashIdx}`}
-                                            weapon={weapon}
-                                            campaignStreetCred={campaignStreetCred}
-                                            equippedCount={stashCountOf(weapon.id)}
-                                            overlay={
-                                                <button
-                                                    onClick={() => handleRemove(stashIdx)}
-                                                    className="absolute top-1 right-1 z-20 p-1 bg-black/80 border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors opacity-0 group-hover/tile:opacity-100"
-                                                    title={`Sell — refund ${weapon.cost} EB`}
-                                                >
-                                                    <Trash2 className="w-3 h-3" />
-                                                </button>
-                                            }
-                                        />
-                                    ))}
+                                    {stashWeapons.map(({ weapon, variantFactionId, stashIdx }) => {
+                                        const variant = resolveVariant(weapon.factionVariants, variantFactionId);
+                                        return (
+                                            <WeaponTile
+                                                key={`owned-${stashIdx}`}
+                                                weapon={weapon}
+                                                variantFactionId={variantFactionId}
+                                                campaignStreetCred={campaignStreetCred}
+                                                equippedCount={stashCountOf(weapon.id)}
+                                                overlay={
+                                                    <button
+                                                        onClick={() => handleRemove(stashIdx)}
+                                                        className="absolute top-1 right-1 z-20 p-1 bg-black/80 border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors opacity-0 group-hover/tile:opacity-100"
+                                                        title={`Sell — refund ${variant.cost} EB`}
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                }
+                                            />
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -248,19 +255,21 @@ export function StashList({ campaign }: StashListProps) {
 
                 <div className={gridClass}>
                     {filteredWeapons.map(weapon => {
-                        const cantAfford = campaign.ebBank < weapon.cost;
+                        const variant = resolveVariant(weapon.factionVariants, campaign.factionId);
+                        const cantAfford = campaign.ebBank < variant.cost;
                         const owned = stashCountOf(weapon.id);
 
                         return (
                             <div key={weapon.id} className={`${cantAfford ? 'opacity-35' : ''} transition-all`}>
                                 <WeaponTile
                                     weapon={weapon}
+                                    variantFactionId={campaign.factionId}
                                     campaignStreetCred={campaignStreetCred}
                                     equippedCount={owned}
                                     overlay={
                                         <button
                                             disabled={cantAfford}
-                                            onClick={() => handleBuyWeapon(weapon.id, weapon.cost)}
+                                            onClick={() => handleBuyWeapon(weapon.id, variant.factionId, variant.cost)}
                                             className={`absolute inset-0 z-20 flex items-end justify-end p-2 ${
                                                 cantAfford
                                                     ? 'cursor-not-allowed'
@@ -269,11 +278,11 @@ export function StashList({ campaign }: StashListProps) {
                                         >
                                             {!cantAfford ? (
                                                 <span className="font-display font-bold text-xs uppercase tracking-wider bg-secondary text-black px-3 py-1 clip-corner-br flex items-center gap-1 shadow-lg shadow-secondary/30">
-                                                    <Plus className="w-3.5 h-3.5" /> {weapon.cost === 0 ? 'Free' : `${weapon.cost} EB`}
+                                                    <Plus className="w-3.5 h-3.5" /> {variant.cost === 0 ? 'Free' : `${variant.cost} EB`}
                                                 </span>
                                             ) : (
                                                 <span className="font-mono-tech text-[10px] text-accent uppercase font-bold bg-black/80 px-2 py-0.5 border border-accent/50">
-                                                    {weapon.cost} EB
+                                                    {variant.cost} EB
                                                 </span>
                                             )}
                                         </button>

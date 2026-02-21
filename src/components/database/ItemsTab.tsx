@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { ItemCard, ItemCategory } from '@/types';
+import { resolveVariant } from '@/lib/variants';
 
 const CATEGORY_STYLES: Record<ItemCategory, { border: string; text: string; bg: string; glow: string }> = {
     Gear: { border: 'border-secondary', text: 'text-secondary', bg: 'bg-secondary', glow: 'group-hover:shadow-[0_0_10px_rgba(0,240,255,0.3)]' },
@@ -99,7 +100,7 @@ export function ItemsTab() {
                                                 </div>
                                             </div>
                                             <div className="text-right shrink-0 ml-3">
-                                                <div className={`font-display font-bold text-lg ${style.text}`}>{item.costEB}</div>
+                                                <div className={`font-display font-bold text-lg ${style.text}`}>{resolveVariant(item.factionVariants).cost}</div>
                                                 <div className="text-[10px] font-mono-tech text-muted-foreground">EB</div>
                                             </div>
                                         </div>
@@ -126,11 +127,11 @@ export function ItemsTab() {
 
                                         {/* Item Footer */}
                                         <div className="px-3 pb-3 flex justify-between items-center">
-                                            {item.rarity < 99 && (
-                                                <span className="text-[10px] font-mono-tech text-muted-foreground">RAR.{item.rarity}</span>
+                                            {resolveVariant(item.factionVariants).rarity < 99 && (
+                                                <span className="text-[10px] font-mono-tech text-muted-foreground">RAR.{resolveVariant(item.factionVariants).rarity}</span>
                                             )}
-                                            {item.reqStreetCred > 0 && (
-                                                <span className="text-[10px] font-mono-tech text-secondary">SC {item.reqStreetCred}+</span>
+                                            {resolveVariant(item.factionVariants).reqStreetCred > 0 && (
+                                                <span className="text-[10px] font-mono-tech text-secondary">SC {resolveVariant(item.factionVariants).reqStreetCred}+</span>
                                             )}
                                         </div>
                                     </div>

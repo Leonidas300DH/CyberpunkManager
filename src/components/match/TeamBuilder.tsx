@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Campaign, ModelLineage, Weapon, HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
 import { MathService } from '@/lib/math';
+import { parseStashEntry, parseEquipmentId, resolveVariant } from '@/lib/variants';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, ChevronDown, ChevronUp, Plus, Users, X, GripVertical, List, Maximize2 } from 'lucide-react';
 import { useTeamBuilder } from '@/hooks/useTeamBuilder';
@@ -118,7 +119,7 @@ function parseDragId(id: string): { itemId: string; sourceRecruitId: string | nu
         const parts = id.split(':');
         return { sourceRecruitId: parts[1], itemId: parts.slice(2).join(':'), isSquadDrag: false };
     }
-    // Strip copy index suffix (e.g., weapon-abc#1 → weapon-abc)
+    // Strip copy index suffix (e.g., weapon-abc@universal#1 → weapon-abc@universal)
     const itemId = id.replace(/#\d+$/, '');
     return { itemId, sourceRecruitId: null, isSquadDrag: false };
 }
@@ -203,22 +204,24 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
     });
 
     // ── Stash items from campaign ──
-    const stashWeapons: Weapon[] = [];
+    const stashWeapons: Array<{ weapon: Weapon; variantFactionId: string }> = [];
     const stashPrograms: Array<{ program: HackingProgram; factionName: string }> = [];
-    campaign.hqStash.forEach(itemId => {
+    campaign.hqStash.forEach(entry => {
+        const { itemId, variantFactionId } = parseStashEntry(entry);
         const weapon = catalog.weapons.find(w => w.id === itemId);
-        if (weapon) { stashWeapons.push(weapon); return; }
+        if (weapon) { stashWeapons.push({ weapon, variantFactionId }); return; }
         const program = catalog.programs.find(p => p.id === itemId);
         if (program) {
             stashPrograms.push({ program, factionName: getFactionName(program.factionId) });
         }
     });
 
-    // ── Count stash copies per item ──
-    const stashWeaponCounts = new Map<string, { weapon: Weapon; count: number }>();
-    stashWeapons.forEach(w => {
-        const e = stashWeaponCounts.get(w.id);
-        if (e) e.count++; else stashWeaponCounts.set(w.id, { weapon: w, count: 1 });
+    // ── Count stash copies per item (keyed by weaponId@variantFactionId) ──
+    const stashWeaponCounts = new Map<string, { weapon: Weapon; variantFactionId: string; count: number }>();
+    stashWeapons.forEach(({ weapon, variantFactionId }) => {
+        const key = `${weapon.id}@${variantFactionId}`;
+        const e = stashWeaponCounts.get(key);
+        if (e) e.count++; else stashWeaponCounts.set(key, { weapon, variantFactionId, count: 1 });
     });
     const stashProgramCounts = new Map<string, { data: { program: HackingProgram; factionName: string }; count: number }>();
     stashPrograms.forEach(sp => {
@@ -233,10 +236,10 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
     });
 
     // ── Available = stash copies minus equipped copies ──
-    const availableWeapons: Array<{ weapon: Weapon; copyIndex: number }> = [];
-    stashWeaponCounts.forEach(({ weapon, count }) => {
-        const equipped = equippedCounts.get(`weapon-${weapon.id}`) ?? 0;
-        for (let i = 0; i < count - equipped; i++) availableWeapons.push({ weapon, copyIndex: i });
+    const availableWeapons: Array<{ weapon: Weapon; variantFactionId: string; copyIndex: number }> = [];
+    stashWeaponCounts.forEach(({ weapon, variantFactionId, count }, key) => {
+        const equipped = equippedCounts.get(`weapon-${weapon.id}@${variantFactionId}`) ?? 0;
+        for (let i = 0; i < count - equipped; i++) availableWeapons.push({ weapon, variantFactionId, copyIndex: i });
     });
     const availablePrograms: Array<{ program: HackingProgram; factionName: string; copyIndex: number }> = [];
     stashProgramCounts.forEach(({ data, count }) => {
@@ -312,22 +315,21 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
         }
 
         const { itemId } = parseDragId(activeDragId);
+        const parsed = parseEquipmentId(itemId);
 
-        if (itemId.startsWith('weapon-')) {
-            const weaponId = itemId.replace('weapon-', '');
-            const weapon = catalog.weapons.find(w => w.id === weaponId);
+        if (parsed.prefix === 'weapon') {
+            const weapon = catalog.weapons.find(w => w.id === parsed.baseId);
             if (weapon) {
                 return (
                     <div className="w-72 opacity-90 pointer-events-none">
-                        <WeaponTile weapon={weapon} />
+                        <WeaponTile weapon={weapon} variantFactionId={parsed.variantFactionId} />
                     </div>
                 );
             }
         }
 
-        if (itemId.startsWith('program-')) {
-            const programId = itemId.replace('program-', '');
-            const program = catalog.programs.find(p => p.id === programId);
+        if (parsed.prefix === 'program') {
+            const program = catalog.programs.find(p => p.id === parsed.baseId);
             if (program) {
                 return (
                     <div className="w-40 opacity-90 pointer-events-none">
@@ -441,18 +443,19 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
 
                                     // Resolve equipped items in order
                                     const equippedItems = equippedIds.map(eqId => {
-                                        if (eqId.startsWith('weapon-')) {
-                                            const weapon = catalog.weapons.find(w => w.id === eqId.replace('weapon-', ''));
-                                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, program: null } : null;
+                                        const parsed = parseEquipmentId(eqId);
+                                        if (parsed.prefix === 'weapon') {
+                                            const weapon = catalog.weapons.find(w => w.id === parsed.baseId);
+                                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null } : null;
                                         }
-                                        if (eqId.startsWith('program-')) {
-                                            const program = catalog.programs.find(p => p.id === eqId.replace('program-', ''));
-                                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, program } : null;
+                                        if (parsed.prefix === 'program') {
+                                            const program = catalog.programs.find(p => p.id === parsed.baseId);
+                                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program } : null;
                                         }
                                         return null;
                                     }).filter(Boolean) as Array<
-                                        | { equipId: string; type: 'weapon'; weapon: Weapon; program: null }
-                                        | { equipId: string; type: 'program'; weapon: null; program: HackingProgram }
+                                        | { equipId: string; type: 'weapon'; weapon: Weapon; variantFactionId: string; program: null }
+                                        | { equipId: string; type: 'program'; weapon: null; variantFactionId: undefined; program: HackingProgram }
                                     >;
 
                                     return (
@@ -493,8 +496,9 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                                     {item.type === 'weapon' ? (
                                                                         <WeaponTile
                                                                             weapon={item.weapon}
+                                                                            variantFactionId={item.variantFactionId}
                                                                             campaignStreetCred={campaignStreetCred}
-                                                                            equippedCount={equippedCounts.get(`weapon-${item.weapon.id}`) ?? 0}
+                                                                            equippedCount={equippedCounts.get(`weapon-${item.weapon.id}@${item.variantFactionId}`) ?? 0}
                                                                             overlay={
                                                                                 <div className="absolute top-1 left-10 z-20">
                                                                                     <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
@@ -717,16 +721,17 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                 </div>
                             ) : (
                                 <div className={gridClass}>
-                                    {availableWeapons.map(({ weapon, copyIndex }) => {
-                                        const dragId = `weapon-${weapon.id}#${copyIndex}`;
+                                    {availableWeapons.map(({ weapon, variantFactionId, copyIndex }) => {
+                                        const dragId = `weapon-${weapon.id}@${variantFactionId}#${copyIndex}`;
 
                                         return (
-                                            <div key={`${weapon.id}-${copyIndex}`} style={cardStyle}>
+                                            <div key={`${weapon.id}-${variantFactionId}-${copyIndex}`} style={cardStyle}>
                                                 <DraggableItem id={dragId}>
                                                     <WeaponTile
                                                         weapon={weapon}
+                                                        variantFactionId={variantFactionId}
                                                         campaignStreetCred={campaignStreetCred}
-                                                        equippedCount={equippedCounts.get(`weapon-${weapon.id}`) ?? 0}
+                                                        equippedCount={equippedCounts.get(`weapon-${weapon.id}@${variantFactionId}`) ?? 0}
                                                         overlay={
                                                             <div className="absolute top-1 left-10 z-20 flex items-center gap-1">
                                                                 <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/tile:opacity-60" />

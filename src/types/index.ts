@@ -57,9 +57,8 @@ export interface ItemCard {
     id: string;
     name: string;
     category: ItemCategory; // 'Program' handles Hacking
-    costEB: number;
-    reqStreetCred: number; // Minimum Campaign Street Cred required to buy/equip
-    rarity: number; // Max copies allowed per team
+    factionVariants: FactionVariant[];
+    source?: WeaponSource;
     keywords: string[]; // e.g., ['Bulky', 'Cybergear']
     grantedActions: GameAction[]; // Actions added to the model equipping it
     passiveRules: string;
@@ -94,11 +93,22 @@ export interface HackingProgram {
     reloadCondition: ReloadCondition; // How to reload/flip the card back
 }
 
+// --- FACTION VARIANTS ---
+export type WeaponSource = 'Custom' | 'Manual' | 'Upload';
+
+export interface FactionVariant {
+    factionId: string;    // 'universal' | 'faction-xxx'
+    cost: number;
+    rarity: number;       // 99 = unlimited
+    reqStreetCred: number;
+}
+
 // --- WEAPONS & GEAR ---
 export interface Weapon {
     id: string;
     name: string;
-    cost: number;
+    source: WeaponSource;
+    factionVariants: FactionVariant[];
     isWeapon: boolean;
     isGear: boolean;
     skillReq?: 'Melee' | 'Ranged'; // Skill used — undefined for gear/equipment
@@ -107,8 +117,6 @@ export interface Weapon {
     rangeGreen: boolean;
     rangeLong: boolean;
     description: string;
-    rarity: number;        // Max copies per team (99 = unlimited)
-    reqStreetCred: number; // Minimum Campaign Street Cred required to buy/equip
     keywords: string[];    // e.g., ['Bulky', 'Deadly']
     grantsNetrunner?: boolean; // true = equipping this allows hacking programs
     imageUrl?: string;     // Illustration in /images/weapons/

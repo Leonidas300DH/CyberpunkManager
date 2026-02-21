@@ -2,13 +2,14 @@
 
 import { useState, useRef } from 'react';
 import { useStore } from '@/store/useStore';
-import { ItemCategory, ActionColor, HackingProgram, ProgramQuality, Weapon } from '@/types';
+import { ItemCategory, ActionColor, HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { formatCardText } from '@/lib/formatCardText';
+import { resolveVariant } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { v4 as uuidv4 } from 'uuid';
@@ -33,6 +34,7 @@ const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-tyger-claws': 'border-cyan-400',
     'faction-zoners': 'border-orange-500',
     'all': 'border-gray-500',
+    'universal': 'border-gray-500',
 };
 
 const TAB_STYLES: Record<string, { border: string; text: string; gradient: string; glow: string }> = {
@@ -42,43 +44,40 @@ const TAB_STYLES: Record<string, { border: string; text: string; gradient: strin
     Objective: { border: 'border-cyber-green', text: 'text-cyber-green', gradient: 'from-cyber-green to-green-900', glow: 'group-hover:shadow-[0_0_10px_rgba(57,255,20,0.3)]' },
 };
 
-/** Upload image to /images/weapons/ via API */
-function WeaponImageUpload({ value, weaponName, onChange }: { value: string; weaponName: string; onChange: (url: string) => void }) {
+/** Resize image client-side and return as data URL */
+function resizeImageToDataUrl(file: File, size: number, quality: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { reject(new Error('Canvas not supported')); return; }
+            // Cover crop: use the largest centered square from the source
+            const srcSize = Math.min(img.width, img.height);
+            const sx = (img.width - srcSize) / 2;
+            const sy = (img.height - srcSize) / 2;
+            ctx.drawImage(img, sx, sy, srcSize, srcSize, 0, 0, size, size);
+            resolve(canvas.toDataURL('image/webp', quality));
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+/** Client-side image upload — resizes and stores as data URL */
+function WeaponImageUpload({ value, onChange }: { value: string; onChange: (url: string) => void }) {
     const fileRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
 
-    const uploadFile = async (file: File, overwrite: boolean) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('name', weaponName);
-        if (overwrite) formData.append('overwrite', 'true');
-        const res = await fetch('/api/upload-weapon-image', { method: 'POST', body: formData });
-        return await res.json();
-    };
-
     const handleFile = async (file: File) => {
-        if (!weaponName.trim()) {
-            alert('Enter a weapon name before uploading an image.');
-            return;
-        }
         setUploading(true);
         try {
-            const data = await uploadFile(file, false);
-            if (data.exists) {
-                const confirmed = window.confirm(
-                    `An image already exists for "${weaponName}" (${data.existingFiles.join(', ')}).\n\nOld versions will be deleted and replaced by the new image.\n\nOverwrite?`
-                );
-                if (!confirmed) { setUploading(false); return; }
-                const data2 = await uploadFile(file, true);
-                if (data2.url) onChange(data2.url);
-                else alert(data2.error || 'Upload failed');
-            } else if (data.url) {
-                onChange(data.url);
-            } else {
-                alert(data.error || 'Upload failed');
-            }
+            const dataUrl = await resizeImageToDataUrl(file, 512, 0.8);
+            onChange(dataUrl);
         } catch {
-            alert('Upload failed');
+            alert('Failed to process image');
         } finally {
             setUploading(false);
         }
@@ -114,7 +113,7 @@ function WeaponImageUpload({ value, weaponName, onChange }: { value: string; wea
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="flex items-center gap-2 text-white">
                             <Upload className="w-5 h-5" />
-                            <span className="font-mono-tech text-xs uppercase tracking-wider">{uploading ? 'Uploading...' : 'Replace'}</span>
+                            <span className="font-mono-tech text-xs uppercase tracking-wider">{uploading ? 'Processing...' : 'Replace'}</span>
                         </div>
                     </div>
                 )}
@@ -125,10 +124,11 @@ function WeaponImageUpload({ value, weaponName, onChange }: { value: string; wea
 
 const DEFAULT_WEAPON_IMAGE = '/images/weapons/default.png';
 
-const EMPTY_WEAPON: Partial<Weapon> = {
-    name: '', cost: 0, isWeapon: true, isGear: false,
+const EMPTY_WEAPON: Partial<Weapon> & { variantRows?: FactionVariant[] } = {
+    name: '', source: 'Manual', isWeapon: true, isGear: false,
+    factionVariants: [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }],
     rangeRed: false, rangeYellow: false, rangeGreen: false, rangeLong: false,
-    description: '', rarity: 99, keywords: [], imageUrl: DEFAULT_WEAPON_IMAGE,
+    description: '', keywords: [], imageUrl: DEFAULT_WEAPON_IMAGE,
 };
 
 const hasNoImage = (w: Weapon) => !w.imageUrl || w.imageUrl === DEFAULT_WEAPON_IMAGE;
@@ -145,6 +145,14 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const [qualityFilter, setQualityFilter] = useState<ProgramQuality | 'all'>('all');
     // Gear/Weapon filters
     const [weaponTypeFilter, setWeaponTypeFilter] = useState<'all' | 'weapon' | 'gear'>('all');
+    const [gearFactionFilters, setGearFactionFilters] = useState<Set<string>>(new Set());
+    const toggleGearFaction = (fid: string) => {
+        setGearFactionFilters(prev => {
+            const next = new Set(prev);
+            if (next.has(fid)) next.delete(fid); else next.add(fid);
+            return next;
+        });
+    };
     const [highlightNoImage, setHighlightNoImage] = useState(false);
     const [highlightNoPrice, setHighlightNoPrice] = useState(false);
     const [highlightDefaultRarity, setHighlightDefaultRarity] = useState(false);
@@ -152,6 +160,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const [weaponDialogOpen, setWeaponDialogOpen] = useState(false);
     const [editingWeapon, setEditingWeapon] = useState<Weapon | null>(null);
     const [weaponForm, setWeaponForm] = useState<Partial<Weapon>>(EMPTY_WEAPON);
+    const [variantRows, setVariantRows] = useState<FactionVariant[]>([{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }]);
     // Detail view
     const [selectedProgram, setSelectedProgram] = useState<HackingProgram | null>(null);
     // View mode + card flip state
@@ -196,16 +205,21 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
 
     const weapons = catalog.weapons ?? [];
 
-    const isWeaponHighlighted = (w: Weapon) =>
-        (highlightNoImage && hasNoImage(w)) ||
-        (highlightNoPrice && w.cost === 0) ||
-        (highlightDefaultRarity && w.rarity === 99);
+    const isWeaponHighlighted = (w: Weapon) => {
+        return (highlightNoImage && hasNoImage(w)) ||
+            (highlightNoPrice && w.factionVariants.some(fv => fv.cost === 0)) ||
+            (highlightDefaultRarity && w.factionVariants.every(fv => fv.rarity === 99));
+    };
     const filteredWeapons = weapons.filter(w => {
         if (weaponTypeFilter === 'weapon' && !w.isWeapon) return false;
         if (weaponTypeFilter === 'gear' && !w.isGear) return false;
         if (highlightNoImage && !hasNoImage(w)) return false;
-        if (highlightNoPrice && w.cost !== 0) return false;
-        if (highlightDefaultRarity && w.rarity !== 99) return false;
+        if (highlightNoPrice && !w.factionVariants.some(fv => fv.cost === 0)) return false;
+        if (highlightDefaultRarity && !w.factionVariants.every(fv => fv.rarity === 99)) return false;
+        if (gearFactionFilters.size > 0) {
+            const hasMatchingVariant = w.factionVariants.some(v => gearFactionFilters.has(v.factionId));
+            if (!hasMatchingVariant) return false;
+        }
         if (search) {
             const q = search.toLowerCase();
             return w.name.toLowerCase().includes(q) || w.description.toLowerCase().includes(q);
@@ -267,27 +281,31 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const openWeaponEdit = (weapon: Weapon) => {
         setEditingWeapon(weapon);
         setWeaponForm(weapon);
+        setVariantRows([...weapon.factionVariants]);
         setWeaponDialogOpen(true);
     };
 
     const openWeaponCreate = () => {
         setEditingWeapon(null);
         setWeaponForm({ ...EMPTY_WEAPON });
+        setVariantRows([{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }]);
         setWeaponDialogOpen(true);
     };
 
     const saveWeapon = () => {
         const currentWeapons = catalog.weapons ?? [];
+        const finalVariants = variantRows.length > 0 ? variantRows : [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }];
         if (editingWeapon) {
             const updated = currentWeapons.map(w =>
-                w.id === editingWeapon.id ? { ...editingWeapon, ...weaponForm } as Weapon : w
+                w.id === editingWeapon.id ? { ...editingWeapon, ...weaponForm, factionVariants: finalVariants } as Weapon : w
             );
             setCatalog({ ...catalog, weapons: updated });
         } else {
             const newWeapon: Weapon = {
                 id: uuidv4(),
                 name: weaponForm.name || 'New Weapon',
-                cost: weaponForm.cost ?? 0,
+                source: 'Manual',
+                factionVariants: finalVariants,
                 isWeapon: weaponForm.isWeapon ?? true,
                 isGear: weaponForm.isGear ?? false,
                 rangeRed: weaponForm.rangeRed ?? false,
@@ -295,8 +313,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 rangeGreen: weaponForm.rangeGreen ?? false,
                 rangeLong: weaponForm.rangeLong ?? false,
                 description: weaponForm.description ?? '',
-                rarity: weaponForm.rarity ?? 99,
-                reqStreetCred: weaponForm.reqStreetCred ?? 0,
                 skillReq: weaponForm.skillReq,
                 keywords: weaponForm.keywords ?? [],
                 imageUrl: weaponForm.imageUrl,
@@ -309,6 +325,8 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     };
 
     const deleteWeapon = (id: string) => {
+        const weapon = (catalog.weapons ?? []).find(w => w.id === id);
+        if (!weapon || !window.confirm(`Delete "${weapon.name}"? This cannot be undone.`)) return;
         setCatalog({ ...catalog, weapons: (catalog.weapons ?? []).filter(w => w.id !== id) });
     };
 
@@ -378,18 +396,18 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                 <button
                                     key={fid}
                                     onClick={() => setFactionFilter(fid)}
-                                    className={`w-[120px] shrink-0 flex flex-col items-center justify-center gap-1.5 px-1.5 pb-2 rounded-sm border-2 transition-all ${
+                                    className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
                                         isActive
                                             ? 'border-white bg-white/10 ring-1 ring-white/30'
                                             : 'border-border bg-black hover:border-white/30'
                                     }`}
                                 >
                                     <div className="w-full aspect-square flex items-center justify-center">
-                                        <span className={`text-2xl font-display font-bold ${isActive ? 'text-white' : 'text-muted-foreground'}`}>
+                                        <span className={`text-xl font-display font-bold ${isActive ? 'text-white' : 'text-muted-foreground'}`}>
                                             {fid === 'all-factions' ? '★' : '◎'}
                                         </span>
                                     </div>
-                                    <span className={`text-[8px] font-mono-tech uppercase tracking-wider text-center leading-tight ${
+                                    <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${
                                         isActive ? 'text-white font-bold' : 'text-muted-foreground'
                                     }`}>
                                         {label}
@@ -410,7 +428,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                             key={fid}
                                             onClick={() => setFactionFilter(fid)}
                                             title={label}
-                                            className={`w-[120px] shrink-0 flex flex-col items-center justify-center gap-1.5 px-1.5 pb-2 rounded-sm border-2 transition-all ${
+                                            className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
                                                 isActive
                                                     ? `${fColor} bg-white/10 ring-1 ring-white/30`
                                                     : 'border-border bg-black hover:border-white/30'
@@ -424,7 +442,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                                     style={{ opacity: isActive ? 1 : 0.4 }}
                                                 />
                                             )}
-                                            <span className={`text-[8px] font-mono-tech uppercase tracking-wider text-center leading-tight ${
+                                            <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${
                                                 isActive ? 'text-white font-bold' : 'text-muted-foreground'
                                             }`}>
                                                 {label}
@@ -440,8 +458,8 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 {/* View mode selector */}
                 <div className="flex gap-1 mb-4">
                     {([
-                        { mode: 'list' as ViewMode, icon: List, label: 'Liste' },
-                        { mode: 'card' as ViewMode, icon: Square, label: 'Carte' },
+                        { mode: 'list' as ViewMode, icon: List, label: 'List' },
+                        { mode: 'card' as ViewMode, icon: Square, label: 'Card' },
                         { mode: 'double' as ViewMode, icon: Columns2, label: 'Double' },
                     ]).map(({ mode, icon: Icon, label }) => (
                         <button
@@ -588,6 +606,62 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     </div>
                 </div>
 
+                {/* Gear faction filter — multi-select */}
+                <div className="flex gap-2 items-stretch mb-6">
+                    <button
+                        onClick={() => setGearFactionFilters(new Set())}
+                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
+                            gearFactionFilters.size === 0
+                                ? 'border-white bg-white/10 ring-1 ring-white/30'
+                                : 'border-border bg-black hover:border-white/30'
+                        }`}
+                    >
+                        <div className="w-full aspect-square flex items-center justify-center">
+                            <span className={`text-xl font-display font-bold ${gearFactionFilters.size === 0 ? 'text-white' : 'text-muted-foreground'}`}>★</span>
+                        </div>
+                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${gearFactionFilters.size === 0 ? 'text-white font-bold' : 'text-muted-foreground'}`}>All</span>
+                    </button>
+                    <button
+                        onClick={() => toggleGearFaction('universal')}
+                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
+                            gearFactionFilters.has('universal')
+                                ? 'border-gray-500 bg-white/10 ring-1 ring-white/30'
+                                : 'border-border bg-black hover:border-white/30'
+                        }`}
+                    >
+                        <div className="w-full aspect-square flex items-center justify-center">
+                            <span className={`text-xl font-display font-bold ${gearFactionFilters.has('universal') ? 'text-white' : 'text-muted-foreground'}`}>◎</span>
+                        </div>
+                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${gearFactionFilters.has('universal') ? 'text-white font-bold' : 'text-muted-foreground'}`}>Universal</span>
+                    </button>
+                    <div className="w-px bg-border shrink-0" />
+                    <div className="flex-1 overflow-x-auto min-w-0 no-scrollbar">
+                        <div className="flex gap-2 w-max">
+                            {catalog.factions.map(faction => {
+                                const isActive = gearFactionFilters.has(faction.id);
+                                const fColor = FACTION_COLOR_MAP[faction.id] ?? 'border-gray-500';
+                                return (
+                                    <button
+                                        key={faction.id}
+                                        onClick={() => toggleGearFaction(faction.id)}
+                                        title={faction.name}
+                                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
+                                            isActive
+                                                ? `${fColor} bg-white/10 ring-1 ring-white/30`
+                                                : 'border-border bg-black hover:border-white/30'
+                                        }`}
+                                    >
+                                        {faction.imageUrl && (
+                                            <img src={faction.imageUrl} alt={faction.name} className="w-full aspect-square object-contain" style={{ opacity: isActive ? 1 : 0.4 }} />
+                                        )}
+                                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${isActive ? 'text-white font-bold' : 'text-muted-foreground'}`}>{faction.name}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Weapon Edit/Create Dialog */}
                 <Dialog open={weaponDialogOpen} onOpenChange={setWeaponDialogOpen}>
                     <DialogContent className="bg-surface-dark border-border max-w-sm max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
@@ -597,23 +671,50 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3 py-2">
-                            <WeaponImageUpload value={weaponForm.imageUrl || ''} weaponName={weaponForm.name || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} />
+                            <WeaponImageUpload value={weaponForm.imageUrl || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} />
                             <div className="space-y-2">
                                 <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
                                 <Input value={weaponForm.name || ''} onChange={(e) => setWeaponForm({ ...weaponForm, name: e.target.value })} placeholder="Weapon Name" className="bg-black border-border font-mono-tech" />
                             </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                <div className="space-y-1">
-                                    <Label className="font-mono-tech text-[10px] uppercase tracking-widest">Cost (EB)</Label>
-                                    <Input type="number" value={weaponForm.cost ?? 0} onChange={(e) => setWeaponForm({ ...weaponForm, cost: Number(e.target.value) })} className="bg-black border-border font-mono-tech text-sm" />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label className="font-mono-tech text-[10px] uppercase tracking-widest">Rarity</Label>
-                                    <Input type="number" value={weaponForm.rarity ?? 99} onChange={(e) => setWeaponForm({ ...weaponForm, rarity: Number(e.target.value) })} className="bg-black border-border font-mono-tech text-sm" />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label className="font-mono-tech text-[10px] uppercase tracking-widest">Req. SC</Label>
-                                    <Input type="number" value={weaponForm.reqStreetCred ?? 0} onChange={(e) => setWeaponForm({ ...weaponForm, reqStreetCred: Number(e.target.value) })} className="bg-black border-border font-mono-tech text-sm" />
+                            {/* Faction Variants Table */}
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Faction Variants</Label>
+                                <div className="border border-border bg-black">
+                                    <div className="grid grid-cols-[1fr_50px_50px_40px_28px] gap-1 px-2 py-1 border-b border-border text-[9px] font-mono-tech text-muted-foreground uppercase tracking-wider">
+                                        <span>Faction</span><span>Cost</span><span>Rar.</span><span>SC</span><span></span>
+                                    </div>
+                                    {variantRows.map((v, i) => {
+                                        const fName = v.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === v.factionId)?.name ?? v.factionId);
+                                        return (
+                                            <div key={i} className="grid grid-cols-[1fr_50px_50px_40px_28px] gap-1 px-2 py-1 border-b border-border/50 items-center">
+                                                <span className="font-mono-tech text-[10px] text-white truncate">{fName}</span>
+                                                <Input type="number" value={v.cost} onChange={(e) => { const rows = [...variantRows]; rows[i] = { ...rows[i], cost: Number(e.target.value) }; setVariantRows(rows); }} className="bg-black border-border font-mono-tech text-xs h-6 px-1" />
+                                                <Input type="number" value={v.rarity} onChange={(e) => { const rows = [...variantRows]; rows[i] = { ...rows[i], rarity: Number(e.target.value) }; setVariantRows(rows); }} className="bg-black border-border font-mono-tech text-xs h-6 px-1" />
+                                                <Input type="number" value={v.reqStreetCred} onChange={(e) => { const rows = [...variantRows]; rows[i] = { ...rows[i], reqStreetCred: Number(e.target.value) }; setVariantRows(rows); }} className="bg-black border-border font-mono-tech text-xs h-6 px-1" />
+                                                <button onClick={() => setVariantRows(variantRows.filter((_, j) => j !== i))} className="p-0.5 text-muted-foreground hover:text-accent transition-colors" title="Remove variant">
+                                                    <XIcon className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                    {/* Add variant row */}
+                                    <div className="px-2 py-1.5">
+                                        <select
+                                            onChange={(e) => {
+                                                if (!e.target.value) return;
+                                                setVariantRows([...variantRows, { factionId: e.target.value, cost: 0, rarity: 99, reqStreetCred: 0 }]);
+                                                e.target.value = '';
+                                            }}
+                                            className="bg-black border border-border px-2 py-1 font-mono-tech text-[10px] uppercase text-muted-foreground w-full"
+                                            defaultValue=""
+                                        >
+                                            <option value="">+ Add variant...</option>
+                                            {!variantRows.some(v => v.factionId === 'universal') && <option value="universal">Universal</option>}
+                                            {catalog.factions.filter(f => !variantRows.some(v => v.factionId === f.id)).map(f => (
+                                                <option key={f.id} value={f.id}>{f.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex gap-4 items-center">
@@ -672,6 +773,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     {filteredWeapons.map(weapon => {
                         const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
                         const skillIcon = weapon.skillReq === 'Melee' ? '/images/Skills Icons/melee.png' : weapon.skillReq === 'Ranged' ? '/images/Skills Icons/ranged.png' : null;
+                        const displayVariant = resolveVariant(weapon.factionVariants, gearFactionFilters.size === 1 ? [...gearFactionFilters][0] : undefined);
                         return (
                             <div key={weapon.id} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
                                 {weapon.imageUrl ? (
@@ -684,26 +786,38 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                         </svg>
                                     </div>
                                 )}
+                                {/* Variant faction badges */}
+                                <div className="absolute top-1 right-1 z-10 flex gap-0.5">
+                                    {weapon.factionVariants.map(v => {
+                                        const fColor = FACTION_COLOR_MAP[v.factionId] ?? 'border-gray-500';
+                                        return <div key={v.factionId} className={`w-2 h-2 border ${fColor} ${fColor.replace('border-', 'bg-')}`} title={v.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === v.factionId)?.name ?? v.factionId)} />;
+                                    })}
+                                </div>
                                 <div className="relative z-10 flex flex-1">
                                     <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
-                                        <div className="font-display font-black text-sm text-black leading-none">{weapon.cost}</div>
+                                        <div className="font-display font-black text-sm text-black leading-none">{displayVariant.cost}</div>
                                         <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
-                                        {weapon.rarity < 99 && (
+                                        {displayVariant.rarity < 99 && (
                                             <div className="font-mono-tech text-[8px] font-bold leading-none mt-0.5 text-black/60"
-                                                title={`Rarity: max ${weapon.rarity} per team`}>
-                                                ×{weapon.rarity}
+                                                title={`Rarity: max ${displayVariant.rarity} per team`}>
+                                                ×{displayVariant.rarity}
                                             </div>
                                         )}
-                                        {(weapon.reqStreetCred ?? 0) > 0 && (
+                                        {(displayVariant.reqStreetCred ?? 0) > 0 && (
                                             <div className="font-mono-tech text-[7px] font-bold leading-none text-black/60"
-                                                title={`Requires Street Cred ${weapon.reqStreetCred}`}>
-                                                SC{weapon.reqStreetCred}
+                                                title={`Requires Street Cred ${displayVariant.reqStreetCred}`}>
+                                                SC{displayVariant.reqStreetCred}
                                             </div>
                                         )}
                                     </div>
                                     <div className="flex-1 px-3 py-2 flex flex-col gap-0.5">
                                         <div className="flex justify-between items-start">
-                                            <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors flex-1">{weapon.name}</h3>
+                                            <div className="flex-1">
+                                                <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
+                                                <span className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-wider">
+                                                    {weapon.factionVariants.map(v => v.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === v.factionId)?.name ?? v.factionId)).join(' · ')}
+                                                </span>
+                                            </div>
                                             {isAdmin && (
                                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button onClick={() => openWeaponEdit(weapon)} className="p-1 text-muted-foreground hover:text-secondary transition-colors"><Edit className="w-3.5 h-3.5" /></button>
@@ -782,7 +896,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                     )}
                                 </div>
                                 <div className="text-right shrink-0 ml-3">
-                                    <div className={`font-display font-bold text-lg ${tab.text}`}>{item.costEB}</div>
+                                    <div className={`font-display font-bold text-lg ${tab.text}`}>{resolveVariant(item.factionVariants).cost}</div>
                                     <div className="text-[10px] font-mono-tech text-muted-foreground">EB</div>
                                 </div>
                             </div>
@@ -804,8 +918,8 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                 )}
                             </div>
                             <div className="px-3 pb-3 flex justify-between items-center">
-                                {item.rarity < 99 && <span className="text-[10px] font-mono-tech text-muted-foreground">RAR.{item.rarity}</span>}
-                                {item.reqStreetCred > 0 && <span className="text-[10px] font-mono-tech text-secondary">SC {item.reqStreetCred}+</span>}
+                                {resolveVariant(item.factionVariants).rarity < 99 && <span className="text-[10px] font-mono-tech text-muted-foreground">RAR.{resolveVariant(item.factionVariants).rarity}</span>}
+                                {resolveVariant(item.factionVariants).reqStreetCred > 0 && <span className="text-[10px] font-mono-tech text-secondary">SC {resolveVariant(item.factionVariants).reqStreetCred}+</span>}
                                 {activeTab === 'Objective' && item.grantsStreetCredBonus && (
                                     <span className="text-[10px] font-mono-tech text-cyber-green">+{item.grantsStreetCredBonus} SC</span>
                                 )}

@@ -1,15 +1,20 @@
 import { Campaign, MatchTeam, CatalogData, Weapon, HackingProgram } from '@/types';
+import { parseEquipmentId, resolveVariant } from './variants';
 
 export function resolveEquipmentItem(
     itemId: string,
     catalog: CatalogData
 ): { name: string; cost: number } | null {
-    if (itemId.startsWith('weapon-')) {
-        const weapon = catalog.weapons.find((w: Weapon) => w.id === itemId.replace('weapon-', ''));
-        return weapon ? { name: weapon.name, cost: weapon.cost } : null;
+    const parsed = parseEquipmentId(itemId);
+
+    if (parsed.prefix === 'weapon') {
+        const weapon = catalog.weapons.find((w: Weapon) => w.id === parsed.baseId);
+        if (!weapon) return null;
+        const variant = resolveVariant(weapon.factionVariants, parsed.variantFactionId);
+        return { name: weapon.name, cost: variant.cost };
     }
-    if (itemId.startsWith('program-')) {
-        const program = catalog.programs.find((p: HackingProgram) => p.id === itemId.replace('program-', ''));
+    if (parsed.prefix === 'program') {
+        const program = catalog.programs.find((p: HackingProgram) => p.id === parsed.baseId);
         return program ? { name: program.name, cost: program.costEB } : null;
     }
     return null;
@@ -87,7 +92,8 @@ export const MathService = {
             recruit.equippedItemIds.forEach((itemId) => {
                 const item = store.items.find((i) => i.id === itemId);
                 if (item) {
-                    totalCost += item.costEB;
+                    const variant = resolveVariant(item.factionVariants, campaign.factionId);
+                    totalCost += variant.cost;
                 }
             });
         });

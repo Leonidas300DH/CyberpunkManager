@@ -2,9 +2,10 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { CatalogData, Campaign, MatchTeam, Weapon } from '@/types'
 import { FACTIONS, HACKING_PROGRAMS, ITEMS, LINEAGES, PROFILES, WEAPONS } from '@/lib/seed'
+import { migrateWeaponToVariants, migrateItemToVariants, migrateStashEntry, migrateEquipmentId } from '@/lib/variants'
 
 // Bump this version whenever seed data changes to force a re-seed
-const SEED_VERSION = 24;
+const SEED_VERSION = 25;
 
 const STORAGE_KEY = 'combat-zone-storage';
 
@@ -17,6 +18,8 @@ interface PlayViewSettings {
     characterView: 'horizontal' | 'vertical';
     programView: 'card' | 'list';
     hideKIA: boolean;
+    enableGlitch: boolean;
+    enableCodeRain: boolean;
 }
 
 export interface TeamBuilderDraft {
@@ -60,29 +63,67 @@ if (typeof window !== 'undefined') {
             const raw = localStorage.getItem(STORAGE_KEY);
             const parsed = raw ? JSON.parse(raw) : null;
             const oldCatalog = parsed?.state?.catalog;
-            const oldWeapons: Weapon[] = oldCatalog?.weapons ?? [];
+            const oldWeapons: Record<string, unknown>[] = oldCatalog?.weapons ?? [];
 
             // Merge weapons: seed updates descriptions/stats,
             // but user-uploaded imageUrl ALWAYS wins over seed
-            const userWeaponsMap = new Map(oldWeapons.map((w: Weapon) => [w.id, w]));
+            const userWeaponsMap = new Map(oldWeapons.map((w) => [w.id as string, w]));
             const mergedWeapons: Weapon[] = WEAPONS.map(seedW => {
                 const userW = userWeaponsMap.get(seedW.id);
                 if (userW?.imageUrl) {
-                    return { ...seedW, imageUrl: userW.imageUrl };
+                    return { ...seedW, imageUrl: userW.imageUrl as string };
                 }
                 return seedW;
             });
-            // Preserve user-created weapons (IDs not in seed)
+            // Preserve user-created weapons (IDs not in seed) — migrate them to variants format
             const seedIds = new Set(WEAPONS.map(w => w.id));
             for (const w of oldWeapons) {
-                if (!seedIds.has(w.id)) mergedWeapons.push(w);
+                if (!seedIds.has(w.id as string)) {
+                    mergedWeapons.push(migrateWeaponToVariants(w));
+                }
+            }
+
+            // Migrate items to variants format
+            const oldItems = oldCatalog?.items ?? [];
+            const migratedItems = ITEMS.length > 0 ? ITEMS : oldItems.map((i: Record<string, unknown>) => migrateItemToVariants(i));
+
+            // Migrate campaigns: stash entries + equipmentMap
+            const oldCampaigns: Campaign[] = parsed?.state?.campaigns ?? [];
+            const migratedCampaigns = oldCampaigns.map((c: Campaign) => ({
+                ...c,
+                hqStash: c.hqStash.map(migrateStashEntry),
+            }));
+
+            // Migrate activeMatchTeam equipmentMap
+            const oldMatch = parsed?.state?.activeMatchTeam;
+            let migratedMatch = oldMatch;
+            if (oldMatch?.equipmentMap) {
+                const newEqMap: Record<string, string[]> = {};
+                for (const [recruitId, ids] of Object.entries(oldMatch.equipmentMap)) {
+                    newEqMap[recruitId] = (ids as string[]).map(migrateEquipmentId);
+                }
+                migratedMatch = { ...oldMatch, equipmentMap: newEqMap };
+            }
+
+            // Migrate teamBuilderDrafts equipmentMap
+            const oldDrafts = parsed?.state?.teamBuilderDrafts ?? {};
+            const migratedDrafts: Record<string, unknown> = {};
+            for (const [key, draft] of Object.entries(oldDrafts)) {
+                const d = draft as { selectedIds: string[]; equipmentMap: Record<string, string[]>; targetEB: number };
+                const newEqMap: Record<string, string[]> = {};
+                if (d.equipmentMap) {
+                    for (const [recruitId, ids] of Object.entries(d.equipmentMap)) {
+                        newEqMap[recruitId] = ids.map(migrateEquipmentId);
+                    }
+                }
+                migratedDrafts[key] = { ...d, equipmentMap: newEqMap };
             }
 
             const newCatalog: CatalogData = {
                 factions: FACTIONS,
                 lineages: LINEAGES,
                 profiles: PROFILES,
-                items: ITEMS,
+                items: migratedItems,
                 programs: HACKING_PROGRAMS,
                 weapons: mergedWeapons,
             };
@@ -91,13 +132,16 @@ if (typeof window !== 'undefined') {
                 state: {
                     ...(parsed?.state ?? {}),
                     catalog: newCatalog,
+                    campaigns: migratedCampaigns,
+                    activeMatchTeam: migratedMatch,
+                    teamBuilderDrafts: migratedDrafts,
                 },
                 version: parsed?.version ?? 0,
             };
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(newPersisted));
             localStorage.setItem('seed-version', String(SEED_VERSION));
-            console.log(`Seed v${SEED_VERSION}: pre-hydration catalog update (${mergedWeapons.length} weapons)`);
+            console.log(`Seed v${SEED_VERSION}: pre-hydration catalog update (${mergedWeapons.length} weapons, variant migration)`);
         } catch (e) {
             console.error('Seed pre-hydration error:', e);
         }
@@ -112,7 +156,7 @@ export const useStore = create<StoreState>()(
             campaigns: [],
             activeMatchTeam: null,
             displaySettings: { cardColumns: 4, fontScale: 100 },
-            playViewSettings: { characterView: 'horizontal', programView: 'card', hideKIA: false },
+            playViewSettings: { characterView: 'horizontal', programView: 'card', hideKIA: false, enableGlitch: true, enableCodeRain: true },
             teamBuilderDrafts: {},
 
             setCatalog: (data) => set({ catalog: data }),
@@ -169,6 +213,10 @@ export const useStore = create<StoreState>()(
                     displaySettings: {
                         ...current.displaySettings,
                         ...(persistedState.displaySettings ?? {}),
+                    },
+                    playViewSettings: {
+                        ...current.playViewSettings,
+                        ...(persistedState.playViewSettings ?? {}),
                     },
                     catalog: {
                         ...defaultCatalog,

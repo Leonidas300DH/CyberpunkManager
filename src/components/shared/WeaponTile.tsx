@@ -1,6 +1,7 @@
 'use client';
 
 import { Weapon } from '@/types';
+import { resolveVariant } from '@/lib/variants';
 
 const OFF = 'rgba(100,100,100,0.35)';
 const OFF_STROKE = 'rgba(255,255,255,0.3)';
@@ -46,6 +47,7 @@ export function WeaponRangeArrows({ weapon }: { weapon: Weapon }) {
 
 interface WeaponTileProps {
     weapon: Weapon;
+    variantFactionId?: string;
     overlay?: React.ReactNode;
     campaignStreetCred?: number;
     equippedCount?: number;
@@ -56,11 +58,12 @@ const SKILL_ICON: Record<string, string> = {
     Ranged: '/images/Skills Icons/ranged.png',
 };
 
-export function WeaponTile({ weapon, overlay, campaignStreetCred, equippedCount }: WeaponTileProps) {
-    const showRarity = weapon.rarity < 99;
-    const showStreetCred = (weapon.reqStreetCred ?? 0) > 0;
-    const rarityExceeded = showRarity && equippedCount != null && equippedCount >= weapon.rarity;
-    const streetCredInsufficient = showStreetCred && campaignStreetCred != null && campaignStreetCred < weapon.reqStreetCred;
+export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCred, equippedCount }: WeaponTileProps) {
+    const variant = resolveVariant(weapon.factionVariants, variantFactionId);
+    const showRarity = variant.rarity < 99;
+    const showStreetCred = (variant.reqStreetCred ?? 0) > 0;
+    const rarityExceeded = showRarity && equippedCount != null && equippedCount >= variant.rarity;
+    const streetCredInsufficient = showStreetCred && campaignStreetCred != null && campaignStreetCred < variant.reqStreetCred;
 
     return (
         <div className="relative group/tile bg-surface-dark border border-border hover:border-secondary transition-all overflow-hidden flex">
@@ -77,18 +80,18 @@ export function WeaponTile({ weapon, overlay, campaignStreetCred, equippedCount 
                 />
             )}
             <div className={`relative z-10 w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
-                <div className="font-display font-black text-sm text-black leading-none">{weapon.cost}</div>
+                <div className="font-display font-black text-sm text-black leading-none">{variant.cost}</div>
                 <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
                 {showRarity && (
                     <div className={`font-mono-tech text-[8px] font-bold leading-none mt-0.5 ${rarityExceeded ? 'text-red-600' : 'text-black/60'}`}
-                        title={`Rarity: max ${weapon.rarity} per team`}>
-                        ×{weapon.rarity}
+                        title={`Rarity: max ${variant.rarity} per team`}>
+                        ×{variant.rarity}
                     </div>
                 )}
                 {showStreetCred && (
                     <div className={`font-mono-tech text-[7px] font-bold leading-none ${streetCredInsufficient ? 'text-red-600' : 'text-black/60'}`}
-                        title={`Requires Street Cred ${weapon.reqStreetCred}`}>
-                        SC{weapon.reqStreetCred}
+                        title={`Requires Street Cred ${variant.reqStreetCred}`}>
+                        SC{variant.reqStreetCred}
                     </div>
                 )}
             </div>

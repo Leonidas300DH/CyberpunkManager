@@ -4,7 +4,8 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { Weapon, HackingProgram, TokenState, ProgramQuality } from '@/types';
-import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3 } from 'lucide-react';
+import { parseEquipmentId } from '@/lib/variants';
+import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal } from 'lucide-react';
 import { useRef } from 'react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
@@ -264,7 +265,7 @@ export function ActiveMatchView() {
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
     const [activeDragId, setActiveDragId] = useState<string | null>(null);
     const [overId, setOverId] = useState<string | null>(null);
-    const { characterView, programView, hideKIA } = playViewSettings;
+    const { characterView, programView, hideKIA, enableGlitch, enableCodeRain = true } = playViewSettings;
     const setCharacterView = (v: 'horizontal' | 'vertical') => setPlayViewSettings({ characterView: v });
     const setProgramView = (v: 'card' | 'list') => setPlayViewSettings({ programView: v });
     const setHideKIA = (v: boolean | ((prev: boolean) => boolean)) => {
@@ -272,6 +273,7 @@ export function ActiveMatchView() {
         setPlayViewSettings({ hideKIA: next });
     };
     const [viewsOpen, setViewsOpen] = useState(false);
+    const [glitchTriggers, setGlitchTriggers] = useState<Record<string, number>>({});
     const viewsRef = useRef<HTMLDivElement>(null);
     const [cardHeights, setCardHeights] = useState<Record<string, number>>({});
     const [cardWidths, setCardWidths] = useState<Record<string, number>>({});
@@ -347,7 +349,10 @@ export function ActiveMatchView() {
 
     const spendToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { spent: true });
     const reactivateToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { spent: false });
-    const woundToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { wounded: true });
+    const woundToken = (recruitId: string, idx: number) => {
+        updateToken(recruitId, idx, { wounded: true });
+        setGlitchTriggers(prev => ({ ...prev, [recruitId]: (prev[recruitId] ?? 0) + 1 }));
+    };
     const healToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { wounded: false });
 
     const inspireTeam = () => {
@@ -452,9 +457,10 @@ export function ActiveMatchView() {
 
         // Equipment drag overlay
         const { itemId } = parseDragId(activeDragId);
-        if (itemId.startsWith('weapon-')) {
-            const weapon = catalog.weapons.find(w => w.id === itemId.replace('weapon-', ''));
-            if (weapon) return <div className="w-72 opacity-90 pointer-events-none"><WeaponTile weapon={weapon} /></div>;
+        const parsedOverlay = parseEquipmentId(itemId);
+        if (parsedOverlay.prefix === 'weapon') {
+            const weapon = catalog.weapons.find(w => w.id === parsedOverlay.baseId);
+            if (weapon) return <div className="w-72 opacity-90 pointer-events-none"><WeaponTile weapon={weapon} variantFactionId={parsedOverlay.variantFactionId} /></div>;
         }
         if (itemId.startsWith('program-')) {
             const program = catalog.programs.find(p => p.id === itemId.replace('program-', ''));
@@ -473,6 +479,12 @@ export function ActiveMatchView() {
     const isDone = (tokens: TokenState[]) => tokens.length > 0 && tokens.every(t => t.spent);
     const isRedLined = (tokens: TokenState[]) =>
         tokens.length > 0 && tokens.every(t => t.wounded || t.baseColor === 'red');
+    /** Ratio of red-displaying tokens (0 = healthy, 1 = all red/wounded) */
+    const getDamageRatio = (tokens: TokenState[]) => {
+        if (tokens.length === 0) return 0;
+        const redCount = tokens.filter(t => t.wounded || t.baseColor === 'red').length;
+        return redCount / tokens.length;
+    };
 
     const nonGonkRoster = matchRoster.filter(r => {
         const p = getProfile(r.currentProfileId);
@@ -610,13 +622,33 @@ export function ActiveMatchView() {
                                         </div>
                                     </div>
                                     {/* Hide KIA */}
-                                    <div className="px-3 py-2">
+                                    <div className="px-3 py-2 border-b border-border">
                                         <button
                                             onClick={() => setHideKIA(h => !h)}
                                             className="flex items-center gap-2 w-full text-left text-[10px] font-mono-tech uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
                                         >
                                             {hideKIA ? <EyeOff className="w-3.5 h-3.5 text-accent" /> : <Eye className="w-3.5 h-3.5" />}
                                             {hideKIA ? 'Show KIA' : 'Hide KIA'}
+                                        </button>
+                                    </div>
+                                    {/* Glitch FX */}
+                                    <div className="px-3 py-2 border-b border-border">
+                                        <button
+                                            onClick={() => setPlayViewSettings({ enableGlitch: !enableGlitch })}
+                                            className="flex items-center gap-2 w-full text-left text-[10px] font-mono-tech uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
+                                        >
+                                            {enableGlitch ? <Eye className="w-3.5 h-3.5 text-[#00F0FF]" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                            Glitch FX {enableGlitch ? 'On' : 'Off'}
+                                        </button>
+                                    </div>
+                                    {/* Code Rain FX */}
+                                    <div className="px-3 py-2">
+                                        <button
+                                            onClick={() => setPlayViewSettings({ enableCodeRain: !enableCodeRain })}
+                                            className="flex items-center gap-2 w-full text-left text-[10px] font-mono-tech uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
+                                        >
+                                            {enableCodeRain ? <Terminal className="w-3.5 h-3.5 text-[#00FF41]" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                            Code FX {enableCodeRain ? 'On' : 'Off'}
                                         </button>
                                     </div>
                                 </div>
@@ -653,18 +685,19 @@ export function ActiveMatchView() {
                     // Resolve equipment
                     const equippedIds = activeMatchTeam.equipmentMap?.[recruit.id] ?? [];
                     const equippedItems = equippedIds.map(eqId => {
-                        if (eqId.startsWith('weapon-')) {
-                            const weapon = catalog.weapons.find(w => w.id === eqId.replace('weapon-', ''));
-                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, program: null } : null;
+                        const parsed = parseEquipmentId(eqId);
+                        if (parsed.prefix === 'weapon') {
+                            const weapon = catalog.weapons.find(w => w.id === parsed.baseId);
+                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null } : null;
                         }
-                        if (eqId.startsWith('program-')) {
-                            const program = catalog.programs.find(p => p.id === eqId.replace('program-', ''));
-                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, program } : null;
+                        if (parsed.prefix === 'program') {
+                            const program = catalog.programs.find(p => p.id === parsed.baseId);
+                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program } : null;
                         }
                         return null;
                     }).filter(Boolean) as Array<
-                        | { equipId: string; type: 'weapon'; weapon: Weapon; program: null }
-                        | { equipId: string; type: 'program'; weapon: null; program: HackingProgram }
+                        | { equipId: string; type: 'weapon'; weapon: Weapon; variantFactionId: string; program: null }
+                        | { equipId: string; type: 'program'; weapon: null; variantFactionId: undefined; program: HackingProgram }
                     >;
 
                     // ── Shared sub-components ──
@@ -680,7 +713,7 @@ export function ActiveMatchView() {
                                             ? 'border-2 border-border opacity-50 saturate-0'
                                             : 'border-2 border-transparent'
                             }`}>
-                                <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} />
+                                <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} enableGlitch={enableGlitch} glitchDamage={getDamageRatio(tokens)} isKIA={dead} triggerGlitch={glitchTriggers[recruit.id] ?? 0} />
                             </div>
 
                             {/* KIA overlay */}
@@ -698,7 +731,7 @@ export function ActiveMatchView() {
 
                             {/* Done overlay */}
                             {done && !dead && !redLined && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-30">
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/25 z-30">
                                     <span className="font-display text-2xl font-bold text-muted-foreground uppercase tracking-[0.3em] rotate-[-15deg] drop-shadow-lg">Done</span>
                                 </div>
                             )}
@@ -707,7 +740,7 @@ export function ActiveMatchView() {
                             {redLined && !dead && (
                                 <div className="absolute inset-x-0 top-0 z-30 pointer-events-none">
                                     <div className="bg-gradient-to-b from-red-950/80 to-transparent px-3 pt-4 pb-8 flex items-start justify-center">
-                                        <span className="font-display text-lg font-black uppercase tracking-[0.25em]"
+                                        <span className="font-display text-lg font-black uppercase tracking-[0.25em] animate-redlined-pulse"
                                             style={{ color: '#ff2020', textShadow: '0 0 8px rgba(255,0,0,0.8), 0 0 20px rgba(255,0,0,0.4), 0 0 40px rgba(255,0,0,0.2)' }}>
                                             Red Lined
                                         </span>
@@ -806,7 +839,7 @@ export function ActiveMatchView() {
                                     <div key={item.equipId} className="relative group/equip">
                                         <DraggableEquip id={dragId}>
                                             {item.type === 'weapon' ? (
-                                                <WeaponTile weapon={item.weapon} overlay={
+                                                <WeaponTile weapon={item.weapon} variantFactionId={item.variantFactionId} overlay={
                                                     <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
                                                 } />
                                             ) : programView === 'list' ? (
@@ -815,8 +848,8 @@ export function ActiveMatchView() {
                                                 <div className="relative">
                                                     <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
                                                         <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
-                                                            <div className="card-flip-front"><ProgramCard program={item.program} side="front" /></div>
-                                                            <div className="card-flip-back"><ProgramCard program={item.program} side="back" /></div>
+                                                            <div className="card-flip-front"><ProgramCard program={item.program} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                            <div className="card-flip-back"><ProgramCard program={item.program} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
                                                         </div>
                                                     </div>
                                                     <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
@@ -849,8 +882,8 @@ export function ActiveMatchView() {
                     return (
                         <div key={recruit.id} className="group/unit" onClick={(e) => e.stopPropagation()}>
                             <SortableCard id={recruit.id} isOver={overId === recruit.id && !!activeDragId} isDraggingCharacter={isDraggingCharacter}>
-                                <div className="flex gap-4 items-start">
-                                    {/* Character card — measure width + height */}
+                                <div className="flex gap-4 items-start overflow-x-auto">
+                                    {/* Character card — measure width + height, sticky on scroll */}
                                     <div
                                         ref={(node) => {
                                             if (node) {
@@ -863,7 +896,7 @@ export function ActiveMatchView() {
                                             }
                                         }}
                                         style={{ width: cardColW, ...cardStyle }}
-                                        className="shrink-0"
+                                        className="shrink-0 sticky left-0 z-10 bg-black"
                                     >
                                         {characterCardBlock}
                                         {controlsBlock}
@@ -890,8 +923,8 @@ export function ActiveMatchView() {
                                                                 <div className="relative">
                                                                     <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
                                                                         <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
-                                                                            <div className="card-flip-front"><ProgramCard program={item.program} side="front" /></div>
-                                                                            <div className="card-flip-back"><ProgramCard program={item.program} side="back" /></div>
+                                                                            <div className="card-flip-front"><ProgramCard program={item.program} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                                            <div className="card-flip-back"><ProgramCard program={item.program} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
                                                                         </div>
                                                                     </div>
                                                                     <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
