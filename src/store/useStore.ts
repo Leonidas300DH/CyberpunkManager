@@ -11,7 +11,6 @@ const STORAGE_KEY = 'combat-zone-storage';
 interface DisplaySettings {
     cardColumns: number;
     fontScale: number;
-    surveillanceFilter: boolean;
 }
 
 interface PlayViewSettings {
@@ -112,7 +111,7 @@ export const useStore = create<StoreState>()(
             catalog: emptyCatalog,
             campaigns: [],
             activeMatchTeam: null,
-            displaySettings: { cardColumns: 4, fontScale: 100, surveillanceFilter: true },
+            displaySettings: { cardColumns: 4, fontScale: 100 },
             playViewSettings: { characterView: 'horizontal', programView: 'card', hideKIA: false },
             teamBuilderDrafts: {},
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ModelLineage, ModelProfile, SkillType, RangeType } from '@/types';
 import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@/lib/glossary';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
@@ -271,16 +271,9 @@ interface CharacterCardProps {
     lineage: ModelLineage;
     profile: ModelProfile;
     hideTokens?: boolean;
-    surveillance?: boolean;
 }
 
-export function CharacterCard({ lineage, profile, hideTokens = false, surveillance = false }: CharacterCardProps) {
-    // Randomize surveillance animation timings per card so they never sync
-    const svTimings = useMemo(() => ({
-        '--sv-bar-delay': `${(Math.random() * 5).toFixed(1)}s`,
-        '--sv-bar-dur': `${(5 + Math.random() * 3).toFixed(1)}s`,
-        '--sv-scroll-dur': `${(6 + Math.random() * 4).toFixed(1)}s`,
-    } as React.CSSProperties), []);
+export function CharacterCard({ lineage, profile, hideTokens = false }: CharacterCardProps) {
 
     // Faction rail color
     const rail = FACTION_RAIL_COLORS[lineage.factionIds[0]] ?? DEFAULT_RAIL;
@@ -311,23 +304,18 @@ export function CharacterCard({ lineage, profile, hideTokens = false, surveillan
         <div className="relative w-full aspect-[2/3] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md">
             {/* 1. Background Image */}
             {lineage.imageUrl && (
-                surveillance ? (
-                    <div className="absolute inset-0 z-0 surveillance-wrap" style={svTimings}>
-                        <img src={lineage.imageUrl} alt={lineage.name} className="w-full h-full object-cover surveillance-img" />
-                        <div className="surveillance-overlay" />
-                    </div>
-                ) : (
-                    <img src={lineage.imageUrl} alt={lineage.name} className="absolute inset-0 w-full h-full object-cover z-0" />
-                )
+                <img
+                    src={lineage.imageUrl}
+                    alt={lineage.name}
+                    className="absolute inset-0 w-full h-full object-cover z-0"
+                />
             )}
 
             {/* Bottom gradient for text readability */}
             <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-            {/* Scanline overlay (static, when surveillance is off) */}
-            {!surveillance && (
-                <div className="absolute inset-0 z-[2] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
-            )}
+            {/* Scanline overlay */}
+            <div className="absolute inset-0 z-[2] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
 
             {/* 2. Left Identity Rail */}
             <div

@@ -237,7 +237,6 @@ export function ActiveMatchView() {
     const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam, displaySettings, playViewSettings, setPlayViewSettings } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const cardColumns = displaySettings?.cardColumns ?? 4;
-    const surveillanceOn = displaySettings?.surveillanceFilter ?? true;
     // Column width matching CSS grid (gap-4 = 16px) — used for vertical layout
     const cardColW = `calc((100% - ${(cardColumns - 1) * 16}px) / ${cardColumns})`;
 
@@ -446,7 +445,7 @@ export function ActiveMatchView() {
             if (!profile || !lineage) return null;
             return (
                 <div className="opacity-80 pointer-events-none" style={{ width: `${100 / cardColumns}vw`, maxWidth: '250px' }}>
-                    <CharacterCard lineage={lineage} profile={profile} hideTokens surveillance={surveillanceOn} />
+                    <CharacterCard lineage={lineage} profile={profile} hideTokens />
                 </div>
             );
         }
@@ -681,7 +680,7 @@ export function ActiveMatchView() {
                                             ? 'border-2 border-border opacity-50 saturate-0'
                                             : 'border-2 border-transparent'
                             }`}>
-                                <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} surveillance={surveillanceOn} />
+                                <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} />
                             </div>
 
                             {/* KIA overlay */}
