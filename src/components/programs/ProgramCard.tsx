@@ -6,6 +6,8 @@ import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { CodeRainCanvas } from '@/components/effects/CodeRainCanvas';
+import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
 
 const RELOAD_TEXT: Record<string, string> = {
     Inspire: 'Reload when you Inspire Your Team.',
@@ -131,6 +133,8 @@ function formatCardText(text: string): React.ReactNode[] {
 interface ProgramCardProps {
     program: HackingProgram;
     side: 'front' | 'back';
+    enableCodeRain?: boolean;
+    isFlipped?: boolean;
 }
 
 const BASE_FONT = 16;
@@ -177,7 +181,7 @@ function useAutoFontSize(deps: unknown[]) {
     return { cardRef, textRef, fontSize };
 }
 
-export function ProgramCard({ program, side }: ProgramCardProps) {
+export function ProgramCard({ program, side, enableCodeRain, isFlipped }: ProgramCardProps) {
     const { catalog } = useStore();
 
     const factionName = program.factionId === 'all'
@@ -208,12 +212,17 @@ export function ProgramCard({ program, side }: ProgramCardProps) {
     if (side === 'front') {
         return (
             <div ref={cardRef} className="relative w-full aspect-[2.5/3.5] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md">
-                {/* z-0: Full-bleed artwork */}
-                <img
-                    src={program.imageUrl}
-                    alt={program.name}
-                    className="absolute inset-0 w-full h-full object-cover z-0"
-                />
+                {/* z-0: Full-bleed artwork (with glitch when code rain enabled) */}
+                {enableCodeRain && !isFlipped ? (
+                    <GlitchCanvas imageUrl={program.imageUrl} alt={program.name} className="absolute inset-0 w-full h-full z-0" damage={0.2} />
+                ) : (
+                    <img src={program.imageUrl} alt={program.name} className="absolute inset-0 w-full h-full object-cover z-0" />
+                )}
+
+                {/* Code rain overlay (front = passive, only when visible) */}
+                {enableCodeRain && !isFlipped && (
+                    <CodeRainCanvas className="absolute inset-0 w-full h-full z-0" isActive={false} quality={program.quality} side="front" />
+                )}
 
                 {/* Scanline overlay */}
                 <div className="absolute inset-0 z-[1] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
@@ -333,12 +342,17 @@ export function ProgramCard({ program, side }: ProgramCardProps) {
     // === BACK CARD ===
     return (
         <div ref={cardRef} className="relative w-full aspect-[2.5/3.5] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md">
-            {/* z-0: Full-bleed artwork */}
-            <img
-                src={program.imageUrl}
-                alt={program.name}
-                className="absolute inset-0 w-full h-full object-cover z-0"
-            />
+            {/* z-0: Full-bleed artwork (with intense glitch when code rain enabled) */}
+            {enableCodeRain && isFlipped ? (
+                <GlitchCanvas imageUrl={program.imageUrl} alt={program.name} className="absolute inset-0 w-full h-full z-0" damage={0.85} />
+            ) : (
+                <img src={program.imageUrl} alt={program.name} className="absolute inset-0 w-full h-full object-cover z-0" />
+            )}
+
+            {/* Code rain overlay (back = active/intense, only when visible) */}
+            {enableCodeRain && isFlipped && (
+                <CodeRainCanvas className="absolute inset-0 w-full h-full z-0" isActive={true} quality={program.quality} side="back" />
+            )}
 
             {/* Scanline overlay */}
             <div className="absolute inset-0 z-[1] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />

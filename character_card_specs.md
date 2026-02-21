@@ -4,7 +4,7 @@
 ## 1. Visual Concept
 The character card follows a **"Vertical Datapad Dossier"** aesthetic. It prioritizes the artwork while overlaying critical game information in distinct, high-contrast zones.
 
-### Key Aesthetic Elements
+### Key Aesthetic Elements1
 -   **Orientation**: Portrait (Vertical Card).
 -   **Theme**: "Night City Data Stream" — dark semi-transparent overlays, neon accents (Purple/Green/Yellow), and tech-greeble (barcodes, connection lines).
 -   **Typography**: Industrial sans-serif (e.g., Teko/Rajdhani).

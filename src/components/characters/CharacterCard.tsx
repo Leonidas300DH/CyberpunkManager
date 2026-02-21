@@ -4,6 +4,7 @@ import React from 'react';
 import { ModelLineage, ModelProfile, SkillType, RangeType } from '@/types';
 import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@/lib/glossary';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
+import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
 
 // ── Faction colors for the Identity Rail ──
 const FACTION_RAIL_COLORS: Record<string, { dark: string; mid: string; light: string }> = {
@@ -271,9 +272,16 @@ interface CharacterCardProps {
     lineage: ModelLineage;
     profile: ModelProfile;
     hideTokens?: boolean;
+    enableGlitch?: boolean;
+    /** 0 (healthy) to 1 (red-lined). Drives glitch intensity. */
+    glitchDamage?: number;
+    /** KIA — permanent static snow. */
+    isKIA?: boolean;
+    /** Increment to trigger an immediate glitch (on wound). */
+    triggerGlitch?: number;
 }
 
-export function CharacterCard({ lineage, profile, hideTokens = false }: CharacterCardProps) {
+export function CharacterCard({ lineage, profile, hideTokens = false, enableGlitch = false, glitchDamage = 0, isKIA = false, triggerGlitch = 0 }: CharacterCardProps) {
 
     // Faction rail color
     const rail = FACTION_RAIL_COLORS[lineage.factionIds[0]] ?? DEFAULT_RAIL;
@@ -304,11 +312,22 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
         <div className="relative w-full aspect-[2/3] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md">
             {/* 1. Background Image */}
             {lineage.imageUrl && (
-                <img
-                    src={lineage.imageUrl}
-                    alt={lineage.name}
-                    className="absolute inset-0 w-full h-full object-cover z-0"
-                />
+                enableGlitch ? (
+                    <GlitchCanvas
+                        imageUrl={lineage.imageUrl}
+                        alt={lineage.name}
+                        className="absolute inset-0 w-full h-full object-cover z-0"
+                        damage={glitchDamage}
+                        isKIA={isKIA}
+                        triggerGlitch={triggerGlitch}
+                    />
+                ) : (
+                    <img
+                        src={lineage.imageUrl}
+                        alt={lineage.name}
+                        className="absolute inset-0 w-full h-full object-cover z-0"
+                    />
+                )
             )}
 
             {/* Bottom gradient for text readability */}
