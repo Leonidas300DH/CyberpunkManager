@@ -334,17 +334,18 @@
 
   /* === SURVEILLANCE CAMERA FILTER === */
 
-  /* Wraps only the illustration image — desaturation + glitch */
+  /* Wraps only the illustration image — desaturation only */
   .surveillance-img {
     filter: contrast(1.08) saturate(0.5);
-    animation: surveillance-glitch var(--sv-glitch-dur, 15s) ease-in-out infinite;
-    animation-delay: var(--sv-glitch-delay, 0s);
   }
 
-  /* Overlay sits on the image only (inside .surveillance-img wrapper) */
+  /* Overlay: scanlines + bar + vignette — clipped to image area (excludes rail) */
   .surveillance-overlay {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 17%;
     pointer-events: none;
     overflow: hidden;
   }
@@ -396,16 +397,6 @@
   @keyframes surveillance-bar {
     0% { background-position: 0 0, 0 -100%; }
     100% { background-position: 0 0, 0 100%; }
-  }
-
-  @keyframes surveillance-glitch {
-    0%, 96% { clip-path: none; transform: none; opacity: 1; }
-    96.5% { clip-path: inset(15% 0 60% 0); transform: translate(-3px, -1px); opacity: 0.95; }
-    97% { clip-path: inset(50% 0 20% 0); transform: translate(2px, 1px); opacity: 0.92; }
-    97.5% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 2px); opacity: 0.95; }
-    98% { clip-path: inset(40% 0 30% 0); transform: translate(3px, -1px); opacity: 0.9; }
-    98.5% { clip-path: none; transform: none; opacity: 1; }
-    100% { clip-path: none; transform: none; opacity: 1; }
   }
 
 }

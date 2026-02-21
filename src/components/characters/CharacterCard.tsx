@@ -275,10 +275,8 @@ interface CharacterCardProps {
 }
 
 export function CharacterCard({ lineage, profile, hideTokens = false, surveillance = false }: CharacterCardProps) {
-    // Randomize all surveillance animation timings per card so they never sync
+    // Randomize surveillance animation timings per card so they never sync
     const svTimings = useMemo(() => ({
-        '--sv-glitch-delay': `${(Math.random() * 14).toFixed(1)}s`,
-        '--sv-glitch-dur': `${(13 + Math.random() * 6).toFixed(1)}s`,
         '--sv-bar-delay': `${(Math.random() * 5).toFixed(1)}s`,
         '--sv-bar-dur': `${(5 + Math.random() * 3).toFixed(1)}s`,
         '--sv-scroll-dur': `${(6 + Math.random() * 4).toFixed(1)}s`,
