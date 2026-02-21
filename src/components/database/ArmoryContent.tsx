@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { ItemCategory, ActionColor, HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
@@ -37,6 +37,21 @@ const FACTION_COLOR_MAP: Record<string, string> = {
     'universal': 'border-gray-500',
 };
 
+const FACTION_TEXT_COLOR_MAP: Record<string, string> = {
+    'faction-arasaka': 'text-red-600',
+    'faction-bozos': 'text-purple-500',
+    'faction-danger-gals': 'text-pink-400',
+    'faction-edgerunners': 'text-emerald-500',
+    'faction-gen-red': 'text-white',
+    'faction-lawmen': 'text-blue-500',
+    'faction-maelstrom': 'text-red-700',
+    'faction-trauma-team': 'text-white',
+    'faction-tyger-claws': 'text-cyan-400',
+    'faction-zoners': 'text-orange-500',
+    'all': 'text-gray-500',
+    'universal': 'text-gray-500',
+};
+
 const TAB_STYLES: Record<string, { border: string; text: string; gradient: string; glow: string }> = {
     Gear: { border: 'border-secondary', text: 'text-secondary', gradient: 'from-secondary to-cyan-900', glow: 'group-hover:shadow-[0_0_10px_rgba(0,240,255,0.3)]' },
     Program: { border: 'border-cyber-purple', text: 'text-cyber-purple', gradient: 'from-cyber-purple to-purple-900', glow: 'group-hover:shadow-[0_0_10px_rgba(168,85,247,0.3)]' },
@@ -44,40 +59,25 @@ const TAB_STYLES: Record<string, { border: string; text: string; gradient: strin
     Objective: { border: 'border-cyber-green', text: 'text-cyber-green', gradient: 'from-cyber-green to-green-900', glow: 'group-hover:shadow-[0_0_10px_rgba(57,255,20,0.3)]' },
 };
 
-/** Resize image client-side and return as data URL */
-function resizeImageToDataUrl(file: File, size: number, quality: number): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const img = new window.Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { reject(new Error('Canvas not supported')); return; }
-            // Cover crop: use the largest centered square from the source
-            const srcSize = Math.min(img.width, img.height);
-            const sx = (img.width - srcSize) / 2;
-            const sy = (img.height - srcSize) / 2;
-            ctx.drawImage(img, sx, sy, srcSize, srcSize, 0, 0, size, size);
-            resolve(canvas.toDataURL('image/webp', quality));
-        };
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = URL.createObjectURL(file);
-    });
-}
-
-/** Client-side image upload — resizes and stores as data URL */
-function WeaponImageUpload({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+/** Upload image to /api/upload-weapon-image → saved in public/images/weapons/ */
+function WeaponImageUpload({ value, onChange, weaponName }: { value: string; onChange: (url: string) => void; weaponName: string }) {
     const fileRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
 
     const handleFile = async (file: File) => {
+        const name = weaponName.trim() || 'unnamed-weapon';
         setUploading(true);
         try {
-            const dataUrl = await resizeImageToDataUrl(file, 512, 0.8);
-            onChange(dataUrl);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('name', name);
+            formData.append('overwrite', 'true');
+            const res = await fetch('/api/upload-weapon-image', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Upload failed');
+            onChange(data.url);
         } catch {
-            alert('Failed to process image');
+            alert('Failed to upload image');
         } finally {
             setUploading(false);
         }
@@ -128,6 +128,7 @@ const EMPTY_WEAPON: Partial<Weapon> & { variantRows?: FactionVariant[] } = {
     name: '', source: 'Manual', isWeapon: true, isGear: false,
     factionVariants: [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }],
     rangeRed: false, rangeYellow: false, rangeGreen: false, rangeLong: false,
+    range2Red: false, range2Yellow: false, range2Green: false, range2Long: false,
     description: '', keywords: [], imageUrl: DEFAULT_WEAPON_IMAGE,
 };
 
@@ -166,6 +167,16 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     // View mode + card flip state
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+
+    const weaponGridRef = useRef<HTMLDivElement>(null);
+    useLayoutEffect(() => {
+        if (!weaponGridRef.current || activeTab !== 'Gear') return;
+        const cards = Array.from(weaponGridRef.current.children) as HTMLElement[];
+        cards.forEach(c => c.style.minHeight = '');
+        if (cards.length === 0) return;
+        const maxH = Math.max(...cards.map(c => c.getBoundingClientRect().height));
+        cards.forEach(c => c.style.minHeight = `${maxH}px`);
+    });
 
     const tab = TAB_STYLES[activeTab] ?? TAB_STYLES.Gear;
     const programs = catalog.programs ?? [];
@@ -226,6 +237,12 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
         }
         return true;
     }).sort((a, b) => a.name.localeCompare(b.name));
+
+    const variantCards = filteredWeapons.flatMap(weapon =>
+        weapon.factionVariants
+            .filter(v => gearFactionFilters.size === 0 || gearFactionFilters.has(v.factionId))
+            .map(variant => ({ weapon, variant }))
+    );
 
     // Programs detail view
     if (selectedProgram) {
@@ -312,6 +329,10 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 rangeYellow: weaponForm.rangeYellow ?? false,
                 rangeGreen: weaponForm.rangeGreen ?? false,
                 rangeLong: weaponForm.rangeLong ?? false,
+                range2Red: weaponForm.range2Red ?? false,
+                range2Yellow: weaponForm.range2Yellow ?? false,
+                range2Green: weaponForm.range2Green ?? false,
+                range2Long: weaponForm.range2Long ?? false,
                 description: weaponForm.description ?? '',
                 skillReq: weaponForm.skillReq,
                 keywords: weaponForm.keywords ?? [],
@@ -573,7 +594,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             ))}
                         </div>
                         <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest ml-auto hidden md:block">
-                            <span className="text-secondary">{filteredWeapons.length}</span> / {weapons.length}
+                            <span className="text-secondary">{variantCards.length}</span> / {weapons.length}
                         </span>
                         {isAdmin && (
                             <>
@@ -671,7 +692,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3 py-2">
-                            <WeaponImageUpload value={weaponForm.imageUrl || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} />
+                            <WeaponImageUpload value={weaponForm.imageUrl || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} weaponName={weaponForm.name || ''} />
                             <div className="space-y-2">
                                 <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
                                 <Input value={weaponForm.name || ''} onChange={(e) => setWeaponForm({ ...weaponForm, name: e.target.value })} placeholder="Weapon Name" className="bg-black border-border font-mono-tech" />
@@ -730,12 +751,14 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                 <Label className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">Skill</Label>
                                 <select
                                     value={weaponForm.skillReq ?? ''}
-                                    onChange={(e) => setWeaponForm({ ...weaponForm, skillReq: (e.target.value as 'Melee' | 'Ranged') || undefined })}
+                                    onChange={(e) => setWeaponForm({ ...weaponForm, skillReq: (e.target.value as 'Melee' | 'Ranged' | 'Medical' | 'Tech') || undefined })}
                                     className="bg-black border border-border px-2 py-1 font-mono-tech text-xs uppercase text-white"
                                 >
                                     <option value="">None</option>
                                     <option value="Melee">Melee</option>
                                     <option value="Ranged">Ranged</option>
+                                    <option value="Medical">Medical</option>
+                                    <option value="Tech">Tech</option>
                                 </select>
                             </div>
                             <div className="space-y-2">
@@ -743,6 +766,21 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                 <div className="flex gap-3">
                                     {(['rangeRed', 'rangeYellow', 'rangeGreen', 'rangeLong'] as const).map(field => {
                                         const label = field.replace('range', '');
+                                        const colors: Record<string, string> = { Red: 'accent-red-500', Yellow: 'accent-yellow-500', Green: 'accent-emerald-500', Long: 'accent-gray-500' };
+                                        return (
+                                            <label key={field} className="flex items-center gap-1.5 cursor-pointer">
+                                                <input type="checkbox" checked={(weaponForm[field] as boolean) ?? false} onChange={(e) => setWeaponForm({ ...weaponForm, [field]: e.target.checked })} className={colors[label]} />
+                                                <span className="font-mono-tech text-xs uppercase text-white">{label}</span>
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Range 2</Label>
+                                <div className="flex gap-3">
+                                    {(['range2Red', 'range2Yellow', 'range2Green', 'range2Long'] as const).map(field => {
+                                        const label = field.replace('range2', '');
                                         const colors: Record<string, string> = { Red: 'accent-red-500', Yellow: 'accent-yellow-500', Green: 'accent-emerald-500', Long: 'accent-gray-500' };
                                         return (
                                             <label key={field} className="flex items-center gap-1.5 cursor-pointer">
@@ -768,14 +806,15 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     </DialogContent>
                 </Dialog>
 
-                {/* Weapons grid */}
-                <div className={gridClass}>
-                    {filteredWeapons.map(weapon => {
+                {/* Weapons grid — one card per faction variant */}
+                <div ref={weaponGridRef} className={gridClass}>
+                    {variantCards.map(({ weapon, variant }) => {
                         const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
-                        const skillIcon = weapon.skillReq === 'Melee' ? '/images/Skills Icons/melee.png' : weapon.skillReq === 'Ranged' ? '/images/Skills Icons/ranged.png' : null;
-                        const displayVariant = resolveVariant(weapon.factionVariants, gearFactionFilters.size === 1 ? [...gearFactionFilters][0] : undefined);
+                        const skillIcon = weapon.skillReq ? ({ Melee: '/images/Skills Icons/melee.png', Ranged: '/images/Skills Icons/ranged.png', Medical: '/images/Skills Icons/medical.png', Tech: '/images/Skills Icons/tech.png' }[weapon.skillReq] ?? null) : null;
+                        const variantFactionName = variant.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
+                        const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
                         return (
-                            <div key={weapon.id} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
+                            <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
                                 {weapon.imageUrl ? (
                                     <img src={weapon.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                                         style={{ opacity: 0.55, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
@@ -786,27 +825,20 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                         </svg>
                                     </div>
                                 )}
-                                {/* Variant faction badges */}
-                                <div className="absolute top-1 right-1 z-10 flex gap-0.5">
-                                    {weapon.factionVariants.map(v => {
-                                        const fColor = FACTION_COLOR_MAP[v.factionId] ?? 'border-gray-500';
-                                        return <div key={v.factionId} className={`w-2 h-2 border ${fColor} ${fColor.replace('border-', 'bg-')}`} title={v.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === v.factionId)?.name ?? v.factionId)} />;
-                                    })}
-                                </div>
                                 <div className="relative z-10 flex flex-1">
                                     <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
-                                        <div className="font-display font-black text-sm text-black leading-none">{displayVariant.cost}</div>
+                                        <div className="font-display font-black text-sm text-black leading-none">{variant.cost}</div>
                                         <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
-                                        {displayVariant.rarity < 99 && (
+                                        {variant.rarity < 99 && (
                                             <div className="font-mono-tech text-[8px] font-bold leading-none mt-0.5 text-black/60"
-                                                title={`Rarity: max ${displayVariant.rarity} per team`}>
-                                                ×{displayVariant.rarity}
+                                                title={`Rarity: max ${variant.rarity} per team`}>
+                                                ×{variant.rarity}
                                             </div>
                                         )}
-                                        {(displayVariant.reqStreetCred ?? 0) > 0 && (
+                                        {(variant.reqStreetCred ?? 0) > 0 && (
                                             <div className="font-mono-tech text-[7px] font-bold leading-none text-black/60"
-                                                title={`Requires Street Cred ${displayVariant.reqStreetCred}`}>
-                                                SC{displayVariant.reqStreetCred}
+                                                title={`Requires Street Cred ${variant.reqStreetCred}`}>
+                                                SC{variant.reqStreetCred}
                                             </div>
                                         )}
                                     </div>
@@ -814,8 +846,8 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                         <div className="flex justify-between items-start">
                                             <div className="flex-1">
                                                 <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
-                                                <span className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-wider">
-                                                    {weapon.factionVariants.map(v => v.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === v.factionId)?.name ?? v.factionId)).join(' · ')}
+                                                <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${variantTextColor}`}>
+                                                    {variantFactionName}
                                                 </span>
                                             </div>
                                             {isAdmin && (
@@ -825,10 +857,20 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                                 </div>
                                             )}
                                         </div>
-                                        {showRange && (
+                                        {(showRange || skillIcon || (weapon.grantsArmor != null && weapon.grantsArmor > 0)) && (
                                             <div className="-ml-2 flex items-center gap-2">
                                                 {skillIcon && (
                                                     <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] shrink-0 object-contain" />
+                                                )}
+                                                {weapon.grantsArmor != null && weapon.grantsArmor > 0 && (
+                                                    <div className="flex items-center -gap-px shrink-0">
+                                                        <span className="w-3 text-center font-display font-black text-xs text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)] [-webkit-text-stroke:0.5px_rgba(0,0,0,0.6)] -mr-0.5">{weapon.grantsArmor}</span>
+                                                        <div className="w-7 h-7 flex items-center justify-start pr-[1px]">
+                                                            <svg className="w-[22px] h-[22px]" viewBox="0 0 40 40" fill="none">
+                                                                <path d="M20 4L6 10v10c0 9 5.6 16.8 14 19 8.4-2.2 14-10 14-19V10L20 4z" fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="2" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
                                                 )}
                                                 <div className="w-[60%]">
                                                     <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
@@ -847,6 +889,27 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                             </div>
                                         )}
                                         <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                        {(weapon.range2Red || weapon.range2Yellow || weapon.range2Green || weapon.range2Long) && (
+                                            <div className="-ml-2 flex items-center gap-2">
+                                                {skillIcon && (
+                                                    <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] shrink-0 object-contain" />
+                                                )}
+                                                <div className="w-[60%]">
+                                                    <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
+                                                        <polygon points={AP.red} fill={weapon.range2Red ? '#dc2626' : OFF} stroke={weapon.range2Red ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Red ? 1 : 0.5} />
+                                                        <polygon points={AP.yellow} fill={weapon.range2Yellow ? '#eab308' : OFF} stroke={weapon.range2Yellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Yellow ? 1 : 0.5} />
+                                                        <polygon points={AP.green} fill={weapon.range2Green ? '#22c55e' : OFF} stroke={weapon.range2Green ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Green ? 1 : 0.5} />
+                                                        {weapon.range2Long && (
+                                                            <>
+                                                                <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
+                                                                <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                                <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                            </>
+                                                        )}
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -854,7 +917,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     })}
                 </div>
 
-                {filteredWeapons.length === 0 && (
+                {variantCards.length === 0 && (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
                         <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">No Gear Found</h3>
                         <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Database query returned zero results.</p>

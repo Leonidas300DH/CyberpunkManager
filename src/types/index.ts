@@ -111,11 +111,16 @@ export interface Weapon {
     factionVariants: FactionVariant[];
     isWeapon: boolean;
     isGear: boolean;
-    skillReq?: 'Melee' | 'Ranged'; // Skill used — undefined for gear/equipment
+    skillReq?: 'Melee' | 'Ranged' | 'Medical' | 'Tech'; // Skill used — undefined for gear/equipment
+    grantsArmor?: number; // Armor bonus granted when equipped
     rangeRed: boolean;
     rangeYellow: boolean;
     rangeGreen: boolean;
     rangeLong: boolean;
+    range2Red?: boolean;
+    range2Yellow?: boolean;
+    range2Green?: boolean;
+    range2Long?: boolean;
     description: string;
     keywords: string[];    // e.g., ['Bulky', 'Deadly']
     grantsNetrunner?: boolean; // true = equipping this allows hacking programs
