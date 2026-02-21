@@ -4,7 +4,6 @@ import React, { useMemo } from 'react';
 import { ModelLineage, ModelProfile, SkillType, RangeType } from '@/types';
 import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@/lib/glossary';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
-import { useStore } from '@/store/useStore';
 
 // ── Faction colors for the Identity Rail ──
 const FACTION_RAIL_COLORS: Record<string, { dark: string; mid: string; light: string }> = {
@@ -272,12 +271,18 @@ interface CharacterCardProps {
     lineage: ModelLineage;
     profile: ModelProfile;
     hideTokens?: boolean;
+    surveillance?: boolean;
 }
 
-export function CharacterCard({ lineage, profile, hideTokens = false }: CharacterCardProps) {
-    const surveillanceFilter = useStore((s) => s.displaySettings.surveillanceFilter);
-    // Random-ish glitch delay per card so they don't all glitch in sync
-    const glitchDelay = useMemo(() => `${(Math.random() * 12).toFixed(1)}s`, []);
+export function CharacterCard({ lineage, profile, hideTokens = false, surveillance = false }: CharacterCardProps) {
+    // Randomize all surveillance animation timings per card so they never sync
+    const svTimings = useMemo(() => ({
+        '--sv-glitch-delay': `${(Math.random() * 14).toFixed(1)}s`,
+        '--sv-glitch-dur': `${(13 + Math.random() * 6).toFixed(1)}s`,
+        '--sv-bar-delay': `${(Math.random() * 5).toFixed(1)}s`,
+        '--sv-bar-dur': `${(5 + Math.random() * 3).toFixed(1)}s`,
+        '--sv-scroll-dur': `${(6 + Math.random() * 4).toFixed(1)}s`,
+    } as React.CSSProperties), []);
 
     // Faction rail color
     const rail = FACTION_RAIL_COLORS[lineage.factionIds[0]] ?? DEFAULT_RAIL;
@@ -305,26 +310,27 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
     const passives = parsePassiveRules(profile.passiveRules);
 
     return (
-        <div
-            className={`relative w-full aspect-[2/3] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md${surveillanceFilter ? ' surveillance-card' : ''}`}
-            style={surveillanceFilter ? { '--glitch-delay': glitchDelay } as React.CSSProperties : undefined}
-        >
-            {/* 1. Background Image */}
+        <div className="relative w-full aspect-[2/3] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md">
+            {/* 1. Background Image — wrapped for surveillance effect */}
             {lineage.imageUrl && (
-                <img
-                    src={lineage.imageUrl}
-                    alt={lineage.name}
-                    className="absolute inset-0 w-full h-full object-cover z-0"
-                />
+                <div
+                    className={`absolute inset-0 z-0${surveillance ? ' surveillance-img' : ''}`}
+                    style={surveillance ? svTimings : undefined}
+                >
+                    <img
+                        src={lineage.imageUrl}
+                        alt={lineage.name}
+                        className="w-full h-full object-cover"
+                    />
+                    {surveillance && <div className="surveillance-overlay" />}
+                </div>
             )}
 
             {/* Bottom gradient for text readability */}
             <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-            {/* Scanline / Surveillance overlay */}
-            {surveillanceFilter ? (
-                <div className="surveillance-overlay" />
-            ) : (
+            {/* Scanline overlay (static, always present when surveillance is off) */}
+            {!surveillance && (
                 <div className="absolute inset-0 z-[2] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
             )}
 
