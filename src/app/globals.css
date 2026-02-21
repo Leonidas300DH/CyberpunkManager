@@ -334,20 +334,16 @@
 
   /* === SURVEILLANCE CAMERA FILTER === */
 
-  /* Wraps only the illustration image — desaturation only */
+  /* Applied directly on <img> — desaturation + slight contrast */
   .surveillance-img {
     filter: contrast(1.08) saturate(0.5);
   }
 
-  /* Overlay: scanlines + bar + vignette — clipped to image area (excludes rail) */
+  /* Sits between <img> and gradient in DOM — gradient covers it */
   .surveillance-overlay {
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 17%;
+    inset: 0;
     pointer-events: none;
-    overflow: hidden;
   }
 
   /* Scanlines + rolling shadow bar */
