@@ -49,8 +49,6 @@ export default function RootLayout({
       >
         <Providers>
           <AppInit />
-          {/* Scanline overlay */}
-          <div className="fixed inset-0 z-50 pointer-events-none opacity-10 scanlines" />
           <main className="container mx-auto px-4 py-4 min-h-screen">
             {children}
           </main>
