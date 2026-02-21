@@ -311,22 +311,20 @@ export function CharacterCard({ lineage, profile, hideTokens = false, surveillan
         <div className="relative w-full aspect-[2/3] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md">
             {/* 1. Background Image */}
             {lineage.imageUrl && (
-                <img
-                    src={lineage.imageUrl}
-                    alt={lineage.name}
-                    className={`absolute inset-0 w-full h-full object-cover z-0${surveillance ? ' surveillance-img' : ''}`}
-                />
+                surveillance ? (
+                    <div className="absolute inset-0 z-0 surveillance-wrap" style={svTimings}>
+                        <img src={lineage.imageUrl} alt={lineage.name} className="w-full h-full object-cover surveillance-img" />
+                        <div className="surveillance-overlay" />
+                    </div>
+                ) : (
+                    <img src={lineage.imageUrl} alt={lineage.name} className="absolute inset-0 w-full h-full object-cover z-0" />
+                )
             )}
 
-            {/* Surveillance overlay — sits between image and gradient */}
-            {surveillance && (
-                <div className="surveillance-overlay" style={svTimings} />
-            )}
-
-            {/* Bottom gradient for text readability — covers surveillance overlay */}
+            {/* Bottom gradient for text readability */}
             <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-            {/* Scanline overlay (static fallback when surveillance is off) */}
+            {/* Scanline overlay (static, when surveillance is off) */}
             {!surveillance && (
                 <div className="absolute inset-0 z-[2] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
             )}

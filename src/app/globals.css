@@ -334,12 +334,19 @@
 
   /* === SURVEILLANCE CAMERA FILTER === */
 
-  /* Applied directly on <img> — desaturation + slight contrast */
+  /* Wrapper: isolate composites image+overlay into one flat layer.
+     Elements above (gradient, rail, stats) see the composited result,
+     not individual overlay layers bleeding through. */
+  .surveillance-wrap {
+    isolation: isolate;
+  }
+
+  /* Desaturation + slight contrast on the <img> */
   .surveillance-img {
     filter: contrast(1.08) saturate(0.5);
   }
 
-  /* Sits between <img> and gradient in DOM — gradient covers it */
+  /* Scanlines + bar + vignette — composited into the image via isolation */
   .surveillance-overlay {
     position: absolute;
     inset: 0;
