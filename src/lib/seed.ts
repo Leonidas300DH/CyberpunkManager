@@ -547,8 +547,8 @@ export const WEAPONS: Weapon[] = [
     { id: 'weapon-wolver', name: 'Wolver', source: 'Custom', factionVariants: [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }], isWeapon: true, isGear: false, skillReq: 'Melee', rangeRed: true, rangeYellow: false, rangeGreen: false, rangeLong: false, description: 'Deadly Crits. [RE]actions made using this attack gain Accurate.', keywords: [], imageUrl: '/images/weapons/wolver.png' },
 
     // --- NEW: Wave 2 characters ---
-    { id: 'weapon-heavy-pistols', name: 'Heavy Pistols', source: 'Custom', factionVariants: [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }], isWeapon: true, isGear: false, skillReq: 'Ranged', rangeRed: true, rangeYellow: true, rangeGreen: true, rangeLong: false, description: 'Deadly Crits. [RE]actions made using this attack gain Accurate.', keywords: [], imageUrl: '/images/weapons/default.png' },
-    { id: 'weapon-sewer-savvy', name: 'Sewer-Savvy', source: 'Custom', factionVariants: [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }], isWeapon: true, isGear: false, skillReq: 'Melee', rangeRed: true, rangeYellow: false, rangeGreen: false, rangeLong: false, description: 'Torrent.', keywords: [], imageUrl: '/images/weapons/default.png' },
+    { id: 'weapon-heavy-pistols', name: 'Heavy Pistols', source: 'Custom', factionVariants: [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }], isWeapon: true, isGear: false, skillReq: 'Ranged', rangeRed: true, rangeYellow: true, rangeGreen: true, rangeLong: false, description: 'Deadly Crits. [RE]actions made using this attack gain Accurate.', keywords: [], imageUrl: '/images/weapons/heavy-pistols.png' },
+    { id: 'weapon-sewer-savvy', name: 'Sewer-Savvy', source: 'Custom', factionVariants: [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }], isWeapon: true, isGear: false, skillReq: 'Melee', rangeRed: true, rangeYellow: false, rangeGreen: false, rangeLong: false, description: 'Torrent.', keywords: [], imageUrl: '/images/weapons/sewer-savvy.png' },
 ];
 
 // ============================================================
