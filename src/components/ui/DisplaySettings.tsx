@@ -16,7 +16,7 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
     const panelRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const { displaySettings, setDisplaySettings } = useStore();
-    const { cardColumns, fontScale } = displaySettings;
+    const { cardColumns, fontScale, surveillanceFilter } = displaySettings;
 
     // Close on outside click
     useEffect(() => {
@@ -120,6 +120,24 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
                                 A+
                             </button>
                         </div>
+                    </div>
+
+                    {/* Surveillance filter */}
+                    <div>
+                        <label className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest block mb-2">
+                            Surveillance filter
+                        </label>
+                        <button
+                            onClick={() => setDisplaySettings({ surveillanceFilter: !surveillanceFilter })}
+                            className={cn(
+                                "px-3 h-8 border font-mono-tech text-sm flex items-center justify-center clip-corner-tr transition-colors",
+                                surveillanceFilter
+                                    ? "border-secondary bg-secondary text-black"
+                                    : "border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary"
+                            )}
+                        >
+                            {surveillanceFilter ? 'ON' : 'OFF'}
+                        </button>
                     </div>
 
                 </div>

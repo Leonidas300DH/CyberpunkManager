@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ModelLineage, ModelProfile, SkillType, RangeType } from '@/types';
 import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@/lib/glossary';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
+import { useStore } from '@/store/useStore';
 
 // ── Faction colors for the Identity Rail ──
 const FACTION_RAIL_COLORS: Record<string, { dark: string; mid: string; light: string }> = {
@@ -127,7 +128,7 @@ const SKILL_ORDER: SkillType[] = ['Ranged', 'Melee', 'Reflexes', 'Medical', 'Tec
 // ── Sub-components ──
 
 /** Single action token shape: green=pentagon, yellow=inverted triangle, red=square */
-function ActionTokenShape({ color, size = 26 }: { color: 'green' | 'yellow' | 'red'; size?: number }) {
+function ActionTokenShape({ color, size = 31 }: { color: 'green' | 'yellow' | 'red'; size?: number }) {
     const fills = { green: '#22c55e', yellow: '#eab308', red: '#dc2626' };
     const fill = fills[color];
 
@@ -274,6 +275,10 @@ interface CharacterCardProps {
 }
 
 export function CharacterCard({ lineage, profile, hideTokens = false }: CharacterCardProps) {
+    const surveillanceFilter = useStore((s) => s.displaySettings.surveillanceFilter);
+    // Random-ish glitch delay per card so they don't all glitch in sync
+    const glitchDelay = useMemo(() => `${(Math.random() * 12).toFixed(1)}s`, []);
+
     // Faction rail color
     const rail = FACTION_RAIL_COLORS[lineage.factionIds[0]] ?? DEFAULT_RAIL;
 
@@ -300,7 +305,10 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
     const passives = parsePassiveRules(profile.passiveRules);
 
     return (
-        <div className="relative w-full aspect-[2/3] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md">
+        <div
+            className={`relative w-full aspect-[2/3] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md${surveillanceFilter ? ' surveillance-card' : ''}`}
+            style={surveillanceFilter ? { '--glitch-delay': glitchDelay } as React.CSSProperties : undefined}
+        >
             {/* 1. Background Image */}
             {lineage.imageUrl && (
                 <img
@@ -313,8 +321,12 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
             {/* Bottom gradient for text readability */}
             <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-            {/* Scanline overlay */}
-            <div className="absolute inset-0 z-[2] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
+            {/* Scanline / Surveillance overlay */}
+            {surveillanceFilter ? (
+                <div className="surveillance-overlay" />
+            ) : (
+                <div className="absolute inset-0 z-[2] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
+            )}
 
             {/* 2. Left Identity Rail */}
             <div
@@ -348,9 +360,9 @@ export function CharacterCard({ lineage, profile, hideTokens = false }: Characte
                     {tokens.map((color, i) => (
                         <React.Fragment key={i}>
                             {i > 0 && (
-                                <div className="-my-0.5 w-px h-2 bg-black/70" />
+                                <div className="-my-[3px] w-px h-2.5 bg-black/70" />
                             )}
-                            <ActionTokenShape color={color} size={26} />
+                            <ActionTokenShape color={color} size={31} />
                         </React.Fragment>
                     ))}
                 </div>

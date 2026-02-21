@@ -11,6 +11,13 @@ const STORAGE_KEY = 'combat-zone-storage';
 interface DisplaySettings {
     cardColumns: number;
     fontScale: number;
+    surveillanceFilter: boolean;
+}
+
+interface PlayViewSettings {
+    characterView: 'horizontal' | 'vertical';
+    programView: 'card' | 'list';
+    hideKIA: boolean;
 }
 
 export interface TeamBuilderDraft {
@@ -24,6 +31,7 @@ interface StoreState {
     campaigns: Campaign[];
     activeMatchTeam: MatchTeam | null;
     displaySettings: DisplaySettings;
+    playViewSettings: PlayViewSettings;
     teamBuilderDrafts: Record<string, TeamBuilderDraft>;
 
     // Actions
@@ -33,6 +41,7 @@ interface StoreState {
     deleteCampaign: (id: string) => void;
     setActiveMatchTeam: (team: MatchTeam | null) => void;
     setDisplaySettings: (updates: Partial<DisplaySettings>) => void;
+    setPlayViewSettings: (updates: Partial<PlayViewSettings>) => void;
     setTeamBuilderDraft: (campaignId: string, draft: Partial<TeamBuilderDraft>) => void;
     clearTeamBuilderDraft: (campaignId: string) => void;
     reset: () => void;
@@ -103,7 +112,8 @@ export const useStore = create<StoreState>()(
             catalog: emptyCatalog,
             campaigns: [],
             activeMatchTeam: null,
-            displaySettings: { cardColumns: 4, fontScale: 100 },
+            displaySettings: { cardColumns: 4, fontScale: 100, surveillanceFilter: true },
+            playViewSettings: { characterView: 'horizontal', programView: 'card', hideKIA: false },
             teamBuilderDrafts: {},
 
             setCatalog: (data) => set({ catalog: data }),
@@ -117,6 +127,9 @@ export const useStore = create<StoreState>()(
             setActiveMatchTeam: (team) => set({ activeMatchTeam: team }),
             setDisplaySettings: (updates) => set((state) => ({
                 displaySettings: { ...state.displaySettings, ...updates },
+            })),
+            setPlayViewSettings: (updates) => set((state) => ({
+                playViewSettings: { ...state.playViewSettings, ...updates },
             })),
             setTeamBuilderDraft: (campaignId, draft) => set((state) => ({
                 teamBuilderDrafts: {

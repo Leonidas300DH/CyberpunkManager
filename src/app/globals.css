@@ -331,4 +331,80 @@
     0% { bottom: 100%; }
     100% { bottom: -100%; }
   }
+
+  /* === SURVEILLANCE CAMERA FILTER === */
+
+  .surveillance-card {
+    filter: contrast(1.1) saturate(0.45);
+    animation: surveillance-glitch 15s ease-in-out infinite;
+    animation-delay: var(--glitch-delay, 0s);
+  }
+
+  .surveillance-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Animated scanlines */
+  .surveillance-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      /* Scanlines */
+      repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.12) 2px,
+        rgba(0, 0, 0, 0.12) 4px
+      ),
+      /* Rolling shadow bar */
+      linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 30%,
+        rgba(0, 0, 0, 0.25) 40%,
+        rgba(0, 0, 0, 0.4) 50%,
+        rgba(0, 0, 0, 0.25) 60%,
+        transparent 70%,
+        transparent 100%
+      );
+    background-size: 100% 4px, 100% 200%;
+    animation: surveillance-scroll 8s linear infinite, surveillance-bar 6s ease-in-out infinite;
+  }
+
+  /* Vignette + noise */
+  .surveillance-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at center, transparent 35%, rgba(0, 0, 0, 0.75) 100%);
+    mix-blend-mode: multiply;
+  }
+
+  @keyframes surveillance-scroll {
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 0 4px, 0 0; }
+  }
+
+  @keyframes surveillance-bar {
+    0% { background-position: 0 0, 0 -100%; }
+    100% { background-position: 0 0, 0 100%; }
+  }
+
+  @keyframes surveillance-glitch {
+    0%, 96% { clip-path: none; transform: none; opacity: 1; }
+    96.5% { clip-path: inset(15% 0 60% 0); transform: translate(-4px, -2px); opacity: 0.95; }
+    97% { clip-path: inset(50% 0 20% 0); transform: translate(3px, 1px); opacity: 0.9; }
+    97.5% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 3px); opacity: 0.95; }
+    98% { clip-path: inset(40% 0 30% 0); transform: translate(5px, -1px); opacity: 0.85; }
+    98.5% { clip-path: none; transform: none; opacity: 1; }
+    100% { clip-path: none; transform: none; opacity: 1; }
+  }
+
 }
