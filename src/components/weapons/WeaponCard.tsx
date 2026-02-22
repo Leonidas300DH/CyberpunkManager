@@ -117,11 +117,11 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
     const showRange2 = weapon.range2Red || weapon.range2Yellow || weapon.range2Green || weapon.range2Long;
     const skillIcon = weapon.skillReq ? SKILL_ICONS[weapon.skillReq] ?? null : null;
     const hasArmor = weapon.grantsArmor != null && weapon.grantsArmor > 0;
-    const hasGauge = !!skillIcon || showRange || hasArmor;
 
     const variantFactionName = variant.factionId === 'universal'
         ? 'Universal'
         : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
+    const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
 
     const sidebar = getSidebarColor(weapon);
 
@@ -210,124 +210,123 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                 </div>
             </div>
 
-            {/* TOP GAUGE BAR */}
-            {hasGauge && (
-                <div className="absolute top-0 left-[14%] right-0 z-20 bg-black/60 backdrop-blur-sm px-[3%] py-[2%] flex items-center gap-[2%]">
-                    {skillIcon && (
-                        <div className="flex items-center shrink-0">
-                            <img
-                                src={skillIcon}
-                                alt={weapon.skillReq!}
-                                className="w-[18%] min-w-[28px] object-contain"
-                            />
-                            {weapon.skillBonus != null && weapon.skillBonus !== 0 && (
-                                <span className="font-display font-black text-xs text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)] [-webkit-text-stroke:0.5px_rgba(0,0,0,0.6)] -ml-1">
-                                    {weapon.skillBonus > 0 ? `+${weapon.skillBonus}` : weapon.skillBonus}
-                                </span>
-                            )}
-                        </div>
-                    )}
-                    {showRange && (
-                        <svg viewBox="0 0 228 22" className="w-[65%] h-auto" fill="none">
-                            <polygon points={AP.red} fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
-                            <polygon points={AP.yellow} fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
-                            <polygon points={AP.green} fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
-                            {weapon.rangeLong && (
-                                <>
-                                    <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                    <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                    <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                </>
-                            )}
-                        </svg>
-                    )}
-                    {hasArmor && (
-                        <div className="relative shrink-0 w-7 h-7 flex items-center justify-center">
-                            <svg className="w-[22px] h-[22px] absolute inset-0 m-auto" viewBox="0 0 40 40" fill="none">
-                                <path d="M20 4L6 10v10c0 9 5.6 16.8 14 19 8.4-2.2 14-10 14-19V10L20 4z" fill="black" stroke="#3b82f6" strokeWidth="2.5" />
-                            </svg>
-                            <span className="relative z-10 font-display font-black text-[10px] text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)]">
-                                {weapon.grantsArmor}
-                            </span>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Range 2 bar (below gauge) */}
-            {showRange2 && (
-                <div className="absolute left-[14%] right-0 z-20 bg-black/50 backdrop-blur-sm px-[3%] py-[1%] flex items-center gap-[2%]"
-                    style={{ top: hasGauge ? 'calc(2% + 32px)' : 0 }}
-                >
-                    {skillIcon && (
-                        <img src={skillIcon} alt={weapon.skillReq!} className="w-[18%] min-w-[28px] object-contain shrink-0" />
-                    )}
-                    <svg viewBox="0 0 228 22" className="w-[65%] h-auto" fill="none">
-                        <polygon points={AP.red} fill={weapon.range2Red ? '#dc2626' : OFF} stroke={weapon.range2Red ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Red ? 1 : 0.5} />
-                        <polygon points={AP.yellow} fill={weapon.range2Yellow ? '#eab308' : OFF} stroke={weapon.range2Yellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Yellow ? 1 : 0.5} />
-                        <polygon points={AP.green} fill={weapon.range2Green ? '#22c55e' : OFF} stroke={weapon.range2Green ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Green ? 1 : 0.5} />
-                        {weapon.range2Long && (
-                            <>
-                                <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                            </>
-                        )}
-                    </svg>
-                </div>
-            )}
-
-            {/* Admin buttons (top right) */}
-            {isAdmin && (onEdit || onDelete) && (
-                <div className="absolute top-1 right-1 z-30 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {onEdit && (
-                        <button onClick={onEdit} className="p-1 bg-black/60 rounded text-muted-foreground hover:text-secondary transition-colors">
-                            <Edit className="w-3.5 h-3.5" />
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button onClick={onDelete} className="p-1 bg-black/60 rounded text-muted-foreground hover:text-accent transition-colors">
-                            <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                    )}
-                </div>
-            )}
-
-            {/* BOTTOM TEXT BOX */}
+            {/* BOTTOM CONTENT BOX — same layout as list view */}
             <div
-                className="absolute bottom-[5%] left-[18%] right-[3%] z-20"
+                className="absolute bottom-[3%] left-[16%] right-[2%] z-20"
                 style={{
-                    maxHeight: '60%',
+                    maxHeight: '70%',
                     filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.5)) drop-shadow(0 0 14px rgba(255,255,255,0.25))',
                 }}
             >
                 <div
-                    className="w-full bg-black/80 backdrop-blur-sm border-[0.5px] border-white/30 p-2.5"
+                    ref={textRef}
+                    className="w-full bg-black/80 backdrop-blur-sm border-[0.5px] border-white/30 px-3 py-2 flex flex-col gap-0.5"
                     style={{
                         clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
+                        fontSize: `${fontSize}px`,
                     }}
                 >
-                    {/* Keywords */}
-                    {weapon.keywords.length > 0 && (
-                        <div className="flex gap-1 flex-wrap mb-1.5">
-                            {weapon.keywords.map((kw, i) => (
-                                <span
-                                    key={i}
-                                    className="text-[8px] font-mono-tech uppercase tracking-wider text-white/80 border border-white/20 px-1 py-px"
-                                >
-                                    {kw}
-                                </span>
-                            ))}
+                    {/* Header: name + faction + admin buttons */}
+                    <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                            <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
+                            <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${variantTextColor}`}>
+                                {variantFactionName}
+                            </span>
+                        </div>
+                        {isAdmin && (onEdit || onDelete) && (
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {onEdit && (
+                                    <button onClick={onEdit} className="p-1 text-muted-foreground hover:text-secondary transition-colors"><Edit className="w-3.5 h-3.5" /></button>
+                                )}
+                                {onDelete && (
+                                    <button onClick={onDelete} className="p-1 text-muted-foreground hover:text-accent transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    {/* Skill icon + armor + range (lettrine logic from list view) */}
+                    {(() => {
+                        const lettrine = (!!skillIcon || hasArmor) && !showRange;
+
+                        const skillEl = skillIcon && (
+                            <div className="flex items-center shrink-0">
+                                <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] object-contain" />
+                                {weapon.skillBonus != null && weapon.skillBonus !== 0 && (
+                                    <span className="font-display font-black text-xs text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)] [-webkit-text-stroke:0.5px_rgba(0,0,0,0.6)] -ml-1">{weapon.skillBonus > 0 ? `+${weapon.skillBonus}` : weapon.skillBonus}</span>
+                                )}
+                            </div>
+                        );
+                        const armorEl = hasArmor && (
+                            <div className="relative shrink-0 w-9 h-9 flex items-center justify-center -my-[2px]">
+                                <svg className="w-[26px] h-[26px] absolute inset-0 m-auto" viewBox="0 0 40 40" fill="none">
+                                    <path d="M20 4L6 10v10c0 9 5.6 16.8 14 19 8.4-2.2 14-10 14-19V10L20 4z" fill="black" stroke="#3b82f6" strokeWidth="2.5" />
+                                </svg>
+                                <span className="relative z-10 font-display font-black text-[11px] text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)]">{weapon.grantsArmor}</span>
+                            </div>
+                        );
+
+                        if (lettrine) {
+                            return (
+                                <div className="-ml-2">
+                                    <div className="float-left flex items-center mr-1">
+                                        {skillEl}
+                                        {armorEl}
+                                    </div>
+                                    <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                </div>
+                            );
+                        }
+                        return (
+                            <>
+                                {(showRange || skillIcon || hasArmor) && (
+                                    <div className="-ml-2 flex items-center gap-2">
+                                        {skillEl}
+                                        {armorEl}
+                                        {showRange && (
+                                            <div className="w-[60%]">
+                                                <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
+                                                    <polygon points={AP.red} fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
+                                                    <polygon points={AP.yellow} fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
+                                                    <polygon points={AP.green} fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
+                                                    {weapon.rangeLong && (
+                                                        <>
+                                                            <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
+                                                            <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                            <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                        </>
+                                                    )}
+                                                </svg>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                            </>
+                        );
+                    })()}
+                    {/* Range 2 */}
+                    {showRange2 && (
+                        <div className="-ml-2 flex items-center gap-2">
+                            {skillIcon && (
+                                <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] shrink-0 object-contain" />
+                            )}
+                            <div className="w-[60%]">
+                                <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
+                                    <polygon points={AP.red} fill={weapon.range2Red ? '#dc2626' : OFF} stroke={weapon.range2Red ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Red ? 1 : 0.5} />
+                                    <polygon points={AP.yellow} fill={weapon.range2Yellow ? '#eab308' : OFF} stroke={weapon.range2Yellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Yellow ? 1 : 0.5} />
+                                    <polygon points={AP.green} fill={weapon.range2Green ? '#22c55e' : OFF} stroke={weapon.range2Green ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Green ? 1 : 0.5} />
+                                    {weapon.range2Long && (
+                                        <>
+                                            <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
+                                            <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                            <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                        </>
+                                    )}
+                                </svg>
+                            </div>
                         </div>
                     )}
-                    {/* Description */}
-                    <div
-                        ref={textRef}
-                        className="font-mono-tech leading-snug whitespace-pre-wrap text-white/90 pr-3 pb-1"
-                        style={{ fontSize: `${fontSize}px` }}
-                    >
-                        {formatCardText(weapon.description)}
-                    </div>
                 </div>
             </div>
         </div>
