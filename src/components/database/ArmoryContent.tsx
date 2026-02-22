@@ -200,6 +200,19 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
         cards.forEach(c => c.style.minHeight = `${maxH}px`);
     });
 
+    // Measure exact card width from a hidden grid cell (same gridClass)
+    const cardMeasureRef = useRef<HTMLDivElement>(null);
+    const [measuredCardW, setMeasuredCardW] = useState(0);
+    useLayoutEffect(() => {
+        const el = cardMeasureRef.current;
+        if (!el) return;
+        const measure = () => setMeasuredCardW(el.offsetWidth);
+        measure();
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [activeTab, gearViewMode, gridClass]);
+
     const tab = TAB_STYLES[activeTab] ?? TAB_STYLES.Gear;
     const programs = catalog.programs ?? [];
 
@@ -1024,8 +1037,17 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     </div>
                 )}
 
-                {/* Weapons grid — CARD view (illustrated cards with stacking) */}
+                {/* Hidden measurement grid — same gridClass, measures exact card cell width */}
+                {gearViewMode === 'card' && (
+                    <div className={gridClass} style={{ visibility: 'hidden', height: 0, overflow: 'hidden' }} aria-hidden="true">
+                        <div ref={cardMeasureRef} />
+                    </div>
+                )}
+
+                {/* Weapons grid — CARD view (flex-wrap for stacking) */}
                 {gearViewMode === 'card' && (() => {
+                    const STRIP_W = 24; // w-6 = 1.5rem = 24px
+
                     // Group variants by weapon
                     const groups = new Map<string, { weapon: Weapon; variants: { variant: FactionVariant; factionName: string }[] }>();
                     for (const { weapon, variant } of variantCards) {
@@ -1043,47 +1065,49 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             return a.factionName.localeCompare(b.factionName);
                         });
                     }
-                    // Build flat list of grid items
+
+                    const cw = measuredCardW; // measured card width (0 before first paint)
+
+                    // Build flat list of flex items
                     const items: React.ReactNode[] = [];
                     for (const [weaponId, group] of groups) {
                         const isExpanded = expandedWeapons.has(weaponId);
                         const isMulti = group.variants.length > 1;
 
                         if (!isMulti) {
-                            // Single variant — render normally
                             items.push(
-                                <div key={weaponId} style={cardStyle}>
+                                <div key={weaponId} style={{ ...cardStyle, width: cw || undefined }}>
                                     <WeaponCard weapon={group.weapon} variant={group.variants[0].variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
                                 </div>
                             );
                         } else if (isExpanded) {
-                            // Expanded: show all cards individually, click to collapse
                             for (const { variant } of group.variants) {
                                 items.push(
-                                    <div key={weaponId + '-' + variant.factionId} style={cardStyle} className="cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
+                                    <div key={weaponId + '-' + variant.factionId} style={{ ...cardStyle, width: cw || undefined }} className="cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
                                         <WeaponCard weapon={group.weapon} variant={variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
                                     </div>
                                 );
                             }
                         } else {
-                            // Collapsed stack: front card full-size, strips peek left (absolute, outside flow)
+                            // Collapsed stack: strips + front card, card keeps exact measured width
                             const [front, ...behind] = group.variants;
+                            const totalW = cw > 0 ? cw + behind.length * STRIP_W : undefined;
                             items.push(
-                                <div key={weaponId + '-stack'} style={cardStyle} className="relative cursor-pointer overflow-visible" onClick={() => toggleExpanded(weaponId)}>
-                                    {/* Strips absolutely positioned to the left — outside the card, in the gap */}
-                                    <div className="absolute right-full top-0 bottom-0 flex">
+                                <div key={weaponId + '-stack'} style={{ ...cardStyle, width: totalW }} className="cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
+                                    <div className="flex items-stretch">
                                         {behind.map(({ variant, factionName }, idx) => (
                                             <WeaponCardStrip key={variant.factionId} variant={variant} factionName={factionName} isFirst={idx === 0} />
                                         ))}
+                                        <div style={{ width: cw || undefined }} className="shrink-0">
+                                            <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
+                                        </div>
                                     </div>
-                                    {/* Front card — exactly same dimensions as standalone */}
-                                    <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
                                 </div>
                             );
                         }
                     }
 
-                    return <div className={`${gridClass} overflow-visible`}>{items}</div>;
+                    return <div className="flex flex-wrap gap-4">{items}</div>;
                 })()}
 
                 {variantCards.length === 0 && (
