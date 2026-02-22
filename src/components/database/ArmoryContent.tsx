@@ -763,17 +763,17 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             <div className="space-y-2">
                                 <Label className="font-mono-tech text-xs uppercase tracking-widest">Faction Variants</Label>
                                 <div className="border border-border bg-black">
-                                    <div className="grid grid-cols-[1fr_50px_50px_40px_28px] gap-1 px-2 py-1 border-b border-border text-[9px] font-mono-tech text-muted-foreground uppercase tracking-wider">
-                                        <span>Faction</span><span>Cost</span><span>Rar.</span><span>SC</span><span></span>
+                                    <div className="grid grid-cols-[1fr_50px_50px_50px_28px] gap-1 px-2 py-1 border-b border-border text-[9px] font-mono-tech text-muted-foreground uppercase tracking-wider">
+                                        <span>Faction</span><span>Cred</span><span>EB</span><span>Rarity</span><span></span>
                                     </div>
                                     {variantRows.map((v, i) => {
                                         const fName = v.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === v.factionId)?.name ?? v.factionId);
                                         return (
-                                            <div key={i} className="grid grid-cols-[1fr_50px_50px_40px_28px] gap-1 px-2 py-1 border-b border-border/50 items-center">
+                                            <div key={i} className="grid grid-cols-[1fr_50px_50px_50px_28px] gap-1 px-2 py-1 border-b border-border/50 items-center">
                                                 <span className="font-mono-tech text-[10px] text-white truncate">{fName}</span>
+                                                <Input type="number" value={v.reqStreetCred} onChange={(e) => { const rows = [...variantRows]; rows[i] = { ...rows[i], reqStreetCred: Number(e.target.value) }; setVariantRows(rows); }} className="bg-black border-border font-mono-tech text-xs h-6 px-1" />
                                                 <Input type="number" value={v.cost} onChange={(e) => { const rows = [...variantRows]; rows[i] = { ...rows[i], cost: Number(e.target.value) }; setVariantRows(rows); }} className="bg-black border-border font-mono-tech text-xs h-6 px-1" />
                                                 <Input type="number" value={v.rarity} onChange={(e) => { const rows = [...variantRows]; rows[i] = { ...rows[i], rarity: Number(e.target.value) }; setVariantRows(rows); }} className="bg-black border-border font-mono-tech text-xs h-6 px-1" />
-                                                <Input type="number" value={v.reqStreetCred} onChange={(e) => { const rows = [...variantRows]; rows[i] = { ...rows[i], reqStreetCred: Number(e.target.value) }; setVariantRows(rows); }} className="bg-black border-border font-mono-tech text-xs h-6 px-1" />
                                                 <button onClick={() => setVariantRows(variantRows.filter((_, j) => j !== i))} className="p-0.5 text-muted-foreground hover:text-accent transition-colors" title="Remove variant">
                                                     <XIcon className="w-3 h-3" />
                                                 </button>
