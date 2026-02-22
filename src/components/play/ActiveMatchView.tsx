@@ -15,7 +15,6 @@ import { ProgramCard } from '@/components/programs/ProgramCard';
 import {
     DndContext,
     DragOverlay,
-    useDraggable,
     useDroppable,
     PointerSensor,
     useSensor,
@@ -121,13 +120,18 @@ function ActionBtn({
     );
 }
 
-// ── Draggable wrapper for equipped items ──
+// ── Sortable wrapper for equipped items (reorder + transfer) ──
 
-function DraggableEquip({ id, children }: { id: string; children: React.ReactNode }) {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+function SortableEquip({ id, children }: { id: string; children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
     return (
         <div
             ref={setNodeRef}
+            style={style}
             {...listeners}
             {...attributes}
             className={`touch-none ${isDragging ? 'opacity-30' : ''}`}
@@ -417,23 +421,47 @@ export function ActiveMatchView() {
             return;
         }
 
-        // ── Equipment transfer ──
-        const toRecruitId = overId.replace('squad-', ''); // handle both droppable and sortable ids
-        const actualToId = activeMatchTeam.selectedRecruitIds.includes(toRecruitId) ? toRecruitId : overId;
+        // ── Equipment interactions ──
         const { sourceRecruitId, itemId } = parseDragId(activeId);
 
-        // Only transfer if dropping on a different character
+        // Dropped on another equipment item
+        if (overId.startsWith('equipped:')) {
+            const overParsed = parseDragId(overId);
+            if (sourceRecruitId === overParsed.sourceRecruitId) {
+                // Same character → reorder
+                const eqList = [...(activeMatchTeam.equipmentMap?.[sourceRecruitId] ?? [])];
+                const oldIndex = eqList.indexOf(itemId);
+                const newIndex = eqList.indexOf(overParsed.itemId);
+                if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+                const map = { ...activeMatchTeam.equipmentMap };
+                map[sourceRecruitId] = arrayMove(eqList, oldIndex, newIndex);
+                setActiveMatchTeam({ ...activeMatchTeam, equipmentMap: map });
+                return;
+            }
+            // Different character → transfer
+            const targetRecruitId = overParsed.sourceRecruitId;
+            if (!activeMatchTeam.selectedRecruitIds.includes(targetRecruitId)) return;
+            const map = { ...activeMatchTeam.equipmentMap };
+            const fromList = [...(map[sourceRecruitId] ?? [])];
+            const idx = fromList.indexOf(itemId);
+            if (idx >= 0) fromList.splice(idx, 1);
+            if (fromList.length === 0) delete map[sourceRecruitId]; else map[sourceRecruitId] = fromList;
+            map[targetRecruitId] = [...(map[targetRecruitId] ?? []), itemId];
+            setActiveMatchTeam({ ...activeMatchTeam, equipmentMap: map });
+            return;
+        }
+
+        // Dropped on a character card → transfer
+        const toRecruitId = overId.replace('squad-', '');
+        const actualToId = activeMatchTeam.selectedRecruitIds.includes(toRecruitId) ? toRecruitId : overId;
         if (sourceRecruitId === actualToId) return;
-        // Only drop on squad members
         if (!activeMatchTeam.selectedRecruitIds.includes(actualToId)) return;
 
         const map = { ...activeMatchTeam.equipmentMap };
-        // Remove from source
         const fromList = [...(map[sourceRecruitId] ?? [])];
         const idx = fromList.indexOf(itemId);
         if (idx >= 0) fromList.splice(idx, 1);
         if (fromList.length === 0) delete map[sourceRecruitId]; else map[sourceRecruitId] = fromList;
-        // Add to target
         map[actualToId] = [...(map[actualToId] ?? []), itemId];
         setActiveMatchTeam({ ...activeMatchTeam, equipmentMap: map });
     };
@@ -859,42 +887,46 @@ export function ActiveMatchView() {
                         </>
                     );
 
+                    const equipDragIds = equippedItems.map(item => `equipped:${recruit.id}:${item.equipId}`);
+
                     const equippedBlock = equippedItems.length > 0 && (
-                        <div className={characterView === 'vertical' ? 'flex flex-col gap-2' : 'mt-2 space-y-2'}>
-                            {equippedItems.map(item => {
-                                const dragId = `equipped:${recruit.id}:${item.equipId}`;
-                                return (
-                                    <div key={item.equipId} className="relative group/equip">
-                                        <DraggableEquip id={dragId}>
-                                            {item.type === 'weapon' ? (
-                                                weaponView === 'list' ? (
-                                                    <WeaponTile weapon={item.weapon} variantFactionId={item.variantFactionId} overlay={
-                                                        <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
-                                                    } />
+                        <SortableContext items={equipDragIds} strategy={verticalListSortingStrategy}>
+                            <div className={characterView === 'vertical' ? 'flex flex-col gap-2' : 'mt-2 space-y-2'}>
+                                {equippedItems.map(item => {
+                                    const dragId = `equipped:${recruit.id}:${item.equipId}`;
+                                    return (
+                                        <div key={item.equipId} className="relative group/equip">
+                                            <SortableEquip id={dragId}>
+                                                {item.type === 'weapon' ? (
+                                                    weaponView === 'list' ? (
+                                                        <WeaponTile weapon={item.weapon} variantFactionId={item.variantFactionId} overlay={
+                                                            <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
+                                                        } />
+                                                    ) : (
+                                                        <div className="relative">
+                                                            <WeaponCard weapon={item.weapon} variant={resolveVariant(item.weapon.factionVariants, item.variantFactionId)} />
+                                                            <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
+                                                        </div>
+                                                    )
+                                                ) : programView === 'list' ? (
+                                                    <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
                                                 ) : (
                                                     <div className="relative">
-                                                        <WeaponCard weapon={item.weapon} variant={resolveVariant(item.weapon.factionVariants, item.variantFactionId)} />
+                                                        <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
+                                                            <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
+                                                                <div className="card-flip-front"><ProgramCard program={item.program} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                                <div className="card-flip-back"><ProgramCard program={item.program} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                            </div>
+                                                        </div>
                                                         <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
                                                     </div>
-                                                )
-                                            ) : programView === 'list' ? (
-                                                <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
-                                            ) : (
-                                                <div className="relative">
-                                                    <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
-                                                        <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
-                                                            <div className="card-flip-front"><ProgramCard program={item.program} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
-                                                            <div className="card-flip-back"><ProgramCard program={item.program} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
-                                                </div>
-                                            )}
-                                        </DraggableEquip>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                                )}
+                                            </SortableEquip>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </SortableContext>
                     );
 
                     // ── HORIZONTAL LAYOUT ──
@@ -939,44 +971,46 @@ export function ActiveMatchView() {
 
                                     {/* All equipment — stacked vertically, wraps to next column if exceeds card height */}
                                     {equippedItems.length > 0 && (
-                                        <div
-                                            className="flex flex-col flex-wrap gap-2 content-start"
-                                            style={{ maxHeight: measuredH || undefined }}
-                                        >
-                                            {equippedItems.map(item => {
-                                                const dragId = `equipped:${recruit.id}:${item.equipId}`;
-                                                return (
-                                                    <div key={item.equipId} style={measuredW ? { width: measuredW } : undefined} className="relative group/equip">
-                                                        <DraggableEquip id={dragId}>
-                                                            {item.type === 'weapon' ? (
-                                                                weaponView === 'list' ? (
-                                                                    <WeaponTile weapon={item.weapon} overlay={
-                                                                        <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
-                                                                    } />
+                                        <SortableContext items={equipDragIds} strategy={verticalListSortingStrategy}>
+                                            <div
+                                                className="flex flex-col flex-wrap gap-2 content-start"
+                                                style={{ maxHeight: measuredH || undefined }}
+                                            >
+                                                {equippedItems.map(item => {
+                                                    const dragId = `equipped:${recruit.id}:${item.equipId}`;
+                                                    return (
+                                                        <div key={item.equipId} style={measuredW ? { width: measuredW } : undefined} className="relative group/equip">
+                                                            <SortableEquip id={dragId}>
+                                                                {item.type === 'weapon' ? (
+                                                                    weaponView === 'list' ? (
+                                                                        <WeaponTile weapon={item.weapon} overlay={
+                                                                            <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
+                                                                        } />
+                                                                    ) : (
+                                                                        <div className="relative">
+                                                                            <WeaponCard weapon={item.weapon} variant={resolveVariant(item.weapon.factionVariants, item.variantFactionId)} />
+                                                                            <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
+                                                                        </div>
+                                                                    )
+                                                                ) : programView === 'list' ? (
+                                                                    <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
                                                                 ) : (
                                                                     <div className="relative">
-                                                                        <WeaponCard weapon={item.weapon} variant={resolveVariant(item.weapon.factionVariants, item.variantFactionId)} />
+                                                                        <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
+                                                                            <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
+                                                                                <div className="card-flip-front"><ProgramCard program={item.program} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                                                <div className="card-flip-back"><ProgramCard program={item.program} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                                            </div>
+                                                                        </div>
                                                                         <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
                                                                     </div>
-                                                                )
-                                                            ) : programView === 'list' ? (
-                                                                <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
-                                                            ) : (
-                                                                <div className="relative">
-                                                                    <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
-                                                                        <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
-                                                                            <div className="card-flip-front"><ProgramCard program={item.program} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
-                                                                            <div className="card-flip-back"><ProgramCard program={item.program} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
-                                                                </div>
-                                                            )}
-                                                        </DraggableEquip>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                                                                )}
+                                                            </SortableEquip>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </SortableContext>
                                     )}
                                 </div>
                             </SortableCard>
