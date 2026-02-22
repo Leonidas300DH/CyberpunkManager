@@ -4,14 +4,14 @@ import { useState, useRef, useLayoutEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { ItemCategory, ActionColor, HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
-import { WeaponCard } from '@/components/weapons/WeaponCard';
+import { WeaponCard, WeaponCardStrip } from '@/components/weapons/WeaponCard';
 import { formatCardText } from '@/lib/formatCardText';
 import { resolveVariant } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon } from 'lucide-react';
-import { useCardGrid } from '@/hooks/useCardGrid';
+import { useCardGrid, GRID_CLASSES } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -147,7 +147,7 @@ const hasNoImage = (w: Weapon) => !w.imageUrl || w.imageUrl === DEFAULT_WEAPON_I
 type ArmoryTab = 'Gear' | 'Program' | 'Loot' | 'Objective';
 
 export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
-    const { catalog, setCatalog } = useStore();
+    const { catalog, setCatalog, displaySettings } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
     const [search, setSearch] = useState('');
@@ -180,6 +180,15 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
     // Gear view mode
     const [gearViewMode, setGearViewMode] = useState<'list' | 'card'>('card');
+    // Stacking state for card view
+    const [expandedWeapons, setExpandedWeapons] = useState<Set<string>>(new Set());
+    const toggleExpanded = (weaponId: string) => {
+        setExpandedWeapons(prev => {
+            const next = new Set(prev);
+            if (next.has(weaponId)) next.delete(weaponId); else next.add(weaponId);
+            return next;
+        });
+    };
 
     const weaponGridRef = useRef<HTMLDivElement>(null);
     useLayoutEffect(() => {
@@ -1015,22 +1024,74 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     </div>
                 )}
 
-                {/* Weapons grid — CARD view (illustrated cards) */}
-                {gearViewMode === 'card' && (
-                    <div className={gridClass}>
-                        {variantCards.map(({ weapon, variant }) => (
-                            <div key={weapon.id + '-' + variant.factionId} style={cardStyle}>
-                                <WeaponCard
-                                    weapon={weapon}
-                                    variant={variant}
-                                    isAdmin={isAdmin}
-                                    onEdit={() => openWeaponEdit(weapon)}
-                                    onDelete={() => deleteWeapon(weapon.id)}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                )}
+                {/* Weapons grid — CARD view (illustrated cards with stacking) */}
+                {gearViewMode === 'card' && (() => {
+                    // Group variants by weapon
+                    const groups = new Map<string, { weapon: Weapon; variants: { variant: FactionVariant; factionName: string }[] }>();
+                    for (const { weapon, variant } of variantCards) {
+                        if (!groups.has(weapon.id)) groups.set(weapon.id, { weapon, variants: [] });
+                        const factionName = variant.factionId === 'universal'
+                            ? 'Universal'
+                            : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
+                        groups.get(weapon.id)!.variants.push({ variant, factionName });
+                    }
+                    // Sort: universal first, then alphabetical
+                    for (const group of groups.values()) {
+                        group.variants.sort((a, b) => {
+                            if (a.variant.factionId === 'universal') return -1;
+                            if (b.variant.factionId === 'universal') return 1;
+                            return a.factionName.localeCompare(b.factionName);
+                        });
+                    }
+                    // Compute reduced grid columns based on max stack size
+                    const maxStack = Math.max(1, ...Array.from(groups.values()).map(g => g.variants.length));
+                    const colReduction = maxStack <= 1 ? 0 : maxStack <= 3 ? 1 : maxStack <= 5 ? 2 : 3;
+                    const { cardColumns = 4 } = displaySettings ?? {};
+                    const reducedCols = Math.max(2, Math.min(6, cardColumns - colReduction));
+                    const stackGridClass = colReduction > 0 ? (GRID_CLASSES[reducedCols] ?? gridClass) : gridClass;
+
+                    // Build flat list of grid items
+                    const items: React.ReactNode[] = [];
+                    for (const [weaponId, group] of groups) {
+                        const isExpanded = expandedWeapons.has(weaponId);
+                        const isMulti = group.variants.length > 1;
+
+                        if (!isMulti) {
+                            // Single variant — render normally
+                            items.push(
+                                <div key={weaponId} style={cardStyle}>
+                                    <WeaponCard weapon={group.weapon} variant={group.variants[0].variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
+                                </div>
+                            );
+                        } else if (isExpanded) {
+                            // Expanded: show all cards individually, click to collapse
+                            for (const { variant } of group.variants) {
+                                items.push(
+                                    <div key={weaponId + '-' + variant.factionId} style={cardStyle} className="cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
+                                        <WeaponCard weapon={group.weapon} variant={variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
+                                    </div>
+                                );
+                            }
+                        } else {
+                            // Collapsed stack: strips for behind + front card
+                            const [front, ...behind] = group.variants;
+                            items.push(
+                                <div key={weaponId + '-stack'} style={cardStyle} className="cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
+                                    <div className="flex items-stretch">
+                                        {behind.map(({ variant, factionName }, idx) => (
+                                            <WeaponCardStrip key={variant.factionId} variant={variant} factionName={factionName} isFirst={idx === 0} />
+                                        ))}
+                                        <div className="flex-1 min-w-0">
+                                            <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        }
+                    }
+
+                    return <div className={stackGridClass}>{items}</div>;
+                })()}
 
                 {variantCards.length === 0 && (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">

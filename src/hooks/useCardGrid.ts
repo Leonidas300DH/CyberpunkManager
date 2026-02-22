@@ -1,7 +1,7 @@
 import { useStore } from '@/store/useStore';
 import { CSSProperties } from 'react';
 
-const GRID_CLASSES: Record<number, string> = {
+export const GRID_CLASSES: Record<number, string> = {
     2: 'grid grid-cols-1 md:grid-cols-2 gap-4',
     3: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4',
     4: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4',

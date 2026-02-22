@@ -100,7 +100,7 @@ const FACTION_SIDEBAR_COLOR: Record<string, string> = {
     'faction-6th-street': '#f59e0b',
 };
 
-function getSidebarGradient(factionId: string): string {
+export function getSidebarGradient(factionId: string): string {
     const color = FACTION_SIDEBAR_COLOR[factionId] ?? '#666666';
     return `linear-gradient(to bottom, #ffffff, ${color} 60%)`;
 }
@@ -219,12 +219,12 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
             {isAdmin && (onEdit || onDelete) && (
                 <div className="absolute top-1 right-1 z-30 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     {onEdit && (
-                        <button onClick={onEdit} className="p-1.5 bg-black/70 border border-border rounded text-muted-foreground hover:text-secondary hover:border-secondary transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="p-1.5 bg-black/70 border border-border rounded text-muted-foreground hover:text-secondary hover:border-secondary transition-colors">
                             <Edit className="w-3.5 h-3.5" />
                         </button>
                     )}
                     {onDelete && (
-                        <button onClick={onDelete} className="p-1.5 bg-black/70 border border-border rounded text-muted-foreground hover:text-accent hover:border-accent transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-1.5 bg-black/70 border border-border rounded text-muted-foreground hover:text-accent hover:border-accent transition-colors">
                             <Trash2 className="w-3.5 h-3.5" />
                         </button>
                     )}
@@ -330,6 +330,36 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                         </div>
                     )}
                 </div>
+            </div>
+        </div>
+    );
+}
+
+// --- Thin sidebar strip for stacked cards ---
+interface WeaponCardStripProps {
+    variant: FactionVariant;
+    factionName: string;
+    isFirst?: boolean; // leftmost strip gets rounded-l-md
+}
+
+export function WeaponCardStrip({ variant, factionName, isFirst }: WeaponCardStripProps) {
+    const gradient = getSidebarGradient(variant.factionId);
+    return (
+        <div
+            className={`w-6 shrink-0 flex flex-col items-center justify-between py-2 border-r border-black/30 ${isFirst ? 'rounded-l-md' : ''}`}
+            style={{ background: gradient }}
+        >
+            <div className="flex flex-col items-center gap-0.5">
+                <span className="font-display font-black text-[10px] text-black leading-none">{variant.cost}</span>
+                <span className="font-mono-tech text-[5px] text-black/70 font-bold">EB</span>
+            </div>
+            <div
+                className="flex-1 flex items-end overflow-hidden min-h-0"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+            >
+                <span className="font-mono-tech text-[6px] text-black/50 uppercase tracking-[0.1em] font-bold truncate">
+                    {factionName}
+                </span>
             </div>
         </div>
     );
