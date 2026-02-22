@@ -84,20 +84,25 @@ function useAutoFontSize(deps: unknown[]) {
     return { cardRef, textRef, fontSize };
 }
 
-// --- Sidebar color logic ---
-function getSidebarColor(weapon: Weapon): { gradient: string; solidClass: string } {
-    const isW = weapon.isWeapon;
-    const isG = weapon.isGear;
-    if (isW && !isG) {
-        return { gradient: 'linear-gradient(to bottom, #ffffff, #FCEE0A 60%)', solidClass: 'bg-primary' };
-    }
-    if (isG && !isW) {
-        return { gradient: 'linear-gradient(to bottom, #ffffff, #00F0FF 60%)', solidClass: 'bg-secondary' };
-    }
-    if (isW && isG) {
-        return { gradient: 'linear-gradient(to bottom, #ffffff, #FCEE0A 30%, #00F0FF 80%)', solidClass: 'bg-secondary' };
-    }
-    return { gradient: 'linear-gradient(to bottom, #ffffff, #666666 60%)', solidClass: 'bg-gray-500' };
+// --- Faction → sidebar hex color ---
+const FACTION_SIDEBAR_COLOR: Record<string, string> = {
+    'universal': '#666666',
+    'faction-arasaka': '#dc2626',
+    'faction-bozos': '#a855f7',
+    'faction-danger-gals': '#f472b6',
+    'faction-edgerunners': '#10b981',
+    'faction-gen-red': '#ffffff',
+    'faction-lawmen': '#3b82f6',
+    'faction-maelstrom': '#b91c1c',
+    'faction-trauma-team': '#ffffff',
+    'faction-tyger-claws': '#22d3ee',
+    'faction-zoners': '#f97316',
+    'faction-6th-street': '#f59e0b',
+};
+
+function getSidebarGradient(factionId: string): string {
+    const color = FACTION_SIDEBAR_COLOR[factionId] ?? '#666666';
+    return `linear-gradient(to bottom, #ffffff, ${color} 60%)`;
 }
 
 interface WeaponCardProps {
@@ -123,7 +128,7 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
         : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
     const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
 
-    const sidebar = getSidebarColor(weapon);
+    const sidebarGradient = getSidebarGradient(variant.factionId);
 
     return (
         <div
@@ -173,7 +178,7 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
             {/* LEFT SIDEBAR — type color gradient */}
             <div
                 className="absolute left-0 top-0 bottom-0 w-[14%] z-10 flex flex-col items-center justify-between py-3"
-                style={{ background: sidebar.gradient }}
+                style={{ background: sidebarGradient }}
             >
                 {/* Stats at top */}
                 <div className="flex flex-col items-center gap-0.5 pt-1">
