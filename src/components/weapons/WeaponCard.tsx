@@ -195,19 +195,19 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                     )}
                 </div>
 
-                {/* Vertical name */}
+                {/* Vertical name — aligned bottom so long names have room */}
                 <div
-                    className="flex flex-col items-center gap-0 flex-1 justify-center min-h-0"
+                    className="flex flex-col items-center gap-0 flex-1 justify-end min-h-0 overflow-hidden"
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
                 >
                     <span
-                        className="font-display font-black text-sm uppercase tracking-widest text-black drop-shadow-sm truncate max-h-[60%]"
+                        className="font-display font-black text-sm uppercase tracking-widest text-black drop-shadow-sm"
                         style={{ marginRight: '-2px' }}
                     >
                         {weapon.name}
                     </span>
                     <span
-                        className="font-mono-tech text-[7px] text-black/50 uppercase tracking-[0.15em] font-bold truncate max-h-[30%]"
+                        className="font-mono-tech text-[7px] text-black/50 uppercase tracking-[0.15em] font-bold shrink-0"
                         style={{ marginLeft: '-2px' }}
                     >
                         {variantFactionName}
