@@ -167,6 +167,7 @@ export interface MatchTeam {
     tokenStates?: Record<string, TokenState[]>;
     deadModelIds?: string[];
     luck?: number;
+    flippedCardKeys?: string[]; // Program card flip state (keys in flippedCards Set)
 }
 
 // Store catalog shape used by services

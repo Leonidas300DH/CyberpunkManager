@@ -253,7 +253,7 @@ export function ActiveMatchView() {
     const deadModels = useMemo(() => new Set(deadModelIds), [deadModelIds]);
     const luck = activeMatchTeam?.luck ?? 0;
 
-    const updatePlayState = useCallback((patch: Partial<Pick<NonNullable<typeof activeMatchTeam>, 'tokenStates' | 'deadModelIds' | 'luck'>>) => {
+    const updatePlayState = useCallback((patch: Partial<Pick<NonNullable<typeof activeMatchTeam>, 'tokenStates' | 'deadModelIds' | 'luck' | 'flippedCardKeys'>>) => {
         if (!activeMatchTeam) return;
         setActiveMatchTeam({ ...activeMatchTeam, ...patch });
     }, [activeMatchTeam, setActiveMatchTeam]);
@@ -268,7 +268,13 @@ export function ActiveMatchView() {
 
     // UI-only state (not persisted)
     const [selectedToken, setSelectedToken] = useState<{ recruitId: string; index: number } | null>(null);
-    const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+
+    // Flipped cards — persisted in activeMatchTeam.flippedCardKeys
+    const flippedCards = useMemo(() => new Set(activeMatchTeam?.flippedCardKeys ?? []), [activeMatchTeam?.flippedCardKeys]);
+    const setFlippedCards = useCallback((updater: (prev: Set<string>) => Set<string>) => {
+        const next = updater(flippedCards);
+        updatePlayState({ flippedCardKeys: [...next] });
+    }, [flippedCards, updatePlayState]);
     const [activeDragId, setActiveDragId] = useState<string | null>(null);
     const [overId, setOverId] = useState<string | null>(null);
     const { characterView, programView, weaponView = 'card', hideKIA, enableGlitch, enableCodeRain = true } = playViewSettings;
@@ -386,7 +392,6 @@ export function ActiveMatchView() {
                     }
                 }
             }
-            console.log('[Inspire] keys to unflip:', keysToRemove, 'currently flipped:', [...flippedCards]);
             if (keysToRemove.length > 0) {
                 setFlippedCards(prev => {
                     const next = new Set(prev);
