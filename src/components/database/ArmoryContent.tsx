@@ -1066,24 +1066,24 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                 );
                             }
                         } else {
-                            // Collapsed stack: strips for behind + front card
+                            // Collapsed stack: front card full-size, strips peek left (absolute, outside flow)
                             const [front, ...behind] = group.variants;
                             items.push(
-                                <div key={weaponId + '-stack'} style={cardStyle} className="cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
-                                    <div className="flex items-stretch">
+                                <div key={weaponId + '-stack'} style={cardStyle} className="relative cursor-pointer overflow-visible" onClick={() => toggleExpanded(weaponId)}>
+                                    {/* Strips absolutely positioned to the left — outside the card, in the gap */}
+                                    <div className="absolute right-full top-0 bottom-0 flex">
                                         {behind.map(({ variant, factionName }, idx) => (
                                             <WeaponCardStrip key={variant.factionId} variant={variant} factionName={factionName} isFirst={idx === 0} />
                                         ))}
-                                        <div className="flex-1 min-w-0">
-                                            <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
-                                        </div>
                                     </div>
+                                    {/* Front card — exactly same dimensions as standalone */}
+                                    <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
                                 </div>
                             );
                         }
                     }
 
-                    return <div className={gridClass}>{items}</div>;
+                    return <div className={`${gridClass} overflow-visible`}>{items}</div>;
                 })()}
 
                 {variantCards.length === 0 && (
