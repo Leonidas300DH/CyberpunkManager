@@ -179,7 +179,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
     // Gear view mode
-    const [gearViewMode, setGearViewMode] = useState<'list' | 'card'>('list');
+    const [gearViewMode, setGearViewMode] = useState<'list' | 'card'>('card');
 
     const weaponGridRef = useRef<HTMLDivElement>(null);
     useLayoutEffect(() => {

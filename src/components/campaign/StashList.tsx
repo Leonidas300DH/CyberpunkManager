@@ -7,6 +7,7 @@ import { MathService } from '@/lib/math';
 import { parseStashEntry, buildStashEntry, resolveVariant, getAvailableVariants } from '@/lib/variants';
 import { Plus, Search, X, Trash2, List, Square, Columns2, ChevronDown } from 'lucide-react';
 import { ProgramCard } from '@/components/programs/ProgramCard';
+import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { ProgramTile, QUALITY_COLORS } from '@/components/shared/ProgramTile';
@@ -25,6 +26,7 @@ export function StashList({ campaign }: StashListProps) {
     const [programSearch, setProgramSearch] = useState('');
     const [programQualityFilter, setProgramQualityFilter] = useState<'all' | 'Green' | 'Yellow' | 'Red'>('all');
     const [programViewMode, setProgramViewMode] = useState<ViewMode>('card');
+    const [gearViewMode, setGearViewMode] = useState<'list' | 'card'>('card');
     const [gearOpen, setGearOpen] = useState(true);
     const [programsOpen, setProgramsOpen] = useState(true);
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
@@ -131,12 +133,47 @@ export function StashList({ campaign }: StashListProps) {
                         {/* Owned Gear */}
                         {stashWeapons.length > 0 && (
                             <div>
-                                <div className="font-mono-tech text-[10px] uppercase tracking-widest text-secondary font-bold border-b border-border pb-1 mb-2">
-                                    Gear — {stashWeapons.length} item{stashWeapons.length !== 1 ? 's' : ''}
+                                <div className="flex items-center justify-between border-b border-border pb-1 mb-2">
+                                    <span className="font-mono-tech text-[10px] uppercase tracking-widest text-secondary font-bold">
+                                        Gear — {stashWeapons.length} item{stashWeapons.length !== 1 ? 's' : ''}
+                                    </span>
+                                    <div className="flex gap-1">
+                                        {([
+                                            { mode: 'list' as const, icon: List, label: 'List' },
+                                            { mode: 'card' as const, icon: Square, label: 'Card' },
+                                        ]).map(({ mode, icon: Icon, label }) => (
+                                            <button
+                                                key={mode}
+                                                onClick={() => setGearViewMode(mode)}
+                                                className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono-tech uppercase tracking-wider transition-all ${
+                                                    gearViewMode === mode
+                                                        ? 'bg-secondary text-black'
+                                                        : 'bg-black border border-border text-muted-foreground hover:text-white'
+                                                }`}
+                                            >
+                                                <Icon className="w-3 h-3" />
+                                                {label}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                                 <div className={gridClass}>
                                     {stashWeapons.map(({ weapon, variantFactionId, stashIdx }) => {
                                         const variant = resolveVariant(weapon.factionVariants, variantFactionId);
+                                        if (gearViewMode === 'card') {
+                                            return (
+                                                <div key={`owned-${stashIdx}`} className="relative group/card" style={cardStyle}>
+                                                    <WeaponCard weapon={weapon} variant={variant} />
+                                                    <button
+                                                        onClick={() => handleRemove(stashIdx)}
+                                                        className="absolute top-1 right-1 z-30 p-1.5 bg-black/80 border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors opacity-0 group-hover/card:opacity-100 rounded"
+                                                        title={`Sell — refund ${variant.cost} EB`}
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            );
+                                        }
                                         return (
                                             <WeaponTile
                                                 key={`owned-${stashIdx}`}
@@ -253,11 +290,53 @@ export function StashList({ campaign }: StashListProps) {
                     </div>
                 </div>
 
+                {/* Gear view toggle */}
+                <div className="flex gap-1 mb-4">
+                    {([
+                        { mode: 'list' as const, icon: List, label: 'List' },
+                        { mode: 'card' as const, icon: Square, label: 'Card' },
+                    ]).map(({ mode, icon: Icon, label }) => (
+                        <button
+                            key={mode}
+                            onClick={() => setGearViewMode(mode)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
+                                gearViewMode === mode
+                                    ? 'bg-secondary text-black'
+                                    : 'bg-black border border-border text-muted-foreground hover:text-white'
+                            }`}
+                        >
+                            <Icon className="w-3.5 h-3.5" />
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
                 <div className={gridClass}>
                     {filteredWeapons.map(weapon => {
                         const variant = resolveVariant(weapon.factionVariants, campaign.factionId);
                         const cantAfford = campaign.ebBank < variant.cost;
                         const owned = stashCountOf(weapon.id);
+
+                        if (gearViewMode === 'card') {
+                            return (
+                                <div key={weapon.id} className={`${cantAfford ? 'opacity-35' : ''} transition-all relative group/card`} style={cardStyle}>
+                                    <WeaponCard weapon={weapon} variant={variant} />
+                                    {!cantAfford && (
+                                        <button
+                                            onClick={() => handleBuyWeapon(weapon.id, variant.factionId, variant.cost)}
+                                            className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 opacity-0 group-hover/card:opacity-100 transition-opacity font-display font-bold text-xs uppercase tracking-wider bg-secondary text-black px-3 py-1 clip-corner-br flex items-center gap-1 shadow-lg shadow-secondary/30"
+                                        >
+                                            <Plus className="w-3.5 h-3.5" /> {variant.cost === 0 ? 'Free' : `${variant.cost} EB`}
+                                        </button>
+                                    )}
+                                    {owned > 0 && (
+                                        <div className="text-right mt-0.5">
+                                            <span className="font-mono-tech text-[9px] text-muted-foreground uppercase">x{owned} owned</span>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }
 
                         return (
                             <div key={weapon.id} className={`${cantAfford ? 'opacity-35' : ''} transition-all`}>

@@ -215,6 +215,22 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                 </div>
             </div>
 
+            {/* Admin buttons (top right overlay) */}
+            {isAdmin && (onEdit || onDelete) && (
+                <div className="absolute top-1 right-1 z-30 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {onEdit && (
+                        <button onClick={onEdit} className="p-1.5 bg-black/70 border border-border rounded text-muted-foreground hover:text-secondary hover:border-secondary transition-colors">
+                            <Edit className="w-3.5 h-3.5" />
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button onClick={onDelete} className="p-1.5 bg-black/70 border border-border rounded text-muted-foreground hover:text-accent hover:border-accent transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                    )}
+                </div>
+            )}
+
             {/* BOTTOM CONTENT BOX — same layout as list view */}
             <div
                 className="absolute bottom-[3%] left-[16%] right-[2%] z-20"
@@ -231,24 +247,12 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                         fontSize: `${fontSize}px`,
                     }}
                 >
-                    {/* Header: name + faction + admin buttons */}
-                    <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                            <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
-                            <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${variantTextColor}`}>
-                                {variantFactionName}
-                            </span>
-                        </div>
-                        {isAdmin && (onEdit || onDelete) && (
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {onEdit && (
-                                    <button onClick={onEdit} className="p-1 text-muted-foreground hover:text-secondary transition-colors"><Edit className="w-3.5 h-3.5" /></button>
-                                )}
-                                {onDelete && (
-                                    <button onClick={onDelete} className="p-1 text-muted-foreground hover:text-accent transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                                )}
-                            </div>
-                        )}
+                    {/* Header: name + faction */}
+                    <div className="flex-1">
+                        <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
+                        <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${variantTextColor}`}>
+                            {variantFactionName}
+                        </span>
                     </div>
                     {/* Skill icon + armor + range (lettrine logic from list view) */}
                     {(() => {
