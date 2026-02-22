@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon } from 'lucide-react';
-import { useCardGrid, GRID_CLASSES } from '@/hooks/useCardGrid';
+import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -147,7 +147,7 @@ const hasNoImage = (w: Weapon) => !w.imageUrl || w.imageUrl === DEFAULT_WEAPON_I
 type ArmoryTab = 'Gear' | 'Program' | 'Loot' | 'Objective';
 
 export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
-    const { catalog, setCatalog, displaySettings } = useStore();
+    const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
     const [search, setSearch] = useState('');
@@ -1043,13 +1043,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             return a.factionName.localeCompare(b.factionName);
                         });
                     }
-                    // Compute reduced grid columns based on max stack size
-                    const maxStack = Math.max(1, ...Array.from(groups.values()).map(g => g.variants.length));
-                    const colReduction = maxStack <= 1 ? 0 : maxStack <= 3 ? 1 : maxStack <= 5 ? 2 : 3;
-                    const { cardColumns = 4 } = displaySettings ?? {};
-                    const reducedCols = Math.max(2, Math.min(6, cardColumns - colReduction));
-                    const stackGridClass = colReduction > 0 ? (GRID_CLASSES[reducedCols] ?? gridClass) : gridClass;
-
                     // Build flat list of grid items
                     const items: React.ReactNode[] = [];
                     for (const [weaponId, group] of groups) {
@@ -1090,7 +1083,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                         }
                     }
 
-                    return <div className={stackGridClass}>{items}</div>;
+                    return <div className={gridClass}>{items}</div>;
                 })()}
 
                 {variantCards.length === 0 && (
