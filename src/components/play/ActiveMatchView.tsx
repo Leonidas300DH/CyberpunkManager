@@ -371,6 +371,28 @@ export function ActiveMatchView() {
             return next;
         });
         setSelectedToken(null);
+
+        // Auto-reload (unflip) all programs with reloadCondition === 'Inspire'
+        if (activeMatchTeam) {
+            setFlippedCards(prev => {
+                const keysToRemove: string[] = [];
+                for (const recruit of matchRoster) {
+                    const eqIds = activeMatchTeam.equipmentMap?.[recruit.id] ?? [];
+                    for (const eqId of eqIds) {
+                        if (!eqId.startsWith('program-')) continue;
+                        const programId = eqId.replace('program-', '');
+                        const program = catalog.programs.find(p => p.id === programId);
+                        if (program?.reloadCondition === 'Inspire') {
+                            keysToRemove.push(`play-${recruit.id}-${eqId}`);
+                        }
+                    }
+                }
+                if (keysToRemove.length === 0) return prev;
+                const next = new Set(prev);
+                for (const key of keysToRemove) next.delete(key);
+                return next;
+            });
+        }
     };
 
     const toggleKill = (id: string) => {
