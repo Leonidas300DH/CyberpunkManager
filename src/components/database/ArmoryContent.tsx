@@ -200,18 +200,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
         cards.forEach(c => c.style.minHeight = `${maxH}px`);
     });
 
-    // Measure exact single-cell width from a hidden grid (for stacked card view)
-    const cardMeasureRef = useRef<HTMLDivElement>(null);
-    const [measuredCardW, setMeasuredCardW] = useState(0);
-    useLayoutEffect(() => {
-        const el = cardMeasureRef.current;
-        if (!el) return;
-        const measure = () => setMeasuredCardW(el.offsetWidth);
-        measure();
-        const ro = new ResizeObserver(measure);
-        ro.observe(el);
-        return () => ro.disconnect();
-    }, [activeTab, gearViewMode, gridClass]);
 
 
     const tab = TAB_STYLES[activeTab] ?? TAB_STYLES.Gear;
@@ -1038,13 +1026,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     </div>
                 )}
 
-                {/* Hidden cell to measure exact single-column card width */}
-                {gearViewMode === 'card' && (
-                    <div className={gridClass} style={{ visibility: 'hidden', height: 0, overflow: 'hidden' }} aria-hidden="true">
-                        <div ref={cardMeasureRef} />
-                    </div>
-                )}
-
                 {/* Weapons grid — CARD view (col-span-2 for stacks) */}
                 {gearViewMode === 'card' && (() => {
                     // Group variants by weapon
@@ -1065,9 +1046,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                         });
                     }
 
-                    const cw = measuredCardW;
-
-                    // Build flat list of grid items
                     const items: React.ReactNode[] = [];
                     for (const [weaponId, group] of groups) {
                         const isExpanded = expandedWeapons.has(weaponId);
@@ -1088,22 +1066,18 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                 );
                             }
                         } else {
-                            // Collapsed stack: spans 2 columns, card keeps exact single-col width
+                            // Collapsed stack: col-span-2, card = calc(50% - 8px) = exact single-col width
                             const [front, ...behind] = group.variants;
                             items.push(
-                                <div key={weaponId + '-stack'} style={cardStyle} className={`cursor-pointer ${cw > 0 ? 'md:col-span-2' : ''}`} onClick={() => toggleExpanded(weaponId)}>
-                                    {cw > 0 ? (
-                                        <div className="flex items-stretch justify-end">
-                                            {behind.map(({ variant, factionName }, idx) => (
-                                                <WeaponCardStrip key={variant.factionId} variant={variant} factionName={factionName} isFirst={idx === 0} />
-                                            ))}
-                                            <div style={{ width: cw }} className="shrink-0">
-                                                <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
-                                            </div>
+                                <div key={weaponId + '-stack'} style={cardStyle} className="md:col-span-2 cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
+                                    <div className="flex items-stretch justify-end">
+                                        {behind.map(({ variant, factionName }, idx) => (
+                                            <WeaponCardStrip key={variant.factionId} variant={variant} factionName={factionName} isFirst={idx === 0} />
+                                        ))}
+                                        <div style={{ width: 'calc(50% - 8px)' }} className="shrink-0">
+                                            <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
                                         </div>
-                                    ) : (
-                                        <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
-                                    )}
+                                    </div>
                                 </div>
                             );
                         }
