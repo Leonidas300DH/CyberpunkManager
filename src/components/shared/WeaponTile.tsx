@@ -2,6 +2,7 @@
 
 import { Weapon } from '@/types';
 import { resolveVariant } from '@/lib/variants';
+import { formatCardText } from '@/lib/formatCardText';
 
 const OFF = 'rgba(100,100,100,0.35)';
 const OFF_STROKE = 'rgba(255,255,255,0.3)';
@@ -54,10 +55,12 @@ interface WeaponTileProps {
 }
 
 const SKILL_ICON: Record<string, string> = {
-    Melee: '/images/Skills Icons/melee.png',
-    Ranged: '/images/Skills Icons/ranged.png',
-    Medical: '/images/Skills Icons/medical.png',
-    Tech: '/images/Skills Icons/tech.png',
+    Reflexes: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png',
+    Ranged: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png',
+    Melee: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png',
+    Medical: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png',
+    Tech: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png',
+    Influence: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png',
 };
 
 export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCred, equippedCount }: WeaponTileProps) {
@@ -82,18 +85,18 @@ export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCr
                 />
             )}
             <div className={`relative z-10 w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
-                <div className="font-display font-black text-sm text-black leading-none">{variant.cost}</div>
-                <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
+                <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
+                <div className="font-mono-tech text-[8px] text-black/70 font-bold">EB</div>
                 {showRarity && (
-                    <div className={`font-mono-tech text-[8px] font-bold leading-none mt-0.5 ${rarityExceeded ? 'text-red-600' : 'text-black/60'}`}
+                    <div className={`font-mono-tech text-[6px] font-bold leading-none mt-1.5 ${rarityExceeded ? 'text-red-600' : 'text-black/60'}`}
                         title={`Rarity: max ${variant.rarity} per team`}>
-                        ×{variant.rarity}
+                        RAR {variant.rarity}
                     </div>
                 )}
                 {showStreetCred && (
-                    <div className={`font-mono-tech text-[7px] font-bold leading-none ${streetCredInsufficient ? 'text-red-600' : 'text-black/60'}`}
+                    <div className={`font-mono-tech text-[6px] font-bold leading-none ${streetCredInsufficient ? 'text-red-600' : 'text-black/60'}`}
                         title={`Requires Street Cred ${variant.reqStreetCred}`}>
-                        SC{variant.reqStreetCred}
+                        CRED {variant.reqStreetCred}
                     </div>
                 )}
             </div>
@@ -101,29 +104,57 @@ export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCr
                 <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover/tile:text-secondary transition-colors">
                     {weapon.name}
                 </h3>
-                {(weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong || weapon.skillReq || weapon.grantsArmor) && (
-                    <div className="-ml-2 flex items-center gap-2">
-                        {weapon.skillReq && SKILL_ICON[weapon.skillReq] && (
-                            <img src={SKILL_ICON[weapon.skillReq]} alt={weapon.skillReq} className="w-12 h-12 -my-[3px] shrink-0 object-contain" />
-                        )}
-                        {weapon.grantsArmor != null && weapon.grantsArmor > 0 && (
-                            <div className="flex items-center -gap-px shrink-0">
-                                <span className="w-3 text-center font-display font-black text-xs text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)] [-webkit-text-stroke:0.5px_rgba(0,0,0,0.6)] -mr-0.5">{weapon.grantsArmor}</span>
-                                <div className="w-7 h-7 flex items-center justify-start pr-[1px]">
-                                    <svg className="w-[22px] h-[22px]" viewBox="0 0 40 40" fill="none">
-                                        <path d="M20 4L6 10v10c0 9 5.6 16.8 14 19 8.4-2.2 14-10 14-19V10L20 4z" fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="2" />
-                                    </svg>
+                {(() => {
+                    const hasSkill = !!(weapon.skillReq && SKILL_ICON[weapon.skillReq]);
+                    const hasArmor = weapon.grantsArmor != null && weapon.grantsArmor > 0;
+                    const hasRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
+                    const lettrine = (hasSkill || hasArmor) && !hasRange;
+
+                    const skillEl = hasSkill && (
+                        <div className="flex items-center shrink-0">
+                            <img src={SKILL_ICON[weapon.skillReq!]} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] object-contain" />
+                            {weapon.skillBonus != null && weapon.skillBonus !== 0 && (
+                                <span className="font-display font-black text-xs text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)] [-webkit-text-stroke:0.5px_rgba(0,0,0,0.6)] -ml-1">{weapon.skillBonus > 0 ? `+${weapon.skillBonus}` : weapon.skillBonus}</span>
+                            )}
+                        </div>
+                    );
+                    const armorEl = hasArmor && (
+                        <div className="relative shrink-0 w-9 h-9 flex items-center justify-center -my-[2px]">
+                            <svg className="w-[26px] h-[26px] absolute inset-0 m-auto" viewBox="0 0 40 40" fill="none">
+                                <path d="M20 4L6 10v10c0 9 5.6 16.8 14 19 8.4-2.2 14-10 14-19V10L20 4z" fill="black" stroke="#3b82f6" strokeWidth="2.5" />
+                            </svg>
+                            <span className="relative z-10 font-display font-black text-[11px] text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)]">{weapon.grantsArmor}</span>
+                        </div>
+                    );
+
+                    if (lettrine) {
+                        return (
+                            <div className="-ml-2">
+                                <div className="float-left flex items-center mr-1">
+                                    {skillEl}
+                                    {armorEl}
                                 </div>
+                                <p className="font-body text-[11px] text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
                             </div>
-                        )}
-                        {(weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong) && (
-                            <div className="w-[60%]">
-                                <WeaponRangeArrows weapon={weapon} />
-                            </div>
-                        )}
-                    </div>
-                )}
-                <p className="font-body text-[11px] text-white/70 leading-snug line-clamp-2">{weapon.description}</p>
+                        );
+                    }
+                    return (
+                        <>
+                            {(hasRange || hasSkill || hasArmor) && (
+                                <div className="-ml-2 flex items-center gap-2">
+                                    {skillEl}
+                                    {armorEl}
+                                    {hasRange && (
+                                        <div className="w-[60%]">
+                                            <WeaponRangeArrows weapon={weapon} />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            <p className="font-body text-[11px] text-white/70 leading-snug line-clamp-2">{formatCardText(weapon.description)}</p>
+                        </>
+                    );
+                })()}
                 {(weapon.range2Red || weapon.range2Yellow || weapon.range2Green || weapon.range2Long) && (
                     <div className="-ml-2 flex items-center gap-2">
                         {weapon.skillReq && SKILL_ICON[weapon.skillReq] && (

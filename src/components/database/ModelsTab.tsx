@@ -25,6 +25,7 @@ const FACTION_ICON_COLORS: Record<string, { bg: string; border: string; text: st
     'faction-trauma-team': { bg: 'bg-white',      border: 'border-white',      text: 'text-white' },
     'faction-tyger-claws': { bg: 'bg-cyan-400',   border: 'border-cyan-400',   text: 'text-cyan-400' },
     'faction-zoners':      { bg: 'bg-orange-500', border: 'border-orange-500', text: 'text-orange-500' },
+    'faction-6th-street':  { bg: 'bg-amber-500',  border: 'border-amber-500',  text: 'text-amber-500' },
 };
 const DEFAULT_FACTION_ICON = { bg: 'bg-gray-500', border: 'border-gray-500', text: 'text-gray-500' };
 

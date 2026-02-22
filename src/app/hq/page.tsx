@@ -43,7 +43,7 @@ const STARTER_IMAGES = Array.from({ length: 18 }, (_, i) => {
         'f4c34555-ee61-4e42-be29-316794e0cb20_2',
         'f4c34555-ee61-4e42-be29-316794e0cb20_3',
     ];
-    return `/images/Campaign Starter/leonidas300_Static_wide_shot_of_the_streets_of_Neo-Tokyo_at_n_${ids[i]}.png`;
+    return `https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/campaign-starter/leonidas300_Static_wide_shot_of_the_streets_of_Neo-Tokyo_at_n_${ids[i]}.png`;
 });
 
 type TabId = 'roster' | 'stash' | 'ops' | 'med';

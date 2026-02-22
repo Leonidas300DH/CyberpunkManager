@@ -3,11 +3,11 @@
 -- Run this ONCE in Supabase Dashboard > SQL Editor > New Query
 -- ============================================================
 
--- 1. User data table: one row per user, campaigns stored as JSONB
+-- 1. User data table: one row per user, all app state in a single JSONB column
+-- No more schema migrations needed — just add fields to SyncData in the app code.
 create table if not exists public.user_data (
   user_id uuid primary key references auth.users(id) on delete cascade,
-  campaigns jsonb not null default '[]',
-  display_settings jsonb not null default '{"cardColumns": 4, "fontScale": 100}',
+  sync_data jsonb not null default '{}',
   updated_at timestamptz not null default now()
 );
 

@@ -18,6 +18,7 @@ const FACTION_RAIL_COLORS: Record<string, { dark: string; mid: string; light: st
     'faction-trauma-team': { dark: '#1a1a1a', mid: '#a0a0a0', light: '#e0e0e0' },
     'faction-tyger-claws': { dark: '#003a3a', mid: '#22d3ee', light: '#a5f3fc' },
     'faction-zoners':      { dark: '#3a1a00', mid: '#f97316', light: '#fdba74' },
+    'faction-6th-street':  { dark: '#3a2a00', mid: '#f59e0b', light: '#fcd34d' },
 };
 const DEFAULT_RAIL = { dark: '#1a1a1a', mid: '#8a8a8a', light: '#e0e0e0' };
 
@@ -115,12 +116,12 @@ function formatCardText(text: string, keyBase: number): React.ReactNode[] {
 // ── Config ──
 
 const SKILL_ICONS: Record<string, { src: string; color: string }> = {
-    Ranged:    { src: '/images/Skills Icons/ranged.png',    color: '#9333ea' },
-    Melee:     { src: '/images/Skills Icons/melee.png',     color: '#a855f7' },
-    Reflexes:  { src: '/images/Skills Icons/reflexes.png',  color: '#d946ef' },
-    Medical:   { src: '/images/Skills Icons/medical.png',   color: '#ec4899' },
-    Tech:      { src: '/images/Skills Icons/tech.png',      color: '#8b5cf6' },
-    Influence: { src: '/images/Skills Icons/influence.png', color: '#c026d3' },
+    Ranged:    { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png',    color: '#9333ea' },
+    Melee:     { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png',     color: '#a855f7' },
+    Reflexes:  { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png',  color: '#d946ef' },
+    Medical:   { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png',   color: '#ec4899' },
+    Tech:      { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png',      color: '#8b5cf6' },
+    Influence: { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png', color: '#c026d3' },
 };
 
 const SKILL_ORDER: SkillType[] = ['Ranged', 'Melee', 'Reflexes', 'Medical', 'Tech', 'Influence'];

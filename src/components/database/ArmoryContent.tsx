@@ -4,7 +4,7 @@ import { useState, useRef, useLayoutEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { ItemCategory, ActionColor, HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
-import { WeaponCard, WeaponCardStrip } from '@/components/weapons/WeaponCard';
+import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { formatCardText } from '@/lib/formatCardText';
 import { resolveVariant } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -1026,23 +1026,22 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     </div>
                 )}
 
-                {/* Weapons grid — CARD view (col-span-2 for stacks) */}
+                {/* Weapons grid — CARD view (grouped, expand/collapse) */}
                 {gearViewMode === 'card' && (() => {
                     // Group variants by weapon
-                    const groups = new Map<string, { weapon: Weapon; variants: { variant: FactionVariant; factionName: string }[] }>();
+                    const groups = new Map<string, { weapon: Weapon; variants: FactionVariant[] }>();
                     for (const { weapon, variant } of variantCards) {
                         if (!groups.has(weapon.id)) groups.set(weapon.id, { weapon, variants: [] });
-                        const factionName = variant.factionId === 'universal'
-                            ? 'Universal'
-                            : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
-                        groups.get(weapon.id)!.variants.push({ variant, factionName });
+                        groups.get(weapon.id)!.variants.push(variant);
                     }
-                    // Sort: universal first, then alphabetical
+                    // Sort: universal first, then alphabetical by faction name
                     for (const group of groups.values()) {
                         group.variants.sort((a, b) => {
-                            if (a.variant.factionId === 'universal') return -1;
-                            if (b.variant.factionId === 'universal') return 1;
-                            return a.factionName.localeCompare(b.factionName);
+                            if (a.factionId === 'universal') return -1;
+                            if (b.factionId === 'universal') return 1;
+                            const nameA = catalog.factions.find(f => f.id === a.factionId)?.name ?? a.factionId;
+                            const nameB = catalog.factions.find(f => f.id === b.factionId)?.name ?? b.factionId;
+                            return nameA.localeCompare(nameB);
                         });
                     }
 
@@ -1051,35 +1050,39 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                         const isExpanded = expandedWeapons.has(weaponId);
                         const isMulti = group.variants.length > 1;
 
-                        if (!isMulti) {
+                        if (!isMulti || !isExpanded) {
+                            // Show only the first variant (universal or 1st alphabetical)
+                            const variant = group.variants[0];
                             items.push(
-                                <div key={weaponId} style={cardStyle}>
-                                    <WeaponCard weapon={group.weapon} variant={group.variants[0].variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
+                                <div key={weaponId} style={cardStyle} className="relative">
+                                    <WeaponCard weapon={group.weapon} variant={variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
+                                    {isMulti && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); toggleExpanded(weaponId); }}
+                                            className="absolute top-1 left-[16%] z-30 w-6 h-6 flex items-center justify-center rounded-full bg-black/70 border border-red-500 text-red-500 hover:bg-red-500/20 transition-colors"
+                                            title={`${group.variants.length} faction variants — click to expand`}
+                                        >
+                                            <ChevronLeft className="w-3.5 h-3.5 -rotate-90" />
+                                        </button>
+                                    )}
                                 </div>
                             );
-                        } else if (isExpanded) {
-                            for (const { variant } of group.variants) {
+                        } else {
+                            // Expanded: show all variants, green collapse button on each
+                            for (const variant of group.variants) {
                                 items.push(
-                                    <div key={weaponId + '-' + variant.factionId} style={cardStyle} className="cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
+                                    <div key={weaponId + '-' + variant.factionId} style={cardStyle} className="relative">
                                         <WeaponCard weapon={group.weapon} variant={variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); toggleExpanded(weaponId); }}
+                                            className="absolute top-1 left-[16%] z-30 w-6 h-6 flex items-center justify-center rounded-full bg-black/70 border border-emerald-500 text-emerald-500 hover:bg-emerald-500/20 transition-colors"
+                                            title="Collapse variants"
+                                        >
+                                            <ChevronLeft className="w-3.5 h-3.5 rotate-90" />
+                                        </button>
                                     </div>
                                 );
                             }
-                        } else {
-                            // Collapsed stack: col-span-2, card = calc(50% - 8px) = exact single-col width
-                            const [front, ...behind] = group.variants;
-                            items.push(
-                                <div key={weaponId + '-stack'} style={cardStyle} className="md:col-span-2 cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
-                                    <div className="flex items-stretch">
-                                        {behind.map(({ variant, factionName }, idx) => (
-                                            <WeaponCardStrip key={variant.factionId} variant={variant} factionName={factionName} isFirst={idx === 0} />
-                                        ))}
-                                        <div style={{ width: 'calc(50% - 8px)' }} className="shrink-0">
-                                            <WeaponCard weapon={group.weapon} variant={front.variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
-                                        </div>
-                                    </div>
-                                </div>
-                            );
                         }
                     }
 

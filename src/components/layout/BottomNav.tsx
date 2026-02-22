@@ -15,10 +15,10 @@ export function BottomNav() {
     const [authOpen, setAuthOpen] = useState(false);
 
     const navItems = [
-        { name: 'HQ', href: '/hq', icon: Home, bg: '/images/Menus/HQ.png' },
-        { name: 'Team Builder', href: '/match', icon: Swords, bg: '/images/Menus/team.png' },
-        { name: 'Play', href: '/play', icon: TabletSmartphone, bg: '/images/Menus/battle.png' },
-        { name: 'Database', href: '/database', icon: Database, bg: '/images/Menus/database.png' },
+        { name: 'HQ', href: '/hq', icon: Home, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/HQ.png' },
+        { name: 'Team Builder', href: '/match', icon: Swords, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/team.png' },
+        { name: 'Play', href: '/play', icon: TabletSmartphone, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/battle.png' },
+        { name: 'Database', href: '/database', icon: Database, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/database.png' },
     ];
 
     return (

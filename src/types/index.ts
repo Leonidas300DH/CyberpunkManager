@@ -111,7 +111,8 @@ export interface Weapon {
     factionVariants: FactionVariant[];
     isWeapon: boolean;
     isGear: boolean;
-    skillReq?: 'Melee' | 'Ranged' | 'Medical' | 'Tech'; // Skill used — undefined for gear/equipment
+    skillReq?: 'Reflexes' | 'Ranged' | 'Melee' | 'Medical' | 'Tech' | 'Influence'; // Skill used — undefined for gear/equipment
+    skillBonus?: number; // Bonus value displayed next to skill icon (e.g. +1 Medical)
     grantsArmor?: number; // Armor bonus granted when equipped
     rangeRed: boolean;
     rangeYellow: boolean;

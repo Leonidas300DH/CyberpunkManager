@@ -41,16 +41,19 @@ export const GLOSSARY: GlossaryEntry[] = [
     { term: 'Command Action', definition: 'An action allowing a character to activate another model outside the normal exchange of Control.', page: 'p.19' },
     { term: 'Control', definition: 'The active player has Control. Only the player with Control may activate a model.', page: 'p.12' },
     { term: 'Complex Action', definition: 'Cannot be attempted if enemy models are within RED.', page: 'p.40', highlight: true },
+    { term: 'Complex', definition: 'Cannot be attempted if enemy models are within RED.', page: 'p.40', highlight: true },
     { term: 'Crit', definition: 'The highest value on a die. Usually an automatic success and may trigger additional effects.', page: 'p.17', highlight: true },
     { term: 'Cyber-Character', definition: 'A character equipped with Cybergear.', page: 'p.37' },
 
     // ── D ──
     { term: 'Dangerous Action', definition: 'If a model rolls a Fumble when attempting this action, he takes a wound.', page: 'p.40', highlight: true },
+    { term: 'Dangerous', definition: 'If a model rolls a Fumble when attempting this action, he takes a wound.', page: 'p.40', highlight: true },
     { term: 'Deadly', definition: 'Deal an additional wound when they hit.', page: 'p.40', highlight: true },
     { term: 'Deadly Crits', definition: 'Deal an additional wound if a Crit is rolled.', page: 'p.40', highlight: true },
     { term: 'Defense', definition: 'A bonus to the listed Skill that only applies when opposing (defending against) an action.', page: 'p.40', highlight: true },
     { term: 'Deploy', definition: 'Placing a model on the table to enter the Battlespace.', page: 'p.38', highlight: true },
     { term: 'Difficult Action', definition: 'May only be used once until the team is Inspired.', page: 'p.19', highlight: true },
+    { term: 'Difficult', definition: 'May only be used once until the team is Inspired.', page: 'p.19', highlight: true },
     { term: 'Discard', definition: 'After use, the Gear or Loot card is discarded.', page: 'p.40', highlight: true },
     { term: 'Drag', definition: 'Using a Move Action to relocate a rival or object. Dragging is limited to RED range.', page: 'p.21, 27', highlight: true },
 

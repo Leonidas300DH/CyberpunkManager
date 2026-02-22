@@ -14,7 +14,7 @@ import * as path from 'path';
 // PATHS
 // ============================================================
 const PROJECT_ROOT = path.resolve(__dirname, '..');
-const IMPORT_DIR = path.resolve(PROJECT_ROOT, '..', 'Import Gear');
+const IMPORT_DIR = path.resolve(PROJECT_ROOT, 'Import Gear');
 const SEED_PATH = path.join(PROJECT_ROOT, 'src', 'lib', 'seed.ts');
 const STORE_PATH = path.join(PROJECT_ROOT, 'src', 'store', 'useStore.ts');
 
@@ -35,14 +35,20 @@ interface Weapon {
     factionVariants: FactionVariant[];
     isWeapon: boolean;
     isGear: boolean;
-    skillReq?: 'Melee' | 'Ranged';
+    skillReq?: 'Reflexes' | 'Ranged' | 'Melee' | 'Medical' | 'Tech' | 'Influence';
+    skillBonus?: number;
     rangeRed: boolean;
     rangeYellow: boolean;
     rangeGreen: boolean;
     rangeLong: boolean;
+    range2Red?: boolean;
+    range2Yellow?: boolean;
+    range2Green?: boolean;
+    range2Long?: boolean;
     description: string;
     keywords: string[];
     grantsNetrunner?: boolean;
+    grantsArmor?: number;
     imageUrl?: string;
 }
 
@@ -88,12 +94,15 @@ const FACTION_NAME_MAP: Record<string, string> = {
     'Trauma Team': 'faction-trauma-team',
     'Tyger Claws': 'faction-tyger-claws',
     'Zoners': 'faction-zoners',
+    '6th Street': 'faction-6th-street',
 };
 
 // Typos / OCR errors seen in extractions → corrected faction name
 const FACTION_ALIASES: Record<string, string> = {
     'Badgerrunners': 'Edgerunners',
     'Gen Red': 'Generation Red',
+    'Bozoz': 'Bozos',
+    'Reavers': 'Zoners',
 };
 
 // Track unknown factions encountered during import
@@ -126,9 +135,19 @@ function factionNameToId(name: string, weaponName?: string): string {
 }
 
 // ============================================================
+// NAME NORMALIZATION (ALL CAPS → Title Case)
+// ============================================================
+function toTitleCase(name: string): string {
+    if (name !== name.toUpperCase()) return name; // already mixed case
+    return name.toLowerCase().replace(/(?:^|\s|-)\S/g, c => c.toUpperCase());
+}
+
+// ============================================================
 // SKILL DEDUCTION
 // ============================================================
-function deduceSkillReq(entry: { isWeapon: boolean; rangeRed: boolean; rangeYellow: boolean; rangeGreen: boolean; rangeLong: boolean; name: string }): 'Melee' | 'Ranged' | undefined {
+type SkillReq = 'Reflexes' | 'Ranged' | 'Melee' | 'Medical' | 'Tech' | 'Influence';
+
+function deduceSkillReq(entry: { isWeapon: boolean; rangeRed: boolean; rangeYellow: boolean; rangeGreen: boolean; rangeLong: boolean; name: string }): SkillReq | undefined {
     if (!entry.isWeapon) return undefined;
 
     const hasYellowPlus = entry.rangeYellow || entry.rangeGreen || entry.rangeLong;
@@ -138,6 +157,32 @@ function deduceSkillReq(entry: { isWeapon: boolean; rangeRed: boolean; rangeYell
     // No range at all but is a weapon — ambiguous
     console.warn(`  ⚠ Ambiguous skillReq for "${entry.name}" (isWeapon but no range) — defaulting to undefined`);
     return undefined;
+}
+
+// ============================================================
+// STRING-AWARE BRACKET MATCHING
+// ============================================================
+function findMatchingBracket(content: string, startAfterOpen: number): number {
+    let depth = 1;
+    let i = startAfterOpen;
+    while (i < content.length && depth > 0) {
+        const ch = content[i];
+        if (ch === "'" || ch === '"' || ch === '`') {
+            // Skip over string literal
+            i++;
+            while (i < content.length && content[i] !== ch) {
+                if (content[i] === '\\') i++; // skip escaped char
+                i++;
+            }
+        } else if (ch === '[') {
+            depth++;
+        } else if (ch === ']') {
+            depth--;
+            if (depth === 0) return i;
+        }
+        i++;
+    }
+    throw new Error('Could not find matching bracket');
 }
 
 // ============================================================
@@ -151,25 +196,9 @@ function parseWeaponsFromSeed(seedContent: string): Weapon[] {
     }
 
     const arrayStart = startMatch.index + startMatch[0].length;
-
-    // Find matching closing bracket by counting brackets
-    let depth = 1;
-    let i = arrayStart;
-    while (i < seedContent.length && depth > 0) {
-        if (seedContent[i] === '[') depth++;
-        else if (seedContent[i] === ']') depth--;
-        i++;
-    }
-    const arrayEnd = i - 1; // position of the closing ]
+    const arrayEnd = findMatchingBracket(seedContent, arrayStart);
     const arrayContent = seedContent.substring(arrayStart, arrayEnd);
 
-    // Parse each weapon object line
-    // Each weapon is on one line: { id: '...', ... },
-    const weapons: Weapon[] = [];
-    const objectRegex = /\{[^}]+\}/g;
-
-    // Use a more robust approach: eval-like parsing via Function constructor
-    // We wrap the content in an array and evaluate it
     try {
         const evalCode = `return [${arrayContent}];`;
         const fn = new Function(evalCode);
@@ -191,14 +220,7 @@ function parseFactionsFromSeed(seedContent: string): Faction[] {
     }
 
     const arrayStart = startMatch.index + startMatch[0].length;
-    let depth = 1;
-    let i = arrayStart;
-    while (i < seedContent.length && depth > 0) {
-        if (seedContent[i] === '[') depth++;
-        else if (seedContent[i] === ']') depth--;
-        i++;
-    }
-    const arrayEnd = i - 1;
+    const arrayEnd = findMatchingBracket(seedContent, arrayStart);
     const arrayContent = seedContent.substring(arrayStart, arrayEnd);
 
     try {
@@ -224,13 +246,19 @@ function serializeWeapon(w: Weapon): string {
     parts.push(`isWeapon: ${w.isWeapon}`);
     parts.push(`isGear: ${w.isGear}`);
     if (w.skillReq !== undefined) parts.push(`skillReq: ${JSON.stringify(w.skillReq)}`);
+    if (w.skillBonus != null && w.skillBonus !== 0) parts.push(`skillBonus: ${w.skillBonus}`);
     parts.push(`rangeRed: ${w.rangeRed}`);
     parts.push(`rangeYellow: ${w.rangeYellow}`);
     parts.push(`rangeGreen: ${w.rangeGreen}`);
     parts.push(`rangeLong: ${w.rangeLong}`);
+    if (w.range2Red) parts.push(`range2Red: true`);
+    if (w.range2Yellow) parts.push(`range2Yellow: true`);
+    if (w.range2Green) parts.push(`range2Green: true`);
+    if (w.range2Long) parts.push(`range2Long: true`);
     parts.push(`description: ${JSON.stringify(w.description)}`);
     parts.push(`keywords: [${w.keywords.map(k => JSON.stringify(k)).join(', ')}]`);
     if (w.grantsNetrunner) parts.push(`grantsNetrunner: true`);
+    if (w.grantsArmor != null && w.grantsArmor > 0) parts.push(`grantsArmor: ${w.grantsArmor}`);
     if (w.imageUrl) parts.push(`imageUrl: ${JSON.stringify(w.imageUrl)}`);
     return `    { ${parts.join(', ')} },`;
 }
@@ -319,8 +347,13 @@ function main() {
     }
     console.log(`\nTotal entries: ${allEntries.length}`);
 
-    // 3. Resolve faction aliases on all entries
+    // 3. Normalize names (ALL CAPS → Title Case) and resolve faction aliases
     for (const entry of allEntries) {
+        const original = entry.name;
+        entry.name = toTitleCase(entry.name);
+        if (entry.name !== original) {
+            console.log(`  📝 Normalized: "${original}" → "${entry.name}"`);
+        }
         entry.faction = resolveFactionName(entry.faction);
     }
 
@@ -370,6 +403,7 @@ function main() {
             rangeLong: first.rangeLong,
             description: first.description,
             keywords: first.keywords || [],
+            imageUrl: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/weapon-images/default.png',
         };
 
         importedWeapons.push(weapon);
@@ -428,7 +462,9 @@ function main() {
                 existing.skillReq = imported.skillReq;
             }
 
-            // Preserve: source stays 'Custom', imageUrl, grantsNetrunner
+            // Mark as Upload since it exists in import files
+            existing.source = 'Upload';
+            // Preserve: imageUrl, grantsNetrunner
 
             updated++;
             console.log(`  ✏️  Updated: ${existing.name} (+${imported.factionVariants.length} variant(s))`);

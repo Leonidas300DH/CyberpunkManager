@@ -262,7 +262,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                         {/* Purple Hexagon — Tech Test */}
                         {program.techTest && (
                             <img
-                                src="/images/Skills Icons/tech.png"
+                                src="https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png"
                                 alt="Tech"
                                 className="w-[18%] object-contain shrink-0"
                             />

@@ -191,6 +191,7 @@ const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-trauma-team': 'border-white',
     'faction-tyger-claws': 'border-cyan-400',
     'faction-zoners': 'border-orange-500',
+    'faction-6th-street': 'border-amber-500',
     'all': 'border-gray-500',
 };
 
@@ -707,11 +708,13 @@ export function ActiveMatchView() {
                             <div className={`transition-all ${
                                 dead
                                     ? 'border-2 border-accent/60 grayscale'
-                                    : redLined
-                                        ? 'border-2 border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5),0_0_40px_rgba(220,38,38,0.2)]'
-                                        : done
-                                            ? 'border-2 border-border opacity-50 saturate-0'
-                                            : 'border-2 border-transparent'
+                                    : redLined && done
+                                        ? 'border-2 border-red-600 opacity-60 shadow-[0_0_15px_rgba(220,38,38,0.5),0_0_40px_rgba(220,38,38,0.2)]'
+                                        : redLined
+                                            ? 'border-2 border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5),0_0_40px_rgba(220,38,38,0.2)]'
+                                            : done
+                                                ? 'border-2 border-border opacity-50 saturate-0'
+                                                : 'border-2 border-transparent'
                             }`}>
                                 <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} enableGlitch={enableGlitch} glitchDamage={getDamageRatio(tokens)} isKIA={dead} triggerGlitch={glitchTriggers[recruit.id] ?? 0} />
                             </div>
@@ -730,7 +733,7 @@ export function ActiveMatchView() {
                             )}
 
                             {/* Done overlay */}
-                            {done && !dead && !redLined && (
+                            {done && !dead && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/25 z-30">
                                     <span className="font-display text-2xl font-bold text-muted-foreground uppercase tracking-[0.3em] rotate-[-15deg] drop-shadow-lg">Done</span>
                                 </div>
