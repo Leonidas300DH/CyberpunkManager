@@ -247,13 +247,6 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                         fontSize: `${fontSize}px`,
                     }}
                 >
-                    {/* Header: name + faction */}
-                    <div className="flex-1">
-                        <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
-                        <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${variantTextColor}`}>
-                            {variantFactionName}
-                        </span>
-                    </div>
                     {/* Skill icon + armor + range (lettrine logic from list view) */}
                     {(() => {
                         const lettrine = (!!skillIcon || hasArmor) && !showRange;
