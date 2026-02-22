@@ -17,6 +17,7 @@ interface DisplaySettings {
 interface PlayViewSettings {
     characterView: 'horizontal' | 'vertical';
     programView: 'card' | 'list';
+    weaponView: 'card' | 'list';
     hideKIA: boolean;
     enableGlitch: boolean;
     enableCodeRain: boolean;
@@ -156,7 +157,7 @@ export const useStore = create<StoreState>()(
             campaigns: [],
             activeMatchTeam: null,
             displaySettings: { cardColumns: 4, fontScale: 100 },
-            playViewSettings: { characterView: 'horizontal', programView: 'card', hideKIA: false, enableGlitch: true, enableCodeRain: true },
+            playViewSettings: { characterView: 'horizontal', programView: 'card', weaponView: 'card', hideKIA: false, enableGlitch: true, enableCodeRain: true },
             teamBuilderDrafts: {},
 
             setCatalog: (data) => set({ catalog: data }),
