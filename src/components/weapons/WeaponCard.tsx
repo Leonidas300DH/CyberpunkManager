@@ -347,7 +347,7 @@ export function WeaponCardStrip({ variant, factionName, isFirst }: WeaponCardStr
     return (
         <div
             className={`w-6 shrink-0 flex flex-col items-center justify-between py-2 border-r border-black/30 ${isFirst ? 'rounded-l-md' : ''}`}
-            style={{ background: gradient }}
+            style={{ background: gradient, boxShadow: '4px 0 12px rgba(0,0,0,0.5), 2px 0 4px rgba(0,0,0,0.3)' }}
         >
             <div className="flex flex-col items-center gap-0.5">
                 <span className="font-display font-black text-[10px] text-black leading-none">{variant.cost}</span>

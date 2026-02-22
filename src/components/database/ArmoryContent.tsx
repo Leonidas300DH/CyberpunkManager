@@ -1070,7 +1070,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             const [front, ...behind] = group.variants;
                             items.push(
                                 <div key={weaponId + '-stack'} style={cardStyle} className="md:col-span-2 cursor-pointer" onClick={() => toggleExpanded(weaponId)}>
-                                    <div className="flex items-stretch justify-end">
+                                    <div className="flex items-stretch">
                                         {behind.map(({ variant, factionName }, idx) => (
                                             <WeaponCardStrip key={variant.factionId} variant={variant} factionName={factionName} isFirst={idx === 0} />
                                         ))}
