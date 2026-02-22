@@ -70,6 +70,11 @@ function useAutoFontSize(deps: unknown[]) {
             size -= 0.5;
             text.style.fontSize = `${size}px`;
         }
+        // If text box is small (<15% of card height), bump font +1pt
+        if (cardH > 0 && text.scrollHeight < cardH * 0.15 && size + 1 <= BASE_FONT) {
+            size += 1;
+            text.style.fontSize = `${size}px`;
+        }
         setFontSize(size);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, deps);
