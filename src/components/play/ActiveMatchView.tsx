@@ -374,24 +374,26 @@ export function ActiveMatchView() {
 
         // Auto-reload (unflip) all programs with reloadCondition === 'Inspire'
         if (activeMatchTeam) {
-            setFlippedCards(prev => {
-                const keysToRemove: string[] = [];
-                for (const recruit of matchRoster) {
-                    const eqIds = activeMatchTeam.equipmentMap?.[recruit.id] ?? [];
-                    for (const eqId of eqIds) {
-                        if (!eqId.startsWith('program-')) continue;
-                        const programId = eqId.replace('program-', '');
-                        const program = catalog.programs.find(p => p.id === programId);
-                        if (program?.reloadCondition === 'Inspire') {
-                            keysToRemove.push(`play-${recruit.id}-${eqId}`);
-                        }
+            const keysToRemove: string[] = [];
+            for (const recruit of matchRoster) {
+                const eqIds = activeMatchTeam.equipmentMap?.[recruit.id] ?? [];
+                for (const eqId of eqIds) {
+                    const parsed = parseEquipmentId(eqId);
+                    if (parsed.prefix !== 'program') continue;
+                    const program = catalog.programs.find(p => p.id === parsed.baseId);
+                    if (program?.reloadCondition === 'Inspire') {
+                        keysToRemove.push(`play-${recruit.id}-${eqId}`);
                     }
                 }
-                if (keysToRemove.length === 0) return prev;
-                const next = new Set(prev);
-                for (const key of keysToRemove) next.delete(key);
-                return next;
-            });
+            }
+            console.log('[Inspire] keys to unflip:', keysToRemove, 'currently flipped:', [...flippedCards]);
+            if (keysToRemove.length > 0) {
+                setFlippedCards(prev => {
+                    const next = new Set(prev);
+                    for (const key of keysToRemove) next.delete(key);
+                    return next;
+                });
+            }
         }
     };
 
