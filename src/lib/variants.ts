@@ -1,5 +1,21 @@
 import { FactionVariant, Weapon, ItemCard } from '@/types';
 
+/* ── Weapon image URL ────────────────────────────────────────────── */
+const WEAPON_IMG_BASE = 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/weapon-images';
+const WEAPON_IMG_DEFAULT = `${WEAPON_IMG_BASE}/default.png`;
+
+/**
+ * Deterministic weapon image URL derived from weapon ID.
+ * weapon-frag-grenade → weapon-images/frag-grenade.png
+ * Falls back to default.png if no custom image exists (handled by onError on <img>).
+ */
+export function getWeaponImageUrl(weaponId: string): string {
+    const slug = weaponId.replace(/^weapon-/, '');
+    return `${WEAPON_IMG_BASE}/${slug}.png`;
+}
+
+export { WEAPON_IMG_DEFAULT };
+
 /**
  * Resolve the best variant for a given faction.
  * Priority: exact faction match > 'universal' > first variant.

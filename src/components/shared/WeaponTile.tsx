@@ -1,7 +1,7 @@
 'use client';
 
 import { Weapon } from '@/types';
-import { resolveVariant } from '@/lib/variants';
+import { resolveVariant, getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 import { formatCardText } from '@/lib/formatCardText';
 
 const OFF = 'rgba(100,100,100,0.35)';
@@ -72,18 +72,17 @@ export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCr
 
     return (
         <div className="relative group/tile bg-surface-dark border border-border hover:border-secondary transition-all overflow-hidden flex">
-            {weapon.imageUrl && (
-                <img
-                    src={weapon.imageUrl}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                    style={{
-                        opacity: 0.5,
-                        WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)',
-                        maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)',
-                    }}
-                />
-            )}
+            <img
+                src={getWeaponImageUrl(weapon.id)}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                style={{
+                    opacity: 0.5,
+                    WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)',
+                    maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)',
+                }}
+            />
             <div className={`relative z-10 w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
                 <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
                 <div className="font-mono-tech text-[8px] text-black/70 font-bold">EB</div>

@@ -5,6 +5,7 @@ import { Weapon, FactionVariant } from '@/types';
 import { useStore } from '@/store/useStore';
 import { formatCardText } from '@/lib/formatCardText';
 import { Edit, Trash2 } from 'lucide-react';
+import { getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 
 // --- Skill icon URLs (same as ArmoryContent) ---
 const SKILL_ICONS: Record<string, string> = {
@@ -28,7 +29,7 @@ const OFF = 'rgba(100,100,100,0.35)';
 const OFF_STROKE = 'rgba(255,255,255,0.3)';
 const ON_STROKE = 'white';
 
-const DEFAULT_WEAPON_IMAGE = 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/weapon-images/default.png';
+const DEFAULT_WEAPON_IMAGE = WEAPON_IMG_DEFAULT;
 
 const FACTION_TEXT_COLOR_MAP: Record<string, string> = {
     'faction-arasaka': 'text-red-600',
@@ -122,7 +123,7 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
     const { catalog } = useStore();
     const { cardRef, textRef, fontSize } = useAutoFontSize([weapon.id, variant.factionId]);
 
-    const hasImage = !!weapon.imageUrl;
+    const weaponImgUrl = getWeaponImageUrl(weapon.id);
     const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
     const showRange2 = weapon.range2Red || weapon.range2Yellow || weapon.range2Green || weapon.range2Long;
     const skillIcon = weapon.skillReq ? SKILL_ICONS[weapon.skillReq] ?? null : null;
@@ -140,42 +141,13 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
             ref={cardRef}
             className="group relative w-full aspect-[2.5/3.5] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md"
         >
-            {/* z-0: Full-bleed artwork or fallback */}
-            {hasImage ? (
-                <img
-                    src={weapon.imageUrl}
-                    alt={weapon.name}
-                    className="absolute inset-0 w-full h-full object-cover z-0"
-                />
-            ) : (
-                <div className="absolute inset-0 z-0 bg-black flex items-center justify-center">
-                    <svg
-                        width="40%"
-                        height="40%"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="0.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-white/10"
-                    >
-                        {weapon.isWeapon ? (
-                            <>
-                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                                <polyline points="14 2 14 8 20 8" />
-                                <line x1="8" y1="13" x2="16" y2="13" />
-                                <line x1="8" y1="17" x2="16" y2="17" />
-                            </>
-                        ) : (
-                            <>
-                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                            </>
-                        )}
-                    </svg>
-                </div>
-            )}
+            {/* z-0: Full-bleed artwork — deterministic URL from weapon ID, onError → default */}
+            <img
+                src={weaponImgUrl}
+                alt={weapon.name}
+                className="absolute inset-0 w-full h-full object-cover z-0"
+                onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_WEAPON_IMAGE; }}
+            />
 
             {/* Scanline overlay */}
             <div className="absolute inset-0 z-[1] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />

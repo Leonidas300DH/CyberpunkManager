@@ -6,7 +6,7 @@ import { ItemCategory, ActionColor, HackingProgram, ProgramQuality, Weapon, Fact
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { formatCardText } from '@/lib/formatCardText';
-import { resolveVariant } from '@/lib/variants';
+import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -895,16 +895,9 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
                             return (
                                 <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
-                                    {weapon.imageUrl ? (
-                                        <img src={weapon.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                                            style={{ opacity: 0.55, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
-                                    ) : (
-                                        <div className="absolute top-2 right-2 z-0 opacity-[0.06] pointer-events-none">
-                                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                                                {weapon.isWeapon ? (<><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="16" y2="17" /></>) : (<><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></>)}
-                                            </svg>
-                                        </div>
-                                    )}
+                                    <img src={getWeaponImageUrl(weapon.id)} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                        style={{ opacity: 0.55, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
                                     <div className="relative z-10 flex flex-1">
                                         <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
                                             <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
