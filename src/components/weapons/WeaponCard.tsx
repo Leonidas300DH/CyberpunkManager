@@ -107,7 +107,7 @@ const FACTION_SIDEBAR_COLOR: Record<string, string> = {
 
 export function getSidebarGradient(factionId: string): string {
     const color = FACTION_SIDEBAR_COLOR[factionId] ?? '#666666';
-    return `linear-gradient(to bottom, #ffffff, ${color} 60%)`;
+    return `linear-gradient(to bottom, ${color} 40%, #ffffff)`;
 }
 
 interface WeaponCardProps {
@@ -182,41 +182,34 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
 
             {/* LEFT SIDEBAR — type color gradient */}
             <div
-                className="absolute left-0 top-0 bottom-0 w-[14%] z-10 flex flex-col items-center justify-between py-3"
+                className="absolute left-0 top-0 bottom-0 w-[14%] z-10 flex flex-col items-center justify-end py-2"
                 style={{ background: sidebarGradient }}
             >
-                {/* Stats at top */}
-                <div className="flex flex-col items-center gap-0.5 pt-1">
-                    <div className="font-display font-black text-2xl text-black leading-none">{variant.cost}</div>
-                    <div className="font-mono-tech text-[9px] text-black/70 font-bold">EB</div>
+                {/* Vertical name — above stats, mb-2 matches CharacterCard */}
+                <div
+                    className="mt-auto flex flex-col items-start mb-2"
+                    style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 0.9, gap: 0 }}
+                >
+                    <span className="mr-[-2px] font-display text-xl uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900 }}>
+                        {weapon.name}
+                    </span>
+                    <span className="mr-[-4px] font-mono-tech text-[12px] text-black/80 uppercase tracking-wide [-webkit-text-stroke:0.5px_rgba(255,255,255,0.5)]" style={{ fontWeight: 900 }}>
+                        {variantFactionName}
+                    </span>
+                </div>
+
+                {/* Stats — EB + cost on one line, then rarity, street cred */}
+                <div className="flex flex-col items-center gap-px pb-1">
+                    <span className="font-mono-tech text-[11px] text-black font-black tracking-wider">EB {variant.cost}</span>
                     {variant.rarity < 99 && (
-                        <div className="font-mono-tech text-[8px] text-black/60 font-bold mt-1">Rar.{variant.rarity}</div>
+                        <div className="font-mono-tech text-[10px] text-black/60 font-bold">Rar.{variant.rarity}</div>
                     )}
                     {(variant.reqStreetCred ?? 0) > 0 && (
-                        <div className="text-black flex items-center gap-0.5 mt-0.5">
+                        <div className="text-black flex items-center gap-0.5">
                             <span className="text-xs">★</span>
                             <span className="font-display font-black text-sm leading-none">{variant.reqStreetCred}</span>
                         </div>
                     )}
-                </div>
-
-                {/* Vertical name — aligned bottom so long names have room */}
-                <div
-                    className="flex flex-col items-center gap-0 flex-1 justify-end min-h-0 overflow-hidden"
-                    style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-                >
-                    <span
-                        className="font-display font-black text-sm uppercase tracking-widest text-black drop-shadow-sm"
-                        style={{ marginRight: '-2px' }}
-                    >
-                        {weapon.name}
-                    </span>
-                    <span
-                        className="font-mono-tech text-[7px] text-black/50 uppercase tracking-[0.15em] font-bold shrink-0"
-                        style={{ marginLeft: '-2px' }}
-                    >
-                        {variantFactionName}
-                    </span>
                 </div>
             </div>
 

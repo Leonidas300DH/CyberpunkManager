@@ -359,7 +359,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
 
                 {/* Cost at bottom */}
                 <span className="font-mono-tech text-[11px] text-black font-black tracking-wider pb-1">
-                    ED {profile.costEB}
+                    EB {profile.costEB}
                 </span>
             </div>
 

@@ -23,6 +23,12 @@ const COLOR_WORDS: Record<string, string> = {
     GREEN: '#22c55e',
 };
 
+/* ── Sidebar stat layout tuning ─────────────────────────────────── */
+const SIDEBAR_EB_LINE     = 'font-mono-tech text-[11px] text-black font-black tracking-wider'; // "EB N" same as CharacterCard
+const SIDEBAR_RAR_SIZE    = 'text-[10px]'; // Rarity label
+const SIDEBAR_SC_STAR     = 'text-xs';     // ★ icon size
+const SIDEBAR_SC_NUM      = 'text-sm';     // Street cred number
+
 /** Process a plain string segment to detect & wrap glossary terms */
 function linkGlossaryTerms(text: string, keyBase: number): React.ReactNode[] {
     if (!GLOSSARY_HIGHLIGHT_REGEX && !REACT_TERM_REGEX) return [text];
@@ -185,7 +191,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
     const { catalog } = useStore();
 
     const factionName = program.factionId === 'all'
-        ? 'All Factions'
+        ? 'Universal'
         : catalog.factions.find(f => f.id === program.factionId)?.name ?? 'Unknown';
 
     const reloadText = RELOAD_TEXT[program.reloadCondition] ?? '';
@@ -199,8 +205,8 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
             ? '#eab308'
             : '#22c55e';
 
-    const sidebarGradient = `linear-gradient(to bottom, #ffffff, ${sidebarColor} 60%)`;
-    const cyanGradient = `linear-gradient(to bottom, #ffffff, #22d3ee 60%)`;
+    const sidebarGradient = `linear-gradient(to bottom, ${sidebarColor} 40%, #ffffff)`;
+    const cyanGradient = `linear-gradient(to bottom, #22d3ee 40%, #ffffff)`;
 
     // Compose back effect text
     const backParts: string[] = [];
@@ -227,32 +233,36 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                 {/* Scanline overlay */}
                 <div className="absolute inset-0 z-[1] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
 
-                {/* LEFT SIDEBAR — Quality color gradient (white→color) */}
+                {/* LEFT SIDEBAR — Quality color gradient */}
                 <div
-                    className="absolute left-0 top-0 bottom-0 w-[14%] z-10 flex flex-col items-center justify-between py-3"
+                    className="absolute left-0 top-0 bottom-0 w-[14%] z-10 flex flex-col items-center justify-end py-2"
                     style={{ background: sidebarGradient }}
                 >
-                    {/* Stats at top */}
-                    <div className="flex flex-col items-center gap-1 pt-1">
-                        <div className="text-black flex items-center gap-0.5">
-                            <span className="text-lg">★</span>
-                            <span className="font-display font-black text-2xl leading-none">{program.reqStreetCred}</span>
-                        </div>
-                        <div className="font-mono-tech text-[9px] text-black/70 font-bold">Rar.{program.rarity}</div>
-                        <div className="font-mono-tech text-[10px] text-black font-black">ED {program.costEB}</div>
-                    </div>
-
-                    {/* Vertical name */}
+                    {/* Vertical name — above stats, mb-2 matches CharacterCard */}
                     <div
-                        className="flex flex-col items-center gap-0 flex-1 justify-center min-h-0"
-                        style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                        className="mt-auto flex flex-col items-start mb-2"
+                        style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 0.9, gap: 0 }}
                     >
-                        <span className="font-display font-black text-base uppercase tracking-widest text-black drop-shadow-sm truncate max-h-[60%]" style={{ marginRight: '-2px' }}>
+                        <span className="mr-[-2px] font-display text-xl uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900 }}>
                             {program.name}
                         </span>
-                        <span className="font-mono-tech text-[8px] text-black/50 uppercase tracking-[0.15em] font-bold truncate max-h-[30%]" style={{ marginLeft: '-2px' }}>
+                        <span className="mr-[-4px] font-mono-tech text-[12px] text-black/80 uppercase tracking-wide [-webkit-text-stroke:0.5px_rgba(255,255,255,0.5)]" style={{ fontWeight: 900 }}>
                             {factionName}
                         </span>
+                    </div>
+
+                    {/* Stats — EB + cost on one line, then rarity, street cred */}
+                    <div className="flex flex-col items-center gap-px pb-1">
+                        <span className={SIDEBAR_EB_LINE}>EB {program.costEB}</span>
+                        {program.rarity < 99 && (
+                            <div className={`font-mono-tech ${SIDEBAR_RAR_SIZE} text-black/60 font-bold`}>Rar.{program.rarity}</div>
+                        )}
+                        {program.reqStreetCred > 0 && (
+                            <div className="text-black flex items-center gap-0.5">
+                                <span className={SIDEBAR_SC_STAR}>★</span>
+                                <span className={`font-display font-black ${SIDEBAR_SC_NUM} leading-none`}>{program.reqStreetCred}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -357,32 +367,36 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
             {/* Scanline overlay */}
             <div className="absolute inset-0 z-[1] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.04)_2px,rgba(0,0,0,0.04)_4px)] pointer-events-none" />
 
-            {/* RIGHT SIDEBAR — Cyan gradient (white→cyan) */}
+            {/* RIGHT SIDEBAR — Cyan gradient */}
             <div
-                className="absolute right-0 top-0 bottom-0 w-[14%] z-10 flex flex-col items-center justify-between py-3 text-black"
+                className="absolute right-0 top-0 bottom-0 w-[14%] z-10 flex flex-col items-center justify-end py-2 text-black"
                 style={{ background: cyanGradient }}
             >
-                {/* Stats at top */}
-                <div className="flex flex-col items-center gap-1 pt-1">
-                    <div className="text-black flex items-center gap-0.5">
-                        <span className="text-lg">★</span>
-                        <span className="font-display font-black text-2xl leading-none">{program.reqStreetCred}</span>
-                    </div>
-                    <div className="font-mono-tech text-[9px] text-black/70 font-bold">Rar.{program.rarity}</div>
-                    <div className="font-mono-tech text-[10px] text-black font-black">ED {program.costEB}</div>
-                </div>
-
-                {/* Vertical name */}
+                {/* Vertical name — above stats, mb-2 matches CharacterCard */}
                 <div
-                    className="flex flex-col items-center gap-0 flex-1 justify-center min-h-0"
-                    style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                    className="mt-auto flex flex-col items-start mb-2"
+                    style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 0.9, gap: 0 }}
                 >
-                    <span className="font-display font-black text-base uppercase tracking-widest drop-shadow-sm truncate max-h-[60%]" style={{ marginRight: '-2px' }}>
+                    <span className="mr-[-2px] font-display text-xl uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900 }}>
                         {program.name}
                     </span>
-                    <span className="font-mono-tech text-[8px] text-black/50 uppercase tracking-[0.15em] font-bold truncate max-h-[30%]" style={{ marginLeft: '-2px' }}>
+                    <span className="mr-[-4px] font-mono-tech text-[12px] text-black/80 uppercase tracking-wide [-webkit-text-stroke:0.5px_rgba(255,255,255,0.5)]" style={{ fontWeight: 900 }}>
                         {factionName}
                     </span>
+                </div>
+
+                {/* Stats — EB + cost on one line, then rarity, street cred */}
+                <div className="flex flex-col items-center gap-px pb-1">
+                    <span className={SIDEBAR_EB_LINE}>EB {program.costEB}</span>
+                    {program.rarity < 99 && (
+                        <div className={`font-mono-tech ${SIDEBAR_RAR_SIZE} text-black/60 font-bold`}>Rar.{program.rarity}</div>
+                    )}
+                    {program.reqStreetCred > 0 && (
+                        <div className="text-black flex items-center gap-0.5">
+                            <span className={SIDEBAR_SC_STAR}>★</span>
+                            <span className={`font-display font-black ${SIDEBAR_SC_NUM} leading-none`}>{program.reqStreetCred}</span>
+                        </div>
+                    )}
                 </div>
 
             </div>

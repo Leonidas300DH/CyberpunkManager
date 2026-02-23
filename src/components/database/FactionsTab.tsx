@@ -341,7 +341,7 @@ export function FactionsTab() {
                                                                     </div>
                                                                 )}
                                                                 <div className="font-mono-tech text-[10px] font-black text-primary mt-0.5">
-                                                                    ED {baseProfile.costEB}
+                                                                    EB {baseProfile.costEB}
                                                                 </div>
                                                             </div>
                                                         </button>
