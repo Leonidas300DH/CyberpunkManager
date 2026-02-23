@@ -5,7 +5,7 @@ import { FACTIONS, HACKING_PROGRAMS, ITEMS, LINEAGES, PROFILES, WEAPONS } from '
 import { migrateWeaponToVariants, migrateItemToVariants, migrateStashEntry, migrateEquipmentId } from '@/lib/variants'
 
 // Bump this version whenever seed data changes to force a re-seed
-const SEED_VERSION = 34;
+const SEED_VERSION = 35;
 
 const STORAGE_KEY = 'combat-zone-storage';
 
@@ -67,12 +67,15 @@ if (typeof window !== 'undefined') {
             const oldWeapons: Record<string, unknown>[] = oldCatalog?.weapons ?? [];
 
             // Merge weapons: seed updates descriptions/stats,
-            // but user-uploaded imageUrl ALWAYS wins over seed
+            // User imageUrl wins ONLY if it's a real custom upload (not default.png)
+            const DEFAULT_IMG_SUFFIX = '/default.png';
             const userWeaponsMap = new Map(oldWeapons.map((w) => [w.id as string, w]));
             const mergedWeapons: Weapon[] = WEAPONS.map(seedW => {
                 const userW = userWeaponsMap.get(seedW.id);
-                if (userW?.imageUrl) {
-                    return { ...seedW, imageUrl: userW.imageUrl as string };
+                const userImg = userW?.imageUrl as string | undefined;
+                // Keep user image only if it's a real upload (not the default placeholder)
+                if (userImg && !userImg.endsWith(DEFAULT_IMG_SUFFIX)) {
+                    return { ...seedW, imageUrl: userImg };
                 }
                 return seedW;
             });
