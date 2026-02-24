@@ -136,6 +136,30 @@ function formatCardText(text: string): React.ReactNode[] {
     return result;
 }
 
+/* ── Auto-shrink vertical name to prevent 2-line wrapping ──────── */
+const NAME_BASE = 20;  // text-xl = 20px
+const NAME_MIN  = 11;
+const NAME_STEP = 0.5;
+
+function useAutoNameSize(name: string) {
+    const ref = useRef<HTMLSpanElement>(null);
+    const [size, setSize] = useState(NAME_BASE);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        let s = NAME_BASE;
+        el.style.fontSize = `${s}px`;
+        while (el.scrollWidth > s * 1.4 && s > NAME_MIN) {
+            s -= NAME_STEP;
+            el.style.fontSize = `${s}px`;
+        }
+        setSize(s);
+    }, [name]);
+
+    return { nameRef: ref, nameSize: size };
+}
+
 interface ProgramCardProps {
     program: HackingProgram;
     side: 'front' | 'back';
@@ -189,6 +213,7 @@ function useAutoFontSize(deps: unknown[]) {
 
 export function ProgramCard({ program, side, enableCodeRain, isFlipped }: ProgramCardProps) {
     const { catalog } = useStore();
+    const { nameRef, nameSize } = useAutoNameSize(program.name);
 
     const factionName = program.factionId === 'all'
         ? 'Universal'
@@ -243,7 +268,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                         className="mt-auto flex flex-col items-start mb-2"
                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 0.9, gap: 0 }}
                     >
-                        <span className="mr-[-2px] font-display text-xl uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900 }}>
+                        <span ref={nameRef} className="mr-[-2px] font-display uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900, fontSize: `${nameSize}px` }}>
                             {program.name}
                         </span>
                         <span className="mr-[-4px] font-mono-tech text-[12px] text-black/80 uppercase tracking-wide [-webkit-text-stroke:0.5px_rgba(255,255,255,0.5)]" style={{ fontWeight: 900 }}>
@@ -377,7 +402,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                     className="mt-auto flex flex-col items-start mb-2"
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 0.9, gap: 0 }}
                 >
-                    <span className="mr-[-2px] font-display text-xl uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900 }}>
+                    <span ref={nameRef} className="mr-[-2px] font-display uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900, fontSize: `${nameSize}px` }}>
                         {program.name}
                     </span>
                     <span className="mr-[-4px] font-mono-tech text-[12px] text-black/80 uppercase tracking-wide [-webkit-text-stroke:0.5px_rgba(255,255,255,0.5)]" style={{ fontWeight: 900 }}>

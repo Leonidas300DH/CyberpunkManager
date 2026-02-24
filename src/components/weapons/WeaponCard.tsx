@@ -31,6 +31,32 @@ const ON_STROKE = 'white';
 
 const DEFAULT_WEAPON_IMAGE = WEAPON_IMG_DEFAULT;
 
+/* ── Auto-shrink vertical name to prevent 2-line wrapping ──────── */
+const NAME_BASE = 20;  // text-xl = 20px
+const NAME_MIN  = 11;  // smallest allowed
+const NAME_STEP = 0.5;
+
+function useAutoNameSize(name: string) {
+    const ref = useRef<HTMLSpanElement>(null);
+    const [size, setSize] = useState(NAME_BASE);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        // In writing-mode: vertical-rl, wrapping adds width.
+        // A single line width ≈ fontSize * 1.3 (with stroke/tracking).
+        let s = NAME_BASE;
+        el.style.fontSize = `${s}px`;
+        while (el.scrollWidth > s * 1.4 && s > NAME_MIN) {
+            s -= NAME_STEP;
+            el.style.fontSize = `${s}px`;
+        }
+        setSize(s);
+    }, [name]);
+
+    return { nameRef: ref, nameSize: size };
+}
+
 const FACTION_TEXT_COLOR_MAP: Record<string, string> = {
     'faction-arasaka': 'text-red-600',
     'faction-bozos': 'text-purple-500',
@@ -122,6 +148,7 @@ interface WeaponCardProps {
 export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: WeaponCardProps) {
     const { catalog } = useStore();
     const { cardRef, textRef, fontSize } = useAutoFontSize([weapon.id, variant.factionId]);
+    const { nameRef, nameSize } = useAutoNameSize(weapon.name);
 
     const weaponImgUrl = getWeaponImageUrl(weapon.id);
     const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
@@ -162,7 +189,7 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                     className="mt-auto flex flex-col items-start mb-2"
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 0.9, gap: 0 }}
                 >
-                    <span className="mr-[-2px] font-display text-xl uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900 }}>
+                    <span ref={nameRef} className="mr-[-2px] font-display uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900, fontSize: `${nameSize}px` }}>
                         {weapon.name}
                     </span>
                     <span className="mr-[-4px] font-mono-tech text-[12px] text-black/80 uppercase tracking-wide [-webkit-text-stroke:0.5px_rgba(255,255,255,0.5)]" style={{ fontWeight: 900 }}>

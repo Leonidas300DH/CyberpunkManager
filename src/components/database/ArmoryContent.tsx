@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useEffect, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { ItemCategory, ActionColor, HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
@@ -142,7 +142,7 @@ const EMPTY_WEAPON: Partial<Weapon> & { variantRows?: FactionVariant[] } = {
     description: '', keywords: [], imageUrl: DEFAULT_WEAPON_IMAGE,
 };
 
-const hasNoImage = (w: Weapon) => !w.imageUrl || w.imageUrl === DEFAULT_WEAPON_IMAGE || w.imageUrl.endsWith('/default.png');
+// hasNoImage is now runtime — see missingImageIds state inside ArmoryContent
 
 type ArmoryTab = 'Gear' | 'Program' | 'Loot' | 'Objective';
 
@@ -239,6 +239,23 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     });
 
     const weapons = catalog.weapons ?? [];
+
+    // Runtime image probe — deterministic URLs mean we must check if the file actually exists
+    const [missingImageIds, setMissingImageIds] = useState<Set<string>>(new Set());
+    const weaponIds = useMemo(() => weapons.map(w => w.id).join(','), [weapons]);
+    useEffect(() => {
+        const ids = weaponIds.split(',').filter(Boolean);
+        if (ids.length === 0) return;
+        const missing = new Set<string>();
+        let completed = 0;
+        ids.forEach(id => {
+            const img = new Image();
+            img.onload = () => { completed++; if (completed === ids.length) setMissingImageIds(new Set(missing)); };
+            img.onerror = () => { missing.add(id); completed++; if (completed === ids.length) setMissingImageIds(new Set(missing)); };
+            img.src = getWeaponImageUrl(id);
+        });
+    }, [weaponIds]);
+    const hasNoImage = (w: Weapon) => missingImageIds.has(w.id);
 
     const isWeaponHighlighted = (w: Weapon) => {
         return (highlightNoImage && hasNoImage(w)) ||
