@@ -14,20 +14,19 @@ const TYPE_COLORS: Record<ModelLineage['type'], string> = {
     Drone: 'text-cyber-orange',
 };
 
-const FACTION_ICON_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-    'faction-arasaka':     { bg: 'bg-red-600',    border: 'border-red-600',    text: 'text-red-600' },
-    'faction-bozos':       { bg: 'bg-purple-500', border: 'border-purple-500', text: 'text-purple-500' },
-    'faction-danger-gals': { bg: 'bg-pink-400',   border: 'border-pink-400',   text: 'text-pink-400' },
-    'faction-edgerunners': { bg: 'bg-emerald-500',border: 'border-emerald-500',text: 'text-emerald-500' },
-    'faction-gen-red':     { bg: 'bg-white',      border: 'border-white',      text: 'text-white' },
-    'faction-lawmen':      { bg: 'bg-blue-500',   border: 'border-blue-500',   text: 'text-blue-500' },
-    'faction-maelstrom':   { bg: 'bg-red-700',    border: 'border-red-700',    text: 'text-red-700' },
-    'faction-trauma-team': { bg: 'bg-white',      border: 'border-white',      text: 'text-white' },
-    'faction-tyger-claws': { bg: 'bg-cyan-400',   border: 'border-cyan-400',   text: 'text-cyan-400' },
-    'faction-zoners':      { bg: 'bg-orange-500', border: 'border-orange-500', text: 'text-orange-500' },
-    'faction-6th-street':  { bg: 'bg-amber-500',  border: 'border-amber-500',  text: 'text-amber-500' },
+const FACTION_COLOR_MAP: Record<string, string> = {
+    'faction-arasaka':     'border-red-600',
+    'faction-bozos':       'border-purple-500',
+    'faction-danger-gals': 'border-pink-400',
+    'faction-edgerunners': 'border-emerald-500',
+    'faction-gen-red':     'border-white',
+    'faction-lawmen':      'border-blue-500',
+    'faction-maelstrom':   'border-red-700',
+    'faction-trauma-team': 'border-white',
+    'faction-tyger-claws': 'border-cyan-400',
+    'faction-zoners':      'border-orange-500',
+    'faction-6th-street':  'border-amber-500',
 };
-const DEFAULT_FACTION_ICON = { bg: 'bg-gray-500', border: 'border-gray-500', text: 'text-gray-500' };
 
 export function ModelsTab() {
     const { catalog } = useStore();
@@ -88,41 +87,47 @@ export function ModelsTab() {
                     </div>
                 </div>
 
-                {/* Row 2: Faction filter icons */}
-                <div className="flex gap-2 flex-wrap items-center">
+                {/* Row 2: Faction filter icons — same layout as Gear tab */}
+                <div className="flex gap-2 items-stretch">
                     <button
                         onClick={() => setFactionFilter('all')}
-                        className={`px-3 py-1.5 font-mono-tech text-xs font-bold uppercase tracking-wider transition-colors ${
-                            factionFilter === 'all' ? 'bg-primary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
+                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
+                            factionFilter === 'all'
+                                ? 'border-white bg-white/10 ring-1 ring-white/30'
+                                : 'border-border bg-black hover:border-white/30'
                         }`}
                     >
-                        All Factions
+                        <div className="w-full aspect-square flex items-center justify-center">
+                            <span className={`text-xl font-display font-bold ${factionFilter === 'all' ? 'text-white' : 'text-muted-foreground'}`}>★</span>
+                        </div>
+                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${factionFilter === 'all' ? 'text-white font-bold' : 'text-muted-foreground'}`}>All</span>
                     </button>
-                    {factions.map(faction => {
-                        if (!faction) return null;
-                        const colors = FACTION_ICON_COLORS[faction.id] ?? DEFAULT_FACTION_ICON;
-                        const isActive = factionFilter === faction.id;
-                        const abbr = faction.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-
-                        return (
-                            <button
-                                key={faction.id}
-                                onClick={() => setFactionFilter(isActive ? 'all' : faction.id)}
-                                className={`flex items-center gap-2 px-3 py-1.5 font-mono-tech text-xs font-bold uppercase tracking-wider transition-colors ${
-                                    isActive
-                                        ? `${colors.bg} text-black border ${colors.border}`
-                                        : `border border-border text-muted-foreground hover:${colors.border} hover:${colors.text}`
-                                }`}
-                            >
-                                {faction.imageUrl ? (
-                                    <img src={faction.imageUrl} className="w-5 h-5 object-cover" />
-                                ) : (
-                                    <span className={`text-[10px] font-bold ${isActive ? 'text-black' : colors.text}`}>{abbr}</span>
-                                )}
-                                <span className="hidden sm:inline">{faction.name}</span>
-                            </button>
-                        );
-                    })}
+                    <div className="w-px bg-border shrink-0" />
+                    <div className="flex-1 overflow-x-auto min-w-0 no-scrollbar">
+                        <div className="flex gap-2 w-max">
+                            {factions.map(faction => {
+                                const isActive = factionFilter === faction.id;
+                                const fColor = FACTION_COLOR_MAP[faction.id] ?? 'border-gray-500';
+                                return (
+                                    <button
+                                        key={faction.id}
+                                        onClick={() => setFactionFilter(isActive ? 'all' : faction.id)}
+                                        title={faction.name}
+                                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
+                                            isActive
+                                                ? `${fColor} bg-white/10 ring-1 ring-white/30`
+                                                : 'border-border bg-black hover:border-white/30'
+                                        }`}
+                                    >
+                                        {faction.imageUrl && (
+                                            <img src={faction.imageUrl} alt={faction.name} className="w-full aspect-square object-contain" style={{ opacity: isActive ? 1 : 0.4 }} />
+                                        )}
+                                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${isActive ? 'text-white font-bold' : 'text-muted-foreground'}`}>{faction.name}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
             </div>
 
