@@ -10,7 +10,7 @@ import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon } from 'lucide-react';
+import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon, Layers } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { v4 as uuidv4 } from 'uuid';
@@ -180,7 +180,8 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
     // Gear view mode
     const [gearViewMode, setGearViewMode] = useState<'list' | 'card'>('card');
-    // Stacking state for card view
+    // Stacking state for card/list views
+    const [gearStacked, setGearStacked] = useState(true);
     const [expandedWeapons, setExpandedWeapons] = useState<Set<string>>(new Set());
     const toggleExpanded = (weaponId: string) => {
         setExpandedWeapons(prev => {
@@ -287,6 +288,25 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
             .filter(v => gearFactionFilters.size === 0 || gearFactionFilters.has(v.factionId))
             .map(variant => ({ weapon, variant }))
     );
+
+    // Group variants by weapon (shared between List and Card views)
+    const weaponGroups = useMemo(() => {
+        const groups = new Map<string, { weapon: Weapon; variants: FactionVariant[] }>();
+        for (const { weapon, variant } of variantCards) {
+            if (!groups.has(weapon.id)) groups.set(weapon.id, { weapon, variants: [] });
+            groups.get(weapon.id)!.variants.push(variant);
+        }
+        for (const group of groups.values()) {
+            group.variants.sort((a, b) => {
+                if (a.factionId === 'universal') return -1;
+                if (b.factionId === 'universal') return 1;
+                const nameA = catalog.factions.find(f => f.id === a.factionId)?.name ?? a.factionId;
+                const nameB = catalog.factions.find(f => f.id === b.factionId)?.name ?? b.factionId;
+                return nameA.localeCompare(nameB);
+            });
+        }
+        return groups;
+    }, [variantCards, catalog.factions]);
 
     // Programs detail view
     if (selectedProgram) {
@@ -762,6 +782,18 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             {label}
                         </button>
                     ))}
+                    <div className="w-px bg-border mx-1" />
+                    <button
+                        onClick={() => setGearStacked(s => !s)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
+                            gearStacked
+                                ? 'bg-secondary text-black'
+                                : 'bg-black border border-border text-muted-foreground hover:text-white'
+                        }`}
+                    >
+                        <Layers className="w-3.5 h-3.5" />
+                        {gearStacked ? 'Stacked' : 'Flat'}
+                    </button>
                 </div>
 
                 {/* Weapon Edit/Create Dialog */}
@@ -904,166 +936,202 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                     </DialogContent>
                 </Dialog>
 
-                {/* Weapons grid — LIST view (one card per faction variant) */}
-                {gearViewMode === 'list' && (
-                    <div ref={weaponGridRef} className={gridClass}>
-                        {variantCards.map(({ weapon, variant }) => {
-                            const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
-                            const skillIcon = weapon.skillReq ? ({ Reflexes: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png', Ranged: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png', Melee: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png', Medical: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png', Tech: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png', Influence: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png' }[weapon.skillReq] ?? null) : null;
-                            const variantFactionName = variant.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
-                            const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
-                            return (
-                                <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
-                                    <img src={getWeaponImageUrl(weapon.id)} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                        style={{ opacity: 0.55, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
-                                    <div className="relative z-10 flex flex-1">
-                                        <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
-                                            <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
-                                            <div className="font-mono-tech text-[8px] text-black/70 font-bold">EB</div>
-                                            {variant.rarity < 99 && (
-                                                <div className="font-mono-tech text-[6px] font-bold leading-none mt-1.5 text-black/60"
-                                                    title={`Rarity: max ${variant.rarity} per team`}>
-                                                    RAR {variant.rarity}
-                                                </div>
-                                            )}
-                                            {(variant.reqStreetCred ?? 0) > 0 && (
-                                                <div className="font-mono-tech text-[6px] font-bold leading-none text-black/60"
-                                                    title={`Requires Street Cred ${variant.reqStreetCred}`}>
-                                                    CRED {variant.reqStreetCred}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 px-3 py-2 flex flex-col gap-0.5">
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex-1">
-                                                    <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
-                                                    <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${variantTextColor}`}>
-                                                        {variantFactionName}
-                                                    </span>
-                                                </div>
-                                                {isAdmin && (
-                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button onClick={() => openWeaponEdit(weapon)} className="p-1 text-muted-foreground hover:text-secondary transition-colors"><Edit className="w-3.5 h-3.5" /></button>
-                                                        <button onClick={() => deleteWeapon(weapon.id)} className="p-1 text-muted-foreground hover:text-accent transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                                                    </div>
-                                                )}
+                {/* Weapons grid — LIST view */}
+                {gearViewMode === 'list' && (() => {
+                    const renderListCard = (weapon: Weapon, variant: FactionVariant, chevron?: 'expand' | 'collapse', variantCount?: number) => {
+                        const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
+                        const skillIcon = weapon.skillReq ? ({ Reflexes: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png', Ranged: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png', Melee: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png', Medical: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png', Tech: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png', Influence: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png' }[weapon.skillReq] ?? null) : null;
+                        const variantFactionName = variant.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
+                        const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
+                        return (
+                            <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
+                                <img src={getWeaponImageUrl(weapon.id)} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                    style={{ opacity: 0.55, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
+                                {chevron === 'expand' && (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); toggleExpanded(weapon.id); }}
+                                        className="absolute top-1 right-1 z-30 w-6 h-6 flex items-center justify-center rounded-full bg-black/70 border border-red-500 text-red-500 hover:bg-red-500/20 transition-colors"
+                                        title={`${variantCount} faction variants — click to expand`}
+                                    >
+                                        <ChevronLeft className="w-3.5 h-3.5 -rotate-90" />
+                                    </button>
+                                )}
+                                {chevron === 'collapse' && (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); toggleExpanded(weapon.id); }}
+                                        className="absolute top-1 right-1 z-30 w-6 h-6 flex items-center justify-center rounded-full bg-black/70 border border-emerald-500 text-emerald-500 hover:bg-emerald-500/20 transition-colors"
+                                        title="Collapse variants"
+                                    >
+                                        <ChevronLeft className="w-3.5 h-3.5 rotate-90" />
+                                    </button>
+                                )}
+                                <div className="relative z-10 flex flex-1">
+                                    <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
+                                        <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
+                                        <div className="font-mono-tech text-[8px] text-black/70 font-bold">EB</div>
+                                        {variant.rarity < 99 && (
+                                            <div className="font-mono-tech text-[6px] font-bold leading-none mt-1.5 text-black/60"
+                                                title={`Rarity: max ${variant.rarity} per team`}>
+                                                RAR {variant.rarity}
                                             </div>
-                                            {(() => {
-                                                const hasArmor = weapon.grantsArmor != null && weapon.grantsArmor > 0;
-                                                const lettrine = (!!skillIcon || hasArmor) && !showRange;
-
-                                                const skillEl = skillIcon && (
-                                                    <div className="flex items-center shrink-0">
-                                                        <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] object-contain" />
-                                                        {weapon.skillBonus != null && weapon.skillBonus !== 0 && (
-                                                            <span className="font-display font-black text-xs text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)] [-webkit-text-stroke:0.5px_rgba(0,0,0,0.6)] -ml-1">{weapon.skillBonus > 0 ? `+${weapon.skillBonus}` : weapon.skillBonus}</span>
-                                                        )}
-                                                    </div>
-                                                );
-                                                const armorEl = hasArmor && (
-                                                    <div className="relative shrink-0 w-9 h-9 flex items-center justify-center -my-[2px]">
-                                                        <svg className="w-[26px] h-[26px] absolute inset-0 m-auto" viewBox="0 0 40 40" fill="none">
-                                                            <path d="M20 4L6 10v10c0 9 5.6 16.8 14 19 8.4-2.2 14-10 14-19V10L20 4z" fill="black" stroke="#3b82f6" strokeWidth="2.5" />
-                                                        </svg>
-                                                        <span className="relative z-10 font-display font-black text-[11px] text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)]">{weapon.grantsArmor}</span>
-                                                    </div>
-                                                );
-
-                                                if (lettrine) {
-                                                    return (
-                                                        <div className="-ml-2">
-                                                            <div className="float-left flex items-center mr-1">
-                                                                {skillEl}
-                                                                {armorEl}
-                                                            </div>
-                                                            <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
-                                                        </div>
-                                                    );
-                                                }
-                                                return (
-                                                    <>
-                                                        {(showRange || skillIcon || hasArmor) && (
-                                                            <div className="-ml-2 flex items-center gap-2">
-                                                                {skillEl}
-                                                                {armorEl}
-                                                                {showRange && (
-                                                                    <div className="w-[60%]">
-                                                                        <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
-                                                                            <polygon points={AP.red} fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
-                                                                            <polygon points={AP.yellow} fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
-                                                                            <polygon points={AP.green} fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
-                                                                            {weapon.rangeLong && (
-                                                                                <>
-                                                                                    <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                                                                    <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                                    <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                                </>
-                                                                            )}
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
-                                                    </>
-                                                );
-                                            })()}
-                                            {(weapon.range2Red || weapon.range2Yellow || weapon.range2Green || weapon.range2Long) && (
-                                                <div className="-ml-2 flex items-center gap-2">
-                                                    {skillIcon && (
-                                                        <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] shrink-0 object-contain" />
-                                                    )}
-                                                    <div className="w-[60%]">
-                                                        <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
-                                                            <polygon points={AP.red} fill={weapon.range2Red ? '#dc2626' : OFF} stroke={weapon.range2Red ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Red ? 1 : 0.5} />
-                                                            <polygon points={AP.yellow} fill={weapon.range2Yellow ? '#eab308' : OFF} stroke={weapon.range2Yellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Yellow ? 1 : 0.5} />
-                                                            <polygon points={AP.green} fill={weapon.range2Green ? '#22c55e' : OFF} stroke={weapon.range2Green ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Green ? 1 : 0.5} />
-                                                            {weapon.range2Long && (
-                                                                <>
-                                                                    <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                                                    <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                    <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                </>
-                                                            )}
-                                                        </svg>
-                                                    </div>
+                                        )}
+                                        {(variant.reqStreetCred ?? 0) > 0 && (
+                                            <div className="font-mono-tech text-[6px] font-bold leading-none text-black/60"
+                                                title={`Requires Street Cred ${variant.reqStreetCred}`}>
+                                                CRED {variant.reqStreetCred}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 px-3 py-2 flex flex-col gap-0.5">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
+                                                <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${variantTextColor}`}>
+                                                    {variantFactionName}
+                                                </span>
+                                            </div>
+                                            {isAdmin && (
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => openWeaponEdit(weapon)} className="p-1 text-muted-foreground hover:text-secondary transition-colors"><Edit className="w-3.5 h-3.5" /></button>
+                                                    <button onClick={() => deleteWeapon(weapon.id)} className="p-1 text-muted-foreground hover:text-accent transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                                                 </div>
                                             )}
                                         </div>
+                                        {(() => {
+                                            const hasArmor = weapon.grantsArmor != null && weapon.grantsArmor > 0;
+                                            const lettrine = (!!skillIcon || hasArmor) && !showRange;
+
+                                            const skillEl = skillIcon && (
+                                                <div className="flex items-center shrink-0">
+                                                    <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] object-contain" />
+                                                    {weapon.skillBonus != null && weapon.skillBonus !== 0 && (
+                                                        <span className="font-display font-black text-xs text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)] [-webkit-text-stroke:0.5px_rgba(0,0,0,0.6)] -ml-1">{weapon.skillBonus > 0 ? `+${weapon.skillBonus}` : weapon.skillBonus}</span>
+                                                    )}
+                                                </div>
+                                            );
+                                            const armorEl = hasArmor && (
+                                                <div className="relative shrink-0 w-9 h-9 flex items-center justify-center -my-[2px]">
+                                                    <svg className="w-[26px] h-[26px] absolute inset-0 m-auto" viewBox="0 0 40 40" fill="none">
+                                                        <path d="M20 4L6 10v10c0 9 5.6 16.8 14 19 8.4-2.2 14-10 14-19V10L20 4z" fill="black" stroke="#3b82f6" strokeWidth="2.5" />
+                                                    </svg>
+                                                    <span className="relative z-10 font-display font-black text-[11px] text-white leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.9)]">{weapon.grantsArmor}</span>
+                                                </div>
+                                            );
+
+                                            if (lettrine) {
+                                                return (
+                                                    <div className="-ml-2">
+                                                        <div className="float-left flex items-center mr-1">
+                                                            {skillEl}
+                                                            {armorEl}
+                                                        </div>
+                                                        <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <>
+                                                    {(showRange || skillIcon || hasArmor) && (
+                                                        <div className="-ml-2 flex items-center gap-2">
+                                                            {skillEl}
+                                                            {armorEl}
+                                                            {showRange && (
+                                                                <div className="w-[60%]">
+                                                                    <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
+                                                                        <polygon points={AP.red} fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
+                                                                        <polygon points={AP.yellow} fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
+                                                                        <polygon points={AP.green} fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
+                                                                        {weapon.rangeLong && (
+                                                                            <>
+                                                                                <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
+                                                                                <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                                                <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                                            </>
+                                                                        )}
+                                                                    </svg>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                                </>
+                                            );
+                                        })()}
+                                        {(weapon.range2Red || weapon.range2Yellow || weapon.range2Green || weapon.range2Long) && (
+                                            <div className="-ml-2 flex items-center gap-2">
+                                                {skillIcon && (
+                                                    <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] shrink-0 object-contain" />
+                                                )}
+                                                <div className="w-[60%]">
+                                                    <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
+                                                        <polygon points={AP.red} fill={weapon.range2Red ? '#dc2626' : OFF} stroke={weapon.range2Red ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Red ? 1 : 0.5} />
+                                                        <polygon points={AP.yellow} fill={weapon.range2Yellow ? '#eab308' : OFF} stroke={weapon.range2Yellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Yellow ? 1 : 0.5} />
+                                                        <polygon points={AP.green} fill={weapon.range2Green ? '#22c55e' : OFF} stroke={weapon.range2Green ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Green ? 1 : 0.5} />
+                                                        {weapon.range2Long && (
+                                                            <>
+                                                                <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
+                                                                <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                                <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                                            </>
+                                                        )}
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                            );
-                        })}
-                    </div>
-                )}
+                            </div>
+                        );
+                    };
 
-                {/* Weapons grid — CARD view (grouped, expand/collapse) */}
-                {gearViewMode === 'card' && (() => {
-                    // Group variants by weapon
-                    const groups = new Map<string, { weapon: Weapon; variants: FactionVariant[] }>();
-                    for (const { weapon, variant } of variantCards) {
-                        if (!groups.has(weapon.id)) groups.set(weapon.id, { weapon, variants: [] });
-                        groups.get(weapon.id)!.variants.push(variant);
-                    }
-                    // Sort: universal first, then alphabetical by faction name
-                    for (const group of groups.values()) {
-                        group.variants.sort((a, b) => {
-                            if (a.factionId === 'universal') return -1;
-                            if (b.factionId === 'universal') return 1;
-                            const nameA = catalog.factions.find(f => f.id === a.factionId)?.name ?? a.factionId;
-                            const nameB = catalog.factions.find(f => f.id === b.factionId)?.name ?? b.factionId;
-                            return nameA.localeCompare(nameB);
-                        });
+                    if (!gearStacked) {
+                        // Flat: all variants individually
+                        return (
+                            <div ref={weaponGridRef} className={gridClass}>
+                                {variantCards.map(({ weapon, variant }) => renderListCard(weapon, variant))}
+                            </div>
+                        );
                     }
 
+                    // Stacked: group by weapon, expand/collapse
                     const items: React.ReactNode[] = [];
-                    for (const [weaponId, group] of groups) {
+                    for (const [weaponId, group] of weaponGroups) {
                         const isExpanded = expandedWeapons.has(weaponId);
                         const isMulti = group.variants.length > 1;
 
                         if (!isMulti || !isExpanded) {
-                            // Show only the first variant (universal or 1st alphabetical)
+                            items.push(renderListCard(group.weapon, group.variants[0], isMulti ? 'expand' : undefined, group.variants.length));
+                        } else {
+                            for (const variant of group.variants) {
+                                items.push(renderListCard(group.weapon, variant, 'collapse'));
+                            }
+                        }
+                    }
+                    return <div ref={weaponGridRef} className={gridClass}>{items}</div>;
+                })()}
+
+                {/* Weapons grid — CARD view (grouped, expand/collapse) */}
+                {gearViewMode === 'card' && (() => {
+                    if (!gearStacked) {
+                        // Flat: all variants individually
+                        return (
+                            <div className={gridClass}>
+                                {variantCards.map(({ weapon, variant }) => (
+                                    <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className="relative">
+                                        <WeaponCard weapon={weapon} variant={variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(weapon)} onDelete={() => deleteWeapon(weapon.id)} />
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    }
+
+                    const items: React.ReactNode[] = [];
+                    for (const [weaponId, group] of weaponGroups) {
+                        const isExpanded = expandedWeapons.has(weaponId);
+                        const isMulti = group.variants.length > 1;
+
+                        if (!isMulti || !isExpanded) {
                             const variant = group.variants[0];
                             items.push(
                                 <div key={weaponId} style={cardStyle} className="relative">
@@ -1080,7 +1148,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                                 </div>
                             );
                         } else {
-                            // Expanded: show all variants, green collapse button on each
                             for (const variant of group.variants) {
                                 items.push(
                                     <div key={weaponId + '-' + variant.factionId} style={cardStyle} className="relative">
