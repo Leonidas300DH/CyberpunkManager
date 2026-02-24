@@ -240,20 +240,22 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
 
     const weapons = catalog.weapons ?? [];
 
-    // Runtime image probe — deterministic URLs mean we must check if the file actually exists
+    // Runtime image probe via fetch HEAD — deterministic URLs mean we must check if the file actually exists
     const [missingImageIds, setMissingImageIds] = useState<Set<string>>(new Set());
     const weaponIds = useMemo(() => weapons.map(w => w.id).join(','), [weapons]);
     useEffect(() => {
         const ids = weaponIds.split(',').filter(Boolean);
         if (ids.length === 0) return;
-        const missing = new Set<string>();
-        let completed = 0;
-        ids.forEach(id => {
-            const img = new Image();
-            img.onload = () => { completed++; if (completed === ids.length) setMissingImageIds(new Set(missing)); };
-            img.onerror = () => { missing.add(id); completed++; if (completed === ids.length) setMissingImageIds(new Set(missing)); };
-            img.src = getWeaponImageUrl(id);
+        let cancelled = false;
+        Promise.all(ids.map(id =>
+            fetch(getWeaponImageUrl(id), { method: 'HEAD' })
+                .then(res => res.ok ? null : id)
+                .catch(() => id)
+        )).then(results => {
+            if (cancelled) return;
+            setMissingImageIds(new Set(results.filter((id): id is string => id !== null)));
         });
+        return () => { cancelled = true; };
     }, [weaponIds]);
     const hasNoImage = (w: Weapon) => missingImageIds.has(w.id);
 
