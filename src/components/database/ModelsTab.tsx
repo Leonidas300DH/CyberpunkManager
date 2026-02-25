@@ -43,12 +43,14 @@ function CharacterImageUpload({ value, onChange, charName, flippedY, onFlipY, fl
             const filePath = `${slug}.png`;
             const { error } = await supabase.storage
                 .from('character-images')
-                .upload(filePath, file, { upsert: true, contentType: file.type });
+                .upload(filePath, file, { upsert: true, contentType: file.type, cacheControl: '0' });
             if (error) throw error;
             const { data: urlData } = supabase.storage
                 .from('character-images')
                 .getPublicUrl(filePath);
-            onChange(urlData.publicUrl);
+            // Append cache-buster so browser + CDN serve the fresh file
+            const freshUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+            onChange(freshUrl);
         } catch (err) {
             console.error('Upload error:', err);
             alert('Failed to upload image');

@@ -78,14 +78,15 @@ function WeaponImageUpload({ value, onChange, weaponName, flipped, onFlip }: { v
             // Upload (upsert to overwrite)
             const { error } = await supabase.storage
                 .from('weapon-images')
-                .upload(filePath, file, { upsert: true, contentType: file.type });
+                .upload(filePath, file, { upsert: true, contentType: file.type, cacheControl: '0' });
             if (error) throw error;
 
-            // Get public URL
+            // Get public URL with cache-buster
             const { data: urlData } = supabase.storage
                 .from('weapon-images')
                 .getPublicUrl(filePath);
-            onChange(urlData.publicUrl);
+            const freshUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+            onChange(freshUrl);
         } catch (err) {
             console.error('Upload error:', err);
             alert('Failed to upload image');
