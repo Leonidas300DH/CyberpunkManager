@@ -10,9 +10,10 @@ import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon, Layers } from 'lucide-react';
+import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon, Layers, FlipVertical2 } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useReferenceData } from '@/hooks/useReferenceData';
 import { v4 as uuidv4 } from 'uuid';
 
 type ViewMode = 'list' | 'card' | 'double';
@@ -63,7 +64,7 @@ const TAB_STYLES: Record<string, { border: string; text: string; gradient: strin
 };
 
 /** Upload image to Supabase Storage → public URL */
-function WeaponImageUpload({ value, onChange, weaponName }: { value: string; onChange: (url: string) => void; weaponName: string }) {
+function WeaponImageUpload({ value, onChange, weaponName, flipped, onFlip }: { value: string; onChange: (url: string) => void; weaponName: string; flipped?: boolean; onFlip?: () => void }) {
     const fileRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
 
@@ -112,7 +113,7 @@ function WeaponImageUpload({ value, onChange, weaponName }: { value: string; onC
                 className="relative w-full aspect-square border border-border bg-black flex items-center justify-center overflow-hidden cursor-pointer hover:border-secondary transition-colors group disabled:opacity-50"
             >
                 {value ? (
-                    <img src={value} alt="" className="w-full h-full object-cover" />
+                    <img src={value} alt="" className="w-full h-full object-cover" style={{ transform: flipped ? 'scaleY(-1)' : undefined }} />
                 ) : (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-secondary transition-colors">
                         <Upload className="w-8 h-8" />
@@ -128,6 +129,16 @@ function WeaponImageUpload({ value, onChange, weaponName }: { value: string; onC
                     </div>
                 )}
             </button>
+            {value && onFlip && (
+                <button
+                    type="button"
+                    onClick={onFlip}
+                    className={`mt-1 flex items-center gap-1.5 px-2 py-1 text-[10px] font-mono-tech uppercase tracking-wider border transition-colors ${flipped ? 'border-secondary text-secondary bg-secondary/10' : 'border-border text-muted-foreground hover:text-white hover:border-white'}`}
+                >
+                    <FlipVertical2 className="w-3.5 h-3.5" />
+                    Flip vertical{flipped ? ' (on)' : ''}
+                </button>
+            )}
         </div>
     );
 }
@@ -150,6 +161,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
+    const { saveWeapons } = useReferenceData();
     const [search, setSearch] = useState('');
     // Program filters
     const [factionFilter, setFactionFilter] = useState<string>('all-factions');
@@ -376,11 +388,11 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const saveWeapon = () => {
         const currentWeapons = catalog.weapons ?? [];
         const finalVariants = variantRows.length > 0 ? variantRows : [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }];
+        let updatedWeapons: Weapon[];
         if (editingWeapon) {
-            const updated = currentWeapons.map(w =>
+            updatedWeapons = currentWeapons.map(w =>
                 w.id === editingWeapon.id ? { ...editingWeapon, ...weaponForm, factionVariants: finalVariants } as Weapon : w
             );
-            setCatalog({ ...catalog, weapons: updated });
         } else {
             const newWeapon: Weapon = {
                 id: uuidv4(),
@@ -404,8 +416,10 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 keywords: weaponForm.keywords ?? [],
                 imageUrl: weaponForm.imageUrl,
             };
-            setCatalog({ ...catalog, weapons: [...currentWeapons, newWeapon] });
+            updatedWeapons = [...currentWeapons, newWeapon];
         }
+        setCatalog({ ...catalog, weapons: updatedWeapons });
+        if (isAdmin) saveWeapons(updatedWeapons);
         setWeaponDialogOpen(false);
         setEditingWeapon(null);
         setWeaponForm(EMPTY_WEAPON);
@@ -414,7 +428,9 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const deleteWeapon = (id: string) => {
         const weapon = (catalog.weapons ?? []).find(w => w.id === id);
         if (!weapon || !window.confirm(`Delete "${weapon.name}"? This cannot be undone.`)) return;
-        setCatalog({ ...catalog, weapons: (catalog.weapons ?? []).filter(w => w.id !== id) });
+        const updatedWeapons = (catalog.weapons ?? []).filter(w => w.id !== id);
+        setCatalog({ ...catalog, weapons: updatedWeapons });
+        if (isAdmin) saveWeapons(updatedWeapons);
     };
 
     const toggleFlip = (id: string) => {
@@ -805,7 +821,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3 py-2">
-                            <WeaponImageUpload value={weaponForm.imageUrl || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} weaponName={weaponForm.name || ''} />
+                            <WeaponImageUpload value={weaponForm.imageUrl || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} weaponName={weaponForm.name || ''} flipped={!!weaponForm.imageFlipY} onFlip={() => setWeaponForm(f => ({ ...f, imageFlipY: !f.imageFlipY }))} />
                             <div className="space-y-2">
                                 <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
                                 <Input value={weaponForm.name || ''} onChange={(e) => setWeaponForm({ ...weaponForm, name: e.target.value })} placeholder="Weapon Name" className="bg-black border-border font-mono-tech" />
@@ -947,7 +963,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
                                 <img src={getWeaponImageUrl(weapon.id)} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                    style={{ opacity: 0.55, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
+                                    style={{ opacity: 0.55, transform: weapon.imageFlipY ? 'scaleY(-1)' : undefined, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
                                 {chevron === 'expand' && (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); toggleExpanded(weapon.id); }}

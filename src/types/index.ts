@@ -20,6 +20,7 @@ export interface GameAction {
     isAttack: boolean;
     keywords: string[]; // e.g., ['Deadly', 'Blast', 'Pierce 2', 'Complex', 'Difficult']
     effectDescription: string;
+    weaponId?: string;  // FK vers Weapon.id — quand présent, render depuis les données de l'arme
 }
 
 // --- CHARACTER & DRONE MODELLING ---
@@ -30,6 +31,9 @@ export interface ModelLineage {
     type: 'Leader' | 'Character' | 'Gonk' | 'Specialist' | 'Drone';
     isMerc: boolean;
     imageUrl?: string; // Rendered as aspect-square
+    imageFlipY?: boolean; // CSS scaleY(-1) flip
+    imageFlipX?: boolean; // CSS scaleX(-1) flip
+    isDefaultImage?: boolean; // true = using faction fallback image, needs real portrait
 }
 
 // A specific experience level (Rank/Star) of a Lineage
@@ -126,6 +130,7 @@ export interface Weapon {
     keywords: string[];    // e.g., ['Bulky', 'Deadly']
     grantsNetrunner?: boolean; // true = equipping this allows hacking programs
     imageUrl?: string;     // Illustration in /images/weapons/
+    imageFlipY?: boolean;  // CSS scaleY(-1) flip
 }
 
 // --- CAMPAIGN & ROSTER MODELLING ---
@@ -136,6 +141,7 @@ export interface RecruitedModel {
     equippedItemIds: string[]; // IDs of ItemCards equipped
     hasMajorInjury: boolean; // If true, forces fallback to Rank 0 stats
     quantity: number; // Used for generic Gonks (e.g., quantity: 5)
+    purchasedLevel?: number; // 0 = base, 1 = veteran direct, 2 = elite direct
 }
 
 // The persistent Campaign state (The "HQ")
@@ -178,4 +184,5 @@ export interface CatalogData {
     items: ItemCard[];
     programs: HackingProgram[];
     weapons: Weapon[];
+    tierSurcharges?: { veteran: number; elite: number };
 }

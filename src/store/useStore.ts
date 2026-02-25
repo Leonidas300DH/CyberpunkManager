@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { CatalogData, Campaign, MatchTeam, Weapon } from '@/types'
-import { FACTIONS, HACKING_PROGRAMS, ITEMS, LINEAGES, PROFILES, WEAPONS } from '@/lib/seed'
+import { FACTIONS, HACKING_PROGRAMS, ITEMS, LINEAGES, PROFILES, WEAPONS, TIER_SURCHARGES } from '@/lib/seed'
 import { migrateWeaponToVariants, migrateItemToVariants, migrateStashEntry, migrateEquipmentId } from '@/lib/variants'
 
 // Bump this version whenever seed data changes to force a re-seed
-const SEED_VERSION = 37;
+const SEED_VERSION = 45;
 
 const STORAGE_KEY = 'combat-zone-storage';
 
@@ -91,11 +91,15 @@ if (typeof window !== 'undefined') {
             const oldItems = oldCatalog?.items ?? [];
             const migratedItems = ITEMS.length > 0 ? ITEMS : oldItems.map((i: Record<string, unknown>) => migrateItemToVariants(i));
 
-            // Migrate campaigns: stash entries + equipmentMap
+            // Migrate campaigns: stash entries + equipmentMap + purchasedLevel
             const oldCampaigns: Campaign[] = parsed?.state?.campaigns ?? [];
             const migratedCampaigns = oldCampaigns.map((c: Campaign) => ({
                 ...c,
                 hqStash: c.hqStash.map(migrateStashEntry),
+                hqRoster: c.hqRoster.map(r => ({
+                    ...r,
+                    purchasedLevel: r.purchasedLevel ?? 0,
+                })),
             }));
 
             // Migrate activeMatchTeam equipmentMap
@@ -130,6 +134,7 @@ if (typeof window !== 'undefined') {
                 items: migratedItems,
                 programs: HACKING_PROGRAMS,
                 weapons: mergedWeapons,
+                tierSurcharges: oldCatalog?.tierSurcharges ?? TIER_SURCHARGES,
             };
 
             const newPersisted = {
@@ -145,7 +150,13 @@ if (typeof window !== 'undefined') {
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(newPersisted));
             localStorage.setItem('seed-version', String(SEED_VERSION));
+            // Diagnostic: verify critical weapon data after merge
+            const _tb = mergedWeapons.find(w => w.id === 'weapon-title-belt');
+            const _mg = mergedWeapons.find(w => w.id === 'weapon-metalgear');
             console.log(`Seed v${SEED_VERSION}: pre-hydration catalog update (${mergedWeapons.length} weapons, variant migration)`);
+            console.log(`  Title Belt: skillReq=${_tb?.skillReq}, skillBonus=${_tb?.skillBonus}`);
+            console.log(`  Metalgear: grantsArmor=${_mg?.grantsArmor}`);
+            console.log(`  Weapons with skillReq: ${mergedWeapons.filter(w => w.skillReq).length}`);
         } catch (e) {
             console.error('Seed pre-hydration error:', e);
         }
@@ -198,7 +209,18 @@ export const useStore = create<StoreState>()(
             name: STORAGE_KEY,
             merge: (persisted, current) => {
                 const persistedState = persisted as Partial<StoreState> | undefined;
-                if (!persistedState) return current;
+                if (!persistedState) {
+                    console.log('[Store merge] No persisted state — using defaults');
+                    return current;
+                }
+                // Diagnostic: verify weapon data in persisted state
+                const _pw = persistedState.catalog?.weapons;
+                if (_pw) {
+                    const _tb = _pw.find(w => w.id === 'weapon-title-belt');
+                    console.log(`[Store merge] ${_pw.length} weapons from storage. Title Belt skillReq=${_tb?.skillReq}, skillBonus=${_tb?.skillBonus}`);
+                } else {
+                    console.log('[Store merge] No weapons in persisted catalog');
+                }
                 const defaultCatalog = current.catalog;
                 // Ensure activeMatchTeam defaults for old data
                 const activeMatch = persistedState.activeMatchTeam

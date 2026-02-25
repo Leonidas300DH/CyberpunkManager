@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStore, TeamBuilderDraft } from '@/store/useStore';
 import { supabase } from '@/lib/supabase';
-import type { Campaign, Weapon, MatchTeam } from '@/types';
+import type { Campaign, MatchTeam } from '@/types';
 
 interface PlayViewSettings {
     characterView: 'horizontal' | 'vertical';
@@ -21,7 +21,6 @@ interface DisplaySettings {
 
 interface SyncData {
     campaigns: Campaign[];
-    weapons: Weapon[];
     displaySettings: DisplaySettings;
     activeMatchTeam: MatchTeam | null;
     playViewSettings: PlayViewSettings;
@@ -31,17 +30,17 @@ interface SyncData {
 /**
  * Bidirectional sync between Zustand (localStorage) and Supabase.
  *
- * Everything goes into a single `sync_data` JSONB column.
- * No more schema migrations needed — just add fields to SyncData.
+ * Only USER-SPECIFIC data is synced (campaigns, match state, settings, drafts).
+ * Reference data (weapons, gears, programs, characters, factions) comes from
+ * the SEED — same for everyone, updated via code deploys.
  *
- * On login  → fetch remote data, merge into local store
+ * On login  → fetch remote user data, merge into local store
  * On change → debounced upsert to Supabase
  * On logout → local data stays (offline fallback)
  */
 export function useSupabaseSync() {
     const { user, loading: authLoading } = useAuth();
     const campaigns = useStore((s) => s.campaigns);
-    const weapons = useStore((s) => s.catalog.weapons);
     const displaySettings = useStore((s) => s.displaySettings);
     const activeMatchTeam = useStore((s) => s.activeMatchTeam);
     const playViewSettings = useStore((s) => s.playViewSettings);
@@ -75,7 +74,6 @@ export function useSupabaseSync() {
             if (data) {
                 const remote = (data.sync_data ?? {}) as Partial<SyncData>;
                 const remoteCampaigns = remote.campaigns ?? [];
-                const remoteWeapons = remote.weapons ?? [];
                 const remoteSettings = remote.displaySettings ?? null;
                 const remoteMatch = remote.activeMatchTeam ?? null;
                 const remotePlayView = remote.playViewSettings ?? null;
@@ -86,12 +84,6 @@ export function useSupabaseSync() {
                 const remoteCampMap = new Map(remoteCampaigns.map((c) => [c.id, c]));
                 const localOnlyCampaigns = localCampaigns.filter((c) => !remoteCampMap.has(c.id));
                 const mergedCampaigns = [...remoteCampaigns, ...localOnlyCampaigns];
-
-                // Merge weapons: remote wins for existing IDs, local-only kept
-                const localWeapons = useStore.getState().catalog.weapons;
-                const remoteWeaponMap = new Map(remoteWeapons.map((w) => [w.id, w]));
-                const localOnlyWeapons = localWeapons.filter((w) => !remoteWeaponMap.has(w.id));
-                const mergedWeapons = [...remoteWeapons, ...localOnlyWeapons];
 
                 // activeMatchTeam: remote wins (latest play state)
                 const mergedMatch = remoteMatch ?? useStore.getState().activeMatchTeam;
@@ -115,9 +107,8 @@ export function useSupabaseSync() {
                 // Mark so the subsequent store update doesn't trigger a save
                 skipNextSave.current = true;
 
-                useStore.setState((state) => ({
+                useStore.setState(() => ({
                     campaigns: mergedCampaigns,
-                    catalog: { ...state.catalog, weapons: mergedWeapons },
                     activeMatchTeam: mergedMatch,
                     playViewSettings: mergedPlayView,
                     displaySettings: mergedDisplay,
@@ -125,7 +116,7 @@ export function useSupabaseSync() {
                 }));
 
                 const merged: SyncData = {
-                    campaigns: mergedCampaigns, weapons: mergedWeapons,
+                    campaigns: mergedCampaigns,
                     activeMatchTeam: mergedMatch, playViewSettings: mergedPlayView,
                     displaySettings: mergedDisplay, teamBuilderDrafts: mergedDrafts,
                 };
@@ -134,7 +125,7 @@ export function useSupabaseSync() {
 
                 // If merged result differs from remote, push back so local-only data reaches Supabase
                 const remoteJson = JSON.stringify({
-                    campaigns: remoteCampaigns, weapons: remoteWeapons,
+                    campaigns: remoteCampaigns,
                     activeMatchTeam: remoteMatch,
                     playViewSettings: remotePlayView ?? currentPlayView,
                     displaySettings: remoteSettings ?? currentDisplay,
@@ -146,12 +137,11 @@ export function useSupabaseSync() {
                 }
 
                 console.log(
-                    `[Sync] loaded ${remoteCampaigns.length} remote campaigns (${localOnlyCampaigns.length} local-only kept), ` +
-                    `${remoteWeapons.length} remote weapons (${localOnlyWeapons.length} local-only kept)`
+                    `[Sync] loaded ${remoteCampaigns.length} remote campaigns (${localOnlyCampaigns.length} local-only kept)`
                 );
             } else {
                 // No remote row yet — push current local data up
-                const syncData: SyncData = { campaigns, weapons, displaySettings, activeMatchTeam, playViewSettings, teamBuilderDrafts };
+                const syncData: SyncData = { campaigns, displaySettings, activeMatchTeam, playViewSettings, teamBuilderDrafts };
                 await upsert(user.id, syncData);
                 lastSavedJson.current = JSON.stringify(syncData);
                 console.log('[Sync] initial push to Supabase');
@@ -169,7 +159,7 @@ export function useSupabaseSync() {
             return;
         }
 
-        const syncData: SyncData = { campaigns, weapons, displaySettings, activeMatchTeam, playViewSettings, teamBuilderDrafts };
+        const syncData: SyncData = { campaigns, displaySettings, activeMatchTeam, playViewSettings, teamBuilderDrafts };
         const json = JSON.stringify(syncData);
         if (json === lastSavedJson.current) return;
 
@@ -182,7 +172,7 @@ export function useSupabaseSync() {
         return () => {
             if (saveTimer.current) clearTimeout(saveTimer.current);
         };
-    }, [user, campaigns, weapons, displaySettings, activeMatchTeam, playViewSettings, teamBuilderDrafts]);
+    }, [user, campaigns, displaySettings, activeMatchTeam, playViewSettings, teamBuilderDrafts]);
 }
 
 async function upsert(userId: string, syncData: SyncData) {

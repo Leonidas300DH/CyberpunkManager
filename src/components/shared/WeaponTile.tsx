@@ -79,6 +79,7 @@ export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCr
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 style={{
                     opacity: 0.5,
+                    transform: weapon.imageFlipY ? 'scaleY(-1)' : undefined,
                     WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)',
                     maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)',
                 }}

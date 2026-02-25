@@ -1,5 +1,6 @@
 import { Campaign, MatchTeam, CatalogData, Weapon, HackingProgram } from '@/types';
 import { parseEquipmentId, resolveVariant } from './variants';
+import { getRecruitBudgetCost } from './tiers';
 
 export function resolveEquipmentItem(
     itemId: string,
@@ -80,13 +81,8 @@ export const MathService = {
             const recruit = campaign.hqRoster.find((r) => r.id === recruitId);
             if (!recruit) return;
 
-            const profile = store.profiles.find((p) => p.id === recruit.currentProfileId);
-            const quantity = recruit.quantity || 1;
-
-            // Base Cost * Quantity
-            if (profile) {
-                totalCost += profile.costEB * quantity;
-            }
+            // Tier-aware budget cost: baseCost + surcharge[purchasedLevel] * quantity
+            totalCost += getRecruitBudgetCost(recruit, store);
 
             // Items Cost (permanent HQ equipment)
             recruit.equippedItemIds.forEach((itemId) => {

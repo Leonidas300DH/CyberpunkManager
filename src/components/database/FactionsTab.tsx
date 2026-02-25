@@ -288,7 +288,7 @@ export function FactionsTab() {
                                                 const profiles = getProfilesForLineage(lineage.id);
                                                 return profiles.map(profile => (
                                                     <div key={profile.id} className="w-full" style={cardStyle}>
-                                                        <CharacterCard lineage={lineage} profile={profile} />
+                                                        <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
                                                         {profiles.length > 1 && (
                                                             <div className="text-center mt-1">
                                                                 <span className="font-mono-tech text-[10px] text-muted-foreground uppercase">
@@ -351,7 +351,7 @@ export function FactionsTab() {
                                                             <div className="mt-2 space-y-2">
                                                                 {profiles.map(profile => (
                                                                     <div key={profile.id} className="w-full">
-                                                                        <CharacterCard lineage={lineage} profile={profile} />
+                                                                        <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
                                                                         {profiles.length > 1 && (
                                                                             <div className="text-center mt-1">
                                                                                 <span className="font-mono-tech text-[10px] text-muted-foreground uppercase">

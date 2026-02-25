@@ -5,6 +5,7 @@ import { Campaign, ModelLineage, Weapon, HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
 import { MathService } from '@/lib/math';
 import { parseStashEntry, parseEquipmentId, resolveVariant } from '@/lib/variants';
+import { getTierLabel } from '@/lib/tiers';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, ChevronDown, ChevronUp, Plus, Users, X, GripVertical, List, Maximize2 } from 'lucide-react';
 import { useTeamBuilder } from '@/hooks/useTeamBuilder';
@@ -305,7 +306,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     return (
                         <div className="opacity-80 pointer-events-none" style={cardStyle}>
                             <div className="border-2 border-primary shadow-[0_0_20px_rgba(252,238,10,0.4)]">
-                                <CharacterCard lineage={lineage} profile={profile} />
+                                <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
                             </div>
                         </div>
                     );
@@ -476,8 +477,15 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                         </button>
                                                         <div className="absolute -left-1 top-0 bottom-0 w-2 bg-primary z-10 glow-primary" />
                                                         <div className="border-2 border-primary">
-                                                            <CharacterCard lineage={lineage} profile={profile} />
+                                                            <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
                                                         </div>
+                                                        {profile.level > 0 && (
+                                                            <div className="text-center mt-0.5">
+                                                                <span className={`font-mono-tech text-[9px] uppercase tracking-wider ${profile.level === 1 ? 'text-primary' : 'text-accent'}`}>
+                                                                    {getTierLabel(profile.level)}
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 }
                                             >
@@ -662,7 +670,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                 className="cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
                                                 onClick={() => toggleSelection(recruit.id)}
                                             >
-                                                <CharacterCard lineage={lineage} profile={profile} />
+                                                <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
                                             </div>
                                         </div>
                                     );

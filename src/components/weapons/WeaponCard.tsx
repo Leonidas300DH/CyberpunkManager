@@ -174,6 +174,7 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                 alt={weapon.name}
                 className="absolute inset-0 w-full h-full object-cover z-0"
                 onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_WEAPON_IMAGE; }}
+                style={{ transform: weapon.imageFlipY ? 'scaleY(-1)' : undefined }}
             />
 
             {/* Scanline overlay */}
