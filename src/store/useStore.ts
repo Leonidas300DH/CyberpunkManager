@@ -5,7 +5,7 @@ import { FACTIONS, HACKING_PROGRAMS, ITEMS, LINEAGES, PROFILES, WEAPONS, TIER_SU
 import { migrateWeaponToVariants, migrateItemToVariants, migrateStashEntry, migrateEquipmentId } from '@/lib/variants'
 
 // Bump this version whenever seed data changes to force a re-seed
-const SEED_VERSION = 46;
+const SEED_VERSION = 47;
 
 const STORAGE_KEY = 'combat-zone-storage';
 
