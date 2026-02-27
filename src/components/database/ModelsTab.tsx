@@ -6,7 +6,7 @@ import { ModelLineage, ModelProfile, GameAction, SkillType, RangeType, ActionCol
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
-import { useReferenceData } from '@/hooks/useReferenceData';
+import { useCatalog } from '@/hooks/useCatalog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -140,7 +140,7 @@ export function ModelsTab() {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
-    const { saveCatalog } = useReferenceData();
+    const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, saveTierSurcharges } = useCatalog();
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState<ModelLineage['type'] | 'all'>('all');
     const [factionFilter, setFactionFilter] = useState<string | 'all'>('all');
@@ -173,11 +173,24 @@ export function ModelsTab() {
     const factions = [...catalog.factions].sort((a, b) => a.name.localeCompare(b.name));
 
     // Filtered lineages (flat, no panels)
+    const factionNameMap = Object.fromEntries(catalog.factions.map(f => [f.id, f.name]));
     const filtered = catalog.lineages.filter(l => {
         const matchSearch = l.name.toLowerCase().includes(search.toLowerCase());
         const matchType = typeFilter === 'all' || l.type === typeFilter;
         const matchFaction = factionFilter === 'all' || l.factionIds.includes(factionFilter);
         return matchSearch && matchType && matchFaction;
+    }).sort((a, b) => {
+        // 1. Faction alphabétique
+        const fA = factionNameMap[a.factionIds[0]] ?? '';
+        const fB = factionNameMap[b.factionIds[0]] ?? '';
+        if (fA !== fB) return fA.localeCompare(fB);
+        // 2. Leaders first, then non-Gonk, then Gonk
+        const typeOrder = (t: string) => t === 'Leader' ? 0 : t === 'Gonk' ? 2 : 1;
+        const tA = typeOrder(a.type);
+        const tB = typeOrder(b.type);
+        if (tA !== tB) return tA - tB;
+        // 3. Alphabetical within same group
+        return a.name.localeCompare(b.name);
     });
 
     // ── Edit/Delete logic ──
@@ -225,7 +238,10 @@ export function ModelsTab() {
         };
 
         setCatalog(updatedCatalog);
-        if (isAdmin) saveCatalog(updatedCatalog);
+        if (isAdmin) {
+            saveLineage(updatedLineage);
+            saveProfile(updatedProfile);
+        }
         setEditDialogOpen(false);
         setEditingLineage(null);
         setEditingProfile(null);
@@ -241,7 +257,7 @@ export function ModelsTab() {
             profiles: catalog.profiles.filter(p => p.lineageId !== lineageId),
         };
         setCatalog(updatedCatalog);
-        if (isAdmin) saveCatalog(updatedCatalog);
+        if (isAdmin) deleteLineageDb(lineageId);
     };
 
     // ── Tier creation ──
@@ -259,7 +275,7 @@ export function ModelsTab() {
             profiles: [...catalog.profiles, newProfile],
         };
         setCatalog(updatedCatalog);
-        if (isAdmin) saveCatalog(updatedCatalog);
+        if (isAdmin) saveProfile(newProfile);
         // Open edit dialog on the new profile
         openEdit(lineage, newProfile);
         setExpandedLineages(prev => new Set(prev).add(lineage.id));
@@ -271,7 +287,7 @@ export function ModelsTab() {
         const updated = { ...surcharges, [field]: value };
         const updatedCatalog = { ...catalog, tierSurcharges: updated };
         setCatalog(updatedCatalog);
-        if (isAdmin) saveCatalog(updatedCatalog);
+        if (isAdmin) saveTierSurcharges(updated);
     };
 
     // ── Action helpers ──

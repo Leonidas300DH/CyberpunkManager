@@ -9,10 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ImageInput } from '@/components/ui/image-input';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
-import { FACTIONS } from '@/lib/seed';
 import { v4 as uuidv4 } from 'uuid';
 import { Plus, Trash2, Edit, ChevronRight } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCatalog } from '@/hooks/useCatalog';
 
 // Per-faction signature colors (border + bg variants)
 const FACTION_COLOR_MAP: Record<string, { border: string; bg: string }> = {
@@ -38,13 +38,18 @@ const TYPE_COLORS: Record<ModelLineage['type'], string> = {
     Drone: 'text-cyber-orange',
 };
 
-// Base faction IDs that cannot be deleted
-const BASE_FACTION_IDS = new Set(FACTIONS.map(f => f.id));
+// Base faction IDs that cannot be deleted (hardcoded for safety)
+const BASE_FACTION_IDS = new Set([
+    'faction-arasaka', 'faction-bozos', 'faction-danger-gals', 'faction-edgerunners',
+    'faction-gen-red', 'faction-lawmen', 'faction-maelstrom', 'faction-trauma-team',
+    'faction-tyger-claws', 'faction-zoners', 'faction-6th-street',
+]);
 
 export function FactionsTab() {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
+    const { saveFaction: saveFactionDb, deleteFaction: deleteFactionDb } = useCatalog();
     const [isOpen, setIsOpen] = useState(false);
     const [editingFaction, setEditingFaction] = useState<Faction | null>(null);
     const [formData, setFormData] = useState<Partial<Faction>>({});
@@ -69,7 +74,11 @@ export function FactionsTab() {
             };
             newFactions.push(newFaction);
         }
+        const savedFaction = editingFaction
+            ? { ...editingFaction, ...formData } as Faction
+            : newFactions[newFactions.length - 1];
         setCatalog({ ...catalog, factions: newFactions });
+        if (isAdmin) saveFactionDb(savedFaction);
         setIsOpen(false);
         setEditingFaction(null);
         setFormData({});
@@ -79,6 +88,7 @@ export function FactionsTab() {
         if (BASE_FACTION_IDS.has(id)) return;
         const newFactions = catalog.factions.filter(f => f.id !== id);
         setCatalog({ ...catalog, factions: newFactions });
+        if (isAdmin) deleteFactionDb(id);
     };
 
     const openEdit = (faction: Faction) => {

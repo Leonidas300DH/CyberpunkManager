@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon, Layers, FlipVertical2 } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
-import { useReferenceData } from '@/hooks/useReferenceData';
+import { useCatalog } from '@/hooks/useCatalog';
 import { v4 as uuidv4 } from 'uuid';
 
 type ViewMode = 'list' | 'card' | 'double';
@@ -162,7 +162,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
-    const { saveWeapons } = useReferenceData();
+    const { saveWeapon: saveWeaponDb, deleteWeapon: deleteWeaponDb } = useCatalog();
     const [search, setSearch] = useState('');
     // Program filters
     const [factionFilter, setFactionFilter] = useState<string>('all-factions');
@@ -419,8 +419,11 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
             };
             updatedWeapons = [...currentWeapons, newWeapon];
         }
+        const savedWeapon = editingWeapon
+            ? { ...editingWeapon, ...weaponForm, factionVariants: finalVariants } as Weapon
+            : updatedWeapons[updatedWeapons.length - 1];
         setCatalog({ ...catalog, weapons: updatedWeapons });
-        if (isAdmin) saveWeapons(updatedWeapons);
+        if (isAdmin) saveWeaponDb(savedWeapon);
         setWeaponDialogOpen(false);
         setEditingWeapon(null);
         setWeaponForm(EMPTY_WEAPON);
@@ -431,7 +434,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
         if (!weapon || !window.confirm(`Delete "${weapon.name}"? This cannot be undone.`)) return;
         const updatedWeapons = (catalog.weapons ?? []).filter(w => w.id !== id);
         setCatalog({ ...catalog, weapons: updatedWeapons });
-        if (isAdmin) saveWeapons(updatedWeapons);
+        if (isAdmin) deleteWeaponDb(id);
     };
 
     const toggleFlip = (id: string) => {
