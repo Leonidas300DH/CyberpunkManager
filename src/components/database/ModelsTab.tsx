@@ -144,6 +144,8 @@ export function ModelsTab() {
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState<ModelLineage['type'] | 'all'>('all');
     const [factionFilter, setFactionFilter] = useState<string | 'all'>('all');
+    const [sourceFilter, setSourceFilter] = useState<'all' | 'Custom' | 'Upload'>('all');
+    const [imageFilter, setImageFilter] = useState<'all' | 'default' | 'custom'>('all');
 
     // ── Expand/collapse state ──
     const [expandedLineages, setExpandedLineages] = useState<Set<string>>(new Set());
@@ -178,7 +180,11 @@ export function ModelsTab() {
         const matchSearch = l.name.toLowerCase().includes(search.toLowerCase());
         const matchType = typeFilter === 'all' || l.type === typeFilter;
         const matchFaction = factionFilter === 'all' || l.factionIds.includes(factionFilter);
-        return matchSearch && matchType && matchFaction;
+        const matchSource = sourceFilter === 'all' || (l.source ?? 'Custom') === sourceFilter;
+        const matchImage = imageFilter === 'all'
+            || (imageFilter === 'default' && l.isDefaultImage !== false)
+            || (imageFilter === 'custom' && l.isDefaultImage === false);
+        return matchSearch && matchType && matchFaction && matchSource && matchImage;
     }).sort((a, b) => {
         // 1. Faction alphabétique
         const fA = factionNameMap[a.factionIds[0]] ?? '';
@@ -364,7 +370,40 @@ export function ModelsTab() {
                     </div>
                 </div>
 
-                {/* Row 2: Faction filter icons — same layout as Gear tab */}
+                {/* Row 2: Source + Image filters */}
+                <div className="flex gap-4 font-mono-tech text-xs flex-wrap items-center">
+                    <div className="flex gap-2 items-center">
+                        <span className="text-muted-foreground uppercase tracking-widest text-[10px]">Source</span>
+                        {(['all', 'Custom', 'Upload'] as const).map(v => (
+                            <button
+                                key={v}
+                                onClick={() => setSourceFilter(v)}
+                                className={`px-3 py-1.5 font-bold uppercase tracking-wider transition-colors ${
+                                    sourceFilter === v ? 'bg-primary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
+                                }`}
+                            >
+                                {v === 'all' ? 'All' : v}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="w-px h-6 bg-border" />
+                    <div className="flex gap-2 items-center">
+                        <span className="text-muted-foreground uppercase tracking-widest text-[10px]">Image</span>
+                        {([['all', 'All'], ['custom', 'Custom'], ['default', 'Default']] as const).map(([v, label]) => (
+                            <button
+                                key={v}
+                                onClick={() => setImageFilter(v)}
+                                className={`px-3 py-1.5 font-bold uppercase tracking-wider transition-colors ${
+                                    imageFilter === v ? 'bg-primary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Row 3: Faction filter icons — same layout as Gear tab */}
                 <div className="flex gap-2 items-stretch">
                     <button
                         onClick={() => setFactionFilter('all')}

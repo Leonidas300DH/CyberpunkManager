@@ -385,9 +385,9 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
                 )
             )}
 
-            {/* Tier stars (Veteran = 1 star, Elite = 2 stars) */}
+            {/* Tier stars (Veteran = 1 star, Elite = 2 stars) — right of faction rail */}
             {profile.level > 0 && (
-                <div className="absolute top-1 left-1 z-20 flex gap-0.5">
+                <div className="absolute top-1 left-[18%] z-20 flex gap-0.5">
                     {Array.from({ length: profile.level }, (_, i) => (
                         <span key={i} className="text-primary text-lg leading-none drop-shadow-[0_0_4px_rgba(252,238,10,0.8)]">★</span>
                     ))}
@@ -584,11 +584,9 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
                                         {src.name}
                                     </div>
                                     {lettrine ? (
-                                        <div className="-ml-2">
-                                            <div className="float-left flex items-center mr-1">
-                                                {skillEl}
-                                                {armorEl}
-                                            </div>
+                                        <div className="-ml-2 flex items-center gap-1">
+                                            {skillEl}
+                                            {armorEl}
                                             <p className="font-body text-[11px] text-white/70 leading-snug">{formatCardText(descriptionText, (i + 10) * 100)}</p>
                                         </div>
                                     ) : (

@@ -33,6 +33,7 @@ function mapLineage(r: Record<string, unknown>, factionIds: string[]): ModelLine
         imageUrl: r.image_url as string | undefined,
         isDefaultImage: r.is_default_image as boolean | undefined,
         imageFlipX: r.image_flip_x as boolean | undefined,
+        source: (r.source as ModelLineage['source']) ?? 'Custom',
         factionIds,
     };
 }

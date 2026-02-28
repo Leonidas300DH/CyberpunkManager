@@ -34,6 +34,7 @@ export interface ModelLineage {
     imageFlipY?: boolean; // CSS scaleY(-1) flip
     imageFlipX?: boolean; // CSS scaleX(-1) flip
     isDefaultImage?: boolean; // true = using faction fallback image, needs real portrait
+    source?: 'Custom' | 'Upload'; // origin: Custom = original seed, Upload = imported from PDF
 }
 
 // A specific experience level (Rank/Star) of a Lineage
