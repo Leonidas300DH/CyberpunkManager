@@ -31,12 +31,12 @@ const EMPTY_ACTION: () => GameAction = () => ({
 });
 
 /** Upload image to Supabase Storage → public URL */
-function CharacterImageUpload({ value, onChange, charName, flippedY, onFlipY, flippedX, onFlipX }: { value: string; onChange: (url: string) => void; charName: string; flippedY?: boolean; onFlipY?: () => void; flippedX?: boolean; onFlipX?: () => void }) {
+function CharacterImageUpload({ value, onChange, charId, flippedY, onFlipY, flippedX, onFlipX }: { value: string; onChange: (url: string) => void; charId: string; flippedY?: boolean; onFlipY?: () => void; flippedX?: boolean; onFlipX?: () => void }) {
     const fileRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
 
     const handleFile = async (file: File) => {
-        const slug = (charName.trim() || 'unnamed-char').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        const slug = (charId.replace(/^lineage-/, '') || 'unnamed-char').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         setUploading(true);
         try {
             const { supabase } = await import('@/lib/supabase');
@@ -560,7 +560,7 @@ export function ModelsTab() {
                         <CharacterImageUpload
                             value={lineageForm.imageUrl || ''}
                             onChange={(val) => setLineageForm({ ...lineageForm, imageUrl: val })}
-                            charName={lineageForm.name || ''}
+                            charId={lineageForm.id || ''}
                             flippedY={!!lineageForm.imageFlipY}
                             onFlipY={() => setLineageForm(f => ({ ...f, imageFlipY: !f.imageFlipY }))}
                             flippedX={!!lineageForm.imageFlipX}

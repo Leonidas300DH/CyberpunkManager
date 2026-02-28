@@ -686,7 +686,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             <>
                                 <div className="w-px h-6 bg-border mx-1" />
                                 {([
-                                    // { label: 'No Image', active: highlightNoImage, toggle: () => setHighlightNoImage(v => !v) },
+                                    { label: 'No Image', active: highlightNoImage, toggle: () => setHighlightNoImage(v => !v) },
                                     { label: 'No Price', active: highlightNoPrice, toggle: () => setHighlightNoPrice(v => !v) },
                                     { label: 'No Rarity', active: highlightDefaultRarity, toggle: () => setHighlightDefaultRarity(v => !v) },
                                 ] as const).map(({ label, active, toggle }) => (
