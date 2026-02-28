@@ -565,18 +565,20 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
                                 </div>
                             );
 
-                            // Build description: keywords + description, but skip description
-                            // if it only repeats the keywords (some weapons store keywords in both fields)
+                            // Build description: keywords + description, deduplicating phrases
+                            // that already appear in keywords to avoid "Rapid 2. Rapid 2. ..."
                             const kwText = src.keywords.length > 0 ? src.keywords.join('. ') : '';
-                            const kwPhrases = new Set(src.keywords.map((k: string) => k.toLowerCase().trim()));
-                            const descPhrases = (src.description ?? '')
-                                .split(/[.,;]+/)
-                                .map((s: string) => s.replace(/^[\s[\]()]+|[\s[\]()]+$/g, '').toLowerCase())
-                                .filter(Boolean);
-                            const descIsRedundant = descPhrases.length > 0 && descPhrases.every((p: string) => kwPhrases.has(p));
-                            const descriptionText = descIsRedundant
-                                ? kwText
-                                : [kwText, src.description].filter(Boolean).join('. ');
+                            const kwPhrases = new Set(src.keywords.map((k: string) => k.toLowerCase().replace(/[.\s]+$/, '').trim()));
+                            // Strip keyword phrases from description to avoid duplication
+                            let cleanDesc = (src.description ?? '').trim();
+                            if (kwPhrases.size > 0 && cleanDesc) {
+                                // Remove leading keyword phrases from description
+                                for (const kw of kwPhrases) {
+                                    const re = new RegExp('^' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[.,;:\\s]*', 'i');
+                                    cleanDesc = cleanDesc.replace(re, '').trim();
+                                }
+                            }
+                            const descriptionText = [kwText, cleanDesc].filter(Boolean).join('. ');
 
                             return (
                                 <div key={action.id}>
