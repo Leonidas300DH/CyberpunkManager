@@ -1,0 +1,670 @@
+[
+  {
+    "isGear": true,
+    "rangeRed": false,
+    "techId": "gear-brain-box-maelstrom",
+    "rarity": 1,
+    "rangeGreen": false,
+    "rangeYellow": false,
+    "name": "Brain-Box",
+    "description": "Cybergear. +2EB Cost. This model gains Netrunner.",
+    "cost": 10,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear",
+      "Netrunner"
+    ],
+    "isWeapon": false,
+    "faction": "Maelstrom",
+    "reqStreetCred": 6
+  },
+  {
+    "rangeYellow": false,
+    "rangeRed": false,
+    "techId": "gear-braindance-recorder-universal",
+    "rarity": 1,
+    "rangeGreen": false,
+    "isGear": true,
+    "keywords": [
+      "Luck"
+    ],
+    "isWeapon": false,
+    "rangeLong": false,
+    "faction": "Universal",
+    "reqStreetCred": 6,
+    "cost": 10,
+    "name": "Braindance Recorder",
+    "description": "When this model spends a Luck token to re-roll a die, and the re-roll fails, take the Luck token back."
+  },
+  {
+    "rangeGreen": false,
+    "techId": "gear-brass-knuckles-edgerunners",
+    "rarity": 2,
+    "rangeRed": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "description": "Deadly Crits. When this attack is used as a [RE]act, gain +2 to the roll.",
+    "name": "Brass Knuckles",
+    "faction": "Edgerunners",
+    "reqStreetCred": 0,
+    "keywords": [
+      "Deadly Crits"
+    ],
+    "rangeLong": false,
+    "isWeapon": true,
+    "cost": 2
+  },
+  {
+    "rangeYellow": false,
+    "isGear": true,
+    "rangeRed": false,
+    "rarity": 1,
+    "techId": "gear-breaching-hammer-universal",
+    "rangeGreen": false,
+    "cost": 2,
+    "isWeapon": true,
+    "rangeLong": false,
+    "keywords": [
+      "Deadly",
+      "Stun 1",
+      "Difficult"
+    ],
+    "faction": "Universal",
+    "reqStreetCred": 1,
+    "name": "Breaching Hammer",
+    "description": "Deadly, Stun 1, Difficult"
+  },
+  {
+    "name": "Breaching Hammer",
+    "description": "Deadly, Stun 1, Difficult",
+    "rangeLong": false,
+    "isWeapon": true,
+    "keywords": [
+      "Deadly",
+      "Stun 1",
+      "Difficult"
+    ],
+    "faction": "Lawmen",
+    "reqStreetCred": 0,
+    "cost": 2,
+    "rangeRed": false,
+    "techId": "gear-breaching-hammer-lawmen",
+    "rarity": 1,
+    "rangeGreen": false,
+    "isGear": true,
+    "rangeYellow": false
+  },
+  {
+    "isGear": true,
+    "rangeRed": false,
+    "rarity": 1,
+    "techId": "gear-breaching-hammer-arasaka",
+    "rangeGreen": false,
+    "rangeYellow": false,
+    "name": "Breaching Hammer",
+    "description": "Deadly, Stun 1, Difficult",
+    "cost": 4,
+    "rangeLong": false,
+    "keywords": [
+      "Deadly",
+      "Stun 1",
+      "Difficult"
+    ],
+    "isWeapon": true,
+    "reqStreetCred": 3,
+    "faction": "Arasaka"
+  },
+  {
+    "rangeYellow": false,
+    "isGear": true,
+    "rangeGreen": false,
+    "rarity": 1,
+    "techId": "gear-bullet-proof-shield-generation-red",
+    "rangeRed": false,
+    "cost": 2,
+    "faction": "Generation Red",
+    "reqStreetCred": 2,
+    "keywords": [
+      "Bulky",
+      "Armor"
+    ],
+    "rangeLong": false,
+    "isWeapon": false,
+    "description": "Bulky, Armor",
+    "name": "Bullet-Proof Shield"
+  },
+  {
+    "cost": 2,
+    "rangeLong": false,
+    "isWeapon": false,
+    "keywords": [
+      "Bulky",
+      "Armor"
+    ],
+    "reqStreetCred": 1,
+    "faction": "Lawmen",
+    "name": "Bullet-Proof Shield",
+    "description": "Bulky, Armor",
+    "rangeYellow": false,
+    "isGear": true,
+    "rangeRed": false,
+    "rarity": 1,
+    "techId": "gear-bullet-proof-shield-lawmen",
+    "rangeGreen": false
+  },
+  {
+    "rangeYellow": false,
+    "rarity": 1,
+    "techId": "gear-butter-bars-universal",
+    "rangeGreen": false,
+    "rangeRed": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeLong": false,
+    "keywords": [
+      "Leader"
+    ],
+    "faction": "Universal",
+    "reqStreetCred": 0,
+    "cost": 1,
+    "description": "This model gains Leader.",
+    "name": "Butter Bars"
+  },
+  {
+    "faction": "Danger Gals",
+    "reqStreetCred": 4,
+    "keywords": [
+      "Impact token",
+      "Obstacle"
+    ],
+    "isWeapon": false,
+    "rangeLong": false,
+    "cost": 3,
+    "description": "Discard during this model's activation to place an Impact token within RED. Rivals that end a move action within RED of that token must pass a Reflexes roll vs. the Obstacle die or suffer a wound.",
+    "name": "Caltrops",
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "techId": "gear-caltrops-danger-gals",
+    "rarity": 1,
+    "rangeRed": true,
+    "isGear": true
+  },
+  {
+    "faction": "Tyger Claws",
+    "reqStreetCred": 1,
+    "keywords": [
+      "Impact token",
+      "Obstacle"
+    ],
+    "rangeLong": false,
+    "isWeapon": false,
+    "cost": 3,
+    "name": "Caltrops",
+    "description": "Discard during this model's activation to place an Impact token within RED. Rivals that end a move action within RED of that token must pass a Reflexes roll vs. the Obstacle die or suffer a wound.",
+    "rangeYellow": false,
+    "rangeRed": true,
+    "rangeGreen": false,
+    "techId": "gear-caltrops-tyger-claws",
+    "rarity": 1,
+    "isGear": true
+  },
+  {
+    "description": "Drug. Discard during this model's activation to roll a RED die. Fumble: This model takes 1 wound. 2+: Make a free basic Melee attack.",
+    "name": "Can O' Smash",
+    "cost": 1,
+    "isWeapon": true,
+    "keywords": [
+      "Drug",
+      "Melee attack"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 0,
+    "faction": "Universal",
+    "isGear": true,
+    "rarity": 2,
+    "techId": "gear-can-o-smash-universal",
+    "rangeGreen": false,
+    "rangeRed": true,
+    "rangeYellow": false
+  },
+  {
+    "cost": 10,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear",
+      "Difficult"
+    ],
+    "isWeapon": false,
+    "reqStreetCred": 6,
+    "faction": "Universal",
+    "name": "Chain Reel",
+    "description": "[Difficult] Place the target within RED of this model.",
+    "rangeYellow": false,
+    "isGear": true,
+    "rangeRed": true,
+    "rarity": 1,
+    "techId": "chain-reel-universal",
+    "rangeGreen": false
+  },
+  {
+    "reqStreetCred": 4,
+    "faction": "Generation Red",
+    "keywords": [
+      "Bulky",
+      "Rapid 2",
+      "Deadly Crits",
+      "Unwieldy"
+    ],
+    "isWeapon": true,
+    "rangeLong": false,
+    "cost": 2,
+    "name": "Chainsaw",
+    "description": "Bulky. Rapid 2, Deadly Crits, Unwieldy. Errata: Zoners version range corrected to RED.",
+    "rangeYellow": false,
+    "rangeRed": true,
+    "rangeGreen": false,
+    "rarity": 1,
+    "techId": "chainsaw-generation-red",
+    "isGear": false
+  },
+  {
+    "isGear": false,
+    "rarity": 1,
+    "techId": "chainsaw-zoners",
+    "rangeGreen": false,
+    "rangeRed": true,
+    "rangeYellow": false,
+    "description": "Bulky. Rapid 2, Deadly Crits, Unwieldy. Errata: Zoners version range corrected to RED.",
+    "name": "Chainsaw",
+    "cost": 2,
+    "isWeapon": true,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Rapid 2",
+      "Deadly Crits",
+      "Unwieldy"
+    ],
+    "faction": "Zoners",
+    "reqStreetCred": 1
+  },
+  {
+    "cost": 2,
+    "reqStreetCred": 3,
+    "faction": "Bozos",
+    "isWeapon": true,
+    "keywords": [
+      "Bulky",
+      "Rapid 2",
+      "Deadly Crits",
+      "Unwieldy"
+    ],
+    "rangeLong": false,
+    "description": "Bulky. Rapid 2, Deadly Crits, Unwieldy. Errata: Zoners version range corrected to RED.",
+    "name": "Chainsaw",
+    "rangeYellow": false,
+    "isGear": false,
+    "rangeGreen": false,
+    "rarity": 2,
+    "techId": "chainsaw-bozos",
+    "rangeRed": true
+  },
+  {
+    "rangeYellow": true,
+    "rangeRed": false,
+    "rangeGreen": true,
+    "techId": "chem-grenade-danger-gals",
+    "rarity": 2,
+    "isGear": false,
+    "faction": "Danger Gals",
+    "reqStreetCred": 3,
+    "keywords": [
+      "Grenade",
+      "Blast",
+      "Deadly Crits",
+      "Discard"
+    ],
+    "rangeLong": false,
+    "isWeapon": true,
+    "cost": 2,
+    "name": "Chem Grenade",
+    "description": "Grenade. Blast, Deadly Crits, Discard. Errata: \"Chem Grenade\" and \"Grenade: Chem\" act as the same card. All versions have Blast, Deadly Crits, Discard."
+  },
+  {
+    "rangeYellow": false,
+    "rangeRed": false,
+    "techId": "chipware-socket-universal",
+    "rarity": 1,
+    "rangeGreen": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeLong": false,
+    "keywords": [],
+    "reqStreetCred": 5,
+    "faction": "Universal",
+    "cost": 5,
+    "name": "Chipware Socket",
+    "description": "This model's minimum Skill value is 1 (instead of 0)."
+  },
+  {
+    "isGear": false,
+    "rangeRed": true,
+    "rangeGreen": false,
+    "rarity": 1,
+    "techId": "comically-oversized-scissors-bozos",
+    "rangeYellow": false,
+    "name": "Comically Oversized Scissors",
+    "description": "Bulky. Deadly. Errata: None.",
+    "cost": 8,
+    "faction": "Bozos",
+    "reqStreetCred": 4,
+    "isWeapon": true,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Deadly"
+    ]
+  },
+  {
+    "rangeYellow": true,
+    "rangeGreen": false,
+    "techId": "comm-scrambler-universal",
+    "rarity": 1,
+    "rangeRed": false,
+    "isGear": true,
+    "faction": "Universal",
+    "reqStreetCred": 2,
+    "isWeapon": false,
+    "keywords": [
+      "Unwieldy"
+    ],
+    "rangeLong": false,
+    "cost": 6,
+    "description": "All Influence actions taken within YELLOW of this model gain Unwieldy.",
+    "name": "Comm Scrambler"
+  },
+  {
+    "rangeYellow": false,
+    "techId": "concealed-automatic-pistols-generation-red",
+    "rarity": 2,
+    "rangeGreen": false,
+    "rangeRed": true,
+    "isGear": false,
+    "isWeapon": true,
+    "rangeLong": false,
+    "keywords": [
+      "Pistol",
+      "Rapid 2"
+    ],
+    "faction": "Generation Red",
+    "reqStreetCred": 1,
+    "cost": 5,
+    "description": "Pistol. Rapid 2. Errata: None.",
+    "name": "Concealed Automatic Pistols"
+  },
+  {
+    "keywords": [
+      "Luck"
+    ],
+    "isWeapon": false,
+    "rangeLong": false,
+    "reqStreetCred": 0,
+    "faction": "Zoners",
+    "cost": 5,
+    "description": "Place two Luck tokens on this Gear when it is equipped. Only this model may use these Luck tokens.",
+    "name": "Concert T-Shirt",
+    "rangeYellow": false,
+    "rarity": 1,
+    "techId": "concert-t-shirt-zoners",
+    "rangeGreen": false,
+    "rangeRed": false,
+    "isGear": true
+  },
+  {
+    "isGear": true,
+    "rangeRed": false,
+    "techId": "concert-t-shirt-generation-red",
+    "rarity": 1,
+    "rangeGreen": false,
+    "rangeYellow": false,
+    "name": "Concert T-Shirt",
+    "description": "Place two Luck tokens on this Gear when it is equipped. Only this model may use these Luck tokens.",
+    "cost": 4,
+    "rangeLong": false,
+    "keywords": [
+      "Luck"
+    ],
+    "isWeapon": false,
+    "faction": "Generation Red",
+    "reqStreetCred": 2
+  },
+  {
+    "cost": 20,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Rapid 3",
+      "Difficult"
+    ],
+    "isWeapon": true,
+    "faction": "Lawmen",
+    "reqStreetCred": 6,
+    "description": "Bulky. Rapid 3, Difficult.",
+    "name": "Constitution Cyclone SSW",
+    "rangeYellow": true,
+    "isGear": true,
+    "techId": "weapon-constitutioncyclonessw-lawmen",
+    "rarity": 1,
+    "rangeGreen": false,
+    "rangeRed": false
+  },
+  {
+    "description": "Bulky. Rapid 3, Difficult.",
+    "name": "Constitution Cyclone SSW",
+    "keywords": [
+      "Bulky",
+      "Rapid 3",
+      "Difficult"
+    ],
+    "isWeapon": true,
+    "rangeLong": false,
+    "reqStreetCred": 6,
+    "faction": "Arasaka",
+    "cost": 19,
+    "techId": "weapon-constitutioncyclonessw-arasaka",
+    "rarity": 1,
+    "rangeGreen": false,
+    "rangeRed": false,
+    "isGear": true,
+    "rangeYellow": true
+  },
+  {
+    "faction": "Lawmen",
+    "reqStreetCred": 4,
+    "keywords": [
+      "Bulky",
+      "Rapid 2",
+      "Torrent",
+      "Suppression"
+    ],
+    "rangeLong": false,
+    "isWeapon": true,
+    "cost": 15,
+    "name": "Constitution Hurricane Assault Weapon",
+    "description": "Bulky. Rapid 2, Torrent, Suppression.",
+    "rangeYellow": true,
+    "rangeRed": false,
+    "rangeGreen": false,
+    "rarity": 1,
+    "techId": "weapon-constitutionhurricaneassaultweapon-lawmen",
+    "isGear": true
+  },
+  {
+    "cost": 15,
+    "isWeapon": true,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Rapid 2",
+      "Torrent",
+      "Suppression"
+    ],
+    "faction": "Danger Gals",
+    "reqStreetCred": 6,
+    "name": "Constitution Hurricane Assault Weapon",
+    "description": "Bulky. Rapid 2, Torrent, Suppression.",
+    "rangeYellow": true,
+    "isGear": true,
+    "rangeRed": false,
+    "rarity": 1,
+    "techId": "weapon-constitutionhurricaneassaultweapon-dangergals",
+    "rangeGreen": false
+  },
+  {
+    "name": "Constitution Hurricane Assault Weapon",
+    "description": "Bulky. Rapid 2, Torrent, Suppression.",
+    "cost": 14,
+    "reqStreetCred": 6,
+    "faction": "Arasaka",
+    "keywords": [
+      "Bulky",
+      "Rapid 2",
+      "Torrent",
+      "Suppression"
+    ],
+    "rangeLong": false,
+    "isWeapon": true,
+    "isGear": true,
+    "rangeRed": false,
+    "rangeGreen": false,
+    "rarity": 1,
+    "techId": "weapon-constitutionhurricaneassaultweapon-arasaka",
+    "rangeYellow": true
+  },
+  {
+    "rangeYellow": true,
+    "isGear": true,
+    "rangeRed": false,
+    "rarity": 1,
+    "techId": "weapon-constitutionhurricaneassaultweapon-tygerclaws",
+    "rangeGreen": false,
+    "cost": 15,
+    "keywords": [
+      "Bulky",
+      "Rapid 2",
+      "Torrent",
+      "Suppression"
+    ],
+    "isWeapon": true,
+    "rangeLong": false,
+    "reqStreetCred": 6,
+    "faction": "Tyger Claws",
+    "name": "Constitution Hurricane Assault Weapon",
+    "description": "Bulky. Rapid 2, Torrent, Suppression."
+  },
+  {
+    "rangeYellow": false,
+    "isGear": true,
+    "rarity": 1,
+    "techId": "gear-corporatecreditcard-arasaka",
+    "rangeGreen": false,
+    "rangeRed": true,
+    "cost": 5,
+    "rangeLong": false,
+    "isWeapon": false,
+    "keywords": [],
+    "reqStreetCred": 2,
+    "faction": "Arasaka",
+    "description": "Draw one card from the Loot deck. You may equip it to this model or any friendly model within RED.",
+    "name": "Corporate Credit Card"
+  },
+  {
+    "name": "Crash Hardening",
+    "description": "Cybergear. This model is immune to Ram and Falling damage.",
+    "cost": 4,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "isWeapon": false,
+    "faction": "Universal",
+    "reqStreetCred": 3,
+    "isGear": true,
+    "rangeRed": false,
+    "rarity": 2,
+    "techId": "gear-crashhardening-universal",
+    "rangeGreen": false,
+    "rangeYellow": false
+  },
+  {
+    "description": "Influence actions against rivals roll an additional PURPLE die. If it Crits, the action Crits. If it fumbles, exhaust this.",
+    "name": "Credentials (Real Enough)",
+    "faction": "Universal",
+    "reqStreetCred": 5,
+    "keywords": [],
+    "isWeapon": false,
+    "rangeLong": false,
+    "cost": 1,
+    "rangeGreen": false,
+    "rarity": 1,
+    "techId": "gear-credentialsrealenough-universal",
+    "rangeRed": false,
+    "isGear": true,
+    "rangeYellow": false
+  },
+  {
+    "rangeRed": false,
+    "rangeGreen": false,
+    "rarity": 2,
+    "techId": "gear-cryopumpbags-universal",
+    "isGear": true,
+    "rangeYellow": false,
+    "name": "Cryopump Bags",
+    "description": "When this model takes the Loot Goods or Loot Gear action, the action gains Rapid 2 and may target the same Body token twice (then remove the Body token as normal).",
+    "reqStreetCred": 0,
+    "faction": "Universal",
+    "rangeLong": false,
+    "isWeapon": false,
+    "keywords": [
+      "Rapid 2"
+    ],
+    "cost": 1
+  },
+  {
+    "techId": "gear-custompilotinghud-universal",
+    "name": "Custom Piloting HUD",
+    "cost": 4,
+    "reqStreetCred": 3,
+    "faction": "Universal",
+    "isWeapon": false,
+    "isGear": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model gains Wheelman.",
+    "rarity": 2,
+    "keywords": [
+      "Wheelman"
+    ]
+  },
+  {
+    "techId": "weapon-cuttingtorch-universal",
+    "name": "Cutting Torch",
+    "cost": 3,
+    "reqStreetCred": 1,
+    "faction": "Universal",
+    "isWeapon": true,
+    "isGear": true,
+    "rangeRed": true,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "(Deadly Crits, Pierce 3) This attack may only be taken against Drone, Robot, or Vehicle targets.",
+    "rarity": 2,
+    "keywords": [
+      "Deadly Crits",
+      "Pierce 3"
+    ]
+  }
+]

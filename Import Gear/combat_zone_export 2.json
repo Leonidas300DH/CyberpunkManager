@@ -1,0 +1,208 @@
+[
+  {
+    "name": "BLACK LACE",
+    "rarity": 1,
+    "description": "Drug\nWhen you Inspire Your Team, roll a RED die:\nFumble: Take 1 wound.\n2+: This model Heals 1.",
+    "rangeRed": false,
+    "isGear": true,
+    "rangeGreen": false,
+    "cost": 5,
+    "reqStreetCred": 6,
+    "isWeapon": false,
+    "keywords": [
+      "Drug",
+      "Inspire"
+    ],
+    "faction": "Zoners",
+    "techId": "gear-blacklace-zoners",
+    "rangeYellow": false,
+    "rangeLong": false
+  },
+  {
+    "description": "Drug\nWhen you Inspire Your Team, roll a RED die:\nFumble: Take 1 wound.\n2+: This model Heals 1.",
+    "rarity": 1,
+    "name": "BLACK LACE",
+    "rangeGreen": false,
+    "cost": 5,
+    "rangeRed": false,
+    "isGear": true,
+    "keywords": [
+      "Drug",
+      "Inspire"
+    ],
+    "faction": "Tyger Claws",
+    "reqStreetCred": 6,
+    "isWeapon": false,
+    "rangeYellow": false,
+    "rangeLong": false,
+    "techId": "gear-blacklace-tygerclaws"
+  },
+  {
+    "faction": "Universal",
+    "keywords": [
+      "Drug",
+      "Inspire"
+    ],
+    "isWeapon": false,
+    "reqStreetCred": 6,
+    "rangeYellow": false,
+    "rangeLong": false,
+    "techId": "gear-blacklace-universal",
+    "description": "Drug\nWhen you Inspire Your Team, roll a RED die:\nFumble: Take 1 wound.\n2+: This model Heals 1.",
+    "rarity": 1,
+    "name": "BLACK LACE",
+    "cost": 6,
+    "rangeGreen": false,
+    "isGear": true,
+    "rangeRed": false
+  },
+  {
+    "description": "Target model takes a free action of your choice. You determine the target of any effects. Can only target friendly models and it may target friendly models.",
+    "rarity": 1,
+    "name": "BLACKMAIL FILES",
+    "cost": 10,
+    "rangeGreen": false,
+    "isGear": true,
+    "rangeRed": false,
+    "faction": "Universal",
+    "keywords": [],
+    "isWeapon": false,
+    "reqStreetCred": 6,
+    "rangeLong": false,
+    "rangeYellow": false,
+    "techId": "gear-blackmailfiles-universal"
+  },
+  {
+    "rarity": 1,
+    "description": "Drug\nStun 2. If this attack Crits, Stun 3 instead. If this attack Fumbles, the attacker suffers Stun 2.",
+    "name": "BLUE GLASS",
+    "cost": 10,
+    "rangeGreen": false,
+    "isGear": true,
+    "rangeRed": false,
+    "faction": "Universal",
+    "keywords": [
+      "Drug",
+      "Stun"
+    ],
+    "isWeapon": true,
+    "reqStreetCred": 5,
+    "rangeYellow": false,
+    "rangeLong": false,
+    "techId": "gear-blueglass-universal"
+  },
+  {
+    "name": "BODY DOUBLE",
+    "rarity": 1,
+    "description": "When this model is taken out, it does not drop Gear and Loot (and keeps all equipped Gear and Loot [end of game] as normal]. The next time you Inspire Your Team, target a model within RED of any friendly model and it suffers one wound. Then discard this card. Being taken out this way does not count for any objectives.",
+    "rangeRed": false,
+    "isGear": true,
+    "rangeGreen": false,
+    "cost": 15,
+    "reqStreetCred": 6,
+    "isWeapon": false,
+    "keywords": [
+      "Inspire"
+    ],
+    "faction": "Edgerunners",
+    "techId": "gear-bodydouble-edgerunners",
+    "rangeYellow": false,
+    "rangeLong": false
+  },
+  {
+    "reqStreetCred": 4,
+    "isWeapon": false,
+    "keywords": [
+      "Armor",
+      "Netrunner"
+    ],
+    "faction": "Zoners",
+    "techId": "gear-bodyweightsut-zoners",
+    "rangeLong": false,
+    "rangeYellow": false,
+    "name": "BODYWEIGHT SUIT",
+    "description": "Armor\nThis model gains Netrunner. If this card is discarded, this model discards all programs.",
+    "rarity": 1,
+    "rangeRed": false,
+    "isGear": true,
+    "rangeGreen": false,
+    "cost": 8
+  },
+  {
+    "reqStreetCred": 4,
+    "isWeapon": false,
+    "keywords": [
+      "Armor",
+      "Netrunner"
+    ],
+    "faction": "Tyger Claws",
+    "techId": "gear-bodyweightsut-tygerclaws",
+    "rangeYellow": false,
+    "rangeLong": false,
+    "name": "BODYWEIGHT SUIT",
+    "description": "Armor\nThis model gains Netrunner. If this card is discarded, this model discards all programs.",
+    "rarity": 1,
+    "rangeRed": false,
+    "isGear": true,
+    "rangeGreen": false,
+    "cost": 3
+  },
+  {
+    "rangeRed": false,
+    "isGear": true,
+    "rangeGreen": false,
+    "cost": 4,
+    "name": "BOOST",
+    "rarity": 2,
+    "description": "Drug\nDiscard this to roll a GREEN die on a non-attack action, instead of the action's normal color.",
+    "techId": "gear-boost-universal",
+    "rangeYellow": false,
+    "rangeLong": false,
+    "reqStreetCred": 2,
+    "isWeapon": false,
+    "keywords": [
+      "Drug"
+    ],
+    "faction": "Universal"
+  },
+  {
+    "description": "[Blast, Complex, Difficult] If this attack deals at least 1 wound, this model may refresh an Action token.\nBulky",
+    "rarity": 1,
+    "name": "BOX LAUNCHER",
+    "cost": 0,
+    "rangeGreen": false,
+    "isGear": true,
+    "rangeRed": false,
+    "faction": "Universal",
+    "keywords": [
+      "Blast",
+      "Complex",
+      "Difficult",
+      "Bulky"
+    ],
+    "isWeapon": true,
+    "reqStreetCred": 4,
+    "rangeYellow": true,
+    "rangeLong": true,
+    "techId": "gear-boxlauncher-universal"
+  },
+  {
+    "rangeYellow": false,
+    "rangeLong": false,
+    "techId": "gear-bozobombs-bozos",
+    "keywords": [
+      "Blast",
+      "Deadly"
+    ],
+    "faction": "Bozos",
+    "reqStreetCred": 0,
+    "isWeapon": true,
+    "rangeGreen": false,
+    "cost": 7,
+    "rangeRed": true,
+    "isGear": true,
+    "rarity": 1,
+    "description": "Blast.\nBefore rolling, you may discard a Luck token to give this attack Deadly.",
+    "name": "BOZO BOMBS"
+  }
+]

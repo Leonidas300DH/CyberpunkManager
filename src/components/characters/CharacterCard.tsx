@@ -627,30 +627,65 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
                                 <div className="font-display font-black text-sm text-[#22c55e] uppercase tracking-wide">
                                     {action.name}
                                 </div>
-                                {action.range !== 'Self' && action.range !== 'Reach' && (
-                                    <div className="-ml-2 flex items-center gap-1.5">
-                                        {action.skillReq && SKILL_ICONS[action.skillReq] && (
-                                            <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-11 h-11 -my-[3px] shrink-0 object-contain" />
-                                        )}
-                                        <div className="w-[60%]">
-                                            <RangeArrows range={action.range} />
+                                {action.range !== 'Self' && action.range !== 'Reach' ? (
+                                    <>
+                                        <div className="-ml-2 flex items-center gap-1.5">
+                                            {action.skillReq && SKILL_ICONS[action.skillReq] && (
+                                                <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-11 h-11 -my-[3px] shrink-0 object-contain" />
+                                            )}
+                                            <div className="w-[60%]">
+                                                <RangeArrows range={action.range} />
+                                            </div>
                                         </div>
+                                        <div className="font-body text-[11px] leading-snug text-white/90">
+                                            {action.keywords.length > 0 && (
+                                                <span>
+                                                    {action.keywords.map((kw, j) => (
+                                                        <React.Fragment key={j}>
+                                                            {j > 0 && '. '}
+                                                            {formatCardText(kw, (i + 10) * 100 + j * 20)}
+                                                        </React.Fragment>
+                                                    ))}
+                                                    {action.effectDescription ? '. ' : '.'}
+                                                </span>
+                                            )}
+                                            {action.effectDescription && formatCardText(action.effectDescription, (i + 10) * 100 + 80)}
+                                        </div>
+                                    </>
+                                ) : action.skillReq && SKILL_ICONS[action.skillReq] ? (
+                                    <div className="-ml-2 flex items-center gap-1">
+                                        <img src={SKILL_ICONS[action.skillReq].src} alt={action.skillReq} className="w-11 h-11 -my-[3px] shrink-0 object-contain" />
+                                        <p className="font-body text-[11px] text-white/90 leading-snug">
+                                            {action.keywords.length > 0 && (
+                                                <span>
+                                                    {action.keywords.map((kw, j) => (
+                                                        <React.Fragment key={j}>
+                                                            {j > 0 && '. '}
+                                                            {formatCardText(kw, (i + 10) * 100 + j * 20)}
+                                                        </React.Fragment>
+                                                    ))}
+                                                    {action.effectDescription ? '. ' : '.'}
+                                                </span>
+                                            )}
+                                            {action.effectDescription && formatCardText(action.effectDescription, (i + 10) * 100 + 80)}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="font-body text-[11px] leading-snug text-white/90">
+                                        {action.keywords.length > 0 && (
+                                            <span>
+                                                {action.keywords.map((kw, j) => (
+                                                    <React.Fragment key={j}>
+                                                        {j > 0 && '. '}
+                                                        {formatCardText(kw, (i + 10) * 100 + j * 20)}
+                                                    </React.Fragment>
+                                                ))}
+                                                {action.effectDescription ? '. ' : '.'}
+                                            </span>
+                                        )}
+                                        {action.effectDescription && formatCardText(action.effectDescription, (i + 10) * 100 + 80)}
                                     </div>
                                 )}
-                                <div className="font-body text-[11px] leading-snug text-white/90">
-                                    {action.keywords.length > 0 && (
-                                        <span>
-                                            {action.keywords.map((kw, j) => (
-                                                <React.Fragment key={j}>
-                                                    {j > 0 && '. '}
-                                                    {formatCardText(kw, (i + 10) * 100 + j * 20)}
-                                                </React.Fragment>
-                                            ))}
-                                            {action.effectDescription ? '. ' : '.'}
-                                        </span>
-                                    )}
-                                    {action.effectDescription && formatCardText(action.effectDescription, (i + 10) * 100 + 80)}
-                                </div>
                             </div>
                         );
                     })}

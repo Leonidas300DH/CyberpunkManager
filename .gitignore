@@ -43,3 +43,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# one-off scripts with hardcoded keys
+scripts/check-tyger-claws.ts
+scripts/push-obsessed-paparazzi.ts
+scripts/push-oyabun-vet.ts

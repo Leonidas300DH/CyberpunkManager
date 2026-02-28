@@ -1,0 +1,2123 @@
+[
+  {
+    "rangeLong": false,
+    "keywords": [
+      "Luck tokens"
+    ],
+    "reqStreetCred": 1,
+    "rangeGreen": false,
+    "name": "Lucky Charm",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "faction": "Bozos",
+    "techId": "weapon-lucky-charm-bozos",
+    "description": "Place two Luck tokens on this Gear when it is equipped. Only this model may use these Luck tokens.",
+    "cost": 3,
+    "rarity": 21,
+    "rangeRed": false
+  },
+  {
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "keywords": [
+      "Iconic: Psycho Hunter",
+      "Hardboiled Luck"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 2,
+    "rangeGreen": false,
+    "name": "Lucky Skidrow Trench",
+    "description": "Iconic: Psycho Hunter. This model may spend Hardboiled Luck tokens to reroll its own rolls.",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 3,
+    "techId": "weapon-lucky-skidrow-trench-lawmen",
+    "faction": "Lawmen"
+  },
+  {
+    "rangeGreen": false,
+    "name": "Mad Hat",
+    "keywords": [
+      "Iconic: Big Top",
+      "Armor",
+      "Giggle Juicer",
+      "Gonks",
+      "Red-lined"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 0,
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "techId": "weapon-mad-hat-bozos",
+    "faction": "Bozos",
+    "rangeRed": false,
+    "cost": 3,
+    "rarity": 1,
+    "description": "Iconic: Big Top. Rival Red-lined models may be targeted by Giggle Juicer as if they were Gonks. When this armor would be removed, this model may suffer a wound instead."
+  },
+  {
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Medical Defense",
+      "Healing"
+    ],
+    "name": "Med-Scanner",
+    "rangeGreen": false,
+    "description": "Increases Medical Defense by 1.",
+    "cost": 4,
+    "rarity": 1,
+    "rangeRed": false,
+    "faction": "Arasaka",
+    "techId": "weapon-med-scanner-arasaka"
+  },
+  {
+    "cost": 4,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Increases Medical Defense by 1.",
+    "faction": "Danger Gals",
+    "techId": "weapon-med-scanner-danger-gals",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeGreen": false,
+    "name": "Med-Scanner",
+    "rangeLong": false,
+    "keywords": [
+      "Medical Defense",
+      "Healing"
+    ],
+    "reqStreetCred": 4
+  },
+  {
+    "description": "Increases Medical Defense by 1.",
+    "rarity": 1,
+    "cost": 5,
+    "rangeRed": false,
+    "faction": "Lawmen",
+    "techId": "weapon-med-scanner-lawmen",
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "reqStreetCred": 5,
+    "rangeLong": false,
+    "keywords": [
+      "Medical Defense",
+      "Healing"
+    ],
+    "name": "Med-Scanner",
+    "rangeGreen": false
+  },
+  {
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "reqStreetCred": 2,
+    "keywords": [
+      "Medical Defense",
+      "Healing"
+    ],
+    "rangeLong": false,
+    "name": "Med-Scanner",
+    "rangeGreen": false,
+    "description": "Increases Medical Defense by 1.",
+    "rangeRed": false,
+    "cost": 4,
+    "rarity": 1,
+    "techId": "weapon-med-scanner-tyger-claws",
+    "faction": "Tyger Claws"
+  },
+  {
+    "rangeGreen": false,
+    "name": "Med-Scanner",
+    "rangeLong": false,
+    "keywords": [
+      "Medical Defense",
+      "Healing"
+    ],
+    "reqStreetCred": 1,
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "faction": "Zoners",
+    "techId": "weapon-med-scanner-zoners",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Increases Medical Defense by 1."
+  },
+  {
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeLong": false,
+    "keywords": [
+      "Armor",
+      "Defense: Medical +3"
+    ],
+    "reqStreetCred": 6,
+    "rangeGreen": false,
+    "name": "Medicgear Combat Medical Armor",
+    "description": "Armor. [Defense: Medical +3]",
+    "cost": 7,
+    "rarity": 2,
+    "rangeRed": false,
+    "faction": "Universal",
+    "techId": "weapon-medicgear-combat-medical-armor-universal"
+  },
+  {
+    "name": "Megaphone",
+    "rangeGreen": true,
+    "reqStreetCred": 3,
+    "keywords": [
+      "Difficult",
+      "Movement",
+      "Green Range"
+    ],
+    "rangeLong": false,
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "techId": "weapon-megaphone-edgerunners",
+    "faction": "Edgerunners",
+    "rangeRed": false,
+    "cost": 2,
+    "rarity": 1,
+    "description": "Difficult. Move target friendly model GREEN."
+  },
+  {
+    "rarity": 1,
+    "cost": 2,
+    "rangeRed": false,
+    "description": "Difficult. Move target friendly model GREEN.",
+    "faction": "Generation Red",
+    "techId": "weapon-megaphone-generation-red",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeGreen": true,
+    "name": "Megaphone",
+    "rangeLong": false,
+    "keywords": [
+      "Difficult",
+      "Movement",
+      "Green Range"
+    ],
+    "reqStreetCred": 2
+  },
+  {
+    "description": "Whenever this model draws a card from the Loot deck, it draws 3 cards, picks one to keep, and places the other two at the bottom of the deck.",
+    "cost": 2,
+    "rarity": 1,
+    "rangeRed": false,
+    "faction": "Generation Red",
+    "techId": "weapon-metal-detector-generation-red",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeLong": false,
+    "keywords": [
+      "Loot",
+      "Draw"
+    ],
+    "reqStreetCred": 3,
+    "rangeGreen": false,
+    "name": "Metal Detector"
+  },
+  {
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "keywords": [
+      "Armor",
+      "Melee",
+      "Deadly Crits"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 6,
+    "rangeGreen": false,
+    "name": "Metalgear",
+    "description": "Armor. This model's melee attacks gain Deadly Crits.",
+    "rangeRed": false,
+    "cost": 15,
+    "rarity": 1,
+    "techId": "weapon-metalgear-lawmen",
+    "faction": "Lawmen"
+  },
+  {
+    "rangeGreen": false,
+    "name": "Metalgear",
+    "keywords": [
+      "Armor",
+      "Melee",
+      "Deadly Crits"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 6,
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "techId": "weapon-metalgear-maelstrom",
+    "faction": "Maelstrom",
+    "rangeRed": false,
+    "cost": 15,
+    "rarity": 1,
+    "description": "Armor. This model's melee attacks gain Deadly Crits."
+  },
+  {
+    "techId": "weapon-metalgear-arasaka",
+    "faction": "Arasaka",
+    "description": "Armor. This model's melee attacks gain Deadly Crits.",
+    "rangeRed": false,
+    "cost": 15,
+    "rarity": 1,
+    "reqStreetCred": 4,
+    "keywords": [
+      "Armor",
+      "Melee",
+      "Deadly Crits"
+    ],
+    "rangeLong": false,
+    "name": "Metalgear",
+    "rangeGreen": false,
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false
+  },
+  {
+    "rangeRed": false,
+    "cost": 4,
+    "rarity": 2,
+    "description": "This model's Basic Melee Attack gains Pierce 1.",
+    "techId": "gear-micro-rotors-universal",
+    "faction": "Universal",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "rangeGreen": false,
+    "name": "Micro Rotors",
+    "keywords": [],
+    "rangeLong": false,
+    "reqStreetCred": 1
+  },
+  {
+    "isGear": false,
+    "rangeYellow": true,
+    "isWeapon": true,
+    "keywords": [
+      "Dangerous",
+      "Deadly",
+      "Critical",
+      "Torment"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 3,
+    "rangeGreen": true,
+    "name": "Midnight Arms \"Beast\"",
+    "description": "When this model declares a Ranged Attack, choose to gain RUSH.",
+    "rangeRed": true,
+    "cost": 7,
+    "rarity": 2,
+    "techId": "weapon-midnight-arms-beast-universal",
+    "faction": "Universal"
+  },
+  {
+    "keywords": [
+      "Deadly",
+      "Diffusing"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 4,
+    "rangeGreen": true,
+    "name": "Militech Boomer Buster",
+    "isGear": false,
+    "rangeYellow": true,
+    "isWeapon": true,
+    "techId": "weapon-militech-boomer-buster-universal",
+    "faction": "Universal",
+    "description": "",
+    "rangeRed": true,
+    "cost": 6,
+    "rarity": 1
+  },
+  {
+    "name": "Militech Crusher SSG",
+    "rangeGreen": true,
+    "reqStreetCred": 3,
+    "rangeLong": false,
+    "keywords": [
+      "Torrent",
+      "Suppression"
+    ],
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false,
+    "faction": "Edgerunners",
+    "techId": "weapon-militech-crusher-ssg-edgerunners",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": true,
+    "description": ""
+  },
+  {
+    "description": "",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": true,
+    "faction": "Lawmen",
+    "techId": "weapon-militech-crusher-ssg-lawmen",
+    "rangeYellow": true,
+    "isGear": false,
+    "isWeapon": true,
+    "rangeLong": false,
+    "keywords": [
+      "Torrent",
+      "Suppression"
+    ],
+    "reqStreetCred": 3,
+    "rangeGreen": true,
+    "name": "Militech Crusher SSG"
+  },
+  {
+    "rangeGreen": true,
+    "name": "Militech Crusher SSG",
+    "rangeLong": false,
+    "keywords": [
+      "Torrent",
+      "Suppression"
+    ],
+    "reqStreetCred": 1,
+    "rangeYellow": true,
+    "isGear": false,
+    "isWeapon": true,
+    "faction": "Danger Gals",
+    "techId": "weapon-militech-crusher-ssg-danger-gals",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": true,
+    "description": ""
+  },
+  {
+    "rangeLong": false,
+    "keywords": [],
+    "reqStreetCred": 6,
+    "rangeGreen": false,
+    "name": "Militech Enforcer Full-Body Conversion",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "faction": "Lawmen",
+    "techId": "gear-militech-enforcer-full-body-conversion-lawmen",
+    "description": "This model's basic melee attack gains Run 2.",
+    "rarity": 1,
+    "cost": 10,
+    "rangeRed": false
+  },
+  {
+    "description": "This model's basic melee attack gains Run 2.",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 10,
+    "techId": "gear-militech-enforcer-full-body-conversion-edgerunners",
+    "faction": "Edgerunners",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "keywords": [],
+    "rangeLong": false,
+    "reqStreetCred": 5,
+    "rangeGreen": false,
+    "name": "Militech Enforcer Full-Body Conversion"
+  },
+  {
+    "faction": "Universal",
+    "techId": "weapon-militech-fox-dual-ammo-universal",
+    "cost": 3,
+    "rarity": 1,
+    "rangeRed": true,
+    "description": "When this attack is declared, choose to gain Fierce 2 or Push.",
+    "rangeGreen": true,
+    "name": "Militech Fox Dual Ammo",
+    "rangeLong": false,
+    "keywords": [],
+    "reqStreetCred": 2,
+    "rangeYellow": true,
+    "isGear": false,
+    "isWeapon": true
+  },
+  {
+    "description": "If the target has one or more spent Action tokens, Fierce 4 instead.",
+    "rangeRed": true,
+    "cost": 5,
+    "rarity": 1,
+    "techId": "weapon-militech-perseus-universal",
+    "faction": "Universal",
+    "isGear": false,
+    "rangeYellow": true,
+    "isWeapon": true,
+    "keywords": [
+      "Fierce 2"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 5,
+    "rangeGreen": true,
+    "name": "Militech Perseus"
+  },
+  {
+    "keywords": [],
+    "rangeLong": false,
+    "reqStreetCred": 4,
+    "rangeGreen": false,
+    "name": "Militech Upgraded Cyberdeck",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "techId": "gear-militech-upgraded-cyberdeck-edgerunners",
+    "faction": "Edgerunners",
+    "description": "This model gains Netrunner. When this model chooses a program to install, it doesn't count against its Team has +1 Street Cred.",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 5
+  },
+  {
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeLong": false,
+    "keywords": [
+      "Iconic: Oyabun"
+    ],
+    "reqStreetCred": 2,
+    "rangeGreen": false,
+    "name": "Mimic Kimono",
+    "description": "Iconic: Oyabun. Exhaust this before rolling against the Obstacle die to treat your Fumbles as Crits.",
+    "cost": 4,
+    "rarity": 1,
+    "rangeRed": false,
+    "faction": "Tyger Claws",
+    "techId": "gear-mimic-kimono-tyger-claws"
+  },
+  {
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "reqStreetCred": 2,
+    "rangeGreen": false,
+    "name": "Modular Cyberhand",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "faction": "Edgerunners",
+    "techId": "gear-modular-cyberhand-edgerunners",
+    "description": "Cybergear. Exhaust this to reroll a non-Attack action (once per activation).",
+    "rarity": 1,
+    "cost": 3,
+    "rangeRed": false
+  },
+  {
+    "rangeGreen": true,
+    "name": "Molotov Cocktail",
+    "rangeLong": false,
+    "keywords": [
+      "Grenade",
+      "Deadly Crits",
+      "Push",
+      "Dangerous",
+      "Discard"
+    ],
+    "reqStreetCred": 0,
+    "rangeYellow": true,
+    "isGear": true,
+    "isWeapon": true,
+    "faction": "Generation Red",
+    "techId": "weapon-molotov-cocktail-generation-red",
+    "rarity": 2,
+    "cost": 2,
+    "rangeRed": false,
+    "description": "Grenade. Deadly Crits, Push, Dangerous, Discard."
+  },
+  {
+    "description": "Melee Weapon. Deadly Crits, Pierce 2, Dangerous.",
+    "cost": 2,
+    "rarity": 1,
+    "rangeRed": true,
+    "faction": "Tyger Claws",
+    "techId": "weapon-mono-katana-tyger-claws",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": true,
+    "rangeLong": false,
+    "keywords": [
+      "Melee Weapon",
+      "Deadly Crits",
+      "Pierce 2",
+      "Dangerous"
+    ],
+    "reqStreetCred": 5,
+    "rangeGreen": false,
+    "name": "Mono Katana"
+  },
+  {
+    "description": "Cybergear. This model gains Wheelman.",
+    "rarity": 1,
+    "cost": 3,
+    "rangeRed": false,
+    "faction": "Universal",
+    "techId": "gear-nav-console-interface-plugs-universal",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear",
+      "Wheelman"
+    ],
+    "reqStreetCred": 5,
+    "rangeGreen": false,
+    "name": "Nav Console Interface Plugs"
+  },
+  {
+    "name": "Net Suit",
+    "rangeGreen": false,
+    "reqStreetCred": 6,
+    "rangeLong": false,
+    "keywords": [],
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "faction": "Arasaka",
+    "techId": "gear-net-suit-arasaka",
+    "cost": 10,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "When this model ends a move, another visible friendly model may move the same distance."
+  },
+  {
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "name": "Netlinked Targeting",
+    "rangeGreen": false,
+    "description": "Cybergear. When targeting a Rival with an attack, this model gains +1 to the roll for each Hacked token on the target.",
+    "cost": 1,
+    "rarity": 1,
+    "rangeRed": false,
+    "faction": "Edgerunners",
+    "techId": "gear-netlinked-targeting-edgerunners"
+  },
+  {
+    "faction": "Danger Gals",
+    "techId": "gear-neural-enhancers-danger-gals",
+    "description": "Cybergear. +2 Movement.",
+    "cost": 10,
+    "rarity": 1,
+    "rangeRed": false,
+    "reqStreetCred": 6,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "name": "Neural Enhancers",
+    "rangeGreen": false,
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "name": "Neural Override",
+    "rangeGreen": true,
+    "reqStreetCred": 5,
+    "rangeLong": false,
+    "keywords": [],
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "faction": "Arasaka",
+    "techId": "gear-neural-override-arasaka",
+    "cost": 4,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Difficult\nMove target model\nGREEN."
+  },
+  {
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "name": "Neural Override",
+    "rangeGreen": true,
+    "reqStreetCred": 5,
+    "rangeLong": false,
+    "keywords": [],
+    "rarity": 1,
+    "cost": 4,
+    "rangeRed": false,
+    "description": "Difficult\nMove target model\nGREEN.",
+    "faction": "Tyger Claws",
+    "techId": "gear-neural-override-tyger-claws"
+  },
+  {
+    "description": "Cybergear\nThis model may use its Tech Skill for any action it takes. Doing so makes that action Dangerous.",
+    "rangeRed": false,
+    "cost": 5,
+    "rarity": 1,
+    "techId": "gear-neural-reprogrammer-maelstrom",
+    "faction": "Maelstrom",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 3,
+    "rangeGreen": false,
+    "name": "Neural Reprogrammer"
+  },
+  {
+    "faction": "Generation Red",
+    "techId": "gear-neural-uplink-generation-red",
+    "rarity": 1,
+    "cost": 5,
+    "rangeRed": false,
+    "description": "Cybergear\nAll visible friendly Gonks may move YELLOW.",
+    "rangeGreen": false,
+    "name": "Neural Uplink",
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "reqStreetCred": 6,
+    "rangeYellow": true,
+    "isGear": true,
+    "isWeapon": false
+  },
+  {
+    "reqStreetCred": 3,
+    "keywords": [
+      "Grenade",
+      "Blast",
+      "Discard"
+    ],
+    "rangeLong": false,
+    "name": "Neuroactive Grenade",
+    "rangeGreen": true,
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": true,
+    "techId": "gear-neuroactive-grenade-danger-gals",
+    "faction": "Danger Gals",
+    "description": "Grenade\n[Blast, Discard] Each model wounded by this attack that is not taken out must take an action, for free, controlling this model's controller.",
+    "rangeRed": true,
+    "rarity": 1,
+    "cost": 3
+  },
+  {
+    "name": "Night Market Surplus",
+    "rangeGreen": false,
+    "reqStreetCred": 3,
+    "rangeLong": false,
+    "keywords": [
+      "Iconic"
+    ],
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "faction": "Edgerunners",
+    "techId": "gear-night-market-surplus-edgerunners",
+    "cost": 4,
+    "rarity": 1,
+    "rangeRed": true,
+    "description": "Iconic: Fixer Arms Dealer\nWhen a friendly model within RED makes a Ranged attack, this model may discard one or more Loot cards to give the attack a +1 for each Loot discarded."
+  },
+  {
+    "rangeGreen": false,
+    "name": "Optical Camo",
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "reqStreetCred": 2,
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "faction": "Universal",
+    "techId": "gear-optical-camo-universal",
+    "cost": 7,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Cybergear\nWhile this model has no used Action tokens, it gains +2 when opposing attacks."
+  },
+  {
+    "description": "Cybergear\nWhen this model is wounded, roll a RED die: If it is a Crit, ignore the wound.",
+    "rarity": 1,
+    "cost": 5,
+    "rangeRed": false,
+    "faction": "Tyger Claws",
+    "techId": "gear-pain-editor-tyger-claws",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "reqStreetCred": 4,
+    "rangeGreen": false,
+    "name": "Pain Editor"
+  },
+  {
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "reqStreetCred": 2,
+    "rangeGreen": false,
+    "name": "Pain Editor",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "faction": "Universal",
+    "techId": "gear-pain-editor-universal",
+    "description": "Cybergear\nWhen this model is wounded, roll a RED die: If it is a Crit, ignore the wound.",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": false
+  },
+  {
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "name": "Pain Editor",
+    "rangeGreen": false,
+    "reqStreetCred": 5,
+    "keywords": [
+      "Cybergear"
+    ],
+    "rangeLong": false,
+    "rangeRed": false,
+    "cost": 5,
+    "rarity": 1,
+    "description": "Cybergear\nWhen this model is wounded, roll a RED die: If it is a Crit, ignore the wound.",
+    "techId": "gear-pain-editor-generation-red",
+    "faction": "Generation Red"
+  },
+  {
+    "isGear": true,
+    "rangeYellow": true,
+    "isWeapon": false,
+    "keywords": [
+      "Grenade",
+      "Blast",
+      "Discard"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 1,
+    "rangeGreen": true,
+    "name": "Pie Grenade",
+    "description": "Grenade\n[Blast, Discard] This attack gains Deadly if target's Action Tokens are Used.",
+    "rangeRed": true,
+    "rarity": 2,
+    "cost": 2,
+    "techId": "gear-pie-grenade-bozos",
+    "faction": "Bozos"
+  },
+  {
+    "cost": 6,
+    "rarity": 2,
+    "rangeRed": true,
+    "description": "",
+    "faction": "Maelstrom",
+    "techId": "gear-pneumatic-cyber-fist-maelstrom",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": true,
+    "rangeGreen": false,
+    "name": "Pneumatic Cyber-Fist",
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear",
+      "Dangerous",
+      "Deadly"
+    ],
+    "reqStreetCred": 1
+  },
+  {
+    "description": "",
+    "cost": 6,
+    "rarity": 1,
+    "rangeRed": true,
+    "faction": "Arasaka",
+    "techId": "gear-pneumatic-cyber-fist-arasaka",
+    "isWeapon": true,
+    "rangeYellow": false,
+    "isGear": true,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear",
+      "Dangerous",
+      "Deadly"
+    ],
+    "name": "Pneumatic Cyber-Fist",
+    "rangeGreen": false
+  },
+  {
+    "techId": "gear-popup-katana-universal",
+    "faction": "Universal",
+    "rangeRed": false,
+    "cost": 5,
+    "rarity": 1,
+    "description": "Cyberware. Deadly Crits. When this attack is made as a [RE]action, it gains Accurate.",
+    "rangeGreen": false,
+    "name": "Popup Katana",
+    "keywords": [
+      "Cyberware",
+      "Deadly Crits",
+      "REaction",
+      "Accurate"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 5,
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": true
+  },
+  {
+    "name": "Power-Glove",
+    "rangeGreen": false,
+    "reqStreetCred": 6,
+    "rangeLong": false,
+    "keywords": [],
+    "isWeapon": true,
+    "rangeYellow": false,
+    "isGear": true,
+    "faction": "Generation Red",
+    "techId": "gear-power-glove-generation-red",
+    "rarity": 1,
+    "cost": 8,
+    "rangeRed": false,
+    "description": "If a model is wounded by this attack and is not taken out, it must take one action, for free, controlled by this model's controller (it may attack friendly targets)."
+  },
+  {
+    "isWeapon": true,
+    "isGear": true,
+    "rangeYellow": true,
+    "name": "Ranger Combat Boomerang",
+    "rangeGreen": true,
+    "reqStreetCred": 5,
+    "keywords": [
+      "Accurate"
+    ],
+    "rangeLong": false,
+    "rangeRed": false,
+    "cost": 5,
+    "rarity": 1,
+    "description": "[Accurate] Targets may oppose this attack with Armor or Reflexes.",
+    "techId": "gear-ranger-combat-boomerang-universal",
+    "faction": "Universal"
+  },
+  {
+    "techId": "gear-rapideploy-sheath-arasaka",
+    "faction": "Arasaka",
+    "rangeRed": false,
+    "cost": 5,
+    "rarity": 1,
+    "description": "Iconic: Team Lead. Exhaust this Gear when taking this Attack as a [RE]action to refresh the spent Action token.",
+    "name": "Rapideploy Sheath",
+    "rangeGreen": false,
+    "reqStreetCred": 2,
+    "keywords": [
+      "Iconic",
+      "Team Lead",
+      "REaction"
+    ],
+    "rangeLong": false,
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false
+  },
+  {
+    "reqStreetCred": 0,
+    "keywords": [
+      "Rapid 2",
+      "Stun 2"
+    ],
+    "rangeLong": false,
+    "name": "Rattle Cans",
+    "rangeGreen": false,
+    "isWeapon": true,
+    "isGear": true,
+    "rangeYellow": false,
+    "techId": "gear-rattle-cans-generation-red",
+    "faction": "Generation Red",
+    "description": "Rapid 2, Stun 2",
+    "rangeRed": true,
+    "cost": 2,
+    "rarity": 1
+  },
+  {
+    "description": "Drug. This model gains a RED action token.",
+    "rangeRed": false,
+    "rarity": 2,
+    "cost": 3,
+    "techId": "gear-raw-juice-universal",
+    "faction": "Universal",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "keywords": [
+      "Drug",
+      "RED action token"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 0,
+    "rangeGreen": false,
+    "name": "Raw Juice"
+  },
+  {
+    "faction": "Tyger Claws",
+    "techId": "gear-reflex-boosters-tyger-claws",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Cybergear. This model gains +1 to Opposed Rolls against attacks targeting it. If this model Fumbles a roll opposing an attack, it takes a wound.",
+    "name": "Reflex Boosters",
+    "rangeGreen": false,
+    "reqStreetCred": 3,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "faction": "Arasaka",
+    "techId": "weapon-remington-gyro-sniper-rifle-arasaka",
+    "cost": 14,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Bulky. Deadly Crits, Accurate",
+    "name": "Remington Gyro-Sniper Rifle",
+    "rangeGreen": false,
+    "reqStreetCred": 3,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Deadly Crits",
+      "Accurate"
+    ],
+    "isWeapon": true,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "faction": "Lawmen",
+    "techId": "weapon-remington-gyro-sniper-rifle-lawmen",
+    "description": "Bulky. Deadly Crits, Accurate",
+    "cost": 15,
+    "rarity": 1,
+    "rangeRed": false,
+    "reqStreetCred": 5,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Deadly Crits",
+      "Accurate"
+    ],
+    "name": "Remington Gyro-Sniper Rifle",
+    "rangeGreen": false,
+    "isWeapon": true,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "faction": "Lawmen",
+    "techId": "weapon-restovic-wrist-racate-lawmen",
+    "cost": 10,
+    "rarity": 1,
+    "rangeRed": true,
+    "description": "Bulky. Blast",
+    "rangeGreen": false,
+    "name": "Restovic Wrist Racate",
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Blast"
+    ],
+    "reqStreetCred": 5,
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": true
+  },
+  {
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Brawling",
+      "Unwieldy"
+    ],
+    "name": "Restraints",
+    "rangeGreen": false,
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "faction": "Lawmen",
+    "techId": "gear-restraints-lawmen",
+    "description": "All rivals Brawling with this model add Unwieldy to all of their actions.",
+    "cost": 2,
+    "rarity": 1,
+    "rangeRed": false
+  },
+  {
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeGreen": false,
+    "name": "Restraints",
+    "rangeLong": false,
+    "keywords": [
+      "Brawling",
+      "Unwieldy"
+    ],
+    "reqStreetCred": 2,
+    "cost": 2,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "All rivals Brawling with this model add Unwieldy to all of their actions.",
+    "faction": "Universal",
+    "techId": "gear-restraints-universal"
+  },
+  {
+    "rangeRed": false,
+    "cost": 2,
+    "rarity": 1,
+    "description": "When you activate this model, it may discard this card to select up to two visible friendly Gonks and place them within reach.",
+    "techId": "gear-ride-a-long-lawmen",
+    "faction": "Lawmen",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "rangeGreen": false,
+    "name": "Ride-A-Long",
+    "keywords": [
+      "Gonks",
+      "reach"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 0
+  },
+  {
+    "name": "Ripper Doc Kit",
+    "rangeGreen": true,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Heal"
+    ],
+    "isWeapon": false,
+    "rangeYellow": true,
+    "isGear": true,
+    "faction": "Maelstrom",
+    "techId": "gear-ripper-doc-kit-maelstrom",
+    "cost": 10,
+    "rarity": 1,
+    "rangeRed": true,
+    "description": "Heal 1"
+  },
+  {
+    "techId": "gear-ripper-doc-kit-edgerunners",
+    "faction": "Edgerunners",
+    "rangeRed": true,
+    "rarity": 1,
+    "cost": 10,
+    "description": "Heal 1",
+    "rangeGreen": true,
+    "name": "Ripper Doc Kit",
+    "keywords": [
+      "Heal"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 2,
+    "isGear": true,
+    "rangeYellow": true,
+    "isWeapon": false
+  },
+  {
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": true,
+    "keywords": [
+      "Bulky",
+      "Blast"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 6,
+    "rangeGreen": true,
+    "name": "Rocket Launcher",
+    "description": "Bulky. Blast",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 20,
+    "techId": "weapon-rocket-launcher-zoners",
+    "faction": "Zoners"
+  },
+  {
+    "faction": "Danger Gals",
+    "techId": "weapon-rocket-launcher-danger-gals",
+    "rarity": 1,
+    "cost": 10,
+    "rangeRed": false,
+    "description": "Bulky. Blast",
+    "name": "Rocket Launcher",
+    "rangeGreen": true,
+    "reqStreetCred": 5,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Blast"
+    ],
+    "isWeapon": true,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "techId": "weapon-rocket-launcher-bozos",
+    "faction": "Bozos",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 10,
+    "description": "Bulky. Blast",
+    "name": "Rocket Launcher",
+    "rangeGreen": true,
+    "reqStreetCred": 6,
+    "keywords": [
+      "Bulky",
+      "Blast"
+    ],
+    "rangeLong": false,
+    "isWeapon": true,
+    "isGear": true,
+    "rangeYellow": false
+  },
+  {
+    "rangeRed": false,
+    "cost": 5,
+    "rarity": 1,
+    "description": "When this model activates, it may move GREEN for free. This model's basic move actions gain Dangerous.",
+    "techId": "gear-rocket-skates-bozos",
+    "faction": "Bozos",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "rangeGreen": false,
+    "name": "Rocket Skates",
+    "keywords": [
+      "GREEN",
+      "Dangerous"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 3
+  },
+  {
+    "keywords": [
+      "GREEN",
+      "Dangerous"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 5,
+    "rangeGreen": false,
+    "name": "Rocket Skates",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "techId": "gear-rocket-skates-generation-red",
+    "faction": "Generation Red",
+    "description": "When this model activates, it may move GREEN for free. This model's basic move actions gain Dangerous.",
+    "rangeRed": false,
+    "cost": 5,
+    "rarity": 1
+  },
+  {
+    "isWeapon": true,
+    "isGear": true,
+    "rangeYellow": false,
+    "name": "Rostović Kleaver",
+    "rangeGreen": false,
+    "reqStreetCred": 3,
+    "keywords": [
+      "Bulky",
+      "Deadly Crits",
+      "Fumbles",
+      "exhaust"
+    ],
+    "rangeLong": false,
+    "rangeRed": true,
+    "cost": 6,
+    "rarity": 1,
+    "description": "Bulky. [Deadly Crits] Roll an additional die. If it Crits, this attack Fumbles, exhaust this gear.",
+    "techId": "weapon-rostovic-kleaver-universal",
+    "faction": "Universal"
+  },
+  {
+    "faction": "Generation Red",
+    "techId": "gear-salvaged-armor-generation-red",
+    "description": "Bulky, Armor",
+    "rarity": 1,
+    "cost": 7,
+    "rangeRed": false,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Armor"
+    ],
+    "reqStreetCred": 3,
+    "rangeGreen": false,
+    "name": "Salvaged Armor",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false
+  },
+  {
+    "techId": "gear-salvaged-armor-zoners",
+    "faction": "Zoners",
+    "description": "Bulky, Armor",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 7,
+    "keywords": [
+      "Bulky",
+      "Armor"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 2,
+    "rangeGreen": false,
+    "name": "Salvaged Armor",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false
+  },
+  {
+    "keywords": [
+      "Rapid 3",
+      "Difficult"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 6,
+    "rangeGreen": true,
+    "name": "Salvaged Machine Gun",
+    "isGear": true,
+    "rangeYellow": true,
+    "isWeapon": true,
+    "techId": "weapon-salvaged-machine-gun-generation-red",
+    "faction": "Generation Red",
+    "description": "Rapid 3, Difficult. This action may not be taken if this model moved during this activation.",
+    "rangeRed": true,
+    "rarity": 1,
+    "cost": 5
+  },
+  {
+    "rangeRed": true,
+    "cost": 2,
+    "rarity": 1,
+    "description": "Rapid 3, Difficult. This action may not be taken if this model moved during this activation.",
+    "techId": "weapon-salvaged-machine-gun-zoners",
+    "faction": "Zoners",
+    "isGear": true,
+    "rangeYellow": true,
+    "isWeapon": true,
+    "rangeGreen": true,
+    "name": "Salvaged Machine Gun",
+    "keywords": [
+      "Rapid 3",
+      "Difficult"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 5
+  },
+  {
+    "faction": "Zoners",
+    "techId": "weapon-salvaged-mortar-zoners",
+    "cost": 10,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Bulky. Blast, Indirect, Dangerous, Difficult.",
+    "name": "Salvaged Mortar",
+    "rangeGreen": true,
+    "reqStreetCred": 3,
+    "rangeLong": true,
+    "keywords": [
+      "Bulky",
+      "Blast",
+      "Indirect",
+      "Dangerous",
+      "Difficult"
+    ],
+    "isWeapon": true,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "name": "Salvaged Mortar",
+    "rangeGreen": true,
+    "reqStreetCred": 5,
+    "keywords": [
+      "Bulky",
+      "Blast",
+      "Indirect",
+      "Dangerous",
+      "Difficult"
+    ],
+    "rangeLong": true,
+    "isWeapon": true,
+    "isGear": true,
+    "rangeYellow": false,
+    "techId": "weapon-salvaged-mortar-generation-red",
+    "faction": "Generation Red",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 10,
+    "description": "Bulky. Blast, Indirect, Dangerous, Difficult."
+  },
+  {
+    "techId": "weapon-salvaged-mortar-tyger-claws",
+    "faction": "Tyger Claws",
+    "description": "Bulky. Blast, Indirect, Dangerous, Difficult.",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 12,
+    "keywords": [
+      "Bulky",
+      "Blast",
+      "Indirect",
+      "Dangerous",
+      "Difficult"
+    ],
+    "rangeLong": true,
+    "reqStreetCred": 6,
+    "rangeGreen": true,
+    "name": "Salvaged Mortar",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": true
+  },
+  {
+    "keywords": [
+      "Cybergear"
+    ],
+    "rangeLong": false,
+    "reqStreetCred": 6,
+    "rangeGreen": false,
+    "name": "Sandevistan",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "techId": "gear-sandevistan-universal",
+    "faction": "Universal",
+    "description": "Cybergear. Put two YELLOW Action tokens on this gear. These tokens may only be used to make [RE]actions. These tokens don't refresh when you Inspire Your Team.",
+    "rangeRed": false,
+    "cost": 10,
+    "rarity": 1
+  },
+  {
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "keywords": [],
+    "rangeLong": false,
+    "reqStreetCred": 0,
+    "rangeGreen": false,
+    "name": "Scavenged Parts",
+    "description": "Discard this during setup to draw 3 Loot cards. These may be given to any character. These cards don't count towards scenario or objective goals.",
+    "rangeRed": false,
+    "cost": 6,
+    "rarity": 1,
+    "techId": "gear-scavenged-parts-generation-red",
+    "faction": "Generation Red"
+  },
+  {
+    "rangeLong": false,
+    "keywords": [
+      "Iconic",
+      "Industrial Tech Supervisor",
+      "Deadly Crits"
+    ],
+    "reqStreetCred": 2,
+    "rangeGreen": false,
+    "name": "Scratch-Built Custom Face-Welder",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": true,
+    "faction": "Edgerunners",
+    "techId": "weapon-scratch-built-custom-face-welder-edgerunners",
+    "description": "Iconic: Industrial Tech Supervisor. [Deadly Crits] This attack is Deadly against Cyber-characters.",
+    "rarity": 1,
+    "cost": 4,
+    "rangeRed": true
+  },
+  {
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "reqStreetCred": 5,
+    "keywords": [
+      "Dangerous"
+    ],
+    "rangeLong": false,
+    "name": "Secsystems Protection Field",
+    "rangeGreen": false,
+    "description": "Melee actions against this model gain Dangerous.",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 8,
+    "techId": "gear-secsystems-protection-field-universal",
+    "faction": "Universal"
+  },
+  {
+    "keywords": [
+      "Free action"
+    ],
+    "rangeLong": true,
+    "reqStreetCred": 1,
+    "rangeGreen": true,
+    "name": "Secured Comms",
+    "isGear": true,
+    "rangeYellow": true,
+    "isWeapon": false,
+    "techId": "gear-secured-comms-universal",
+    "faction": "Universal",
+    "description": "Target friendly model takes a Free action.",
+    "rangeRed": true,
+    "cost": 2,
+    "rarity": 2
+  },
+  {
+    "description": "Iconic: Street King\nOther visible friendly models gain Defense: Influence +2. If this model is taken out, it rolls only one RED die when resolving its Major Injuries.",
+    "rarity": 1,
+    "cost": 2,
+    "rangeRed": false,
+    "faction": "Zoners",
+    "techId": "gear-sheisty-of-the-faceless-zoners",
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Iconic",
+      "Street King"
+    ],
+    "name": "SHEISTY OF THE FACELESS",
+    "rangeGreen": false
+  },
+  {
+    "faction": "Arasaka",
+    "techId": "weapon-shotgun-arasaka",
+    "description": "",
+    "cost": 4,
+    "rarity": 1,
+    "rangeRed": true,
+    "rangeLong": true,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "reqStreetCred": 0,
+    "rangeGreen": true,
+    "name": "SHOTGUN",
+    "rangeYellow": true,
+    "isGear": false,
+    "isWeapon": true
+  },
+  {
+    "description": "",
+    "rangeRed": true,
+    "cost": 5,
+    "rarity": 2,
+    "techId": "weapon-shotgun-lawmen",
+    "faction": "Lawmen",
+    "isWeapon": true,
+    "isGear": false,
+    "rangeYellow": true,
+    "reqStreetCred": 1,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "rangeLong": true,
+    "name": "SHOTGUN",
+    "rangeGreen": true
+  },
+  {
+    "faction": "Edgerunners",
+    "techId": "weapon-shotgun-edgerunners",
+    "rarity": 1,
+    "cost": 5,
+    "rangeRed": true,
+    "description": "",
+    "name": "SHOTGUN",
+    "rangeGreen": true,
+    "reqStreetCred": 0,
+    "rangeLong": true,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false
+  },
+  {
+    "description": "",
+    "rarity": 1,
+    "cost": 5,
+    "rangeRed": true,
+    "faction": "Maelstrom",
+    "techId": "weapon-shotgun-maelstrom",
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false,
+    "reqStreetCred": 1,
+    "rangeLong": true,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "name": "SHOTGUN",
+    "rangeGreen": true
+  },
+  {
+    "name": "SHOTGUN",
+    "rangeGreen": true,
+    "reqStreetCred": 0,
+    "rangeLong": true,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false,
+    "faction": "Bozos",
+    "techId": "weapon-shotgun-bozos",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": true,
+    "description": ""
+  },
+  {
+    "isGear": false,
+    "rangeYellow": true,
+    "isWeapon": true,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "rangeLong": true,
+    "reqStreetCred": 3,
+    "rangeGreen": true,
+    "name": "SHOTGUN",
+    "description": "",
+    "rangeRed": true,
+    "rarity": 1,
+    "cost": 5,
+    "techId": "weapon-shotgun-generation-red",
+    "faction": "Generation Red"
+  },
+  {
+    "isGear": false,
+    "rangeYellow": true,
+    "isWeapon": true,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "rangeLong": true,
+    "reqStreetCred": 0,
+    "rangeGreen": true,
+    "name": "SHOTGUN",
+    "description": "",
+    "rangeRed": true,
+    "cost": 5,
+    "rarity": 2,
+    "techId": "weapon-shotgun-universal",
+    "faction": "Universal"
+  },
+  {
+    "faction": "Danger Gals",
+    "techId": "weapon-shotgun-danger-gals",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": true,
+    "description": "",
+    "name": "SHOTGUN",
+    "rangeGreen": true,
+    "reqStreetCred": 1,
+    "rangeLong": true,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false
+  },
+  {
+    "name": "SHOTGUN",
+    "rangeGreen": true,
+    "reqStreetCred": 0,
+    "keywords": [
+      "Torrent",
+      "Deadly Crits"
+    ],
+    "rangeLong": true,
+    "isWeapon": true,
+    "isGear": false,
+    "rangeYellow": true,
+    "techId": "weapon-shotgun-zoners",
+    "faction": "Zoners",
+    "rangeRed": true,
+    "cost": 5,
+    "rarity": 2,
+    "description": ""
+  },
+  {
+    "faction": "Maelstrom",
+    "techId": "weapon-shoulder-mounted-rocket-maelstrom",
+    "rarity": 1,
+    "cost": 3,
+    "rangeRed": true,
+    "description": "",
+    "name": "SHOULDER-MOUNTED ROCKET",
+    "rangeGreen": true,
+    "reqStreetCred": 3,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear",
+      "Blast",
+      "Discard"
+    ],
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false
+  },
+  {
+    "faction": "Edgerunners",
+    "techId": "weapon-shoulder-mounted-rocket-edgerunners",
+    "description": "",
+    "cost": 3,
+    "rarity": 1,
+    "rangeRed": true,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear",
+      "Blast",
+      "Discard"
+    ],
+    "name": "SHOULDER-MOUNTED ROCKET",
+    "rangeGreen": true,
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false
+  },
+  {
+    "faction": "Danger Gals",
+    "techId": "gear-shrieker-danger-gals",
+    "cost": 10,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Replace target rival's GREEN Action Token with a YELLOW one.",
+    "name": "SHRIEKER",
+    "rangeGreen": false,
+    "reqStreetCred": 5,
+    "rangeLong": false,
+    "keywords": [],
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "faction": "Zoners",
+    "techId": "gear-shrieker-zoners",
+    "cost": 10,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "Replace target rival's GREEN Action Token with a YELLOW one.",
+    "name": "SHRIEKER",
+    "rangeGreen": false,
+    "reqStreetCred": 5,
+    "rangeLong": false,
+    "keywords": [],
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "faction": "Danger Gals",
+    "techId": "gear-silencer-danger-gals",
+    "rarity": 1,
+    "cost": 2,
+    "rangeRed": false,
+    "description": "This model's Basic Ranged Attacks and Pistols gain Silent.",
+    "name": "SILENCER",
+    "rangeGreen": false,
+    "reqStreetCred": 1,
+    "rangeLong": false,
+    "keywords": [],
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "faction": "Zoners",
+    "techId": "gear-silencer-zoners",
+    "rarity": 1,
+    "cost": 2,
+    "rangeRed": false,
+    "description": "This model's Basic Ranged Attacks and Pistols gain Silent.",
+    "name": "SILENCER",
+    "rangeGreen": false,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [],
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "reqStreetCred": 2,
+    "keywords": [],
+    "rangeLong": false,
+    "name": "SILENCER",
+    "rangeGreen": false,
+    "description": "This model's Basic Ranged Attacks and Pistols gain Silent.",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 2,
+    "techId": "gear-silencer-tyger-claws",
+    "faction": "Tyger Claws"
+  },
+  {
+    "description": "",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": true,
+    "faction": "Zoners",
+    "techId": "weapon-single-shot-rpg-zoners",
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Blast",
+      "Discard"
+    ],
+    "name": "SINGLE-SHOT RPG",
+    "rangeGreen": true
+  },
+  {
+    "description": "",
+    "rarity": 1,
+    "cost": 5,
+    "rangeRed": true,
+    "faction": "Danger Gals",
+    "techId": "weapon-single-shot-rpg-danger-gals",
+    "isWeapon": true,
+    "rangeYellow": true,
+    "isGear": false,
+    "reqStreetCred": 2,
+    "rangeLong": false,
+    "keywords": [
+      "Bulky",
+      "Blast",
+      "Discard"
+    ],
+    "name": "SINGLE-SHOT RPG",
+    "rangeGreen": true
+  },
+  {
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 4,
+    "description": "Discard this during setup to draw 2 Loot cards. These may be given to any character. These cards don't count towards scenario or objective goals.",
+    "techId": "gear-skimmed-profits-tyger-claws",
+    "faction": "Tyger Claws",
+    "isGear": true,
+    "rangeYellow": false,
+    "isWeapon": false,
+    "rangeGreen": false,
+    "name": "SKIMMED PROFITS",
+    "keywords": [],
+    "rangeLong": false,
+    "reqStreetCred": 1
+  },
+  {
+    "reqStreetCred": 6,
+    "rangeLong": false,
+    "keywords": [
+      "Deadly Crits",
+      "Pierce 2"
+    ],
+    "name": "SLAMDANCE TASMANSKIY KLO",
+    "rangeGreen": false,
+    "isWeapon": true,
+    "rangeYellow": false,
+    "isGear": false,
+    "faction": "Universal",
+    "techId": "weapon-slamdance-tasmanskiy-klo-universal",
+    "description": "When this attack takes out a rival, all visible friendly GREEN suffer Stun 1.",
+    "rarity": 1,
+    "cost": 8,
+    "rangeRed": true
+  },
+  {
+    "description": "If an attack causes this Armor to be discarded, this model may [RE]Act to the attack as if it had been wounded",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 7,
+    "techId": "gear-spinning-bowtie-deflector-bozos",
+    "faction": "Bozos",
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "reqStreetCred": 2,
+    "keywords": [
+      "Armor"
+    ],
+    "rangeLong": false,
+    "name": "Spinning Bowtie Deflector",
+    "rangeGreen": false
+  },
+  {
+    "faction": "Universal",
+    "techId": "gear-sprayskin-reservoir-universal",
+    "cost": 9,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "When this model heals a wound, you may Exhaust this to increase the Heal by +1.",
+    "rangeGreen": false,
+    "name": "Sprayskin Reservoir",
+    "rangeLong": false,
+    "keywords": [
+      "Cybergear"
+    ],
+    "reqStreetCred": 3,
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false
+  },
+  {
+    "faction": "Universal",
+    "techId": "gear-steroid-pack-universal",
+    "description": "Target friendly model may make a YELLOW move for free and then make a Basic Melee Attack with +1 to the roll for free.",
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": false,
+    "reqStreetCred": 1,
+    "rangeLong": false,
+    "keywords": [
+      "Drug"
+    ],
+    "name": "Steroid Pack",
+    "rangeGreen": false,
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "rangeGreen": false,
+    "name": "Steroid Pack",
+    "rangeLong": false,
+    "keywords": [
+      "Drug"
+    ],
+    "reqStreetCred": 1,
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "faction": "Maelstrom",
+    "techId": "gear-steroid-pack-maelstrom",
+    "rarity": 1,
+    "cost": 5,
+    "rangeRed": false,
+    "description": "Target friendly model may make a YELLOW move for free and then make a Basic Melee Attack with +1 to the roll for free."
+  },
+  {
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeGreen": false,
+    "name": "Stims",
+    "rangeLong": false,
+    "keywords": [
+      "Drug"
+    ],
+    "reqStreetCred": 4,
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "When you Inspire Your Team, roll a RED die. Fumble: This model takes 1 wound. 2+: Move RED for free.",
+    "faction": "Maelstrom",
+    "techId": "gear-stims-maelstrom"
+  },
+  {
+    "isWeapon": false,
+    "rangeYellow": false,
+    "isGear": true,
+    "name": "Stims",
+    "rangeGreen": false,
+    "reqStreetCred": 6,
+    "rangeLong": false,
+    "keywords": [
+      "Drug"
+    ],
+    "rarity": 1,
+    "cost": 5,
+    "rangeRed": false,
+    "description": "When you Inspire Your Team, roll a RED die. Fumble: This model takes 1 wound. 2+: Move RED for free.",
+    "faction": "Zoners",
+    "techId": "gear-stims-zoners"
+  },
+  {
+    "description": "When you Inspire Your Team, roll a RED die. Fumble: This model takes 1 wound. 2+: Move RED for free.",
+    "rangeRed": false,
+    "cost": 5,
+    "rarity": 1,
+    "techId": "gear-stims-universal",
+    "faction": "Universal",
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "reqStreetCred": 4,
+    "keywords": [
+      "Drug"
+    ],
+    "rangeLong": false,
+    "name": "Stims",
+    "rangeGreen": false
+  },
+  {
+    "description": "When you Inspire Your Team, roll a RED die. Fumble: This model takes 1 wound. 2+: Move RED for free.",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 5,
+    "techId": "gear-stims-bozos",
+    "faction": "Bozos",
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "reqStreetCred": 0,
+    "keywords": [
+      "Drug"
+    ],
+    "rangeLong": false,
+    "name": "Stims",
+    "rangeGreen": false
+  },
+  {
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": false,
+    "rangeGreen": false,
+    "name": "Stims",
+    "rangeLong": false,
+    "keywords": [
+      "Drug"
+    ],
+    "reqStreetCred": 4,
+    "cost": 5,
+    "rarity": 1,
+    "rangeRed": false,
+    "description": "When you Inspire Your Team, roll a RED die. Fumble: This model takes 1 wound. 2+: Move RED for free.",
+    "faction": "Edgerunners",
+    "techId": "gear-stims-edgerunners"
+  },
+  {
+    "description": "This model's basic Melee attacks gain Stun 1 Crits.",
+    "cost": 6,
+    "rarity": 2,
+    "rangeRed": false,
+    "faction": "Universal",
+    "techId": "gear-strobe-sticks-universal",
+    "rangeYellow": false,
+    "isGear": true,
+    "isWeapon": true,
+    "rangeLong": false,
+    "keywords": [],
+    "reqStreetCred": 3,
+    "rangeGreen": false,
+    "name": "Strobe Sticks"
+  },
+  {
+    "techId": "gear-subdermal-armor-universal",
+    "name": "Subdermal Armor",
+    "cost": 5,
+    "reqStreetCred": 3,
+    "faction": "Universal",
+    "isWeapon": false,
+    "isGear": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Increase the Armor value of this model by +1 (max +4) If the model has no Armor value on its card, it gains Armor 1.",
+    "rarity": 1,
+    "keywords": [
+      "Cybergear"
+    ]
+  },
+  {
+    "techId": "gear-synthcoke-universal",
+    "name": "Synthcoke",
+    "cost": 4,
+    "reqStreetCred": 3,
+    "faction": "Universal",
+    "isWeapon": false,
+    "isGear": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model suffers a wound, discard this card. For the rest of the game, this model gains +1 to rolls made to Heal wounds.",
+    "rarity": 2,
+    "keywords": [
+      "Drug"
+    ]
+  },
+  {
+    "description": "When this model suffers a wound on a GREEN Action Token, the token is replaced with a YELLOW token instead of a RED token.",
+    "rangeRed": false,
+    "rarity": 1,
+    "cost": 99,
+    "techId": "gear-the-strontium-saddle-universal",
+    "faction": "Universal",
+    "isWeapon": false,
+    "isGear": true,
+    "rangeYellow": false,
+    "reqStreetCred": 0,
+    "keywords": [],
+    "rangeLong": false,
+    "name": "The Strontium Saddle",
+    "rangeGreen": false
+  }
+]

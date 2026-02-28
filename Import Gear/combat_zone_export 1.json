@@ -1,0 +1,319 @@
+[
+  {
+    "description": "This model's Ranged attacks gain Dangerous, Deadly, and Pierce 2.",
+    "isWeapon": false,
+    "rangeGreen": false,
+    "cost": 4,
+    "faction": "Universal",
+    "reqStreetCred": 3,
+    "keywords": [
+      "Dangerous",
+      "Deadly",
+      "Pierce 2"
+    ],
+    "rangeLong": false,
+    "techId": "weapon-api-rounds-universal",
+    "rangeRed": false,
+    "name": "API Rounds",
+    "rarity": 1,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "keywords": [
+      "Stun 2",
+      "Indirect",
+      "Difficult"
+    ],
+    "rangeLong": true,
+    "rangeGreen": false,
+    "isWeapon": true,
+    "description": "[Stun 2, Indirect, Difficult] This model may target any model (friendly or rival) within range.",
+    "reqStreetCred": 6,
+    "faction": "Universal",
+    "cost": 14,
+    "rangeYellow": true,
+    "rarity": 1,
+    "isGear": true,
+    "rangeRed": true,
+    "techId": "weapon-arasaka-nauseator-universal",
+    "name": "Arasaka Nauseator"
+  },
+  {
+    "name": "Arasaka Quickstrike Blade",
+    "rangeRed": true,
+    "techId": "weapon-arasaka-quickstrike-blade-arasaka",
+    "isGear": true,
+    "rarity": 2,
+    "rangeYellow": false,
+    "faction": "Arasaka",
+    "reqStreetCred": 1,
+    "cost": 3,
+    "isWeapon": true,
+    "rangeGreen": false,
+    "description": "Deadly Crits. [RE]actions made using this attack gain Accurate.",
+    "rangeLong": false,
+    "keywords": [
+      "Deadly Crits",
+      "Accurate"
+    ]
+  },
+  {
+    "isWeapon": true,
+    "rangeGreen": false,
+    "description": "Choose one when declaring a target of this attack: Deadly Crits. 1. Pierce 2.",
+    "faction": "Universal",
+    "reqStreetCred": 5,
+    "cost": 6,
+    "keywords": [
+      "Deadly Crits",
+      "Pierce 2"
+    ],
+    "rangeLong": false,
+    "rangeRed": true,
+    "techId": "weapon-arasaka-weeping-reaver-katana-universal",
+    "name": "Arasaka Weeping Reaver Katana",
+    "rarity": 1,
+    "rangeYellow": false,
+    "isGear": true
+  },
+  {
+    "name": "Assault Rifle",
+    "techId": "weapon-assault-rifle-badgerrunners",
+    "rangeRed": true,
+    "isGear": true,
+    "rarity": 1,
+    "rangeYellow": true,
+    "cost": 10,
+    "faction": "Badgerrunners",
+    "reqStreetCred": 4,
+    "description": "Rapid 2 -OR-",
+    "isWeapon": true,
+    "rangeGreen": true,
+    "rangeLong": true,
+    "keywords": [
+      "Rapid 2"
+    ]
+  },
+  {
+    "isGear": true,
+    "rarity": 2,
+    "rangeYellow": true,
+    "name": "Assault Rifle",
+    "techId": "weapon-assault-rifle-universal",
+    "rangeRed": true,
+    "rangeLong": true,
+    "keywords": [
+      "Rapid 2"
+    ],
+    "cost": 10,
+    "faction": "Universal",
+    "reqStreetCred": 4,
+    "description": "Rapid 2 -OR-",
+    "isWeapon": true,
+    "rangeGreen": true
+  },
+  {
+    "name": "Assault Rifle",
+    "rangeRed": true,
+    "techId": "weapon-assault-rifle-lawmen",
+    "isGear": true,
+    "rarity": 2,
+    "rangeYellow": true,
+    "faction": "Lawmen",
+    "reqStreetCred": 4,
+    "cost": 10,
+    "isWeapon": true,
+    "rangeGreen": true,
+    "description": "Rapid 2 -OR-",
+    "rangeLong": true,
+    "keywords": [
+      "Rapid 2"
+    ]
+  },
+  {
+    "rangeLong": true,
+    "keywords": [
+      "Rapid 2"
+    ],
+    "reqStreetCred": 4,
+    "faction": "Zoners",
+    "cost": 10,
+    "rangeGreen": true,
+    "isWeapon": true,
+    "description": "Rapid 2 -OR-",
+    "isGear": true,
+    "rangeYellow": true,
+    "rarity": 1,
+    "name": "Assault Rifle",
+    "rangeRed": true,
+    "techId": "weapon-assault-rifle-zoners"
+  },
+  {
+    "description": "Rapid 2 -OR-",
+    "rangeGreen": true,
+    "isWeapon": true,
+    "cost": 9,
+    "reqStreetCred": 0,
+    "faction": "Arasaka",
+    "keywords": [
+      "Rapid 2"
+    ],
+    "rangeLong": true,
+    "techId": "weapon-assault-rifle-arasaka",
+    "rangeRed": true,
+    "name": "Assault Rifle",
+    "rangeYellow": true,
+    "rarity": 2,
+    "isGear": true
+  },
+  {
+    "keywords": [
+      "Rapid 2"
+    ],
+    "rangeLong": true,
+    "isWeapon": true,
+    "rangeGreen": true,
+    "description": "Rapid 2 -OR-",
+    "faction": "Bozos",
+    "reqStreetCred": 5,
+    "cost": 10,
+    "rarity": 1,
+    "rangeYellow": true,
+    "isGear": true,
+    "rangeRed": true,
+    "techId": "weapon-assault-rifle-bozos",
+    "name": "Assault Rifle"
+  },
+  {
+    "keywords": [
+      "Rapid 2"
+    ],
+    "rangeLong": true,
+    "isWeapon": true,
+    "rangeGreen": true,
+    "description": "Rapid 2 -OR-",
+    "faction": "Maelstrom",
+    "reqStreetCred": 4,
+    "cost": 10,
+    "rarity": 1,
+    "rangeYellow": true,
+    "isGear": true,
+    "rangeRed": true,
+    "techId": "weapon-assault-rifle-maelstrom",
+    "name": "Assault Rifle"
+  },
+  {
+    "techId": "weapon-assault-rifle-generation-red",
+    "rangeRed": true,
+    "name": "Assault Rifle",
+    "rarity": 1,
+    "rangeYellow": true,
+    "isGear": true,
+    "description": "Rapid 2 -OR-",
+    "isWeapon": true,
+    "rangeGreen": true,
+    "cost": 11,
+    "faction": "Generation Red",
+    "reqStreetCred": 5,
+    "keywords": [
+      "Rapid 2"
+    ],
+    "rangeLong": true
+  },
+  {
+    "rangeGreen": true,
+    "isWeapon": true,
+    "description": "Rapid 2 -OR-",
+    "reqStreetCred": 2,
+    "faction": "Danger Gals",
+    "cost": 10,
+    "keywords": [
+      "Rapid 2"
+    ],
+    "rangeLong": true,
+    "rangeRed": true,
+    "techId": "weapon-assault-rifle-danger-gals",
+    "name": "Assault Rifle",
+    "rangeYellow": true,
+    "rarity": 1,
+    "isGear": true
+  },
+  {
+    "rangeRed": true,
+    "techId": "weapon-assault-rifle-tyger-claws",
+    "name": "Assault Rifle",
+    "rarity": 1,
+    "rangeYellow": true,
+    "isGear": true,
+    "isWeapon": true,
+    "rangeGreen": true,
+    "description": "Rapid 2 -OR-",
+    "faction": "Tyger Claws",
+    "reqStreetCred": 4,
+    "cost": 10,
+    "keywords": [
+      "Rapid 2"
+    ],
+    "rangeLong": true
+  },
+  {
+    "techId": "weapon-assertive-badge-lawmen",
+    "rangeRed": false,
+    "name": "Assertive Badge",
+    "rangeYellow": false,
+    "rarity": 1,
+    "isGear": true,
+    "description": "Iconic: Maximum Mike. Pull Rank may target models of any faction and at Long Range.",
+    "rangeGreen": false,
+    "isWeapon": false,
+    "cost": 2,
+    "reqStreetCred": 0,
+    "faction": "Lawmen",
+    "keywords": [
+      "Iconic",
+      "Maximum Mike",
+      "Pull Rank",
+      "Long Range"
+    ],
+    "rangeLong": false
+  },
+  {
+    "techId": "weapon-authorized-drone-strike-generation-red",
+    "name": "Authorized Drone Strike",
+    "cost": 2,
+    "reqStreetCred": 1,
+    "faction": "Generation Red",
+    "isWeapon": false,
+    "isGear": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Discard. Place up to two Impact tokens in base contact with up to two visible models. All models within RED of an Impact token win a Reflexes roll vs. the Obstacle die or suffer a wound. The Obstacle die gains a bonus equal to this model's Tech Skill.",
+    "rarity": 2,
+    "keywords": [
+      "Discard",
+      "Impact tokens",
+      "Reflexes roll"
+    ]
+  },
+  {
+    "techId": "weapon-autoblade-universal",
+    "name": "Autoblade",
+    "cost": 2,
+    "reqStreetCred": 1,
+    "faction": "Universal",
+    "isWeapon": true,
+    "isGear": true,
+    "rangeRed": true,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "On a Crit, this model may attack with this weapon again for free (you may choose a different target).",
+    "rarity": 2,
+    "keywords": [
+      "Crit"
+    ]
+  }
+]
