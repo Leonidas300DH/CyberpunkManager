@@ -73,7 +73,7 @@ export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCr
     return (
         <div className="relative group/tile bg-surface-dark border border-border hover:border-secondary transition-all overflow-hidden flex">
             <img
-                src={getWeaponImageUrl(weapon.id)}
+                src={getWeaponImageUrl(weapon.id, weapon.imageUrl)}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

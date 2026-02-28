@@ -261,8 +261,9 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
         const ids = weaponIds.split(',').filter(Boolean);
         if (ids.length === 0) return;
         let cancelled = false;
+        const weaponMap = new Map(weapons.map(w => [w.id, w]));
         Promise.all(ids.map(id =>
-            fetch(getWeaponImageUrl(id), { method: 'HEAD' })
+            fetch(getWeaponImageUrl(id, weaponMap.get(id)?.imageUrl), { method: 'HEAD' })
                 .then(res => res.ok ? null : id)
                 .catch(() => id)
         )).then(results => {
@@ -965,7 +966,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                         const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
                         return (
                             <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
-                                <img src={getWeaponImageUrl(weapon.id)} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                                <img src={getWeaponImageUrl(weapon.id, weapon.imageUrl)} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     style={{ opacity: 0.55, transform: weapon.imageFlipY ? 'scaleY(-1)' : undefined, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
                                 {chevron === 'expand' && (

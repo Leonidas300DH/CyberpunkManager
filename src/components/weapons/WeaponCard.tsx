@@ -150,7 +150,7 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
     const { cardRef, textRef, fontSize } = useAutoFontSize([weapon.id, variant.factionId]);
     const { nameRef, nameSize } = useAutoNameSize(weapon.name);
 
-    const weaponImgUrl = getWeaponImageUrl(weapon.id);
+    const weaponImgUrl = getWeaponImageUrl(weapon.id, weapon.imageUrl);
     const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
     const showRange2 = weapon.range2Red || weapon.range2Yellow || weapon.range2Green || weapon.range2Long;
     const skillIcon = weapon.skillReq ? SKILL_ICONS[weapon.skillReq] ?? null : null;

@@ -5,11 +5,12 @@ const WEAPON_IMG_BASE = 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/obj
 const WEAPON_IMG_DEFAULT = `${WEAPON_IMG_BASE}/default.png`;
 
 /**
- * Deterministic weapon image URL derived from weapon ID.
- * weapon-frag-grenade → weapon-images/frag-grenade.png
+ * Weapon image URL — uses stored imageUrl when available,
+ * otherwise derives deterministically from weapon ID.
  * Falls back to default.png if no custom image exists (handled by onError on <img>).
  */
-export function getWeaponImageUrl(weaponId: string): string {
+export function getWeaponImageUrl(weaponId: string, imageUrl?: string): string {
+    if (imageUrl && imageUrl !== WEAPON_IMG_DEFAULT) return imageUrl;
     const slug = weaponId.replace(/^weapon-/, '');
     return `${WEAPON_IMG_BASE}/${slug}.png`;
 }
