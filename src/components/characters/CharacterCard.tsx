@@ -20,8 +20,21 @@ const FACTION_RAIL_COLORS: Record<string, { dark: string; mid: string; light: st
     'faction-tyger-claws': { dark: '#003a3a', mid: '#22d3ee', light: '#a5f3fc' },
     'faction-zoners':      { dark: '#3a1a00', mid: '#f97316', light: '#fdba74' },
     'faction-6th-street':  { dark: '#3a2a00', mid: '#f59e0b', light: '#fcd34d' },
+    'faction-max-tac':     { dark: '#000d1a', mid: '#1d4ed8', light: '#3b82f6' },
+    'faction-piranhas':    { dark: '#3a1a00', mid: '#f97316', light: '#fdba74' },
+    'faction-militech':    { dark: '#1a2a1a', mid: '#4ade80', light: '#86efac' },
+    'faction-wild-things': { dark: '#2a1a00', mid: '#d97706', light: '#fbbf24' },
 };
 const DEFAULT_RAIL = { dark: '#1a1a1a', mid: '#8a8a8a', light: '#e0e0e0' };
+
+// ── Faction display names for multi-faction rail labels ──
+const FACTION_DISPLAY_NAMES: Record<string, string> = {
+    'faction-arasaka': 'Arasaka', 'faction-bozos': 'Bozos', 'faction-danger-gals': 'Danger Gals',
+    'faction-edgerunners': 'Edgerunners', 'faction-gen-red': 'Gen Red', 'faction-lawmen': 'Lawmen',
+    'faction-maelstrom': 'Maelstrom', 'faction-max-tac': 'Max-Tac', 'faction-militech': 'Militech',
+    'faction-piranhas': 'Piranhas', 'faction-trauma-team': 'Trauma Team', 'faction-tyger-claws': 'Tyger Claws',
+    'faction-wild-things': 'Wild Things', 'faction-zoners': 'Zoners', 'faction-6th-street': '6th Street',
+};
 
 // ── Color words ──
 const COLOR_WORDS: Record<string, string> = {
@@ -348,8 +361,16 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
         : lineage.factionIds[0];
     const rail = FACTION_RAIL_COLORS[railFactionId] ?? DEFAULT_RAIL;
 
-    // Archetype label: first keyword or lineage type
-    const archetype = profile.keywords[0] || lineage.type;
+    // Archetype label: all keywords, active faction keyword first
+    const archetype = (() => {
+        const kws = [...profile.keywords];
+        const activeName = FACTION_DISPLAY_NAMES[railFactionId];
+        if (activeName) {
+            const idx = kws.indexOf(activeName);
+            if (idx > 0) { kws.splice(idx, 1); kws.unshift(activeName); }
+        }
+        return kws.join(', ') || lineage.type;
+    })();
 
     // Build action token list
     const tokens: Array<'green' | 'yellow' | 'red'> = [];

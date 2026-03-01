@@ -136,6 +136,8 @@ const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-6th-street':  'border-amber-500',
     'faction-max-tac':     'border-indigo-400',
     'faction-militech':    'border-lime-500',
+    'faction-piranhas':    'border-teal-400',
+    'faction-wild-things': 'border-rose-500',
 };
 
 export function ModelsTab() {
@@ -188,11 +190,15 @@ export function ModelsTab() {
             || (imageFilter === 'custom' && l.isDefaultImage === false);
         return matchSearch && matchType && matchFaction && matchSource && matchImage;
     }).sort((a, b) => {
-        // 1. Faction alphabétique
+        // 1. When filtering: native (single-faction) first, then multi-faction guests
+        if (factionFilter !== 'all') {
+            if (a.factionIds.length !== b.factionIds.length) return a.factionIds.length - b.factionIds.length;
+        }
+        // 2. Faction alphabétique
         const fA = factionNameMap[a.factionIds[0]] ?? '';
         const fB = factionNameMap[b.factionIds[0]] ?? '';
         if (fA !== fB) return fA.localeCompare(fB);
-        // 2. Leaders first, then non-Gonk, then Gonk
+        // 3. Leaders first, then non-Gonk, then Gonk
         const typeOrder = (t: string) => t === 'Leader' ? 0 : t === 'Gonk' ? 2 : 1;
         const tA = typeOrder(a.type);
         const tB = typeOrder(b.type);
