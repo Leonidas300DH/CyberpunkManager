@@ -27,13 +27,13 @@ const FACTION_RAIL_COLORS: Record<string, { dark: string; mid: string; light: st
 };
 const DEFAULT_RAIL = { dark: '#1a1a1a', mid: '#8a8a8a', light: '#e0e0e0' };
 
-// ── Faction display names for multi-faction rail labels ──
+// ── Faction keyword names (must match actual profile keywords for reordering) ──
 const FACTION_DISPLAY_NAMES: Record<string, string> = {
-    'faction-arasaka': 'Arasaka', 'faction-bozos': 'Bozos', 'faction-danger-gals': 'Danger Gals',
-    'faction-edgerunners': 'Edgerunners', 'faction-gen-red': 'Gen Red', 'faction-lawmen': 'Lawmen',
+    'faction-arasaka': 'Arasaka', 'faction-bozos': 'Bozo', 'faction-danger-gals': 'Danger Gal',
+    'faction-edgerunners': 'Edgerunner', 'faction-gen-red': 'Gen Red', 'faction-lawmen': 'Lawman',
     'faction-maelstrom': 'Maelstrom', 'faction-max-tac': 'Max-Tac', 'faction-militech': 'Militech',
-    'faction-piranhas': 'Piranhas', 'faction-trauma-team': 'Trauma Team', 'faction-tyger-claws': 'Tyger Claws',
-    'faction-wild-things': 'Wild Things', 'faction-zoners': 'Zoners', 'faction-6th-street': '6th Street',
+    'faction-piranhas': 'Piranha', 'faction-trauma-team': 'Trauma Team', 'faction-tyger-claws': 'Tyger Claw',
+    'faction-wild-things': 'Wild Thing', 'faction-zoners': 'Zoner', 'faction-6th-street': '6th Street',
 };
 
 // ── Color words ──

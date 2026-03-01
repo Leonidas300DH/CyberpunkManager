@@ -38,6 +38,8 @@ const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-6th-street': 'border-amber-500',
     'faction-max-tac':    'border-indigo-400',
     'faction-militech':   'border-lime-500',
+    'faction-piranhas':   'border-teal-400',
+    'faction-wild-things':'border-rose-500',
     'all': 'border-gray-500',
     'universal': 'border-gray-500',
 };
@@ -56,6 +58,8 @@ const FACTION_TEXT_COLOR_MAP: Record<string, string> = {
     'faction-6th-street': 'text-amber-500',
     'faction-max-tac':    'text-indigo-400',
     'faction-militech':   'text-lime-500',
+    'faction-piranhas':   'text-teal-400',
+    'faction-wild-things':'text-rose-500',
     'all': 'text-gray-500',
     'universal': 'text-gray-500',
 };

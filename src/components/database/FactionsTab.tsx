@@ -29,6 +29,8 @@ const FACTION_COLOR_MAP: Record<string, { border: string; bg: string }> = {
     'faction-6th-street': { border: 'border-amber-500',  bg: 'bg-amber-500' },
     'faction-max-tac':    { border: 'border-indigo-400', bg: 'bg-indigo-400' },
     'faction-militech':   { border: 'border-lime-500',   bg: 'bg-lime-500' },
+    'faction-piranhas':   { border: 'border-teal-400',   bg: 'bg-teal-400' },
+    'faction-wild-things':{ border: 'border-rose-500',   bg: 'bg-rose-500' },
 };
 const DEFAULT_FACTION_COLOR = { border: 'border-gray-500', bg: 'bg-gray-500' };
 
@@ -45,6 +47,7 @@ const BASE_FACTION_IDS = new Set([
     'faction-arasaka', 'faction-bozos', 'faction-danger-gals', 'faction-edgerunners',
     'faction-gen-red', 'faction-lawmen', 'faction-maelstrom', 'faction-trauma-team',
     'faction-tyger-claws', 'faction-zoners', 'faction-6th-street',
+    'faction-piranhas', 'faction-wild-things',
 ]);
 
 export function FactionsTab() {

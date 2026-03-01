@@ -199,6 +199,8 @@ const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-6th-street': 'border-amber-500',
     'faction-max-tac':    'border-indigo-400',
     'faction-militech':   'border-lime-500',
+    'faction-piranhas':   'border-teal-400',
+    'faction-wild-things':'border-rose-500',
     'all': 'border-gray-500',
 };
 
