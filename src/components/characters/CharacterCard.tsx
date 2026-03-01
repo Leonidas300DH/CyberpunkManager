@@ -332,16 +332,21 @@ interface CharacterCardProps {
     onDelete?: () => void;
     /** Catalog weapons for weapon-linked action rendering */
     catalogWeapons?: Weapon[];
+    /** Override faction color for multi-faction lineages (e.g. when filtered by or playing as a specific faction) */
+    activeFactionId?: string;
 }
 
-export function CharacterCard({ lineage, profile, hideTokens = false, enableGlitch = false, glitchDamage = 0, isKIA = false, triggerGlitch = 0, isAdmin = false, onEdit, onDelete, catalogWeapons }: CharacterCardProps) {
+export function CharacterCard({ lineage, profile, hideTokens = false, enableGlitch = false, glitchDamage = 0, isKIA = false, triggerGlitch = 0, isAdmin = false, onEdit, onDelete, catalogWeapons, activeFactionId }: CharacterCardProps) {
 
     // Weapon lookup for weapon-linked actions
     const resolveWeapon = (weaponId?: string): Weapon | undefined =>
         weaponId ? (catalogWeapons ?? []).find(w => w.id === weaponId) : undefined;
 
-    // Faction rail color
-    const rail = FACTION_RAIL_COLORS[lineage.factionIds[0]] ?? DEFAULT_RAIL;
+    // Faction rail color — use activeFactionId if provided and valid for this lineage
+    const railFactionId = activeFactionId && lineage.factionIds.includes(activeFactionId)
+        ? activeFactionId
+        : lineage.factionIds[0];
+    const rail = FACTION_RAIL_COLORS[railFactionId] ?? DEFAULT_RAIL;
 
     // Archetype label: first keyword or lineage type
     const archetype = profile.keywords[0] || lineage.type;

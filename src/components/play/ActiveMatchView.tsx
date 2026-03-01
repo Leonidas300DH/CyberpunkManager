@@ -510,7 +510,7 @@ export function ActiveMatchView() {
             if (!profile || !lineage) return null;
             return (
                 <div className="opacity-80 pointer-events-none" style={{ width: `${100 / cardColumns}vw`, maxWidth: '250px' }}>
-                    <CharacterCard lineage={lineage} profile={profile} hideTokens catalogWeapons={catalog.weapons} />
+                    <CharacterCard lineage={lineage} profile={profile} hideTokens catalogWeapons={catalog.weapons} activeFactionId={campaign?.factionId} />
                 </div>
             );
         }
@@ -798,7 +798,7 @@ export function ActiveMatchView() {
                                                 ? 'border-2 border-border opacity-50 saturate-0'
                                                 : 'border-2 border-transparent'
                             }`}>
-                                <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} enableGlitch={enableGlitch} glitchDamage={getDamageRatio(tokens)} isKIA={dead} triggerGlitch={glitchTriggers[recruit.id] ?? 0} catalogWeapons={catalog.weapons} />
+                                <CharacterCard lineage={lineage} profile={profile} hideTokens={!isGonk} enableGlitch={enableGlitch} glitchDamage={getDamageRatio(tokens)} isKIA={dead} triggerGlitch={glitchTriggers[recruit.id] ?? 0} catalogWeapons={catalog.weapons} activeFactionId={campaign?.factionId} />
                             </div>
 
                             {/* KIA overlay */}

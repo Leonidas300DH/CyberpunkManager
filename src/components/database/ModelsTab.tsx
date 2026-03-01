@@ -140,7 +140,7 @@ export function ModelsTab() {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
-    const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, saveTierSurcharges } = useCatalog();
+    const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, deleteProfile: deleteProfileDb, saveTierSurcharges } = useCatalog();
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState<ModelLineage['type'] | 'all'>('all');
     const [factionFilter, setFactionFilter] = useState<string | 'all'>('all');
@@ -264,6 +264,19 @@ export function ModelsTab() {
         };
         setCatalog(updatedCatalog);
         if (isAdmin) deleteLineageDb(lineageId);
+    };
+
+    const deleteTier = (profile: ModelProfile) => {
+        const lineage = catalog.lineages.find(l => l.id === profile.lineageId);
+        const label = profile.level === 1 ? 'Veteran' : 'Elite';
+        if (!lineage || !window.confirm(`Delete ${label} tier of "${lineage.name}"?`)) return;
+
+        const updatedCatalog = {
+            ...catalog,
+            profiles: catalog.profiles.filter(p => p.id !== profile.id),
+        };
+        setCatalog(updatedCatalog);
+        if (isAdmin) deleteProfileDb(profile.id);
     };
 
     // ── Tier creation ──
@@ -501,6 +514,7 @@ export function ModelsTab() {
                                         onEdit={() => openEdit(lineage, baseProfile)}
                                         onDelete={() => deleteCharacter(lineage.id)}
                                         catalogWeapons={catalog.weapons}
+                                        activeFactionId={factionFilter !== 'all' ? factionFilter : undefined}
                                     />
                                     <button
                                         onClick={() => toggleExpanded(lineage.id)}
@@ -523,8 +537,9 @@ export function ModelsTab() {
                                     profile={profile}
                                     isAdmin={isAdmin}
                                     onEdit={() => openEdit(lineage, profile)}
-                                    onDelete={() => deleteCharacter(lineage.id)}
+                                    onDelete={profile.level > 0 ? () => deleteTier(profile) : () => deleteCharacter(lineage.id)}
                                     catalogWeapons={catalog.weapons}
+                                    activeFactionId={factionFilter !== 'all' ? factionFilter : undefined}
                                 />
                                 {hasTiers && (
                                     <div className="flex items-center justify-center gap-2 mt-1">

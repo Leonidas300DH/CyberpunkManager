@@ -306,7 +306,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     return (
                         <div className="opacity-80 pointer-events-none" style={cardStyle}>
                             <div className="border-2 border-primary shadow-[0_0_20px_rgba(252,238,10,0.4)]">
-                                <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
+                                <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                             </div>
                         </div>
                     );
@@ -477,7 +477,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                         </button>
                                                         <div className="absolute -left-1 top-0 bottom-0 w-2 bg-primary z-10 glow-primary" />
                                                         <div className="border-2 border-primary">
-                                                            <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
+                                                            <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                                         </div>
                                                         {profile.level > 0 && (
                                                             <div className="text-center mt-0.5">
@@ -670,7 +670,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                 className="cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
                                                 onClick={() => toggleSelection(recruit.id)}
                                             >
-                                                <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
+                                                <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                             </div>
                                         </div>
                                     );

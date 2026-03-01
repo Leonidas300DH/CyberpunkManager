@@ -155,7 +155,7 @@ export function RosterList({ campaign }: RosterListProps) {
 
                             return (
                                 <div key={recruit.id} className="relative group/card" style={cardStyle}>
-                                    <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
+                                    <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                     {/* Dismiss button — top right overlay */}
                                     <button
                                         onClick={() => handleDismiss(recruit.id)}
@@ -248,7 +248,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                         return (
                                             <div key={profile.id} className="relative group/card" style={cardStyle}>
                                                 <div className={`w-full ${disabled ? 'opacity-35 saturate-50' : ''} transition-all`}>
-                                                    <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
+                                                    <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                                 </div>
                                                 <div className="text-center mt-1">
                                                     <span className={`font-mono-tech text-[10px] uppercase ${profile.level === 0 ? 'text-muted-foreground' : profile.level === 1 ? 'text-primary' : 'text-accent'}`}>
@@ -352,7 +352,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                         return (
                                             <div key={profile.id} className="relative group/card" style={cardStyle}>
                                                 <div className={`w-full ${disabled ? 'opacity-35 saturate-50' : ''} transition-all`}>
-                                                    <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} />
+                                                    <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                                 </div>
                                                 <div className="text-center mt-1">
                                                     <span className={`font-mono-tech text-[10px] uppercase ${profile.level === 0 ? 'text-muted-foreground' : profile.level === 1 ? 'text-primary' : 'text-accent'}`}>
