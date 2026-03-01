@@ -27,6 +27,8 @@ const FACTION_COLOR_MAP: Record<string, { border: string; bg: string }> = {
     'faction-tyger-claws':{ border: 'border-cyan-400',   bg: 'bg-cyan-400' },
     'faction-zoners':     { border: 'border-orange-500', bg: 'bg-orange-500' },
     'faction-6th-street': { border: 'border-amber-500',  bg: 'bg-amber-500' },
+    'faction-max-tac':    { border: 'border-indigo-400', bg: 'bg-indigo-400' },
+    'faction-militech':   { border: 'border-lime-500',   bg: 'bg-lime-500' },
 };
 const DEFAULT_FACTION_COLOR = { border: 'border-gray-500', bg: 'bg-gray-500' };
 

@@ -197,6 +197,8 @@ const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-tyger-claws': 'border-cyan-400',
     'faction-zoners': 'border-orange-500',
     'faction-6th-street': 'border-amber-500',
+    'faction-max-tac':    'border-indigo-400',
+    'faction-militech':   'border-lime-500',
     'all': 'border-gray-500',
 };
 

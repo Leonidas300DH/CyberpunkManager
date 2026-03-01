@@ -18,6 +18,8 @@ const FACTION_COLORS: Record<string, { border: string; text: string; bg: string;
     'faction-tyger-claws':{ border: 'border-cyan-400',    text: 'text-cyan-400',    bg: 'bg-cyan-400',    glow: 'shadow-[0_0_20px_rgba(34,211,238,0.4)]' },
     'faction-zoners':     { border: 'border-orange-500',  text: 'text-orange-400',  bg: 'bg-orange-500',  glow: 'shadow-[0_0_20px_rgba(249,115,22,0.4)]' },
     'faction-6th-street': { border: 'border-amber-500',   text: 'text-amber-400',   bg: 'bg-amber-500',   glow: 'shadow-[0_0_20px_rgba(245,158,11,0.4)]' },
+    'faction-max-tac':    { border: 'border-indigo-400',  text: 'text-indigo-400',  bg: 'bg-indigo-400',  glow: 'shadow-[0_0_20px_rgba(129,140,248,0.4)]' },
+    'faction-militech':   { border: 'border-lime-500',    text: 'text-lime-400',    bg: 'bg-lime-500',    glow: 'shadow-[0_0_20px_rgba(132,204,22,0.4)]' },
 };
 const DEFAULT_FC = { border: 'border-primary', text: 'text-primary', bg: 'bg-primary', glow: 'glow-primary' };
 
