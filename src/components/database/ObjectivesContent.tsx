@@ -58,6 +58,7 @@ const FACTION_TEXT_MAP: Record<string, string> = {
     'faction-tyger-claws': 'text-black',
     'faction-6th-street': 'text-black',
     'faction-militech': 'text-black',
+    'faction-edgerunners': 'text-black',
     'faction-piranhas': 'text-black',
     'deck-street-justice': 'text-black',
 };
