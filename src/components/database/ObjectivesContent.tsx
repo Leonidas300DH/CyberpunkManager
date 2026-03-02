@@ -205,8 +205,11 @@ function ObjectiveCard({ objective, isAdmin, onEdit, onDelete }: ObjectiveCardPr
                             Reward
                         </span>
                         {!placeholder && (
-                            <span className={`text-[8px] font-mono-tech font-bold uppercase px-1.5 py-px rounded-sm cursor-help ${badge.cls}`} title={badge.tooltip}>
+                            <span className={`relative text-[8px] font-mono-tech font-bold uppercase px-1.5 py-px rounded-sm cursor-help group/tip ${badge.cls}`}>
                                 {badge.label}
+                                <span className="pointer-events-none absolute left-0 top-full mt-1 z-40 w-48 px-2 py-1.5 rounded bg-black/95 border border-border text-[10px] font-mono-tech font-normal normal-case tracking-normal text-gray-200 leading-snug opacity-0 group-hover/tip:opacity-100 transition-opacity">
+                                    {badge.tooltip}
+                                </span>
                             </span>
                         )}
                     </div>
