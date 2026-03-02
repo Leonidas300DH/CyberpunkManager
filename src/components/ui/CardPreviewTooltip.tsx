@@ -8,10 +8,9 @@ interface CardPreviewTooltipProps {
     renderCard: () => React.ReactNode;
 }
 
-const CARD_W = 400;
-const SCALE = 0.45;
-const VISUAL_W = CARD_W * SCALE;   // ~180
-const VISUAL_H = CARD_W * (3.5 / 2.5) * SCALE; // ~252
+// Full-size card: same width as database grid cards (~280px → ~392px tall)
+const CARD_W = 280;
+const CARD_H = CARD_W * (3.5 / 2.5); // ~392
 
 export function CardPreviewTooltip({ children, renderCard }: CardPreviewTooltipProps) {
     const [show, setShow] = useState(false);
@@ -22,10 +21,10 @@ export function CardPreviewTooltip({ children, renderCard }: CardPreviewTooltipP
     const updatePos = useCallback(() => {
         if (!ref.current) return;
         const rect = ref.current.getBoundingClientRect();
-        const showBelow = rect.top < VISUAL_H + 20;
+        const showBelow = rect.top < CARD_H + 20;
         setPos({
             top: showBelow ? rect.bottom + 8 : rect.top - 8,
-            left: Math.min(Math.max(rect.left + rect.width / 2, VISUAL_W / 2 + 8), window.innerWidth - VISUAL_W / 2 - 8),
+            left: Math.min(Math.max(rect.left + rect.width / 2, CARD_W / 2 + 8), window.innerWidth - CARD_W / 2 - 8),
             showBelow,
         });
     }, []);
@@ -72,20 +71,12 @@ export function CardPreviewTooltip({ children, renderCard }: CardPreviewTooltipP
                         transform: pos.showBelow
                             ? 'translate(-50%, 0)'
                             : 'translate(-50%, -100%)',
-                        width: VISUAL_W,
-                        height: VISUAL_H,
-                        overflow: 'hidden',
+                        width: CARD_W,
                         borderRadius: 2,
                         boxShadow: '0 0 20px rgba(252,238,10,0.15), 0 4px 30px rgba(0,0,0,0.8)',
                     }}
                 >
-                    <div style={{
-                        width: CARD_W,
-                        transformOrigin: 'top left',
-                        transform: `scale(${SCALE})`,
-                    }}>
-                        {renderCard()}
-                    </div>
+                    {renderCard()}
                 </div>,
                 document.body,
             )}
