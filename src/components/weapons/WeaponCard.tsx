@@ -117,7 +117,7 @@ function useAutoFontSize(deps: unknown[]) {
 }
 
 // --- Faction → sidebar hex color ---
-const FACTION_SIDEBAR_COLOR: Record<string, string> = {
+export const FACTION_SIDEBAR_COLOR: Record<string, string> = {
     'universal': '#666666',
     'faction-arasaka': '#dc2626',
     'faction-bozos': '#a855f7',

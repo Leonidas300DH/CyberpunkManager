@@ -3,6 +3,7 @@
 import { Weapon } from '@/types';
 import { resolveVariant, getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 import { formatCardText } from '@/lib/formatCardText';
+import { FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
 
 const OFF = 'rgba(100,100,100,0.35)';
 const OFF_STROKE = 'rgba(255,255,255,0.3)';
@@ -84,7 +85,7 @@ export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCr
                     maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)',
                 }}
             />
-            <div className={`relative z-10 w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
+            <div className="relative z-10 w-8 shrink-0 self-stretch flex flex-col items-center justify-center py-1 gap-0.5" style={{ backgroundColor: FACTION_SIDEBAR_COLOR[variantFactionId ?? 'universal'] ?? '#666666' }}>
                 <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
                 <div className="font-mono-tech text-[8px] text-black/70 font-bold">EB</div>
                 {showRarity && (

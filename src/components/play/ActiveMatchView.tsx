@@ -13,6 +13,7 @@ import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { ProgramCard } from '@/components/programs/ProgramCard';
+import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import {
     DndContext,
     DragOverlay,
@@ -1039,7 +1040,9 @@ export function ActiveMatchView() {
                                                         </div>
                                                     )
                                                 ) : programView === 'list' ? (
-                                                    <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
+                                                    <CardPreviewTooltip renderCard={() => <ProgramCard program={item.program} side="front" />}>
+                                                        <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
+                                                    </CardPreviewTooltip>
                                                 ) : (
                                                     <div className="relative">
                                                         <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
@@ -1123,7 +1126,9 @@ export function ActiveMatchView() {
                                                                         </div>
                                                                     )
                                                                 ) : programView === 'list' ? (
-                                                                    <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
+                                                                    <CardPreviewTooltip renderCard={() => <ProgramCard program={item.program} side="front" />}>
+                                                                        <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
+                                                                    </CardPreviewTooltip>
                                                                 ) : (
                                                                     <div className="relative">
                                                                         <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>

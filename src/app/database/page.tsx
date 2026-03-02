@@ -202,7 +202,7 @@ export default function DatabasePage() {
                             <button
                                 ref={filtersBtnRef}
                                 onClick={() => { setFiltersOpen(v => !v); setViewsOpen(false); }}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all ${
+                                className={`flex items-center justify-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all md:min-w-[100px] ${
                                     filtersOpen ? 'border-secondary text-secondary bg-secondary/10' : 'border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary'
                                 }`}
                                 title="Filters"
@@ -306,7 +306,7 @@ export default function DatabasePage() {
                             <button
                                 ref={viewsBtnRef}
                                 onClick={() => { setViewsOpen(v => !v); setFiltersOpen(false); }}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all ${
+                                className={`flex items-center justify-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all md:min-w-[100px] ${
                                     viewsOpen ? 'border-secondary text-secondary bg-secondary/10' : 'border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary'
                                 }`}
                                 title="View mode"

@@ -4,7 +4,8 @@ import { useState, useRef, useLayoutEffect, useEffect, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
-import { WeaponCard } from '@/components/weapons/WeaponCard';
+import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
+import { WeaponCard, FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
 import { formatCardText } from '@/lib/formatCardText';
 import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -560,33 +561,34 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                             const factionName = getFactionName(prog.factionId);
                             const fColor = FACTION_COLOR_MAP[prog.factionId] ?? 'border-gray-500';
                             return (
-                                <div
-                                    key={prog.id}
-                                    data-card-id={prog.id}
-                                    style={cardStyle}
-                                    className={`group relative text-left bg-surface-dark border border-border hover:${qs.border} transition-all duration-200 overflow-hidden`}
-                                >
-                                    {prog.imageUrl && (
-                                        <img src={prog.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                                            style={{ opacity: 0.5, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 100%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 100%)' }} />
-                                    )}
-                                    <div className={`relative z-10 h-1 w-full ${fColor.replace('border-', 'bg-')}`} />
-                                    <div className="relative z-10 flex">
-                                        <div className={`w-8 shrink-0 ${qs.bg} flex flex-col items-center justify-center py-1 relative`}>
-                                            <div className="font-display font-black text-sm text-black leading-none">{prog.costEB}</div>
-                                            <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
+                                <CardPreviewTooltip key={prog.id} renderCard={() => <ProgramCard program={prog} side="front" />}>
+                                    <div
+                                        data-card-id={prog.id}
+                                        style={cardStyle}
+                                        className={`group relative text-left bg-surface-dark border border-border hover:${qs.border} transition-all duration-200 overflow-hidden`}
+                                    >
+                                        {prog.imageUrl && (
+                                            <img src={prog.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                                                style={{ opacity: 0.5, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 100%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 100%)' }} />
+                                        )}
+                                        <div className={`relative z-10 h-1 w-full ${fColor.replace('border-', 'bg-')}`} />
+                                        <div className="relative z-10 flex">
+                                            <div className={`w-8 shrink-0 ${qs.bg} flex flex-col items-center justify-center py-1 relative`}>
+                                                <div className="font-display font-black text-sm text-black leading-none">{prog.costEB}</div>
+                                                <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
+                                            </div>
+                                            <div className="flex-1 px-3 py-2 flex flex-col min-h-[100px]">
+                                                <h3 className={`font-display font-bold text-base uppercase leading-tight ${qs.text} group-hover:text-white transition-colors`}>{prog.name}</h3>
+                                                <span className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider">{factionName}</span>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 px-3 py-2 flex flex-col min-h-[100px]">
-                                            <h3 className={`font-display font-bold text-base uppercase leading-tight ${qs.text} group-hover:text-white transition-colors`}>{prog.name}</h3>
-                                            <span className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider">{factionName}</span>
-                                        </div>
+                                        {isAdmin && (
+                                            <button onClick={(e) => { e.stopPropagation(); openProgramEdit(prog); }} className="absolute top-2 right-2 z-20 p-1 bg-black/70 text-muted-foreground hover:text-primary transition-colors" title="Edit program">
+                                                <Edit className="w-3.5 h-3.5" />
+                                            </button>
+                                        )}
                                     </div>
-                                    {isAdmin && (
-                                        <button onClick={(e) => { e.stopPropagation(); openProgramEdit(prog); }} className="absolute top-2 right-2 z-20 p-1 bg-black/70 text-muted-foreground hover:text-primary transition-colors" title="Edit program">
-                                            <Edit className="w-3.5 h-3.5" />
-                                        </button>
-                                    )}
-                                </div>
+                                </CardPreviewTooltip>
                             );
                         })}
                     </div>
@@ -898,7 +900,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                     </button>
                                 )}
                                 <div className="relative z-10 flex flex-1">
-                                    <div className={`w-8 shrink-0 self-stretch ${weapon.isWeapon ? 'bg-secondary' : 'bg-cyan-600'} flex flex-col items-center justify-center py-1 gap-0.5`}>
+                                    <div className="w-8 shrink-0 self-stretch flex flex-col items-center justify-center py-1 gap-0.5" style={{ backgroundColor: FACTION_SIDEBAR_COLOR[variant.factionId] ?? '#666666' }}>
                                         <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
                                         <div className="font-mono-tech text-[8px] text-black/70 font-bold">EB</div>
                                         {variant.rarity < 99 && (
