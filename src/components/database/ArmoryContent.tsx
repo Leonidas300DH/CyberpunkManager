@@ -225,6 +225,28 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
         setFlippedCards(new Set());
     }, [viewMode]);
 
+    // Trigger create from parent toolbar (must be above any early returns to satisfy hooks rules)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        if (triggerCreate > 0) {
+            if (activeTab === 'Weapon' || activeTab === 'Gear') {
+                setEditingWeapon(null);
+                setWeaponForm({ ...EMPTY_WEAPON, isWeapon: activeTab === 'Weapon', isGear: activeTab === 'Gear' });
+                setVariantRows([{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }]);
+                setWeaponDialogOpen(true);
+            } else if (activeTab === 'Program') {
+                setEditingProgram(null);
+                setProgramForm({
+                    name: '', factionId: factionFilter !== 'all' ? factionFilter : 'all', costEB: 0, reqStreetCred: 0, rarity: 99,
+                    imageUrl: '', quality: 'Green', range: 'Red', techTest: false, flavorText: '', loadedText: '',
+                    vulnerable: false, runningEffect: '', reloadCondition: 'Manual',
+                });
+                setProgramDialogOpen(true);
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [triggerCreate]);
+
     const tab = TAB_STYLES[activeTab] ?? TAB_STYLES.Gear;
     const programs = catalog.programs ?? [];
 
@@ -448,15 +470,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
         setProgramForm({});
     };
 
-    // Trigger create from parent toolbar
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => {
-        if (triggerCreate > 0) {
-            if (activeTab === 'Weapon' || activeTab === 'Gear') openWeaponCreate();
-            else if (activeTab === 'Program') openProgramCreate();
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [triggerCreate]);
+    // (triggerCreate effect moved above selectedProgram guard to avoid hooks-order violation)
 
     const saveWeapon = () => {
         const currentWeapons = catalog.weapons ?? [];
@@ -546,10 +560,9 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                             const factionName = getFactionName(prog.factionId);
                             const fColor = FACTION_COLOR_MAP[prog.factionId] ?? 'border-gray-500';
                             return (
-                                <button
+                                <div
                                     key={prog.id}
                                     data-card-id={prog.id}
-                                    onClick={() => setSelectedProgram(prog)}
                                     style={cardStyle}
                                     className={`group relative text-left bg-surface-dark border border-border hover:${qs.border} transition-all duration-200 overflow-hidden`}
                                 >
@@ -573,7 +586,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                             <Edit className="w-3.5 h-3.5" />
                                         </button>
                                     )}
-                                </button>
+                                </div>
                             );
                         })}
                     </div>
