@@ -169,32 +169,34 @@ export default function DatabasePage() {
                 </div>
 
                 {/* Unified Toolbar */}
-                <div className="flex items-center gap-2 shrink-0 pt-3">
-                    {/* Search */}
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={SEARCH_PLACEHOLDER[activeTab]}
-                            className="bg-black border border-border pl-8 pr-3 py-1.5 font-mono-tech text-xs text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-44 md:w-56"
-                        />
-                    </div>
+                <div className="flex flex-col items-end gap-1.5 shrink-0 pt-3">
+                    {/* Row 1: Search + New + Filters */}
+                    <div className="flex items-center gap-2">
+                        {/* Search */}
+                        <div className="relative">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder={SEARCH_PLACEHOLDER[activeTab]}
+                                className="bg-black border border-border pl-8 pr-3 py-1.5 font-mono-tech text-xs text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-44 md:w-56"
+                            />
+                        </div>
 
-                    {/* +New */}
-                    {showCreate && (
-                        <button
-                            onClick={() => setTriggerCreate(v => v + 1)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 border border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary font-mono-tech text-xs uppercase tracking-wider transition-all"
-                            title="Create new"
-                        >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span className="hidden md:inline">New</span>
-                        </button>
-                    )}
+                        {/* +New */}
+                        {showCreate && (
+                            <button
+                                onClick={() => setTriggerCreate(v => v + 1)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 border border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary font-mono-tech text-xs uppercase tracking-wider transition-all"
+                                title="Create new"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span className="hidden md:inline">New</span>
+                            </button>
+                        )}
 
-                    {/* Filters */}
+                        {/* Filters */}
                     {showFilters && (
                         <div className="relative">
                             <button
@@ -296,8 +298,9 @@ export default function DatabasePage() {
                             )}
                         </div>
                     )}
+                    </div>
 
-                    {/* Views */}
+                    {/* Row 2: Views (right-aligned below row 1) */}
                     {showViews && (
                         <div className="relative">
                             <button
