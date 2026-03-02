@@ -27,40 +27,57 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
 
     const isLeaderCard = (id: string) => carryingLeaderPenalty && id === leaderCardId;
 
+    const handleCapsuleClick = (e: React.MouseEvent, objId: string) => {
+        e.stopPropagation();
+        const isCompleted = completedSet.has(objId);
+        if (confirmingId === objId) {
+            if (isCompleted) {
+                onUncomplete(objId);
+            } else {
+                onComplete(objId);
+            }
+            setConfirmingId(null);
+        } else {
+            setConfirmingId(objId);
+        }
+    };
+
     return (
         <div className="mb-4 -mx-4 px-4">
-            {/* Header */}
-            <button
-                onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 w-full text-left py-1.5"
-            >
-                <Target className="w-3.5 h-3.5 text-primary" />
-                <span className="font-display text-xs font-bold text-white uppercase tracking-wider">
-                    Objectives
-                </span>
+            {/* Header — capsules inline when collapsed */}
+            <div className="flex items-center gap-2 w-full py-1.5 flex-wrap">
+                <button onClick={() => setOpen(!open)} className="flex items-center gap-2 shrink-0">
+                    <Target className="w-3.5 h-3.5 text-primary" />
+                    <span className="font-display text-xs font-bold text-white uppercase tracking-wider">
+                        Objectives
+                    </span>
+                </button>
+                {!open && objectives.map((obj) => {
+                    const isCompleted = completedSet.has(obj.id);
+                    const isConfirming = confirmingId === obj.id;
+                    const fColor = OBJ_FACTION_COLOR[obj.factionId] ?? 'border-gray-500';
+                    return (
+                        <CardPreviewTooltip key={obj.id} renderCard={() => <ObjectiveCard objective={obj} />}>
+                            <button
+                                onClick={(e) => handleCapsuleClick(e, obj.id)}
+                                onBlur={() => setTimeout(() => setConfirmingId(null), 200)}
+                                className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border ${fColor} rounded-full text-white hover:brightness-125 transition-all ${isConfirming ? 'ring-1 ring-white/50 animate-pulse' : ''}`}
+                            >
+                                {isCompleted && !isConfirming && <Check className="w-3 h-3 text-emerald-400 shrink-0" />}
+                                {isConfirming && !isCompleted && <Check className="w-3 h-3 text-emerald-400 shrink-0" />}
+                                {isConfirming && isCompleted && <Undo2 className="w-3 h-3 text-amber-400 shrink-0" />}
+                                {obj.name}
+                            </button>
+                        </CardPreviewTooltip>
+                    );
+                })}
                 <span className="text-[9px] font-mono-tech text-muted-foreground">
                     {completedCount}/{totalCount} completed
                 </span>
-                {open ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground ml-auto" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-auto" />}
-            </button>
-
-            {/* Collapsed: capsule view with hover preview */}
-            {!open && (
-                <div className="mt-1 flex flex-wrap gap-1.5 px-1">
-                    {objectives.map((obj) => {
-                        const isCompleted = completedSet.has(obj.id);
-                        const fColor = OBJ_FACTION_COLOR[obj.factionId] ?? 'border-gray-500';
-                        return (
-                            <CardPreviewTooltip key={obj.id} renderCard={() => <ObjectiveCard objective={obj} />}>
-                                <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border ${fColor} rounded-full text-white cursor-default hover:brightness-125 transition-all`}>
-                                    {isCompleted && <Check className="w-3 h-3 text-emerald-400 shrink-0" />}
-                                    {obj.name}
-                                </span>
-                            </CardPreviewTooltip>
-                        );
-                    })}
-                </div>
-            )}
+                <button onClick={() => setOpen(!open)} className="ml-auto">
+                    {open ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+                </button>
+            </div>
 
             {open && (
                 <div className={`mt-1 ${gridClass}`}>
