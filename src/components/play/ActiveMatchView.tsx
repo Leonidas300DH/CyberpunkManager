@@ -471,6 +471,42 @@ export function ActiveMatchView() {
         // recycle/immediate: do NOT add to campaign.completedObjectives (can be drawn again)
     }, [activeMatchTeam, campaign, catalog.objectives, completedObjectiveIds, leaderCardId, luck, updateCampaign, updatePlayState]);
 
+    const handleUncompleteObjective = useCallback((objectiveId: string) => {
+        if (!activeMatchTeam || !campaign) return;
+        const obj = catalog.objectives.find(o => o.id === objectiveId);
+        if (!obj) return;
+
+        // Remove from match completedObjectiveIds
+        updatePlayState({ completedObjectiveIds: completedObjectiveIds.filter(id => id !== objectiveId) });
+
+        const isLeader = objectiveId === leaderCardId;
+        if (isLeader) return;
+
+        // Reverse EB reward
+        const freshCampaign = useStore.getState().campaigns.find(c => c.id === campaign.id);
+        if (!freshCampaign) return;
+
+        if (obj.grantsEB && obj.grantsEB > 0) {
+            updateCampaign(campaign.id, { ebBank: freshCampaign.ebBank - obj.grantsEB });
+        }
+
+        // Reverse Luck reward
+        if (obj.grantsLuck && obj.grantsLuck > 0) {
+            const currentLuck = useStore.getState().activeMatchTeam?.luck ?? 0;
+            updatePlayState({ luck: Math.max(0, currentLuck - obj.grantsLuck) });
+        }
+
+        // Remove from campaign.completedObjectives if it was added
+        if (obj.rewardType === 'ongoing' || obj.rewardType === 'cybergear') {
+            const freshCampaign2 = useStore.getState().campaigns.find(c => c.id === campaign.id);
+            if (freshCampaign2) {
+                updateCampaign(campaign.id, {
+                    completedObjectives: freshCampaign2.completedObjectives.filter(id => id !== objectiveId),
+                });
+            }
+        }
+    }, [activeMatchTeam, campaign, catalog.objectives, completedObjectiveIds, leaderCardId, updateCampaign, updatePlayState]);
+
     // ── DnD Handlers ──
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -809,6 +845,7 @@ export function ActiveMatchView() {
                     carryingLeaderPenalty={activeMatchTeam?.carryingLeaderPenalty}
                     leaderCardId={leaderCardId}
                     onComplete={handleCompleteObjective}
+                    onUncomplete={handleUncompleteObjective}
                 />
             )}
 

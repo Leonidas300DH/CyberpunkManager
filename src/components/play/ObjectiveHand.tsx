@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Objective } from '@/types';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { ObjectiveCard } from '@/components/shared/ObjectiveCard';
-import { Target, ChevronDown, ChevronUp, Check, AlertTriangle } from 'lucide-react';
+import { Target, ChevronDown, ChevronUp, Check, AlertTriangle, Undo2 } from 'lucide-react';
 
 interface ObjectiveHandProps {
     objectives: Objective[];
@@ -12,9 +12,10 @@ interface ObjectiveHandProps {
     carryingLeaderPenalty?: boolean;
     leaderCardId?: string;
     onComplete: (objectiveId: string) => void;
+    onUncomplete: (objectiveId: string) => void;
 }
 
-export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty, leaderCardId, onComplete }: ObjectiveHandProps) {
+export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty, leaderCardId, onComplete, onUncomplete }: ObjectiveHandProps) {
     const [open, setOpen] = useState(true);
     const [confirmingId, setConfirmingId] = useState<string | null>(null);
     const { gridClass } = useCardGrid();
@@ -53,9 +54,12 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
                             <button
                                 key={obj.id}
                                 onClick={() => {
-                                    if (isCompleted) return;
                                     if (isConfirming) {
-                                        onComplete(obj.id);
+                                        if (isCompleted) {
+                                            onUncomplete(obj.id);
+                                        } else {
+                                            onComplete(obj.id);
+                                        }
                                         setConfirmingId(null);
                                     } else {
                                         setConfirmingId(obj.id);
@@ -69,7 +73,7 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
                                     overlay={
                                         <>
                                             {/* Completed overlay */}
-                                            {isCompleted && (
+                                            {isCompleted && !isConfirming && (
                                                 <>
                                                     <div className="absolute inset-0 z-20 border-2 border-emerald-500 pointer-events-none" />
                                                     <div className="absolute inset-0 z-20 bg-emerald-900/20 pointer-events-none" />
@@ -79,7 +83,7 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
                                                 </>
                                             )}
                                             {/* Leader penalty border */}
-                                            {isLeader && !isCompleted && (
+                                            {isLeader && !isCompleted && !isConfirming && (
                                                 <>
                                                     <div className="absolute inset-0 z-20 border-2 border-accent pointer-events-none" />
                                                     <div className="absolute top-2 right-2 z-30 pointer-events-none">
@@ -87,13 +91,24 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
                                                     </div>
                                                 </>
                                             )}
-                                            {/* Confirm tap overlay */}
+                                            {/* Confirm tap overlay — complete */}
                                             {isConfirming && !isCompleted && (
                                                 <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
                                                     <div className="text-center">
                                                         <Check className="w-8 h-8 text-emerald-400 mx-auto mb-1" />
                                                         <span className="text-[10px] font-mono-tech text-emerald-400 uppercase tracking-wider animate-pulse">
                                                             Tap again to complete
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {/* Confirm tap overlay — uncomplete */}
+                                            {isConfirming && isCompleted && (
+                                                <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
+                                                    <div className="text-center">
+                                                        <Undo2 className="w-8 h-8 text-amber-400 mx-auto mb-1" />
+                                                        <span className="text-[10px] font-mono-tech text-amber-400 uppercase tracking-wider animate-pulse">
+                                                            Tap again to undo
                                                         </span>
                                                     </div>
                                                 </div>
