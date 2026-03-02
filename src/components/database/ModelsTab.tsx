@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, X, Upload, FlipVertical2, ChevronDown, ChevronRight, Edit } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { canHaveTiers, getTierLabel, getTierSurcharges } from '@/lib/tiers';
+import { canHaveTiers, getTierLabel } from '@/lib/tiers';
 
 const SKILL_TYPES: SkillType[] = ['Ranged', 'Melee', 'Reflexes', 'Medical', 'Tech', 'Influence'];
 const RANGE_TYPES: RangeType[] = ['Reach', 'Red', 'Yellow', 'Green', 'Long', 'Self'];
@@ -122,24 +122,6 @@ function CharacterImageUpload({ value, onChange, charId, flippedY, onFlipY, flip
     );
 }
 
-const FACTION_COLOR_MAP: Record<string, string> = {
-    'faction-arasaka':     'border-red-600',
-    'faction-bozos':       'border-purple-500',
-    'faction-danger-gals': 'border-pink-400',
-    'faction-edgerunners': 'border-emerald-500',
-    'faction-gen-red':     'border-white',
-    'faction-lawmen':      'border-blue-500',
-    'faction-maelstrom':   'border-red-700',
-    'faction-trauma-team': 'border-white',
-    'faction-tyger-claws': 'border-cyan-400',
-    'faction-zoners':      'border-orange-500',
-    'faction-6th-street':  'border-amber-500',
-    'faction-max-tac':     'border-indigo-400',
-    'faction-militech':    'border-lime-500',
-    'faction-piranhas':    'border-teal-400',
-    'faction-wild-things': 'border-rose-500',
-};
-
 function slugify(text: string): string {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
 }
@@ -230,25 +212,15 @@ function LinkedActionSummary({ action, catalog, onEdit }: {
     );
 }
 
-export function ModelsTab({ highlightId, highlightKey }: { highlightId?: string; highlightKey?: number }) {
+export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', search = '', typeFilter = 'all', sourceFilter = 'all', imageFilter = 'all', triggerCreate = 0 }: { highlightId?: string; highlightKey?: number; factionFilter?: string; search?: string; typeFilter?: string; sourceFilter?: 'all' | 'Custom' | 'Upload'; imageFilter?: 'all' | 'default' | 'custom'; triggerCreate?: number }) {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
-    const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, deleteProfile: deleteProfileDb, saveTierSurcharges, saveWeapon } = useCatalog();
-    const [search, setSearch] = useState('');
-    const [typeFilter, setTypeFilter] = useState<ModelLineage['type'] | 'all'>('all');
-    const [factionFilter, setFactionFilter] = useState<string | 'all'>('all');
-    const [sourceFilter, setSourceFilter] = useState<'all' | 'Custom' | 'Upload'>('all');
-    const [imageFilter, setImageFilter] = useState<'all' | 'default' | 'custom'>('all');
+    const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, deleteProfile: deleteProfileDb, saveWeapon } = useCatalog();
 
     // Highlight scroll-to effect
     useEffect(() => {
         if (!highlightId) return;
-        setSearch('');
-        setTypeFilter('all');
-        setFactionFilter('all');
-        setSourceFilter('all');
-        setImageFilter('all');
         const timer = setTimeout(() => {
             const el = document.querySelector(`[data-card-id="${highlightId}"]`) as HTMLElement;
             if (el) {
@@ -270,6 +242,12 @@ export function ModelsTab({ highlightId, highlightKey }: { highlightId?: string;
             return next;
         });
     };
+
+    // Trigger create from parent toolbar
+    useEffect(() => {
+        if (triggerCreate > 0) openCreateNew();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [triggerCreate]);
 
     // ── Edit dialog state ──
     const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -386,11 +364,6 @@ export function ModelsTab({ highlightId, highlightKey }: { highlightId?: string;
         catalog.profiles.filter(p => p.lineageId === lineageId).sort((a, b) => a.level - b.level);
 
     // Collect unique types
-    const allTypes = Array.from(new Set(catalog.lineages.map(l => l.type)));
-
-    // All factions sorted alphabetically
-    const factions = [...catalog.factions].sort((a, b) => a.name.localeCompare(b.name));
-
     // Filtered lineages (flat, no panels)
     const factionNameMap = Object.fromEntries(catalog.factions.map(f => [f.id, f.name]));
     const filtered = catalog.lineages.filter(l => {
@@ -431,6 +404,38 @@ export function ModelsTab({ highlightId, highlightKey }: { highlightId?: string;
         setEditDialogOpen(true);
     };
 
+    const openCreateNew = () => {
+        const newLineageId = `lineage-${uuidv4()}`;
+        const newProfileId = `profile-${uuidv4()}`;
+        const preselectedFaction = factionFilter !== 'all' ? factionFilter : '';
+        const newLineage: ModelLineage = {
+            id: newLineageId,
+            name: '',
+            type: 'Character',
+            factionIds: preselectedFaction ? [preselectedFaction] : [],
+            isMerc: false,
+            source: 'Custom',
+        };
+        const newProfile: ModelProfile = {
+            id: newProfileId,
+            lineageId: newLineageId,
+            costEB: 0,
+            armor: 0,
+            skills: { Ranged: 0, Melee: 0, Reflexes: 0, Medical: 0, Tech: 0, Influence: 0, None: 0 },
+            actions: [],
+            actionTokens: { green: 0, yellow: 0, red: 0 },
+            keywords: [],
+            streetCred: 0,
+            level: 0,
+        };
+        setEditingLineage(newLineage);
+        setEditingProfile(newProfile);
+        setLineageForm({ ...newLineage });
+        setProfileForm({ ...newProfile, skills: { ...newProfile.skills }, actionTokens: { ...newProfile.actionTokens } });
+        setActionsForm([]);
+        setEditDialogOpen(true);
+    };
+
     const saveCharacter = () => {
         if (!editingLineage || !editingProfile) return;
 
@@ -457,10 +462,17 @@ export function ModelsTab({ highlightId, highlightKey }: { highlightId?: string;
             actions: actionsForm,
         };
 
+        const lineageExists = catalog.lineages.some(l => l.id === updatedLineage.id);
+        const profileExists = catalog.profiles.some(p => p.id === updatedProfile.id);
+
         const updatedCatalog = {
             ...catalog,
-            lineages: catalog.lineages.map(l => l.id === updatedLineage.id ? updatedLineage : l),
-            profiles: catalog.profiles.map(p => p.id === updatedProfile.id ? updatedProfile : p),
+            lineages: lineageExists
+                ? catalog.lineages.map(l => l.id === updatedLineage.id ? updatedLineage : l)
+                : [...catalog.lineages, updatedLineage],
+            profiles: profileExists
+                ? catalog.profiles.map(p => p.id === updatedProfile.id ? updatedProfile : p)
+                : [...catalog.profiles, updatedProfile],
         };
 
         setCatalog(updatedCatalog);
@@ -521,13 +533,6 @@ export function ModelsTab({ highlightId, highlightKey }: { highlightId?: string;
     };
 
     // ── Surcharge editing ──
-    const surcharges = getTierSurcharges(catalog);
-    const updateSurcharges = (field: 'veteran' | 'elite', value: number) => {
-        const updated = { ...surcharges, [field]: value };
-        const updatedCatalog = { ...catalog, tierSurcharges: updated };
-        setCatalog(updatedCatalog);
-        if (isAdmin) saveTierSurcharges(updated);
-    };
 
     // ── Action helpers ──
 
@@ -570,143 +575,6 @@ export function ModelsTab({ highlightId, highlightKey }: { highlightId?: string;
 
     return (
         <div className="space-y-6">
-            {/* Search & Filters */}
-            <div className="flex flex-col gap-4 bg-surface-dark/50 p-4 border border-border">
-                {/* Row 1: Search + Type filters */}
-                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                    <input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="SEARCH UNITS..."
-                        className="bg-black border border-border px-4 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-full md:w-64"
-                    />
-                    <div className="flex gap-2 font-mono-tech text-xs flex-wrap items-center">
-                        <button
-                            onClick={() => setTypeFilter('all')}
-                            className={`px-4 py-2 font-bold uppercase tracking-wider transition-colors ${
-                                typeFilter === 'all' ? 'bg-primary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
-                            }`}
-                        >
-                            All Types
-                        </button>
-                        {allTypes.map(type => (
-                            <button
-                                key={type}
-                                onClick={() => setTypeFilter(type)}
-                                className={`px-4 py-2 font-bold uppercase tracking-wider transition-colors ${
-                                    typeFilter === type ? 'bg-secondary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
-                                }`}
-                            >
-                                {type}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Row 2: Source + Image filters */}
-                <div className="flex gap-4 font-mono-tech text-xs flex-wrap items-center">
-                    <div className="flex gap-2 items-center">
-                        <span className="text-muted-foreground uppercase tracking-widest text-[10px]">Source</span>
-                        {(['all', 'Custom', 'Upload'] as const).map(v => (
-                            <button
-                                key={v}
-                                onClick={() => setSourceFilter(v)}
-                                className={`px-3 py-1.5 font-bold uppercase tracking-wider transition-colors ${
-                                    sourceFilter === v ? 'bg-primary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
-                                }`}
-                            >
-                                {v === 'all' ? 'All' : v}
-                            </button>
-                        ))}
-                    </div>
-                    <div className="w-px h-6 bg-border" />
-                    <div className="flex gap-2 items-center">
-                        <span className="text-muted-foreground uppercase tracking-widest text-[10px]">Image</span>
-                        {([['all', 'All'], ['custom', 'Custom'], ['default', 'Default']] as const).map(([v, label]) => (
-                            <button
-                                key={v}
-                                onClick={() => setImageFilter(v)}
-                                className={`px-3 py-1.5 font-bold uppercase tracking-wider transition-colors ${
-                                    imageFilter === v ? 'bg-primary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
-                                }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Row 3: Faction filter icons — same layout as Gear tab */}
-                <div className="flex gap-2 items-stretch">
-                    <button
-                        onClick={() => setFactionFilter('all')}
-                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                            factionFilter === 'all'
-                                ? 'border-white bg-white/10 ring-1 ring-white/30'
-                                : 'border-border bg-black hover:border-white/30'
-                        }`}
-                    >
-                        <div className="w-full aspect-square flex items-center justify-center">
-                            <span className={`text-xl font-display font-bold ${factionFilter === 'all' ? 'text-white' : 'text-muted-foreground'}`}>★</span>
-                        </div>
-                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${factionFilter === 'all' ? 'text-white font-bold' : 'text-muted-foreground'}`}>All</span>
-                    </button>
-                    <div className="w-px bg-border shrink-0" />
-                    <div className="flex-1 overflow-x-auto min-w-0 no-scrollbar">
-                        <div className="flex gap-2 w-max">
-                            {factions.map(faction => {
-                                const isActive = factionFilter === faction.id;
-                                const fColor = FACTION_COLOR_MAP[faction.id] ?? 'border-gray-500';
-                                return (
-                                    <button
-                                        key={faction.id}
-                                        onClick={() => setFactionFilter(isActive ? 'all' : faction.id)}
-                                        title={faction.name}
-                                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                                            isActive
-                                                ? `${fColor} bg-white/10 ring-1 ring-white/30`
-                                                : 'border-border bg-black hover:border-white/30'
-                                        }`}
-                                    >
-                                        {faction.imageUrl && (
-                                            <img src={faction.imageUrl} alt={faction.name} className="w-full aspect-square object-contain" style={{ opacity: isActive ? 1 : 0.4 }} />
-                                        )}
-                                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${isActive ? 'text-white font-bold' : 'text-muted-foreground'}`}>{faction.name}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Tier Surcharges (admin only) */}
-            {isAdmin && (
-                <div className="bg-surface-dark/50 border border-border p-4 flex items-center gap-6">
-                    <span className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground shrink-0">Tier Surcharges</span>
-                    <div className="flex items-center gap-2">
-                        <label className="font-mono-tech text-[10px] uppercase text-muted-foreground">Veteran</label>
-                        <Input
-                            type="number"
-                            value={surcharges.veteran}
-                            onChange={(e) => updateSurcharges('veteran', Number(e.target.value))}
-                            className="w-16 h-7 bg-black border-border font-mono-tech text-xs px-2"
-                        />
-                        <span className="font-mono-tech text-[10px] text-muted-foreground">EB</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <label className="font-mono-tech text-[10px] uppercase text-muted-foreground">Elite</label>
-                        <Input
-                            type="number"
-                            value={surcharges.elite}
-                            onChange={(e) => updateSurcharges('elite', Number(e.target.value))}
-                            className="w-16 h-7 bg-black border-border font-mono-tech text-xs px-2"
-                        />
-                        <span className="font-mono-tech text-[10px] text-muted-foreground">EB</span>
-                    </div>
-                </div>
-            )}
-
             {/* Card Grid with expand/collapse tiers */}
             {filtered.length === 0 ? (
                 <div className="border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">

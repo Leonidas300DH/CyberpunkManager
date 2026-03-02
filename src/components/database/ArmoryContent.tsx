@@ -2,7 +2,7 @@
 
 import { useState, useRef, useLayoutEffect, useEffect, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
-import { ItemCategory, ActionColor, HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
+import { HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { formatCardText } from '@/lib/formatCardText';
@@ -10,7 +10,7 @@ import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, List, Square, Columns2, Plus, Edit, Trash2, Upload, X as XIcon, Layers, FlipVertical2 } from 'lucide-react';
+import { ChevronLeft, Edit, Trash2, Upload, X as XIcon, FlipVertical2 } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
@@ -167,29 +167,11 @@ const EMPTY_WEAPON: Partial<Weapon> & { variantRows?: FactionVariant[] } = {
 
 type ArmoryTab = 'Weapon' | 'Gear' | 'Program' | 'Loot';
 
-export function ArmoryContent({ activeTab, highlightId, highlightFactionId, highlightKey }: { activeTab: ArmoryTab; highlightId?: string; highlightFactionId?: string; highlightKey?: number }) {
+export function ArmoryContent({ activeTab, highlightId, highlightFactionId, highlightKey, factionFilter = 'all', search = '', qualityFilter = 'all', highlightNoImage = false, highlightNoPrice = false, highlightDefaultRarity = false, sourceFilter = 'all', viewMode = 'list', gearViewMode = 'card', gearStacked = true, triggerCreate = 0 }: { activeTab: ArmoryTab; highlightId?: string; highlightFactionId?: string; highlightKey?: number; factionFilter?: string; search?: string; qualityFilter?: ProgramQuality | 'all'; highlightNoImage?: boolean; highlightNoPrice?: boolean; highlightDefaultRarity?: boolean; sourceFilter?: 'all' | 'Custom' | 'Upload' | 'Manual'; viewMode?: ViewMode; gearViewMode?: 'list' | 'card'; gearStacked?: boolean; triggerCreate?: number }) {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
     const { saveWeapon: saveWeaponDb, deleteWeapon: deleteWeaponDb } = useCatalog();
-    const [search, setSearch] = useState('');
-    // Program filters
-    const [factionFilter, setFactionFilter] = useState<string>('all-factions');
-    const [qualityFilter, setQualityFilter] = useState<ProgramQuality | 'all'>('all');
-    // Gear/Weapon filters
-    const [weaponTypeFilter, setWeaponTypeFilter] = useState<'all' | 'weapon' | 'gear'>('all');
-    const [gearFactionFilters, setGearFactionFilters] = useState<Set<string>>(new Set());
-    const toggleGearFaction = (fid: string) => {
-        setGearFactionFilters(prev => {
-            const next = new Set(prev);
-            if (next.has(fid)) next.delete(fid); else next.add(fid);
-            return next;
-        });
-    };
-    const [highlightNoImage, setHighlightNoImage] = useState(false);
-    const [highlightNoPrice, setHighlightNoPrice] = useState(false);
-    const [highlightDefaultRarity, setHighlightDefaultRarity] = useState(false);
-    const [sourceFilter, setSourceFilter] = useState<'all' | 'Custom' | 'Upload' | 'Manual'>('all');
     // Weapon CRUD
     const [weaponDialogOpen, setWeaponDialogOpen] = useState(false);
     const [editingWeapon, setEditingWeapon] = useState<Weapon | null>(null);
@@ -197,13 +179,9 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     const [variantRows, setVariantRows] = useState<FactionVariant[]>([{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }]);
     // Detail view
     const [selectedProgram, setSelectedProgram] = useState<HackingProgram | null>(null);
-    // View mode + card flip state (Programs)
-    const [viewMode, setViewMode] = useState<ViewMode>('list');
+    // Card flip state (Programs)
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
-    // Gear view mode
-    const [gearViewMode, setGearViewMode] = useState<'list' | 'card'>('card');
-    // Stacking state for card/list views
-    const [gearStacked, setGearStacked] = useState(true);
+    // Stacking state expansion
     const [expandedWeapons, setExpandedWeapons] = useState<Set<string>>(new Set());
     const toggleExpanded = (weaponId: string) => {
         setExpandedWeapons(prev => {
@@ -226,11 +204,6 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     // Highlight scroll-to effect
     useEffect(() => {
         if (!highlightId) return;
-        setSearch('');
-        setFactionFilter('all-factions');
-        setQualityFilter('all');
-        setGearFactionFilters(new Set());
-        setSourceFilter('all');
         const timer = setTimeout(() => {
             const el = document.querySelector(`[data-card-id="${highlightId}"]`) as HTMLElement;
             if (el) {
@@ -243,6 +216,11 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [highlightId, highlightKey]);
 
+    // Reset flipped cards on view mode change
+    useEffect(() => {
+        setFlippedCards(new Set());
+    }, [viewMode]);
+
     const tab = TAB_STYLES[activeTab] ?? TAB_STYLES.Gear;
     const programs = catalog.programs ?? [];
 
@@ -251,14 +229,9 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
         return catalog.factions.find(f => f.id === factionId)?.name ?? 'Unknown';
     };
 
-    const programFactions = ['all-factions', 'all', ...Array.from(new Set(
-        programs.filter(p => p.factionId !== 'all').map(p => p.factionId)
-    )).sort((a, b) => getFactionName(a).localeCompare(getFactionName(b)))];
-
     const filteredPrograms = programs.filter(p => {
-        if (factionFilter !== 'all-factions') {
-            if (factionFilter === 'all' && p.factionId !== 'all') return false;
-            if (factionFilter !== 'all' && p.factionId !== factionFilter) return false;
+        if (factionFilter !== 'all') {
+            if (p.factionId !== factionFilter && p.factionId !== 'all') return false;
         }
         if (qualityFilter !== 'all' && p.quality !== qualityFilter) return false;
         if (search) {
@@ -315,8 +288,8 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
         if (highlightNoPrice && !w.factionVariants.some(fv => fv.cost === 0)) return false;
         if (highlightDefaultRarity && !w.factionVariants.every(fv => fv.rarity === 99)) return false;
         if (sourceFilter !== 'all' && w.source !== sourceFilter) return false;
-        if (gearFactionFilters.size > 0) {
-            const hasMatchingVariant = w.factionVariants.some(v => gearFactionFilters.has(v.factionId));
+        if (factionFilter !== 'all') {
+            const hasMatchingVariant = w.factionVariants.some(v => v.factionId === factionFilter || v.factionId === 'universal');
             if (!hasMatchingVariant) return false;
         }
         if (search) {
@@ -328,7 +301,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
 
     const variantCards = filteredWeapons.flatMap(weapon =>
         weapon.factionVariants
-            .filter(v => gearFactionFilters.size === 0 || gearFactionFilters.has(v.factionId))
+            .filter(v => factionFilter === 'all' || v.factionId === factionFilter || v.factionId === 'universal')
             .map(variant => ({ weapon, variant }))
     );
 
@@ -420,6 +393,15 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
         setWeaponDialogOpen(true);
     };
 
+    // Trigger create from parent toolbar
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        if (triggerCreate > 0 && (activeTab === 'Weapon' || activeTab === 'Gear')) {
+            openWeaponCreate();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [triggerCreate]);
+
     const saveWeapon = () => {
         const currentWeapons = catalog.weapons ?? [];
         const finalVariants = variantRows.length > 0 ? variantRows : [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }];
@@ -494,129 +476,11 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     if (activeTab === 'Program') {
         return (
             <>
-                {/* Programs filters bar */}
-                <div className="mb-6 space-y-4">
-                    <div className="flex items-center gap-3 bg-surface-dark/50 p-4 border border-border flex-wrap">
-                        <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="SEARCH PROGRAMS..."
-                            className="bg-black border border-border px-4 py-2 text-sm font-mono-tech uppercase text-white placeholder:text-muted-foreground focus:border-cyber-purple focus:outline-none w-full md:w-56"
-                        />
-                        <div className="flex gap-1">
-                            {(['all', 'Red', 'Yellow', 'Green'] as const).map(q => {
-                                const isActive = qualityFilter === q;
-                                const qs = q === 'all' ? null : QUALITY_STYLES[q];
-                                return (
-                                    <button
-                                        key={q}
-                                        onClick={() => setQualityFilter(q)}
-                                        className={`px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
-                                            isActive
-                                                ? q === 'all'
-                                                    ? 'bg-white text-black'
-                                                    : `${qs!.bg} text-black font-bold`
-                                                : 'bg-black border border-border text-muted-foreground hover:text-white'
-                                        }`}
-                                    >
-                                        {q === 'all' ? 'All' : q}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest ml-auto hidden md:block">
-                            <span className="text-cyber-purple">{filteredPrograms.length}</span> / {programs.length}
-                        </span>
-                    </div>
-
-                    {/* Faction filter */}
-                    <div className="flex gap-2 items-stretch">
-                        {programFactions.filter(fid => fid === 'all-factions' || fid === 'all').map(fid => {
-                            const isActive = factionFilter === fid;
-                            const label = fid === 'all-factions' ? 'All' : 'Universal';
-                            return (
-                                <button
-                                    key={fid}
-                                    onClick={() => setFactionFilter(fid)}
-                                    className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                                        isActive
-                                            ? 'border-white bg-white/10 ring-1 ring-white/30'
-                                            : 'border-border bg-black hover:border-white/30'
-                                    }`}
-                                >
-                                    <div className="w-full aspect-square flex items-center justify-center">
-                                        <span className={`text-xl font-display font-bold ${isActive ? 'text-white' : 'text-muted-foreground'}`}>
-                                            {fid === 'all-factions' ? '★' : '◎'}
-                                        </span>
-                                    </div>
-                                    <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${
-                                        isActive ? 'text-white font-bold' : 'text-muted-foreground'
-                                    }`}>
-                                        {label}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                        <div className="w-px bg-border shrink-0" />
-                        <div className="flex-1 overflow-x-auto min-w-0 no-scrollbar">
-                            <div className="flex gap-2 w-max">
-                                {programFactions.filter(fid => fid !== 'all-factions' && fid !== 'all').map(fid => {
-                                    const isActive = factionFilter === fid;
-                                    const faction = catalog.factions.find(f => f.id === fid);
-                                    const fColor = FACTION_COLOR_MAP[fid] ?? 'border-gray-500';
-                                    const label = getFactionName(fid);
-                                    return (
-                                        <button
-                                            key={fid}
-                                            onClick={() => setFactionFilter(fid)}
-                                            title={label}
-                                            className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                                                isActive
-                                                    ? `${fColor} bg-white/10 ring-1 ring-white/30`
-                                                    : 'border-border bg-black hover:border-white/30'
-                                            }`}
-                                        >
-                                            {faction?.imageUrl && (
-                                                <img
-                                                    src={faction.imageUrl}
-                                                    alt={label}
-                                                    className="w-full aspect-square object-contain"
-                                                    style={{ opacity: isActive ? 1 : 0.4 }}
-                                                />
-                                            )}
-                                            <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${
-                                                isActive ? 'text-white font-bold' : 'text-muted-foreground'
-                                            }`}>
-                                                {label}
-                                            </span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* View mode selector */}
-                <div className="flex gap-1 mb-4">
-                    {([
-                        { mode: 'list' as ViewMode, icon: List, label: 'List' },
-                        { mode: 'card' as ViewMode, icon: Square, label: 'Card' },
-                        { mode: 'double' as ViewMode, icon: Columns2, label: 'Double' },
-                    ]).map(({ mode, icon: Icon, label }) => (
-                        <button
-                            key={mode}
-                            onClick={() => { setViewMode(mode); setFlippedCards(new Set()); }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
-                                viewMode === mode
-                                    ? 'bg-cyber-purple text-white'
-                                    : 'bg-black border border-border text-muted-foreground hover:text-white'
-                            }`}
-                        >
-                            <Icon className="w-3.5 h-3.5" />
-                            {label}
-                        </button>
-                    ))}
+                {/* Count */}
+                <div className="flex items-center justify-end mb-4">
+                    <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest">
+                        <span className="text-cyber-purple">{filteredPrograms.length}</span> / {programs.length}
+                    </span>
                 </div>
 
                 {viewMode === 'list' && (
@@ -689,153 +553,13 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     }
 
     if (activeTab === 'Weapon' || activeTab === 'Gear') {
-        const tabLabel = activeTab === 'Weapon' ? 'WEAPONS' : 'GEAR';
         return (
             <>
-                {/* Weapons/Gear filters + Add button */}
-                <div className="mb-6 space-y-4">
-                    <div className="flex items-center gap-3 bg-surface-dark/50 p-4 border border-border flex-wrap">
-                        <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={`SEARCH ${tabLabel}...`}
-                            className="bg-black border border-border px-4 py-2 text-sm font-mono-tech uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-full md:w-56"
-                        />
-                        <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest ml-auto hidden md:block">
-                            <span className="text-secondary">{filteredWeapons.length}</span> / {weapons.length}
-                        </span>
-                        {isAdmin && (
-                            <>
-                                <div className="w-px h-6 bg-border mx-1" />
-                                {([
-                                    { label: 'No Image', active: highlightNoImage, toggle: () => setHighlightNoImage(v => !v) },
-                                    { label: 'No Price', active: highlightNoPrice, toggle: () => setHighlightNoPrice(v => !v) },
-                                    { label: 'No Rarity', active: highlightDefaultRarity, toggle: () => setHighlightDefaultRarity(v => !v) },
-                                ] as const).map(({ label, active, toggle }) => (
-                                    <button
-                                        key={label}
-                                        onClick={toggle}
-                                        className={`px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
-                                            active
-                                                ? 'bg-accent text-white font-bold border border-accent'
-                                                : 'bg-black border border-border text-muted-foreground hover:text-white'
-                                        }`}
-                                    >
-                                        {label}
-                                    </button>
-                                ))}
-                                <div className="w-px h-6 bg-border mx-1" />
-                                {(['all', 'Custom', 'Upload', 'Manual'] as const).map(src => (
-                                    <button
-                                        key={src}
-                                        onClick={() => setSourceFilter(src)}
-                                        className={`px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
-                                            sourceFilter === src
-                                                ? 'bg-secondary text-black font-bold border border-secondary'
-                                                : 'bg-black border border-border text-muted-foreground hover:text-white'
-                                        }`}
-                                    >
-                                        {src === 'all' ? 'All Src' : src}
-                                    </button>
-                                ))}
-                                <button
-                                    onClick={openWeaponCreate}
-                                    className="bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider px-4 py-2 clip-corner-br transition-colors flex items-center gap-2 text-sm"
-                                >
-                                    <Plus className="w-4 h-4" /> Add
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </div>
-
-                {/* Gear faction filter — multi-select */}
-                <div className="flex gap-2 items-stretch mb-6">
-                    <button
-                        onClick={() => setGearFactionFilters(new Set())}
-                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                            gearFactionFilters.size === 0
-                                ? 'border-white bg-white/10 ring-1 ring-white/30'
-                                : 'border-border bg-black hover:border-white/30'
-                        }`}
-                    >
-                        <div className="w-full aspect-square flex items-center justify-center">
-                            <span className={`text-xl font-display font-bold ${gearFactionFilters.size === 0 ? 'text-white' : 'text-muted-foreground'}`}>★</span>
-                        </div>
-                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${gearFactionFilters.size === 0 ? 'text-white font-bold' : 'text-muted-foreground'}`}>All</span>
-                    </button>
-                    <button
-                        onClick={() => toggleGearFaction('universal')}
-                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                            gearFactionFilters.has('universal')
-                                ? 'border-gray-500 bg-white/10 ring-1 ring-white/30'
-                                : 'border-border bg-black hover:border-white/30'
-                        }`}
-                    >
-                        <div className="w-full aspect-square flex items-center justify-center">
-                            <span className={`text-xl font-display font-bold ${gearFactionFilters.has('universal') ? 'text-white' : 'text-muted-foreground'}`}>◎</span>
-                        </div>
-                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${gearFactionFilters.has('universal') ? 'text-white font-bold' : 'text-muted-foreground'}`}>Universal</span>
-                    </button>
-                    <div className="w-px bg-border shrink-0" />
-                    <div className="flex-1 overflow-x-auto min-w-0 no-scrollbar">
-                        <div className="flex gap-2 w-max">
-                            {catalog.factions.map(faction => {
-                                const isActive = gearFactionFilters.has(faction.id);
-                                const fColor = FACTION_COLOR_MAP[faction.id] ?? 'border-gray-500';
-                                return (
-                                    <button
-                                        key={faction.id}
-                                        onClick={() => toggleGearFaction(faction.id)}
-                                        title={faction.name}
-                                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                                            isActive
-                                                ? `${fColor} bg-white/10 ring-1 ring-white/30`
-                                                : 'border-border bg-black hover:border-white/30'
-                                        }`}
-                                    >
-                                        {faction.imageUrl && (
-                                            <img src={faction.imageUrl} alt={faction.name} className="w-full aspect-square object-contain" style={{ opacity: isActive ? 1 : 0.4 }} />
-                                        )}
-                                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${isActive ? 'text-white font-bold' : 'text-muted-foreground'}`}>{faction.name}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-
-                {/* View mode selector */}
-                <div className="flex gap-1 mb-4">
-                    {([
-                        { mode: 'list' as const, icon: List, label: 'List' },
-                        { mode: 'card' as const, icon: Square, label: 'Card' },
-                    ]).map(({ mode, icon: Icon, label }) => (
-                        <button
-                            key={mode}
-                            onClick={() => setGearViewMode(mode)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
-                                gearViewMode === mode
-                                    ? 'bg-secondary text-black'
-                                    : 'bg-black border border-border text-muted-foreground hover:text-white'
-                            }`}
-                        >
-                            <Icon className="w-3.5 h-3.5" />
-                            {label}
-                        </button>
-                    ))}
-                    <div className="w-px bg-border mx-1" />
-                    <button
-                        onClick={() => setGearStacked(s => !s)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
-                            gearStacked
-                                ? 'bg-secondary text-black'
-                                : 'bg-black border border-border text-muted-foreground hover:text-white'
-                        }`}
-                    >
-                        <Layers className="w-3.5 h-3.5" />
-                        {gearStacked ? 'Stacked' : 'Flat'}
-                    </button>
+                {/* Count */}
+                <div className="flex items-center justify-end mb-4">
+                    <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest">
+                        <span className="text-secondary">{filteredWeapons.length}</span> / {weapons.length}
+                    </span>
                 </div>
 
                 {/* Weapon Edit/Create Dialog */}
@@ -1223,14 +947,9 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     // Loot & Objectives
     return (
         <>
-            <div className="mb-8 flex items-center gap-4 bg-surface-dark/50 p-4 border border-border">
-                <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="SEARCH..."
-                    className={`bg-black border border-border px-4 py-2 text-sm font-mono-tech uppercase text-white placeholder:text-muted-foreground focus:${tab.border} focus:outline-none w-full md:w-64`}
-                />
-                <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest hidden md:block">
+            {/* Count */}
+            <div className="flex items-center justify-end mb-4">
+                <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest">
                     <span className={tab.text}>{filteredItems.length}</span> item{filteredItems.length !== 1 ? 's' : ''} loaded
                 </span>
             </div>

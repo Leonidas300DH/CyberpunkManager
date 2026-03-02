@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Settings } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCatalog } from '@/hooks/useCatalog';
+import { getTierSurcharges } from '@/lib/tiers';
 import { cn } from '@/lib/utils';
 
 const MIN_COLS = 2;
@@ -15,8 +18,18 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
     const [open, setOpen] = useState(false);
     const panelRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
-    const { displaySettings, setDisplaySettings } = useStore();
+    const { displaySettings, setDisplaySettings, catalog, setCatalog } = useStore();
     const { cardColumns, fontScale } = displaySettings;
+    const isAdmin = useIsAdmin();
+    const { saveTierSurcharges } = useCatalog();
+
+    const surcharges = getTierSurcharges(catalog);
+    const updateSurcharges = (field: 'veteran' | 'elite', value: number) => {
+        const updated = { ...surcharges, [field]: value };
+        const updatedCatalog = { ...catalog, tierSurcharges: updated };
+        setCatalog(updatedCatalog);
+        if (isAdmin) saveTierSurcharges(updated);
+    };
 
     // Close on outside click
     useEffect(() => {
@@ -122,6 +135,36 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
                         </div>
                     </div>
 
+                    {/* Tier Surcharges (admin only) */}
+                    {isAdmin && (
+                        <div className="border-t border-border pt-4">
+                            <label className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest block mb-2">
+                                Tier Surcharges
+                            </label>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-mono-tech text-[10px] uppercase text-muted-foreground">Veteran</span>
+                                    <input
+                                        type="number"
+                                        value={surcharges.veteran}
+                                        onChange={(e) => updateSurcharges('veteran', Number(e.target.value))}
+                                        className="w-14 h-7 bg-black border border-border font-mono-tech text-xs px-2 text-white focus:border-secondary focus:outline-none"
+                                    />
+                                    <span className="font-mono-tech text-[10px] text-muted-foreground">EB</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-mono-tech text-[10px] uppercase text-muted-foreground">Elite</span>
+                                    <input
+                                        type="number"
+                                        value={surcharges.elite}
+                                        onChange={(e) => updateSurcharges('elite', Number(e.target.value))}
+                                        className="w-14 h-7 bg-black border border-border font-mono-tech text-xs px-2 text-white focus:border-secondary focus:outline-none"
+                                    />
+                                    <span className="font-mono-tech text-[10px] text-muted-foreground">EB</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             )}

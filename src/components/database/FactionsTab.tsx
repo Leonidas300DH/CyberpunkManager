@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { Faction, ModelLineage, Weapon, HackingProgram, Objective } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ImageInput } from '@/components/ui/image-input';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { CharacterCard } from '@/components/characters/CharacterCard';
@@ -14,7 +14,7 @@ import { ProgramCard } from '@/components/programs/ProgramCard';
 import { ObjectiveCard } from '@/components/shared/ObjectiveCard';
 import { resolveVariant } from '@/lib/variants';
 import { v4 as uuidv4 } from 'uuid';
-import { Plus, Trash2, Edit, ChevronRight } from 'lucide-react';
+import { Trash2, Edit, ChevronRight } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
 
@@ -81,15 +81,24 @@ function SectionHeader({ title, count, colorClass }: { title: string; count: num
 
 /* ─── Main Component ─── */
 
-export function FactionsTab({ onNavigateToCard }: { onNavigateToCard?: (tab: string, itemId: string, factionId?: string) => void }) {
+export function FactionsTab({ onNavigateToCard, factionFilter, search = '', triggerCreate = 0 }: { onNavigateToCard?: (tab: string, itemId: string, factionId?: string) => void; factionFilter?: string; search?: string; triggerCreate?: number }) {
     const { catalog, setCatalog } = useStore();
     const isAdmin = useIsAdmin();
     const { saveFaction: saveFactionDb, deleteFaction: deleteFactionDb } = useCatalog();
     const [isOpen, setIsOpen] = useState(false);
     const [editingFaction, setEditingFaction] = useState<Faction | null>(null);
     const [formData, setFormData] = useState<Partial<Faction>>({});
-    const [expandedId, setExpandedId] = useState<string | null>(null);
-    const [search, setSearch] = useState('');
+    const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
+
+    // Trigger create from parent toolbar
+    useEffect(() => {
+        if (triggerCreate > 0) {
+            setEditingFaction(null);
+            setFormData({});
+            setIsOpen(true);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [triggerCreate]);
 
     const handleSave = () => {
         const newFactions = [...catalog.factions];
@@ -132,6 +141,9 @@ export function FactionsTab({ onNavigateToCard }: { onNavigateToCard?: (tab: str
     const filteredFactions = catalog.factions
         .filter(f => f.id.startsWith('faction-'))
         .filter(f => {
+            if (factionFilter && factionFilter !== 'all') {
+                if (f.id !== factionFilter) return false;
+            }
             const q = search.toLowerCase();
             return f.name.toLowerCase().includes(q) || (f.description?.toLowerCase().includes(q) ?? false);
         })
@@ -192,69 +204,53 @@ export function FactionsTab({ onNavigateToCard }: { onNavigateToCard?: (tab: str
 
     return (
         <div className="space-y-6">
-            {/* Top Bar */}
-            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-surface-dark/50 p-4 border border-border">
-                <div className="flex items-center gap-4 w-full md:w-auto">
-                    <input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="SEARCH FACTIONS..."
-                        className="bg-black border border-border px-4 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-full md:w-64"
-                    />
-                    <span className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest whitespace-nowrap">
-                        {filteredFactions.length} faction{filteredFactions.length !== 1 ? 's' : ''}
-                    </span>
-                </div>
-                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                    {isAdmin && (
-                        <DialogTrigger asChild>
-                            <button
-                                onClick={() => { setEditingFaction(null); setFormData({}); }}
-                                className="bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider px-4 py-2 clip-corner-br transition-colors flex items-center gap-2"
-                            >
-                                <Plus className="w-4 h-4" /> Faction
-                            </button>
-                        </DialogTrigger>
-                    )}
-                    <DialogContent className="bg-surface-dark border-border">
-                        <DialogHeader>
-                            <DialogTitle className="font-display uppercase tracking-wider text-primary">
-                                {editingFaction ? 'Edit Faction' : 'New Faction'}
-                            </DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
-                                <Input
-                                    value={formData.name || ''}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="Faction Name"
-                                    className="bg-black border-border font-mono-tech"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Description</Label>
-                                <Input
-                                    value={formData.description || ''}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    placeholder="Short faction description"
-                                    className="bg-black border-border font-mono-tech"
-                                />
-                            </div>
-                            <ImageInput
-                                value={formData.imageUrl || ''}
-                                onChange={(val) => setFormData({ ...formData, imageUrl: val })}
-                            />
-                            <button
-                                onClick={handleSave}
-                                className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors"
-                            >
-                                Save
-                            </button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+            {/* Count */}
+            <div className="flex items-center justify-end">
+                <span className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest whitespace-nowrap">
+                    {filteredFactions.length} faction{filteredFactions.length !== 1 ? 's' : ''}
+                </span>
             </div>
+
+            {/* Edit/Create Dialog */}
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className="bg-surface-dark border-border">
+                    <DialogHeader>
+                        <DialogTitle className="font-display uppercase tracking-wider text-primary">
+                            {editingFaction ? 'Edit Faction' : 'New Faction'}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                            <Input
+                                value={formData.name || ''}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="Faction Name"
+                                className="bg-black border-border font-mono-tech"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="font-mono-tech text-xs uppercase tracking-widest">Description</Label>
+                            <Input
+                                value={formData.description || ''}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder="Short faction description"
+                                className="bg-black border-border font-mono-tech"
+                            />
+                        </div>
+                        <ImageInput
+                            value={formData.imageUrl || ''}
+                            onChange={(val) => setFormData({ ...formData, imageUrl: val })}
+                        />
+                        <button
+                            onClick={handleSave}
+                            className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors"
+                        >
+                            Save
+                        </button>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Faction Panels */}
             <div className="space-y-3">
@@ -267,7 +263,7 @@ export function FactionsTab({ onNavigateToCard }: { onNavigateToCard?: (tab: str
                 {filteredFactions.map((faction) => {
                     const factionColor = FACTION_COLOR_MAP[faction.id] ?? DEFAULT_FACTION_COLOR;
                     const data = factionData[faction.id];
-                    const isExpanded = expandedId === faction.id;
+                    const isExpanded = !collapsedIds.has(faction.id);
                     const abbr = faction.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
                     const isBase = BASE_FACTION_IDS.has(faction.id);
 
@@ -293,8 +289,8 @@ export function FactionsTab({ onNavigateToCard }: { onNavigateToCard?: (tab: str
                             <div
                                 role="button"
                                 tabIndex={0}
-                                onClick={() => setExpandedId(isExpanded ? null : faction.id)}
-                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedId(isExpanded ? null : faction.id); } }}
+                                onClick={() => setCollapsedIds(prev => { const next = new Set(prev); if (isExpanded) next.add(faction.id); else next.delete(faction.id); return next; })}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCollapsedIds(prev => { const next = new Set(prev); if (isExpanded) next.add(faction.id); else next.delete(faction.id); return next; }); } }}
                                 className={`w-full bg-surface-dark hover:bg-tech-gray border-l-4 ${factionColor.border} px-4 py-0 flex items-center justify-between transition-all duration-300 cursor-pointer`}
                             >
                                 <div className="flex items-center gap-4">

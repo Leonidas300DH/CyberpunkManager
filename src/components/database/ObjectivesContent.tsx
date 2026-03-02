@@ -1,17 +1,15 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
+// Plus removed — create triggered from parent toolbar
 import type { Objective, ObjectiveRewardType } from '@/types';
 import {
     ObjectiveCard,
-    FACTION_COLOR_MAP,
-    FACTION_BG_MAP,
     isPlaceholder,
 } from '@/components/shared/ObjectiveCard';
 
@@ -58,22 +56,15 @@ const EMPTY_OBJECTIVE: Partial<Objective> = {
     cybergearEffect: undefined,
 };
 
-export function ObjectivesContent({ highlightId, highlightKey }: { highlightId?: string; highlightKey?: number }) {
+export function ObjectivesContent({ highlightId, highlightKey, factionFilter = 'all', search = '', showOnlyIncomplete = false, triggerCreate = 0 }: { highlightId?: string; highlightKey?: number; factionFilter?: string; search?: string; showOnlyIncomplete?: boolean; triggerCreate?: number }) {
     const { catalog, setCatalog } = useStore();
     const { gridClass } = useCardGrid();
     const isAdmin = useIsAdmin();
     const { saveObjective: saveObjectiveDb, deleteObjective: deleteObjectiveDb } = useCatalog();
 
-    const [search, setSearch] = useState('');
-    const [factionFilter, setFactionFilter] = useState<string>('all');
-    const [showOnlyIncomplete, setShowOnlyIncomplete] = useState(false);
-
     // Highlight scroll-to effect
     useEffect(() => {
         if (!highlightId) return;
-        setSearch('');
-        setFactionFilter('all');
-        setShowOnlyIncomplete(false);
         const timer = setTimeout(() => {
             const el = document.querySelector(`[data-card-id="${highlightId}"]`) as HTMLElement;
             if (el) {
@@ -86,18 +77,16 @@ export function ObjectivesContent({ highlightId, highlightKey }: { highlightId?:
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [highlightId, highlightKey]);
 
+    // Trigger create from parent toolbar
+    useEffect(() => {
+        if (triggerCreate > 0) openCreate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [triggerCreate]);
+
     // Dialog state
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingObjective, setEditingObjective] = useState<Objective | null>(null);
     const [objectiveForm, setObjectiveForm] = useState<Partial<Objective>>({ ...EMPTY_OBJECTIVE });
-
-    // Factions that have objectives
-    const objectiveFactions = useMemo(() => {
-        const fids = Array.from(new Set(catalog.objectives.map(o => o.factionId)));
-        const factions = fids.filter(id => id.startsWith('faction-')).sort();
-        const decks = fids.filter(id => id.startsWith('deck-')).sort();
-        return [...factions, ...decks];
-    }, [catalog.objectives]);
 
     // All possible factions for the select dropdown (factions + decks)
     const allFactionOptions = useMemo(() => {
@@ -217,111 +206,12 @@ export function ObjectivesContent({ highlightId, highlightKey }: { highlightId?:
 
     return (
         <>
-            {/* Search + count */}
-            <div className="flex items-center gap-4 mb-4">
-                <div className="relative flex-1 max-w-md">
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search objectives..."
-                        className="w-full bg-black border border-border px-4 py-2 font-mono-tech text-sm text-white placeholder:text-muted-foreground focus:border-cyber-green focus:outline-none"
-                    />
-                </div>
-                {isAdmin && (
-                    <button
-                        onClick={openCreate}
-                        className="shrink-0 flex items-center gap-1.5 px-3 py-2 border border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary rounded-sm font-mono-tech text-xs uppercase tracking-wider transition-all"
-                    >
-                        <Plus className="w-3.5 h-3.5" />
-                        New
-                    </button>
-                )}
-                {incompleteCount > 0 && (
-                    <button
-                        onClick={() => setShowOnlyIncomplete(v => !v)}
-                        className={`shrink-0 flex items-center gap-2 px-3 py-2 border rounded-sm font-mono-tech text-xs uppercase tracking-wider transition-all ${
-                            showOnlyIncomplete
-                                ? 'border-orange-500 bg-orange-600/20 text-orange-400'
-                                : 'border-border bg-black text-muted-foreground hover:border-orange-500/50'
-                        }`}
-                    >
-                        <span className="text-[10px]">{showOnlyIncomplete ? '●' : '○'}</span>
-                        Incomplete
-                        <span className={`text-[10px] font-bold ${showOnlyIncomplete ? 'text-orange-300' : 'text-orange-500'}`}>
-                            {incompleteCount}
-                        </span>
-                    </button>
-                )}
-                <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest ml-auto hidden md:block">
+            {/* Count */}
+            <div className="flex items-center justify-end mb-4">
+                <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest">
                     <span className="text-cyber-green">{filteredObjectives.length}</span> / {catalog.objectives.length}
                 </span>
             </div>
-
-            {/* Faction filter bar */}
-            {objectiveFactions.length > 0 && (
-                <div className="flex gap-2 items-stretch mb-6">
-                    {/* All button */}
-                    <button
-                        onClick={() => setFactionFilter('all')}
-                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                            factionFilter === 'all'
-                                ? 'border-white bg-white/10 ring-1 ring-white/30'
-                                : 'border-border bg-black hover:border-white/30'
-                        }`}
-                    >
-                        <div className="w-full aspect-square flex items-center justify-center">
-                            <span className={`text-xl font-display font-bold ${factionFilter === 'all' ? 'text-white' : 'text-muted-foreground'}`}>
-                                ★
-                            </span>
-                        </div>
-                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${
-                            factionFilter === 'all' ? 'text-white font-bold' : 'text-muted-foreground'
-                        }`}>
-                            All
-                        </span>
-                    </button>
-
-                    <div className="w-px bg-border shrink-0" />
-
-                    <div className="flex-1 overflow-x-auto min-w-0 no-scrollbar">
-                        <div className="flex gap-2 w-max">
-                            {objectiveFactions.map(fid => {
-                                const isActive = factionFilter === fid;
-                                const faction = catalog.factions.find(f => f.id === fid);
-                                const fColor = FACTION_COLOR_MAP[fid] ?? 'border-gray-500';
-                                const label = faction?.name ?? fid;
-                                return (
-                                    <button
-                                        key={fid}
-                                        onClick={() => setFactionFilter(fid)}
-                                        title={label}
-                                        className={`w-[80px] shrink-0 flex flex-col items-center justify-center gap-1 px-1 pb-1.5 rounded-sm border-2 transition-all ${
-                                            isActive
-                                                ? `${fColor} bg-white/10 ring-1 ring-white/30`
-                                                : 'border-border bg-black hover:border-white/30'
-                                        }`}
-                                    >
-                                        {faction?.imageUrl && (
-                                            <img
-                                                src={faction.imageUrl}
-                                                alt={label}
-                                                className="w-full aspect-square object-contain"
-                                                style={{ opacity: isActive ? 1 : 0.4 }}
-                                            />
-                                        )}
-                                        <span className={`text-[7px] font-mono-tech uppercase tracking-wider text-center leading-tight ${
-                                            isActive ? 'text-white font-bold' : 'text-muted-foreground'
-                                        }`}>
-                                            {label}
-                                        </span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Grid */}
             <div className={gridClass}>
