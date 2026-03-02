@@ -46,7 +46,7 @@ const ARMORY_MAP: Record<string, 'Weapon' | 'Gear' | 'Program' | 'Loot'> = {
 
 const SEARCH_PLACEHOLDER: Record<TabId, string> = {
     factions: 'Search factions...',
-    models: 'Search units...',
+    models: 'Search characters...',
     weapons: 'Search weapons...',
     gear: 'Search gear...',
     programs: 'Search programs...',
