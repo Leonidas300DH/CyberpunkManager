@@ -1,73 +1,20 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Edit, Trash2, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { Objective, ObjectiveRewardType } from '@/types';
+import {
+    ObjectiveCard,
+    FACTION_COLOR_MAP,
+    FACTION_BG_MAP,
+    isPlaceholder,
+} from '@/components/shared/ObjectiveCard';
 
-const FACTION_COLOR_MAP: Record<string, string> = {
-    'faction-arasaka': 'border-red-600',
-    'faction-bozos': 'border-purple-500',
-    'faction-danger-gals': 'border-pink-400',
-    'faction-edgerunners': 'border-emerald-500',
-    'faction-gen-red': 'border-white',
-    'faction-lawmen': 'border-blue-500',
-    'faction-maelstrom': 'border-red-700',
-    'faction-trauma-team': 'border-white',
-    'faction-tyger-claws': 'border-cyan-400',
-    'faction-zoners': 'border-orange-500',
-    'faction-6th-street': 'border-amber-500',
-    'faction-max-tac': 'border-indigo-400',
-    'faction-militech': 'border-lime-500',
-    'faction-piranhas': 'border-teal-400',
-    'faction-wild-things': 'border-rose-500',
-    'deck-corpo-crimes': 'border-red-500',
-    'deck-public-enemies': 'border-violet-500',
-    'deck-street-justice': 'border-yellow-500',
-};
-
-const FACTION_BG_MAP: Record<string, string> = {
-    'faction-arasaka': 'bg-red-600',
-    'faction-bozos': 'bg-purple-500',
-    'faction-danger-gals': 'bg-pink-400',
-    'faction-edgerunners': 'bg-emerald-500',
-    'faction-gen-red': 'bg-white',
-    'faction-lawmen': 'bg-blue-500',
-    'faction-maelstrom': 'bg-red-700',
-    'faction-trauma-team': 'bg-white',
-    'faction-tyger-claws': 'bg-cyan-400',
-    'faction-zoners': 'bg-orange-500',
-    'faction-6th-street': 'bg-amber-500',
-    'faction-max-tac': 'bg-indigo-400',
-    'faction-militech': 'bg-lime-500',
-    'faction-piranhas': 'bg-teal-400',
-    'faction-wild-things': 'bg-rose-500',
-    'deck-corpo-crimes': 'bg-red-500',
-    'deck-public-enemies': 'bg-violet-500',
-    'deck-street-justice': 'bg-yellow-500',
-};
-
-const FACTION_TEXT_MAP: Record<string, string> = {
-    'faction-gen-red': 'text-black',
-    'faction-trauma-team': 'text-black',
-    'faction-danger-gals': 'text-black',
-    'faction-tyger-claws': 'text-black',
-    'faction-6th-street': 'text-black',
-    'faction-militech': 'text-black',
-    'faction-edgerunners': 'text-black',
-    'faction-piranhas': 'text-black',
-    'deck-street-justice': 'text-black',
-};
-
-const REWARD_BADGE: Record<ObjectiveRewardType, { label: string; cls: string; tooltip: string }> = {
-    ongoing: { label: 'ONGOING', cls: 'bg-emerald-600 text-white', tooltip: 'This reward stays active for the rest of the game once the condition is met.' },
-    recycle: { label: 'RECYCLE', cls: 'bg-amber-600 text-white', tooltip: 'After resolving, shuffle this card back into the deck. It can be drawn again.' },
-    cybergear: { label: 'CYBERGEAR', cls: 'bg-cyan-600 text-white', tooltip: 'Completing this objective grants a permanent Cybergear upgrade to a model.' },
-};
 
 const FACTION_SLUG: Record<string, string> = {
     'faction-6th-street': '6th',
@@ -98,164 +45,18 @@ function slugify(name: string): string {
         .replace(/^-|-$/g, '');
 }
 
-const isPlaceholder = (o: Objective) =>
-    o.description === 'PLACEHOLDER' || o.rewardText === 'PLACEHOLDER';
-
 const EMPTY_OBJECTIVE: Partial<Objective> = {
     name: '',
     factionId: '',
     description: '',
     rewardType: 'ongoing',
     rewardText: '',
-    grantsStreetCred: true,
+    grantsStreetCred: 1,
     grantsEB: undefined,
     grantsLuck: undefined,
     grantsCybergearTo: undefined,
     cybergearEffect: undefined,
 };
-
-interface ObjectiveCardProps {
-    objective: Objective;
-    isAdmin?: boolean;
-    onEdit?: () => void;
-    onDelete?: () => void;
-}
-
-function ObjectiveCard({ objective, isAdmin, onEdit, onDelete }: ObjectiveCardProps) {
-    const { catalog } = useStore();
-    const { cardStyle } = useCardGrid();
-
-    const faction = catalog.factions.find(f => f.id === objective.factionId);
-    const factionName = faction?.name ?? objective.factionId;
-    const borderColor = FACTION_COLOR_MAP[objective.factionId] ?? 'border-gray-500';
-    const bgColor = FACTION_BG_MAP[objective.factionId] ?? 'bg-gray-400';
-    const textColor = FACTION_TEXT_MAP[objective.factionId] ?? (FACTION_BG_MAP[objective.factionId] ? 'text-white' : 'text-black');
-    const badge = REWARD_BADGE[objective.rewardType];
-    const placeholder = isPlaceholder(objective);
-
-    return (
-        <div
-            style={cardStyle}
-            className={`group relative bg-surface-dark border ${borderColor} h-[320px] overflow-hidden flex flex-col`}
-        >
-            {/* Admin buttons (top right overlay) */}
-            {isAdmin && (onEdit || onDelete) && (
-                <div className="absolute top-1 right-1 z-30 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {onEdit && (
-                        <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="p-1.5 bg-black/70 border border-border rounded text-muted-foreground hover:text-secondary hover:border-secondary transition-colors">
-                            <Edit className="w-3.5 h-3.5" />
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-1.5 bg-black/70 border border-border rounded text-muted-foreground hover:text-accent hover:border-accent transition-colors">
-                            <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                    )}
-                </div>
-            )}
-
-            {/* Faction icon background */}
-            {faction?.imageUrl && (
-                <img
-                    src={faction.imageUrl}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-contain opacity-[0.10] pointer-events-none"
-                />
-            )}
-
-            {/* Faction color bar */}
-            <div className={`h-1 w-full ${bgColor} shrink-0 relative z-10`} />
-
-            {/* Header */}
-            <div className="px-3 pt-2 pb-1 shrink-0 relative z-10">
-                <h3 className="font-display font-bold text-sm uppercase leading-tight text-white truncate">
-                    {objective.name}
-                </h3>
-                <div className="flex items-center gap-2">
-                    <span className={`text-[8px] font-mono-tech font-bold uppercase px-1.5 py-px rounded-sm ${bgColor} ${textColor}`}>
-                        {factionName}
-                    </span>
-                    {placeholder && (
-                        <span className="text-[8px] font-mono-tech font-bold uppercase px-1.5 py-px rounded-sm bg-orange-600 text-white">
-                            INCOMPLETE
-                        </span>
-                    )}
-                </div>
-            </div>
-
-            {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto px-3 pb-3 min-h-0 relative z-10">
-                {/* Condition */}
-                <div className="mb-2">
-                    <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest mb-0.5">
-                        Condition
-                    </div>
-                    <p className={`text-xs leading-relaxed ${placeholder ? 'text-orange-400/60 italic' : 'text-gray-300'}`}>
-                        {placeholder ? 'Awaiting close-up photo...' : objective.description}
-                    </p>
-                </div>
-
-                {/* Divider */}
-                <div className="border-t border-dashed border-border my-2" />
-
-                {/* Reward */}
-                <div className="mb-2">
-                    <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            Reward
-                        </span>
-                        {!placeholder && (
-                            <span className={`relative text-[8px] font-mono-tech font-bold uppercase px-1.5 py-px rounded-sm cursor-help group/tip ${badge.cls}`}>
-                                {badge.label}
-                                <span className="pointer-events-none absolute left-0 top-full mt-1 z-40 w-48 px-2 py-1.5 rounded bg-black/95 border border-border text-[10px] font-mono-tech font-normal normal-case tracking-normal text-gray-200 leading-snug opacity-0 group-hover/tip:opacity-100 transition-opacity">
-                                    {badge.tooltip}
-                                </span>
-                            </span>
-                        )}
-                    </div>
-                    <p className={`text-xs leading-relaxed ${placeholder ? 'text-orange-400/60 italic' : 'text-gray-300'}`}>
-                        {placeholder ? 'Awaiting close-up photo...' : objective.rewardText}
-                    </p>
-                </div>
-
-                {/* Bonus chips */}
-                {!placeholder && (objective.grantsStreetCred || objective.grantsEB || objective.grantsLuck) && (
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                        {objective.grantsStreetCred && (
-                            <span className="text-[9px] font-mono-tech font-bold bg-yellow-900/50 text-secondary px-1.5 py-0.5 rounded-sm">
-                                Street Cred ★
-                            </span>
-                        )}
-                        {objective.grantsEB != null && objective.grantsEB > 0 && (
-                            <span className="text-[9px] font-mono-tech font-bold bg-green-900/50 text-cyber-green px-1.5 py-0.5 rounded-sm">
-                                +{objective.grantsEB} EB
-                            </span>
-                        )}
-                        {objective.grantsLuck != null && objective.grantsLuck > 0 && (
-                            <span className="text-[9px] font-mono-tech font-bold bg-cyan-900/50 text-cyan-400 px-1.5 py-0.5 rounded-sm">
-                                +{objective.grantsLuck} LUCK
-                            </span>
-                        )}
-                    </div>
-                )}
-
-                {/* Cybergear block */}
-                {!placeholder && objective.rewardType === 'cybergear' && objective.cybergearEffect && (
-                    <div className="border-l-2 border-cyan-500 pl-2 py-1 bg-cyan-950/30 rounded-r-sm">
-                        {objective.grantsCybergearTo && (
-                            <div className="text-[9px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-0.5">
-                                Cybergear &rarr; {objective.grantsCybergearTo}
-                            </div>
-                        )}
-                        <p className="text-[11px] text-cyan-200 leading-relaxed">
-                            {objective.cybergearEffect}
-                        </p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
 
 export function ObjectivesContent() {
     const { catalog, setCatalog } = useStore();
@@ -352,7 +153,7 @@ export function ObjectivesContent() {
             description: objectiveForm.description?.trim() || 'PLACEHOLDER',
             rewardType: objectiveForm.rewardType || 'ongoing',
             rewardText: objectiveForm.rewardText?.trim() || 'PLACEHOLDER',
-            grantsStreetCred: objectiveForm.grantsStreetCred ?? true,
+            grantsStreetCred: objectiveForm.grantsStreetCred ?? 1,
             grantsEB: objectiveForm.grantsEB || undefined,
             grantsLuck: objectiveForm.grantsLuck || undefined,
             grantsCybergearTo: objectiveForm.rewardType === 'cybergear' ? objectiveForm.grantsCybergearTo?.trim() || undefined : undefined,
@@ -582,6 +383,7 @@ export function ObjectivesContent() {
                                 <option value="ongoing">Ongoing</option>
                                 <option value="recycle">Recycle</option>
                                 <option value="cybergear">Cybergear</option>
+                                <option value="immediate">Immediate</option>
                             </select>
                         </div>
 
@@ -598,14 +400,16 @@ export function ObjectivesContent() {
 
                         {/* Grants row */}
                         <div className="grid grid-cols-3 gap-2">
-                            <div className="flex items-center gap-2">
+                            <div>
+                                <label className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-widest mb-1 block">Street Cred ★</label>
                                 <input
-                                    type="checkbox"
-                                    checked={objectiveForm.grantsStreetCred ?? false}
-                                    onChange={(e) => updateForm({ grantsStreetCred: e.target.checked })}
-                                    className="accent-secondary"
+                                    type="number"
+                                    value={objectiveForm.grantsStreetCred ?? 0}
+                                    onChange={(e) => updateForm({ grantsStreetCred: Number(e.target.value) || 0 })}
+                                    className="w-full bg-black border border-border px-2 py-1 font-mono-tech text-sm text-white focus:border-cyber-green focus:outline-none"
+                                    min={0}
+                                    max={2}
                                 />
-                                <label className="text-[10px] font-mono-tech text-muted-foreground uppercase">Street Cred</label>
                             </div>
                             <div>
                                 <label className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-widest mb-1 block">EB</label>

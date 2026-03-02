@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Campaign, Objective } from '@/types';
 import { TeamBuilderDraft } from '@/store/useStore';
 import { getLeaderCard, getEligiblePool, drawObjectives } from '@/lib/objectives';
-import { MathService } from '@/lib/math';
+import { useCardGrid } from '@/hooks/useCardGrid';
+import { ObjectiveCard } from '@/components/shared/ObjectiveCard';
 import { ChevronDown, ChevronUp, Target, Shuffle, Check } from 'lucide-react';
 
 interface ObjectiveDrawerProps {
@@ -16,31 +17,9 @@ interface ObjectiveDrawerProps {
     onDraftChange: (patch: Partial<TeamBuilderDraft>) => void;
 }
 
-function RewardBadge({ type }: { type: string }) {
-    const colors: Record<string, string> = {
-        ongoing: 'bg-emerald-600 text-white',
-        recycle: 'bg-amber-600 text-white',
-        cybergear: 'bg-purple-600 text-white',
-        immediate: 'bg-blue-600 text-white',
-    };
-    return (
-        <span className={`text-[8px] font-mono-tech uppercase tracking-wider px-1.5 py-0.5 ${colors[type] ?? 'bg-zinc-700 text-white'}`}>
-            {type}
-        </span>
-    );
-}
-
-function ScStars({ count }: { count: number }) {
-    if (count <= 0) return null;
-    return (
-        <span className="text-primary text-[10px]">
-            {'★'.repeat(count)}
-        </span>
-    );
-}
-
 export function ObjectiveDrawer({ campaign, objectives, factionId, campaignStreetCred, draft, onDraftChange }: ObjectiveDrawerProps) {
     const [open, setOpen] = useState(true);
+    const { gridClass } = useCardGrid();
 
     const enabled = draft.objectivesEnabled ?? false;
     const carryingLeader = draft.carryingLeaderPenalty ?? false;
@@ -50,7 +29,6 @@ export function ObjectiveDrawer({ campaign, objectives, factionId, campaignStree
     const leaderCard = getLeaderCard(objectives, factionId);
     const hasLeaderCard = !!leaderCard;
 
-    // How many to draw and keep
     const drawCount = carryingLeader ? 3 : 4;
     const keepCount = carryingLeader ? 2 : 3;
 
@@ -73,17 +51,12 @@ export function ObjectiveDrawer({ campaign, objectives, factionId, campaignStree
         if (selectedSet.has(id)) {
             onDraftChange({ selectedObjectiveIds: selectedIds.filter((x) => x !== id) });
         } else {
-            if (selectedIds.length >= keepCount) return; // already at max
+            if (selectedIds.length >= keepCount) return;
             onDraftChange({ selectedObjectiveIds: [...selectedIds, id] });
         }
     };
 
-    const totalObjectives = carryingLeader ? keepCount + 1 : keepCount; // +1 for leader card
-    const readyCount = carryingLeader ? selectedIds.length + 1 : selectedIds.length;
     const isReady = selectedIds.length === keepCount;
-
-    // Faction objectives count
-    const factionPool = objectives.filter((o) => o.factionId === factionId);
     const poolSize = getEligiblePool(objectives, factionId, campaignStreetCred, campaign.completedObjectives).length;
 
     return (
@@ -171,22 +144,22 @@ export function ObjectiveDrawer({ campaign, objectives, factionId, campaignStree
                                 )}
                             </div>
 
-                            {/* Drawn cards */}
-                            {drawnObjectives.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                    {/* Leader card (auto-included, not selectable) */}
+                            {/* Drawn cards — full ObjectiveCard layout */}
+                            {(drawnObjectives.length > 0 || (carryingLeader && leaderCard)) && (
+                                <div className={gridClass}>
+                                    {/* Leader card (auto-included) */}
                                     {carryingLeader && leaderCard && (
-                                        <div className="border-2 border-accent bg-accent/10 p-2 min-w-[120px] max-w-[160px]">
-                                            <div className="text-[10px] font-display font-bold text-accent uppercase leading-tight truncate">
-                                                {leaderCard.name}
-                                            </div>
-                                            <div className="flex items-center gap-1 mt-1">
-                                                <RewardBadge type={leaderCard.rewardType} />
-                                                <ScStars count={leaderCard.grantsStreetCred} />
-                                            </div>
-                                            <div className="text-[8px] font-mono-tech text-accent/70 mt-1 uppercase">
-                                                Auto-included
-                                            </div>
+                                        <div className="relative cursor-default">
+                                            <ObjectiveCard
+                                                objective={leaderCard}
+                                                overlay={
+                                                    <div className="absolute inset-0 z-20 border-2 border-accent pointer-events-none flex items-end justify-center pb-2">
+                                                        <span className="text-[9px] font-mono-tech font-bold text-accent uppercase tracking-wider bg-black/80 px-2 py-0.5">
+                                                            Auto-included
+                                                        </span>
+                                                    </div>
+                                                }
+                                            />
                                         </div>
                                     )}
 
@@ -198,31 +171,33 @@ export function ObjectiveDrawer({ campaign, objectives, factionId, campaignStree
                                             <button
                                                 key={obj.id}
                                                 onClick={() => toggleCard(obj.id)}
-                                                disabled={!canSelect && !isSelected}
-                                                className={`text-left border-2 p-2 min-w-[120px] max-w-[160px] transition-all ${
-                                                    isSelected
-                                                        ? 'border-emerald-500 bg-emerald-500/10'
-                                                        : canSelect
-                                                            ? 'border-border hover:border-secondary bg-black/50'
-                                                            : 'border-border/30 bg-black/20 opacity-40'
-                                                }`}
+                                                className="relative text-left"
                                             >
-                                                <div className="flex items-start justify-between gap-1">
-                                                    <div className="text-[10px] font-display font-bold text-white uppercase leading-tight truncate flex-1">
-                                                        {obj.name}
-                                                    </div>
-                                                    {isSelected && <Check className="w-3 h-3 text-emerald-400 shrink-0" />}
-                                                </div>
-                                                <div className="flex items-center gap-1 mt-1">
-                                                    <RewardBadge type={obj.rewardType} />
-                                                    <ScStars count={obj.grantsStreetCred} />
-                                                </div>
-                                                {obj.grantsEB && obj.grantsEB > 0 && (
-                                                    <div className="text-[8px] font-mono-tech text-primary mt-0.5">+{obj.grantsEB} EB</div>
-                                                )}
-                                                {obj.grantsLuck && obj.grantsLuck > 0 && (
-                                                    <div className="text-[8px] font-mono-tech text-purple-400 mt-0.5">+{obj.grantsLuck} Luck</div>
-                                                )}
+                                                <ObjectiveCard
+                                                    objective={obj}
+                                                    overlay={
+                                                        <>
+                                                            {/* Selection border */}
+                                                            <div className={`absolute inset-0 z-20 border-2 pointer-events-none transition-colors ${
+                                                                isSelected
+                                                                    ? 'border-emerald-500'
+                                                                    : canSelect
+                                                                        ? 'border-transparent hover:border-secondary'
+                                                                        : 'border-transparent'
+                                                            }`} />
+                                                            {/* Dim unselectable cards */}
+                                                            {!canSelect && !isSelected && (
+                                                                <div className="absolute inset-0 z-20 bg-black/50 pointer-events-none" />
+                                                            )}
+                                                            {/* Checkmark */}
+                                                            {isSelected && (
+                                                                <div className="absolute top-2 right-2 z-30 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                                                                    <Check className="w-4 h-4 text-white" />
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    }
+                                                />
                                             </button>
                                         );
                                     })}
