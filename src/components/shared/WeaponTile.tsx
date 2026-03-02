@@ -50,6 +50,7 @@ export function WeaponRangeArrows({ weapon }: { weapon: Weapon }) {
 interface WeaponTileProps {
     weapon: Weapon;
     variantFactionId?: string;
+    activeFactionId?: string;
     overlay?: React.ReactNode;
     campaignStreetCred?: number;
     equippedCount?: number;
@@ -64,12 +65,14 @@ const SKILL_ICON: Record<string, string> = {
     Influence: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png',
 };
 
-export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCred, equippedCount }: WeaponTileProps) {
+export function WeaponTile({ weapon, variantFactionId, activeFactionId, overlay, campaignStreetCred, equippedCount }: WeaponTileProps) {
     const variant = resolveVariant(weapon.factionVariants, variantFactionId);
     const showRarity = variant.rarity < 99;
     const showStreetCred = (variant.reqStreetCred ?? 0) > 0;
     const rarityExceeded = showRarity && equippedCount != null && equippedCount >= variant.rarity;
     const streetCredInsufficient = showStreetCred && campaignStreetCred != null && campaignStreetCred < variant.reqStreetCred;
+    // Color band: use activeFactionId (character's faction) if provided, otherwise variant's factionId
+    const bandFactionId = activeFactionId ?? variant.factionId;
 
     return (
         <div className="relative group/tile bg-surface-dark border border-border hover:border-secondary transition-all overflow-hidden flex">
@@ -85,7 +88,7 @@ export function WeaponTile({ weapon, variantFactionId, overlay, campaignStreetCr
                     maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)',
                 }}
             />
-            <div className="relative z-10 w-8 shrink-0 self-stretch flex flex-col items-center justify-center py-1 gap-0.5" style={{ backgroundColor: FACTION_SIDEBAR_COLOR[variantFactionId ?? 'universal'] ?? '#666666' }}>
+            <div className="relative z-10 w-8 shrink-0 self-stretch flex flex-col items-center justify-center py-1 gap-0.5" style={{ backgroundColor: FACTION_SIDEBAR_COLOR[bandFactionId] ?? '#666666' }}>
                 <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
                 <div className="font-mono-tech text-[8px] text-black/70 font-bold">EB</div>
                 {showRarity && (

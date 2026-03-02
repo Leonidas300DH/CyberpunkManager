@@ -900,7 +900,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                     </button>
                                 )}
                                 <div className="relative z-10 flex flex-1">
-                                    <div className="w-8 shrink-0 self-stretch flex flex-col items-center justify-center py-1 gap-0.5" style={{ backgroundColor: FACTION_SIDEBAR_COLOR[variant.factionId] ?? '#666666' }}>
+                                    <div className="w-8 shrink-0 self-stretch flex flex-col items-center justify-center py-1 gap-0.5" style={{ backgroundColor: FACTION_SIDEBAR_COLOR[factionFilter !== 'all' ? factionFilter : variant.factionId] ?? '#666666' }}>
                                         <div className="font-display font-black text-base text-black leading-none">{variant.cost}</div>
                                         <div className="font-mono-tech text-[8px] text-black/70 font-bold">EB</div>
                                         {variant.rarity < 99 && (

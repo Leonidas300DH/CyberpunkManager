@@ -614,7 +614,7 @@ export function ActiveMatchView() {
                 if (weaponView === 'card') {
                     return <div className="w-40 opacity-90 pointer-events-none"><WeaponCard weapon={weapon} variant={resolveVariant(weapon.factionVariants, parsedOverlay.variantFactionId)} /></div>;
                 }
-                return <div className="w-72 opacity-90 pointer-events-none"><WeaponTile weapon={weapon} variantFactionId={parsedOverlay.variantFactionId} /></div>;
+                return <div className="w-72 opacity-90 pointer-events-none"><WeaponTile weapon={weapon} variantFactionId={parsedOverlay.variantFactionId} activeFactionId={campaign?.factionId} /></div>;
             }
         }
         if (itemId.startsWith('program-')) {
@@ -1030,7 +1030,7 @@ export function ActiveMatchView() {
                                             <SortableEquip id={dragId}>
                                                 {item.type === 'weapon' ? (
                                                     weaponView === 'list' ? (
-                                                        <WeaponTile weapon={item.weapon} variantFactionId={item.variantFactionId} overlay={
+                                                        <WeaponTile weapon={item.weapon} variantFactionId={item.variantFactionId} activeFactionId={campaign?.factionId} overlay={
                                                             <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
                                                         } />
                                                     ) : (
@@ -1116,7 +1116,7 @@ export function ActiveMatchView() {
                                                             <SortableEquip id={dragId}>
                                                                 {item.type === 'weapon' ? (
                                                                     weaponView === 'list' ? (
-                                                                        <WeaponTile weapon={item.weapon} overlay={
+                                                                        <WeaponTile weapon={item.weapon} variantFactionId={item.variantFactionId} activeFactionId={campaign?.factionId} overlay={
                                                                             <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
                                                                         } />
                                                                     ) : (
