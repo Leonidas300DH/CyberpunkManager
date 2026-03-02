@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 async function generate() {
-  const [linRes, lfRes, profRes, weapRes, itemRes, progRes, factionsRes, configRes] = await Promise.all([
+  const [linRes, lfRes, profRes, weapRes, itemRes, progRes, factionsRes, configRes, objRes] = await Promise.all([
     supabase.from('lineages').select('*').order('name'),
     supabase.from('lineage_factions').select('*'),
     supabase.from('profiles').select('*').order('lineage_id').order('level'),
@@ -16,6 +16,7 @@ async function generate() {
     supabase.from('programs').select('*').order('name'),
     supabase.from('factions').select('*').order('name'),
     supabase.from('app_config').select('*').eq('key', 'tier_surcharges').maybeSingle(),
+    supabase.from('objectives').select('*').order('name'),
   ]);
 
   for (const [name, res] of Object.entries({ linRes, lfRes, profRes, weapRes, itemRes, progRes, factionsRes })) {
@@ -128,13 +129,29 @@ async function generate() {
     reloadCondition: r.reload_condition,
   }));
 
+  const objectives = (objRes.data ?? []).map((r: any) => ({
+    id: r.id,
+    name: r.name,
+    factionId: r.faction_id,
+    description: r.description ?? '',
+    rewardType: r.reward_type ?? 'ongoing',
+    rewardText: r.reward_text ?? '',
+    grantsStreetCred: r.grants_street_cred ?? false,
+    grantsEB: r.grants_eb ?? undefined,
+    grantsLuck: r.grants_luck ?? undefined,
+    grantsCybergearTo: r.grants_cybergear_to || undefined,
+    cybergearEffect: r.cybergear_effect || undefined,
+    unlocksCardId: r.unlocks_card_id || undefined,
+    imageUrl: r.image_url || undefined,
+  }));
+
   const tierSurcharges = (configRes.data?.value as any) ?? { veteran: 5, elite: 10 };
 
   fs.writeFileSync('/tmp/seed_dump.json', JSON.stringify({
-    factions, lineages, profiles, weapons, items, programs, tierSurcharges
+    factions, lineages, profiles, weapons, items, programs, objectives, tierSurcharges
   }));
 
-  console.log(`Dumped: ${factions.length} factions, ${lineages.length} lineages, ${profiles.length} profiles, ${weapons.length} weapons, ${items.length} items, ${programs.length} programs`);
+  console.log(`Dumped: ${factions.length} factions, ${lineages.length} lineages, ${profiles.length} profiles, ${weapons.length} weapons, ${items.length} items, ${programs.length} programs, ${objectives.length} objectives`);
 }
 
 generate();

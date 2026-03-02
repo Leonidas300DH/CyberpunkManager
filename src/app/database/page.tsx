@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FactionsTab } from "@/components/database/FactionsTab";
 import { ModelsTab } from "@/components/database/ModelsTab";
 import { ArmoryContent } from "@/components/database/ArmoryContent";
+import { ObjectivesContent } from "@/components/database/ObjectivesContent";
 
 type TabId = 'factions' | 'models' | 'gear' | 'programs' | 'loot' | 'objectives';
 
@@ -25,11 +26,10 @@ const PAGE_TITLE: Record<TabId, { title: string; accent: string; subtitle: strin
     objectives: { title: 'Mission', accent: 'Objectives', subtitle: 'Contract targets // Complete for street cred' },
 };
 
-const ARMORY_MAP: Record<string, 'Gear' | 'Program' | 'Loot' | 'Objective'> = {
+const ARMORY_MAP: Record<string, 'Gear' | 'Program' | 'Loot'> = {
     gear: 'Gear',
     programs: 'Program',
     loot: 'Loot',
-    objectives: 'Objective',
 };
 
 export default function DatabasePage() {
@@ -76,6 +76,7 @@ export default function DatabasePage() {
             {/* Tab Content */}
             {activeTab === 'factions' && <FactionsTab />}
             {activeTab === 'models' && <ModelsTab />}
+            {activeTab === 'objectives' && <ObjectivesContent />}
             {ARMORY_MAP[activeTab] && <ArmoryContent activeTab={ARMORY_MAP[activeTab]} />}
 
             {/* Footer Status */}

@@ -11,6 +11,7 @@ import type {
     Weapon,
     ItemCard,
     HackingProgram,
+    Objective,
 } from '@/types';
 
 // ─── DB row → TypeScript mappers ────────────────────────────────────────────
@@ -111,6 +112,24 @@ function mapProgram(r: Record<string, unknown>): HackingProgram {
         vulnerable: (r.vulnerable as boolean) ?? false,
         runningEffect: (r.running_effect as string) ?? '',
         reloadCondition: r.reload_condition as HackingProgram['reloadCondition'],
+    };
+}
+
+function mapObjective(r: Record<string, unknown>): Objective {
+    return {
+        id: r.id as string,
+        name: r.name as string,
+        factionId: r.faction_id as string,
+        description: (r.description as string) ?? '',
+        rewardType: (r.reward_type as Objective['rewardType']) ?? 'ongoing',
+        rewardText: (r.reward_text as string) ?? '',
+        grantsStreetCred: (r.grants_street_cred as boolean) ?? false,
+        grantsEB: r.grants_eb as number | undefined,
+        grantsLuck: r.grants_luck as number | undefined,
+        grantsCybergearTo: r.grants_cybergear_to as string | undefined,
+        cybergearEffect: r.cybergear_effect as string | undefined,
+        unlocksCardId: r.unlocks_card_id as string | undefined,
+        imageUrl: r.image_url as string | undefined,
     };
 }
 
@@ -225,6 +244,25 @@ function programToRow(p: HackingProgram) {
     };
 }
 
+function objectiveToRow(o: Objective) {
+    return {
+        id: o.id,
+        name: o.name,
+        faction_id: o.factionId,
+        description: o.description,
+        reward_type: o.rewardType,
+        reward_text: o.rewardText,
+        grants_street_cred: o.grantsStreetCred,
+        grants_eb: o.grantsEB,
+        grants_luck: o.grantsLuck,
+        grants_cybergear_to: o.grantsCybergearTo,
+        cybergear_effect: o.cybergearEffect,
+        unlocks_card_id: o.unlocksCardId,
+        image_url: o.imageUrl,
+        updated_at: new Date().toISOString(),
+    };
+}
+
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export function useCatalog() {
@@ -237,7 +275,7 @@ export function useCatalog() {
 
         (async () => {
             try {
-                const [factionsRes, lineagesRes, lfRes, profilesRes, weaponsRes, itemsRes, programsRes, configRes] = await Promise.all([
+                const [factionsRes, lineagesRes, lfRes, profilesRes, weaponsRes, itemsRes, programsRes, configRes, objectivesRes] = await Promise.all([
                     supabase.from('factions').select('*'),
                     supabase.from('lineages').select('*'),
                     supabase.from('lineage_factions').select('*'),
@@ -246,10 +284,15 @@ export function useCatalog() {
                     supabase.from('items').select('*'),
                     supabase.from('programs').select('*'),
                     supabase.from('app_config').select('*').eq('key', 'tier_surcharges').maybeSingle(),
+                    supabase.from('objectives').select('*'),
                 ]);
 
                 if (factionsRes.error || lineagesRes.error || profilesRes.error || weaponsRes.error) {
                     throw new Error(`Table fetch failed: ${factionsRes.error?.message || lineagesRes.error?.message || profilesRes.error?.message || weaponsRes.error?.message}`);
+                }
+
+                if (objectivesRes.error) {
+                    console.warn('[Catalog] objectives fetch failed (non-fatal):', objectivesRes.error.message);
                 }
 
                 // Build factionIds lookup from junction table
@@ -267,6 +310,7 @@ export function useCatalog() {
                     weapons: (weaponsRes.data ?? []).map(mapWeapon),
                     items: (itemsRes.data ?? []).map(mapItem),
                     programs: (programsRes.data ?? []).map(mapProgram),
+                    objectives: (objectivesRes.data ?? []).map(mapObjective),
                     tierSurcharges: (configRes.data?.value as { veteran: number; elite: number }) ?? { veteran: 5, elite: 10 },
                 };
 
@@ -283,6 +327,7 @@ export function useCatalog() {
                         items: seed.ITEMS,
                         programs: seed.HACKING_PROGRAMS,
                         weapons: seed.WEAPONS,
+                        objectives: (seed as { OBJECTIVES?: Objective[] }).OBJECTIVES ?? [],
                         tierSurcharges: seed.TIER_SURCHARGES,
                     };
                     useStore.setState({ catalog: fallback });
@@ -356,6 +401,16 @@ export function useCatalog() {
         if (error) console.error('[Catalog] saveProgram error:', error.message);
     }, []);
 
+    const saveObjective = useCallback(async (objective: Objective) => {
+        const { error } = await supabase.from('objectives').upsert(objectiveToRow(objective));
+        if (error) console.error('[Catalog] saveObjective error:', error.message);
+    }, []);
+
+    const deleteObjective = useCallback(async (objectiveId: string) => {
+        const { error } = await supabase.from('objectives').delete().eq('id', objectiveId);
+        if (error) console.error('[Catalog] deleteObjective error:', error.message);
+    }, []);
+
     const saveTierSurcharges = useCallback(async (surcharges: { veteran: number; elite: number }) => {
         const { error } = await supabase.from('app_config').upsert({
             key: 'tier_surcharges',
@@ -376,6 +431,8 @@ export function useCatalog() {
         deleteWeapon,
         saveItem,
         saveProgram,
+        saveObjective,
+        deleteObjective,
         saveTierSurcharges,
     };
 }

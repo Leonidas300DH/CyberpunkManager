@@ -164,7 +164,7 @@ const EMPTY_WEAPON: Partial<Weapon> & { variantRows?: FactionVariant[] } = {
 
 // hasNoImage is now runtime — see missingImageIds state inside ArmoryContent
 
-type ArmoryTab = 'Gear' | 'Program' | 'Loot' | 'Objective';
+type ArmoryTab = 'Gear' | 'Program' | 'Loot';
 
 export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
     const { catalog, setCatalog } = useStore();
@@ -1263,9 +1263,6 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             <div className="px-3 pb-3 flex justify-between items-center">
                                 {resolveVariant(item.factionVariants).rarity < 99 && <span className="text-[10px] font-mono-tech text-muted-foreground">RAR.{resolveVariant(item.factionVariants).rarity}</span>}
                                 {resolveVariant(item.factionVariants).reqStreetCred > 0 && <span className="text-[10px] font-mono-tech text-secondary">SC {resolveVariant(item.factionVariants).reqStreetCred}+</span>}
-                                {activeTab === 'Objective' && item.grantsStreetCredBonus && (
-                                    <span className="text-[10px] font-mono-tech text-cyber-green">+{item.grantsStreetCredBonus} SC</span>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -1274,7 +1271,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
 
             {filteredItems.length === 0 && (
                 <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                    <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">No {activeTab === 'Objective' ? 'Objectives' : activeTab} Found</h3>
+                    <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">No {activeTab} Found</h3>
                     <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Database query returned zero results.</p>
                 </div>
             )}

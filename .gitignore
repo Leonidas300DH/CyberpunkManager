@@ -48,3 +48,6 @@ next-env.d.ts
 scripts/check-tyger-claws.ts
 scripts/push-obsessed-paparazzi.ts
 scripts/push-oyabun-vet.ts
+scripts/create-objectives-table.ts
+scripts/insert-all-objectives.ts
+scripts/update-6th-street-objectives.ts

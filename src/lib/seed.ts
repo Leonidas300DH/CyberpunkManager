@@ -1,7 +1,7 @@
 // Auto-generated from Supabase on 2026-02-28
 // DO NOT EDIT MANUALLY — regenerate with: npx tsx scripts/dump-seed.ts && npx tsx scripts/gen-seed.ts
 
-import type { Faction, ModelLineage, ModelProfile, Weapon, ItemCard, HackingProgram } from '@/types';
+import type { Faction, ModelLineage, ModelProfile, Weapon, ItemCard, HackingProgram, Objective } from '@/types';
 
 export const FACTIONS: Faction[] = [
     {"id":"faction-6th-street","name":"6th Street","description":"Patriotic street militia defending their turf with military discipline and heavy firepower.","imageUrl":"https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/factions/6thStreet.png"},
@@ -957,5 +957,7 @@ export const HACKING_PROGRAMS: HackingProgram[] = [
     {"id":"program-weapon-glitch","name":"WEAPON GLITCH","factionId":"all","costEB":2,"reqStreetCred":2,"rarity":1,"imageUrl":"https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/programs/WEAPON GLITCH.png","quality":"Yellow","range":"Green","techTest":true,"flavorText":"The moment your trusted steel betrays you ...","loadedText":"Hack target rival and launch program: Flip this card.","vulnerable":false,"runningEffect":"Hacked target cannot use an equiped gear as long as he is hacked or spends an action token to remove the effect.","reloadCondition":"Inspire"},
     {"id":"program-witness-me","name":"WITNESS ME","factionId":"faction-maelstrom","costEB":2,"reqStreetCred":2,"rarity":1,"imageUrl":"https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/programs/WITNESS ME.png","quality":"Green","range":"Self","techTest":false,"flavorText":"Mirrored digital reflex engrams boost combat performance.","loadedText":"Launch program: Flip this card.","vulnerable":true,"runningEffect":"Other friendly models within RED gain +1 Melee and Deadly Crits on all melee attacks.","reloadCondition":"Inspire"},
 ];
+
+export const OBJECTIVES: Objective[] = [];
 
 export const TIER_SURCHARGES = {"elite":10,"veteran":5};

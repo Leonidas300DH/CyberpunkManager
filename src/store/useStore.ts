@@ -45,7 +45,7 @@ interface StoreState {
     reset: () => void;
 }
 
-const emptyCatalog: CatalogData = { factions: [], lineages: [], profiles: [], items: [], programs: [], weapons: [] };
+const emptyCatalog: CatalogData = { factions: [], lineages: [], profiles: [], items: [], programs: [], weapons: [], objectives: [] };
 
 // ─── STORE ────────────────────────────────────────────────────────────
 // Catalog starts empty — populated by useCatalog from Supabase relational tables.

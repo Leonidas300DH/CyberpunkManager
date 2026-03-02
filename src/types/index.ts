@@ -2,6 +2,7 @@ export type ActionColor = 'Green' | 'Yellow' | 'Red';
 export type SkillType = 'Reflexes' | 'Ranged' | 'Melee' | 'Medical' | 'Tech' | 'Influence' | 'None';
 export type RangeType = 'Reach' | 'Red' | 'Yellow' | 'Green' | 'Long' | 'Self';
 export type ItemCategory = 'Gear' | 'Program' | 'Loot' | 'Objective';
+export type ObjectiveRewardType = 'ongoing' | 'recycle' | 'cybergear';
 
 // --- DYNAMIC FACTIONS ---
 export interface Faction {
@@ -98,6 +99,23 @@ export interface HackingProgram {
     reloadCondition: ReloadCondition; // How to reload/flip the card back
 }
 
+// --- OBJECTIVES ---
+export interface Objective {
+    id: string;
+    name: string;
+    factionId: string;           // FK to Faction
+    description: string;         // Condition text
+    rewardType: ObjectiveRewardType;
+    rewardText: string;          // Reward description
+    grantsStreetCred: boolean;
+    grantsEB?: number;
+    grantsLuck?: number;
+    grantsCybergearTo?: string;  // Target description for cybergear
+    cybergearEffect?: string;    // Cybergear effect text
+    unlocksCardId?: string;      // FK to item/weapon unlocked
+    imageUrl?: string;
+}
+
 // --- FACTION VARIANTS ---
 export type WeaponSource = 'Custom' | 'Manual' | 'Upload';
 
@@ -185,5 +203,6 @@ export interface CatalogData {
     items: ItemCard[];
     programs: HackingProgram[];
     weapons: Weapon[];
+    objectives: Objective[];
     tierSurcharges?: { veteran: number; elite: number };
 }
