@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
-import { ModelLineage, ModelProfile, GameAction, SkillType, RangeType, ActionColor } from '@/types';
+import { ModelLineage, ModelProfile, GameAction, SkillType, RangeType, ActionColor, Weapon, FactionVariant } from '@/types';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -10,7 +10,7 @@ import { useCatalog } from '@/hooks/useCatalog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, X, Upload, FlipVertical2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, X, Upload, FlipVertical2, ChevronDown, ChevronRight, Edit } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { canHaveTiers, getTierLabel, getTierSurcharges } from '@/lib/tiers';
 
@@ -140,16 +140,126 @@ const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-wild-things': 'border-rose-500',
 };
 
-export function ModelsTab() {
+function slugify(text: string): string {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+}
+
+const EMPTY_ACTION_CATALOG_FORM = {
+    name: '',
+    description: '',
+    skillReq: undefined as Weapon['skillReq'],
+    skillBonus: undefined as number | undefined,
+    rangeRed: false,
+    rangeYellow: false,
+    rangeGreen: false,
+    rangeLong: false,
+};
+
+// ── Range arrows (same coordinates as CharacterCard) ──
+const RA = {
+    red:    '1,1 44,1 49,11 44,21 5,21',
+    yellow: '52,1 95,1 100,11 95,21 52,21 57,11',
+    green:  '103,1 145,1 150,11 145,21 103,21 108,11',
+    long:   '153,1 218,1 223,11 218,21 153,21 158,11',
+    plusCx: 188,
+};
+
+function RangeArrowsPreview({ rangeRed, rangeYellow, rangeGreen, rangeLong }: {
+    rangeRed: boolean; rangeYellow: boolean; rangeGreen: boolean; rangeLong: boolean;
+}) {
+    if (!rangeRed && !rangeYellow && !rangeGreen && !rangeLong) return null;
+    const OFF = 'rgba(100,100,100,0.35)';
+    const OFF_STROKE = 'rgba(255,255,255,0.3)';
+    const ON_STROKE = 'white';
+    return (
+        <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
+            <polygon points={RA.red}
+                fill={rangeRed ? '#dc2626' : OFF}
+                stroke={rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
+                opacity={rangeRed ? 1 : 0.5} />
+            <polygon points={RA.yellow}
+                fill={rangeYellow ? '#eab308' : OFF}
+                stroke={rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
+                opacity={rangeYellow ? 1 : 0.5} />
+            <polygon points={RA.green}
+                fill={rangeGreen ? '#22c55e' : OFF}
+                stroke={rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
+                opacity={rangeGreen ? 1 : 0.5} />
+            {rangeLong && (
+                <>
+                    <polygon points={RA.long}
+                        fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
+                    <line x1={RA.plusCx} y1="8" x2={RA.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1={RA.plusCx - 3} y1="11" x2={RA.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                </>
+            )}
+        </svg>
+    );
+}
+
+function LinkedActionSummary({ action, catalog, onEdit }: {
+    action: GameAction;
+    catalog: { weapons: Weapon[] };
+    onEdit: (weapon: Weapon) => void;
+}) {
+    const linkedWeapon = catalog.weapons.find(w => w.id === action.weaponId);
+    const isActionType = linkedWeapon?.isAction;
+    return (
+        <div className="bg-black/50 border border-border/30 px-2 py-1.5">
+            <div className="flex items-start justify-between gap-2">
+                <span className="font-mono-tech text-[9px] text-white/60 flex-1">
+                    <span className="font-bold text-emerald-400 uppercase">{action.name}</span>
+                    {action.skillReq && action.skillReq !== 'None' && <> · {action.skillReq}{linkedWeapon?.skillBonus ? ` +${linkedWeapon.skillBonus}` : ''}</>}
+                    {action.keywords.length > 0 && <> · {action.keywords.join(', ')}</>}
+                    {action.effectDescription && (
+                        <span className="block mt-0.5 text-white/40 text-[8px] leading-tight">{action.effectDescription.slice(0, 120)}{action.effectDescription.length > 120 ? '...' : ''}</span>
+                    )}
+                </span>
+                {isActionType && (
+                    <button
+                        type="button"
+                        onClick={() => linkedWeapon && onEdit(linkedWeapon)}
+                        className="shrink-0 p-1 text-muted-foreground hover:text-emerald-400 transition-colors"
+                        title="Edit this action in catalog"
+                    >
+                        <Edit className="w-3 h-3" />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export function ModelsTab({ highlightId, highlightKey }: { highlightId?: string; highlightKey?: number }) {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
-    const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, deleteProfile: deleteProfileDb, saveTierSurcharges } = useCatalog();
+    const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, deleteProfile: deleteProfileDb, saveTierSurcharges, saveWeapon } = useCatalog();
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState<ModelLineage['type'] | 'all'>('all');
     const [factionFilter, setFactionFilter] = useState<string | 'all'>('all');
     const [sourceFilter, setSourceFilter] = useState<'all' | 'Custom' | 'Upload'>('all');
     const [imageFilter, setImageFilter] = useState<'all' | 'default' | 'custom'>('all');
+
+    // Highlight scroll-to effect
+    useEffect(() => {
+        if (!highlightId) return;
+        setSearch('');
+        setTypeFilter('all');
+        setFactionFilter('all');
+        setSourceFilter('all');
+        setImageFilter('all');
+        const timer = setTimeout(() => {
+            const el = document.querySelector(`[data-card-id="${highlightId}"]`) as HTMLElement;
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('highlight-flash');
+                setTimeout(() => el.classList.remove('highlight-flash'), 2000);
+            }
+        }, 150);
+        return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [highlightId, highlightKey]);
 
     // ── Expand/collapse state ──
     const [expandedLineages, setExpandedLineages] = useState<Set<string>>(new Set());
@@ -168,6 +278,109 @@ export function ModelsTab() {
     const [lineageForm, setLineageForm] = useState<Partial<ModelLineage>>({});
     const [profileForm, setProfileForm] = useState<Partial<ModelProfile>>({});
     const [actionsForm, setActionsForm] = useState<GameAction[]>([]);
+
+    // ── Action catalog create/edit sub-dialog ──
+    const [actionCatalogDialogOpen, setActionCatalogDialogOpen] = useState(false);
+    const [editingCatalogAction, setEditingCatalogAction] = useState<Weapon | null>(null);
+    const [actionCatalogForm, setActionCatalogForm] = useState(EMPTY_ACTION_CATALOG_FORM);
+    const [actionLinkIndex, setActionLinkIndex] = useState<number | null>(null); // index to link after create
+
+    const openCreateAction = (linkIndex: number) => {
+        setEditingCatalogAction(null);
+        setActionCatalogForm(EMPTY_ACTION_CATALOG_FORM);
+        setActionLinkIndex(linkIndex);
+        setActionCatalogDialogOpen(true);
+    };
+
+    const openEditCatalogAction = (weapon: Weapon) => {
+        setEditingCatalogAction(weapon);
+        setActionCatalogForm({
+            name: weapon.name,
+            description: weapon.description,
+            skillReq: weapon.skillReq,
+            skillBonus: weapon.skillBonus,
+            rangeRed: weapon.rangeRed,
+            rangeYellow: weapon.rangeYellow,
+            rangeGreen: weapon.rangeGreen,
+            rangeLong: weapon.rangeLong,
+        });
+        setActionLinkIndex(null);
+        setActionCatalogDialogOpen(true);
+    };
+
+    const saveCatalogAction = () => {
+        if (!catalog) return;
+
+        if (editingCatalogAction) {
+            // Edit existing action
+            const updated: Weapon = {
+                ...editingCatalogAction,
+                name: actionCatalogForm.name || editingCatalogAction.name,
+                description: actionCatalogForm.description ?? '',
+                skillReq: actionCatalogForm.skillReq,
+                skillBonus: actionCatalogForm.skillBonus,
+                rangeRed: actionCatalogForm.rangeRed,
+                rangeYellow: actionCatalogForm.rangeYellow,
+                rangeGreen: actionCatalogForm.rangeGreen,
+                rangeLong: actionCatalogForm.rangeLong,
+            };
+            const updatedWeapons = catalog.weapons.map(w => w.id === updated.id ? updated : w);
+            setCatalog({ ...catalog, weapons: updatedWeapons });
+            saveWeapon(updated);
+
+            // Update action form if this action is linked to any action in the current form
+            setActionsForm(prev => prev.map(a => {
+                if (a.weaponId !== updated.id) return a;
+                return {
+                    ...a,
+                    name: updated.name,
+                    skillReq: (updated.skillReq ?? 'None') as SkillType,
+                    range: (updated.rangeRed ? 'Red' : updated.rangeYellow ? 'Yellow' : updated.rangeGreen ? 'Green' : updated.rangeLong ? 'Long' : 'Reach') as RangeType,
+                    keywords: [...updated.keywords],
+                    effectDescription: updated.description,
+                };
+            }));
+        } else {
+            // Create new action
+            const newAction: Weapon = {
+                id: `action-${slugify(actionCatalogForm.name || 'unnamed')}-${Date.now().toString(36)}`,
+                name: actionCatalogForm.name || 'New Action',
+                source: 'Manual',
+                factionVariants: [{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }] as FactionVariant[],
+                isWeapon: false,
+                isGear: false,
+                isAction: true,
+                skillReq: actionCatalogForm.skillReq,
+                skillBonus: actionCatalogForm.skillBonus,
+                rangeRed: actionCatalogForm.rangeRed,
+                rangeYellow: actionCatalogForm.rangeYellow,
+                rangeGreen: actionCatalogForm.rangeGreen,
+                rangeLong: actionCatalogForm.rangeLong,
+                description: actionCatalogForm.description ?? '',
+                keywords: [],
+            };
+            const updatedWeapons = [...catalog.weapons, newAction];
+            setCatalog({ ...catalog, weapons: updatedWeapons });
+            saveWeapon(newAction);
+
+            // Auto-link the newly created action to the current action slot
+            if (actionLinkIndex !== null) {
+                setActionsForm(prev => prev.map((a, i) => i === actionLinkIndex ? {
+                    ...a,
+                    weaponId: newAction.id,
+                    name: newAction.name,
+                    skillReq: (newAction.skillReq ?? 'None') as SkillType,
+                    range: (newAction.rangeRed ? 'Red' : newAction.rangeYellow ? 'Yellow' : newAction.rangeGreen ? 'Green' : newAction.rangeLong ? 'Long' : 'Reach') as RangeType,
+                    keywords: [...newAction.keywords],
+                    effectDescription: newAction.description,
+                } : a));
+            }
+        }
+
+        setActionCatalogDialogOpen(false);
+        setEditingCatalogAction(null);
+        setActionLinkIndex(null);
+    };
 
     const getProfilesForLineage = (lineageId: string) =>
         catalog.profiles.filter(p => p.lineageId === lineageId).sort((a, b) => a.level - b.level);
@@ -240,7 +453,6 @@ export function ModelsTab() {
             armor: profileForm.armor ?? editingProfile.armor,
             streetCred: profileForm.streetCred ?? editingProfile.streetCred,
             keywords: profileForm.keywords ?? editingProfile.keywords,
-            passiveRules: profileForm.passiveRules ?? editingProfile.passiveRules,
             gonkActionColor: profileForm.gonkActionColor,
             actions: actionsForm,
         };
@@ -514,7 +726,7 @@ export function ModelsTab() {
                             // Collapsed: show base card only + expand chevron
                             const baseProfile = profiles.find(p => p.level === 0) ?? profiles[0];
                             return (
-                                <div key={lineage.id} className="w-full" style={cardStyle}>
+                                <div key={lineage.id} data-card-id={lineage.id} className="w-full" style={cardStyle}>
                                     <CharacterCard
                                         lineage={lineage}
                                         profile={baseProfile}
@@ -539,7 +751,7 @@ export function ModelsTab() {
 
                         // Expanded (or single profile): show all versions
                         return profiles.map(profile => (
-                            <div key={profile.id} className="w-full" style={cardStyle}>
+                            <div key={profile.id} data-card-id={lineage.id} className="w-full" style={cardStyle}>
                                 <CharacterCard
                                     lineage={lineage}
                                     profile={profile}
@@ -759,18 +971,6 @@ export function ModelsTab() {
                             />
                         </div>
 
-                        {/* ── Passive Rules ── */}
-                        <div className="space-y-2">
-                            <Label className="font-mono-tech text-xs uppercase tracking-widest">Passive Rules</Label>
-                            <textarea
-                                value={profileForm.passiveRules ?? ''}
-                                onChange={(e) => setProfileForm({ ...profileForm, passiveRules: e.target.value })}
-                                placeholder="Passive Name: Description..."
-                                rows={2}
-                                className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-sm text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none resize-none"
-                            />
-                        </div>
-
                         {/* ── Actions ── */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
@@ -788,42 +988,55 @@ export function ModelsTab() {
                                         <X className="w-3 h-3" />
                                     </button>
 
-                                    {/* Weapon/Gear dropdown */}
+                                    {/* Weapon/Gear/Action dropdown + Create New */}
                                     <div className="space-y-0.5 pr-5">
-                                        <span className="font-mono-tech text-[9px] text-muted-foreground uppercase">Weapon / Gear</span>
-                                        <select
-                                            value={action.weaponId || ''}
-                                            onChange={(e) => selectWeaponForAction(i, e.target.value)}
-                                            className="w-full bg-black border border-border px-2 py-1 font-mono-tech text-[10px] uppercase text-white"
-                                        >
-                                            <option value="">-- None (manual) --</option>
-                                            {availableWeapons.filter(w => w.isWeapon).length > 0 && (
-                                                <optgroup label="Weapons">
-                                                    {availableWeapons.filter(w => w.isWeapon).map(w => (
-                                                        <option key={w.id} value={w.id}>{w.name}</option>
-                                                    ))}
-                                                </optgroup>
-                                            )}
-                                            {availableWeapons.filter(w => w.isGear).length > 0 && (
-                                                <optgroup label="Gear">
-                                                    {availableWeapons.filter(w => w.isGear).map(w => (
-                                                        <option key={w.id} value={w.id}>{w.name}</option>
-                                                    ))}
-                                                </optgroup>
-                                            )}
-                                        </select>
+                                        <span className="font-mono-tech text-[9px] text-muted-foreground uppercase">Weapon / Gear / Action</span>
+                                        <div className="flex gap-1">
+                                            <select
+                                                value={action.weaponId || ''}
+                                                onChange={(e) => selectWeaponForAction(i, e.target.value)}
+                                                className="flex-1 bg-black border border-border px-2 py-1 font-mono-tech text-[10px] uppercase text-white"
+                                            >
+                                                <option value="">-- None (manual) --</option>
+                                                {availableWeapons.filter(w => w.isWeapon).length > 0 && (
+                                                    <optgroup label="Weapons">
+                                                        {availableWeapons.filter(w => w.isWeapon).map(w => (
+                                                            <option key={w.id} value={w.id}>{w.name}</option>
+                                                        ))}
+                                                    </optgroup>
+                                                )}
+                                                {availableWeapons.filter(w => w.isGear).length > 0 && (
+                                                    <optgroup label="Gear">
+                                                        {availableWeapons.filter(w => w.isGear).map(w => (
+                                                            <option key={w.id} value={w.id}>{w.name}</option>
+                                                        ))}
+                                                    </optgroup>
+                                                )}
+                                                {availableWeapons.filter(w => w.isAction).length > 0 && (
+                                                    <optgroup label="Actions">
+                                                        {availableWeapons.filter(w => w.isAction).map(w => (
+                                                            <option key={w.id} value={w.id}>{w.name}</option>
+                                                        ))}
+                                                    </optgroup>
+                                                )}
+                                            </select>
+                                            <button
+                                                type="button"
+                                                onClick={() => openCreateAction(i)}
+                                                className="shrink-0 px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white font-mono-tech text-[9px] uppercase tracking-wider transition-colors"
+                                                title="Create new action in catalog"
+                                            >
+                                                <Plus className="w-3 h-3" />
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {action.weaponId ? (
-                                        /* ── Linked: single read-only summary ── */
-                                        <div className="bg-black/50 border border-border/30 px-2 py-1 pointer-events-none opacity-80">
-                                            <span className="font-mono-tech text-[9px] text-white/60">
-                                                <span className="font-bold text-emerald-400 uppercase">{action.name}</span>
-                                                {action.skillReq && action.skillReq !== 'None' && <> · {action.skillReq}</>}
-                                                {action.keywords.length > 0 && <> · {action.keywords.join(', ')}</>}
-                                                {action.effectDescription && <> · {action.effectDescription}</>}
-                                            </span>
-                                        </div>
+                                        <LinkedActionSummary
+                                            action={action}
+                                            catalog={catalog}
+                                            onEdit={openEditCatalogAction}
+                                        />
                                     ) : (
                                         /* ── Manual action form ── */
                                         <>
@@ -924,6 +1137,107 @@ export function ModelsTab() {
                             className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors"
                         >
                             Save
+                        </button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* ── Action Catalog Create/Edit Sub-Dialog ── */}
+            <Dialog open={actionCatalogDialogOpen} onOpenChange={setActionCatalogDialogOpen}>
+                <DialogContent className="max-w-sm max-h-[75vh] overflow-y-auto bg-black border-emerald-500/50 text-white !top-[12vh] !translate-y-0">
+                    <DialogHeader>
+                        <DialogTitle className="font-display text-lg tracking-wider text-emerald-400">
+                            {editingCatalogAction ? 'Edit Action' : 'Create Action'}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-2">
+                        {/* Name */}
+                        <div className="space-y-1">
+                            <Label className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Name</Label>
+                            <Input
+                                value={actionCatalogForm.name}
+                                onChange={(e) => setActionCatalogForm(f => ({ ...f, name: e.target.value }))}
+                                placeholder="Action name..."
+                                className="bg-black border-border font-mono-tech text-sm"
+                            />
+                        </div>
+
+                        {/* Skill + Bonus */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <Label className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Skill</Label>
+                                <select
+                                    value={actionCatalogForm.skillReq ?? ''}
+                                    onChange={(e) => setActionCatalogForm(f => ({ ...f, skillReq: e.target.value ? e.target.value as Weapon['skillReq'] : undefined }))}
+                                    className="w-full bg-black border border-border px-2 py-1.5 font-mono-tech text-xs uppercase text-white"
+                                >
+                                    <option value="">None</option>
+                                    {SKILL_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Skill Bonus</Label>
+                                <Input
+                                    type="number"
+                                    value={actionCatalogForm.skillBonus ?? ''}
+                                    onChange={(e) => setActionCatalogForm(f => ({ ...f, skillBonus: e.target.value ? Number(e.target.value) : undefined }))}
+                                    placeholder="+1, +2..."
+                                    className="bg-black border-border font-mono-tech text-sm"
+                                    disabled={!actionCatalogForm.skillReq}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Range checkboxes */}
+                        <div className="space-y-2">
+                            <Label className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Range</Label>
+                            <div className="flex gap-4">
+                                {(['rangeRed', 'rangeYellow', 'rangeGreen', 'rangeLong'] as const).map(key => {
+                                    const label = key.replace('range', '');
+                                    const color = key === 'rangeRed' ? 'text-red-500' : key === 'rangeYellow' ? 'text-yellow-500' : key === 'rangeGreen' ? 'text-green-500' : 'text-white';
+                                    return (
+                                        <label key={key} className="flex items-center gap-1.5 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={actionCatalogForm[key]}
+                                                onChange={(e) => setActionCatalogForm(f => ({ ...f, [key]: e.target.checked }))}
+                                                className="accent-emerald-500"
+                                            />
+                                            <span className={`font-mono-tech text-[10px] uppercase ${color}`}>{label}</span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                            {/* Range preview */}
+                            <div className="w-[70%]">
+                                <RangeArrowsPreview
+                                    rangeRed={actionCatalogForm.rangeRed}
+                                    rangeYellow={actionCatalogForm.rangeYellow}
+                                    rangeGreen={actionCatalogForm.rangeGreen}
+                                    rangeLong={actionCatalogForm.rangeLong}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Description */}
+                        <div className="space-y-1">
+                            <Label className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Description</Label>
+                            <textarea
+                                value={actionCatalogForm.description}
+                                onChange={(e) => setActionCatalogForm(f => ({ ...f, description: e.target.value }))}
+                                placeholder="Effect description..."
+                                rows={3}
+                                className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-xs text-white placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none resize-none"
+                            />
+                        </div>
+
+                        {/* Save */}
+                        <button
+                            onClick={saveCatalogAction}
+                            disabled={!actionCatalogForm.name.trim()}
+                            className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-black font-display font-bold uppercase tracking-wider py-2.5 clip-corner-br transition-colors"
+                        >
+                            {editingCatalogAction ? 'Update Action' : 'Create & Link'}
                         </button>
                     </div>
                 </DialogContent>

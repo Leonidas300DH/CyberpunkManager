@@ -65,6 +65,7 @@ const FACTION_TEXT_COLOR_MAP: Record<string, string> = {
 };
 
 const TAB_STYLES: Record<string, { border: string; text: string; gradient: string; glow: string }> = {
+    Weapon: { border: 'border-accent', text: 'text-accent', gradient: 'from-accent to-red-900', glow: 'group-hover:shadow-[0_0_10px_rgba(255,0,60,0.3)]' },
     Gear: { border: 'border-secondary', text: 'text-secondary', gradient: 'from-secondary to-cyan-900', glow: 'group-hover:shadow-[0_0_10px_rgba(0,240,255,0.3)]' },
     Program: { border: 'border-cyber-purple', text: 'text-cyber-purple', gradient: 'from-cyber-purple to-purple-900', glow: 'group-hover:shadow-[0_0_10px_rgba(168,85,247,0.3)]' },
     Loot: { border: 'border-primary', text: 'text-primary', gradient: 'from-primary to-yellow-700', glow: 'group-hover:shadow-[0_0_10px_rgba(252,238,10,0.3)]' },
@@ -164,9 +165,9 @@ const EMPTY_WEAPON: Partial<Weapon> & { variantRows?: FactionVariant[] } = {
 
 // hasNoImage is now runtime — see missingImageIds state inside ArmoryContent
 
-type ArmoryTab = 'Gear' | 'Program' | 'Loot';
+type ArmoryTab = 'Weapon' | 'Gear' | 'Program' | 'Loot';
 
-export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
+export function ArmoryContent({ activeTab, highlightId, highlightFactionId, highlightKey }: { activeTab: ArmoryTab; highlightId?: string; highlightFactionId?: string; highlightKey?: number }) {
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
@@ -222,7 +223,25 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
         cards.forEach(c => c.style.minHeight = `${maxH}px`);
     });
 
-
+    // Highlight scroll-to effect
+    useEffect(() => {
+        if (!highlightId) return;
+        setSearch('');
+        setFactionFilter('all-factions');
+        setQualityFilter('all');
+        setGearFactionFilters(new Set());
+        setSourceFilter('all');
+        const timer = setTimeout(() => {
+            const el = document.querySelector(`[data-card-id="${highlightId}"]`) as HTMLElement;
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('highlight-flash');
+                setTimeout(() => el.classList.remove('highlight-flash'), 2000);
+            }
+        }, 150);
+        return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [highlightId, highlightKey]);
 
     const tab = TAB_STYLES[activeTab] ?? TAB_STYLES.Gear;
     const programs = catalog.programs ?? [];
@@ -288,8 +307,10 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
             (highlightDefaultRarity && w.factionVariants.every(fv => fv.rarity === 99));
     };
     const filteredWeapons = weapons.filter(w => {
-        if (weaponTypeFilter === 'weapon' && !w.isWeapon) return false;
-        if (weaponTypeFilter === 'gear' && !w.isGear) return false;
+        if (w.isAction) return false;
+        // Tab-level filter: Weapon tab shows only weapons, Gear tab shows only gear
+        if (activeTab === 'Weapon' && !w.isWeapon) return false;
+        if (activeTab === 'Gear' && !w.isGear) return false;
         if (highlightNoImage && !hasNoImage(w)) return false;
         if (highlightNoPrice && !w.factionVariants.some(fv => fv.cost === 0)) return false;
         if (highlightDefaultRarity && !w.factionVariants.every(fv => fv.rarity === 99)) return false;
@@ -390,7 +411,11 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
 
     const openWeaponCreate = () => {
         setEditingWeapon(null);
-        setWeaponForm({ ...EMPTY_WEAPON });
+        setWeaponForm({
+            ...EMPTY_WEAPON,
+            isWeapon: activeTab === 'Weapon',
+            isGear: activeTab === 'Gear',
+        });
         setVariantRows([{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }]);
         setWeaponDialogOpen(true);
     };
@@ -411,6 +436,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 factionVariants: finalVariants,
                 isWeapon: weaponForm.isWeapon ?? true,
                 isGear: weaponForm.isGear ?? false,
+                isAction: false,
                 rangeRed: weaponForm.rangeRed ?? false,
                 rangeYellow: weaponForm.rangeYellow ?? false,
                 rangeGreen: weaponForm.rangeGreen ?? false,
@@ -602,6 +628,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                             return (
                                 <button
                                     key={prog.id}
+                                    data-card-id={prog.id}
                                     onClick={() => setSelectedProgram(prog)}
                                     style={cardStyle}
                                     className={`group relative text-left bg-surface-dark border border-border hover:${qs.border} transition-all duration-200 overflow-hidden`}
@@ -630,7 +657,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 {viewMode === 'card' && (
                     <div className={gridClass}>
                         {filteredPrograms.map(prog => (
-                            <div key={prog.id} className="card-flip-container w-full cursor-pointer" style={cardStyle} onClick={() => toggleFlip(prog.id)}>
+                            <div key={prog.id} data-card-id={prog.id} className="card-flip-container w-full cursor-pointer" style={cardStyle} onClick={() => toggleFlip(prog.id)}>
                                 <div className={`card-flip-inner ${flippedCards.has(prog.id) ? 'flipped' : ''}`}>
                                     <div className="card-flip-front"><ProgramCard program={prog} side="front" /></div>
                                     <div className="card-flip-back"><ProgramCard program={prog} side="back" /></div>
@@ -643,7 +670,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                 {viewMode === 'double' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {filteredPrograms.map(prog => (
-                            <div key={prog.id} className="flex gap-3">
+                            <div key={prog.id} data-card-id={prog.id} className="flex gap-3">
                                 <div className="flex-1"><ProgramCard program={prog} side="front" /></div>
                                 <div className="flex-1"><ProgramCard program={prog} side="back" /></div>
                             </div>
@@ -661,33 +688,19 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
         );
     }
 
-    if (activeTab === 'Gear') {
+    if (activeTab === 'Weapon' || activeTab === 'Gear') {
+        const tabLabel = activeTab === 'Weapon' ? 'WEAPONS' : 'GEAR';
         return (
             <>
-                {/* Gear/Weapons filters + Add button */}
+                {/* Weapons/Gear filters + Add button */}
                 <div className="mb-6 space-y-4">
                     <div className="flex items-center gap-3 bg-surface-dark/50 p-4 border border-border flex-wrap">
                         <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="SEARCH GEAR..."
+                            placeholder={`SEARCH ${tabLabel}...`}
                             className="bg-black border border-border px-4 py-2 text-sm font-mono-tech uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-full md:w-56"
                         />
-                        <div className="flex gap-1">
-                            {(['all', 'weapon', 'gear'] as const).map(t => (
-                                <button
-                                    key={t}
-                                    onClick={() => setWeaponTypeFilter(t)}
-                                    className={`px-3 py-1.5 text-xs font-mono-tech uppercase tracking-wider transition-all ${
-                                        weaponTypeFilter === t
-                                            ? 'bg-secondary text-black font-bold'
-                                            : 'bg-black border border-border text-muted-foreground hover:text-white'
-                                    }`}
-                                >
-                                    {t === 'all' ? 'All' : t === 'weapon' ? 'Weapons' : 'Equipment'}
-                                </button>
-                            ))}
-                        </div>
                         <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest ml-auto hidden md:block">
                             <span className="text-secondary">{filteredWeapons.length}</span> / {weapons.length}
                         </span>
@@ -973,7 +986,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                         const variantFactionName = variant.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
                         const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
                         return (
-                            <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
+                            <div key={weapon.id + '-' + variant.factionId} data-card-id={weapon.id} style={cardStyle} className={`group relative text-left bg-surface-dark border hover:border-secondary transition-all duration-200 overflow-hidden flex flex-col ${isWeaponHighlighted(weapon) ? 'border-accent border-2' : 'border-border'}`}>
                                 <img src={getWeaponImageUrl(weapon.id, weapon.imageUrl)} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     style={{ opacity: 0.55, transform: weapon.imageFlipY ? 'scaleY(-1)' : undefined, WebkitMaskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)', maskImage: 'linear-gradient(to top left, black 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.3) 60%, transparent 90%)' }} />
@@ -1147,7 +1160,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                         return (
                             <div className={gridClass}>
                                 {variantCards.map(({ weapon, variant }) => (
-                                    <div key={weapon.id + '-' + variant.factionId} style={cardStyle} className="relative">
+                                    <div key={weapon.id + '-' + variant.factionId} data-card-id={weapon.id} style={cardStyle} className="relative">
                                         <WeaponCard weapon={weapon} variant={variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(weapon)} onDelete={() => deleteWeapon(weapon.id)} />
                                     </div>
                                 ))}
@@ -1163,7 +1176,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                         if (!isMulti || !isExpanded) {
                             const variant = group.variants[0];
                             items.push(
-                                <div key={weaponId} style={cardStyle} className="relative">
+                                <div key={weaponId} data-card-id={group.weapon.id} style={cardStyle} className="relative">
                                     <WeaponCard weapon={group.weapon} variant={variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
                                     {isMulti && (
                                         <button
@@ -1179,7 +1192,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
                         } else {
                             for (const variant of group.variants) {
                                 items.push(
-                                    <div key={weaponId + '-' + variant.factionId} style={cardStyle} className="relative">
+                                    <div key={weaponId + '-' + variant.factionId} data-card-id={group.weapon.id} style={cardStyle} className="relative">
                                         <WeaponCard weapon={group.weapon} variant={variant} isAdmin={isAdmin} onEdit={() => openWeaponEdit(group.weapon)} onDelete={() => deleteWeapon(group.weapon.id)} />
                                         <button
                                             onClick={(e) => { e.stopPropagation(); toggleExpanded(weaponId); }}
@@ -1224,7 +1237,7 @@ export function ArmoryContent({ activeTab }: { activeTab: ArmoryTab }) {
 
             <div className={gridClass}>
                 {filteredItems.map(item => (
-                    <div key={item.id} style={cardStyle} className={`group bg-surface-dark border border-border hover:${tab.border} transition-all ${tab.glow} relative flex overflow-hidden`}>
+                    <div key={item.id} data-card-id={item.id} style={cardStyle} className={`group bg-surface-dark border border-border hover:${tab.border} transition-all ${tab.glow} relative flex overflow-hidden`}>
                         <div className={`w-2 shrink-0 bg-gradient-to-b ${tab.gradient}`} />
                         <div className="flex-1 flex flex-col">
                             <div className="bg-black p-3 border-b border-border flex justify-between items-start">

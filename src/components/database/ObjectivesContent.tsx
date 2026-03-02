@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -58,7 +58,7 @@ const EMPTY_OBJECTIVE: Partial<Objective> = {
     cybergearEffect: undefined,
 };
 
-export function ObjectivesContent() {
+export function ObjectivesContent({ highlightId, highlightKey }: { highlightId?: string; highlightKey?: number }) {
     const { catalog, setCatalog } = useStore();
     const { gridClass } = useCardGrid();
     const isAdmin = useIsAdmin();
@@ -67,6 +67,24 @@ export function ObjectivesContent() {
     const [search, setSearch] = useState('');
     const [factionFilter, setFactionFilter] = useState<string>('all');
     const [showOnlyIncomplete, setShowOnlyIncomplete] = useState(false);
+
+    // Highlight scroll-to effect
+    useEffect(() => {
+        if (!highlightId) return;
+        setSearch('');
+        setFactionFilter('all');
+        setShowOnlyIncomplete(false);
+        const timer = setTimeout(() => {
+            const el = document.querySelector(`[data-card-id="${highlightId}"]`) as HTMLElement;
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('highlight-flash');
+                setTimeout(() => el.classList.remove('highlight-flash'), 2000);
+            }
+        }, 150);
+        return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [highlightId, highlightKey]);
 
     // Dialog state
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -308,13 +326,14 @@ export function ObjectivesContent() {
             {/* Grid */}
             <div className={gridClass}>
                 {filteredObjectives.map(obj => (
-                    <ObjectiveCard
-                        key={obj.id}
-                        objective={obj}
-                        isAdmin={isAdmin}
-                        onEdit={() => openEdit(obj)}
-                        onDelete={() => handleDelete(obj.id)}
-                    />
+                    <div key={obj.id} data-card-id={obj.id}>
+                        <ObjectiveCard
+                            objective={obj}
+                            isAdmin={isAdmin}
+                            onEdit={() => openEdit(obj)}
+                            onDelete={() => handleDelete(obj.id)}
+                        />
+                    </div>
                 ))}
             </div>
 

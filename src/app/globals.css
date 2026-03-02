@@ -353,4 +353,11 @@
     animation: redlined-pulse 2s ease-in-out infinite;
   }
 
+  /* Highlight flash for card navigation */
+  @keyframes highlight-flash {
+    0% { box-shadow: 0 0 0 3px rgba(252, 238, 10, 0.9); }
+    100% { box-shadow: 0 0 0 3px rgba(252, 238, 10, 0); }
+  }
+  .highlight-flash { animation: highlight-flash 2s ease-out; }
+
 }

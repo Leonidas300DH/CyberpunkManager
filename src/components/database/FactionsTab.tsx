@@ -1,38 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
-import { Faction, ModelLineage } from '@/types';
+import { Faction, ModelLineage, Weapon, HackingProgram, Objective } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ImageInput } from '@/components/ui/image-input';
+import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { CharacterCard } from '@/components/characters/CharacterCard';
-import { useCardGrid } from '@/hooks/useCardGrid';
+import { WeaponCard } from '@/components/weapons/WeaponCard';
+import { ProgramCard } from '@/components/programs/ProgramCard';
+import { ObjectiveCard } from '@/components/shared/ObjectiveCard';
+import { resolveVariant } from '@/lib/variants';
 import { v4 as uuidv4 } from 'uuid';
 import { Plus, Trash2, Edit, ChevronRight } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
 
-// Per-faction signature colors (border + bg variants)
-const FACTION_COLOR_MAP: Record<string, { border: string; bg: string }> = {
-    'faction-arasaka':    { border: 'border-red-600',    bg: 'bg-red-600' },
-    'faction-bozos':      { border: 'border-purple-500', bg: 'bg-purple-500' },
-    'faction-danger-gals':{ border: 'border-pink-400',   bg: 'bg-pink-400' },
-    'faction-edgerunners':{ border: 'border-emerald-500',bg: 'bg-emerald-500' },
-    'faction-gen-red':    { border: 'border-white',      bg: 'bg-white' },
-    'faction-lawmen':     { border: 'border-blue-500',   bg: 'bg-blue-500' },
-    'faction-maelstrom':  { border: 'border-red-700',    bg: 'bg-red-700' },
-    'faction-trauma-team':{ border: 'border-white',      bg: 'bg-white' },
-    'faction-tyger-claws':{ border: 'border-cyan-400',   bg: 'bg-cyan-400' },
-    'faction-zoners':     { border: 'border-orange-500', bg: 'bg-orange-500' },
-    'faction-6th-street': { border: 'border-amber-500',  bg: 'bg-amber-500' },
-    'faction-max-tac':    { border: 'border-indigo-400', bg: 'bg-indigo-400' },
-    'faction-militech':   { border: 'border-lime-500',   bg: 'bg-lime-500' },
-    'faction-piranhas':   { border: 'border-teal-400',   bg: 'bg-teal-400' },
-    'faction-wild-things':{ border: 'border-rose-500',   bg: 'bg-rose-500' },
+// Per-faction signature colors (border + bg + text variants)
+const FACTION_COLOR_MAP: Record<string, { border: string; bg: string; text: string }> = {
+    'faction-arasaka':    { border: 'border-red-600',    bg: 'bg-red-600',    text: 'text-red-600' },
+    'faction-bozos':      { border: 'border-purple-500', bg: 'bg-purple-500', text: 'text-purple-500' },
+    'faction-danger-gals':{ border: 'border-pink-400',   bg: 'bg-pink-400',   text: 'text-pink-400' },
+    'faction-edgerunners':{ border: 'border-emerald-500',bg: 'bg-emerald-500',text: 'text-emerald-500' },
+    'faction-gen-red':    { border: 'border-white',      bg: 'bg-white',      text: 'text-white' },
+    'faction-lawmen':     { border: 'border-blue-500',   bg: 'bg-blue-500',   text: 'text-blue-500' },
+    'faction-maelstrom':  { border: 'border-red-700',    bg: 'bg-red-700',    text: 'text-red-700' },
+    'faction-trauma-team':{ border: 'border-white',      bg: 'bg-white',      text: 'text-white' },
+    'faction-tyger-claws':{ border: 'border-cyan-400',   bg: 'bg-cyan-400',   text: 'text-cyan-400' },
+    'faction-zoners':     { border: 'border-orange-500', bg: 'bg-orange-500', text: 'text-orange-500' },
+    'faction-6th-street': { border: 'border-amber-500',  bg: 'bg-amber-500',  text: 'text-amber-500' },
+    'faction-max-tac':    { border: 'border-indigo-400', bg: 'bg-indigo-400', text: 'text-indigo-400' },
+    'faction-militech':   { border: 'border-lime-500',   bg: 'bg-lime-500',   text: 'text-lime-500' },
+    'faction-piranhas':   { border: 'border-teal-400',   bg: 'bg-teal-400',   text: 'text-teal-400' },
+    'faction-wild-things':{ border: 'border-rose-500',   bg: 'bg-rose-500',   text: 'text-rose-500' },
 };
-const DEFAULT_FACTION_COLOR = { border: 'border-gray-500', bg: 'bg-gray-500' };
+const DEFAULT_FACTION_COLOR = { border: 'border-gray-500', bg: 'bg-gray-500', text: 'text-gray-500' };
 
 const TYPE_COLORS: Record<ModelLineage['type'], string> = {
     Leader: 'text-accent',
@@ -40,6 +44,15 @@ const TYPE_COLORS: Record<ModelLineage['type'], string> = {
     Gonk: 'text-cyber-green',
     Specialist: 'text-secondary',
     Drone: 'text-cyber-orange',
+};
+
+const TYPE_ORDER: ModelLineage['type'][] = ['Leader', 'Character', 'Specialist', 'Gonk', 'Drone'];
+const TYPE_LABEL: Record<ModelLineage['type'], string> = {
+    Leader: 'Leaders',
+    Character: 'Characters',
+    Gonk: 'Gonks',
+    Specialist: 'Specialists',
+    Drone: 'Drones',
 };
 
 // Base faction IDs that cannot be deleted (hardcoded for safety)
@@ -50,9 +63,26 @@ const BASE_FACTION_IDS = new Set([
     'faction-piranhas', 'faction-wild-things',
 ]);
 
-export function FactionsTab() {
+const QUALITY_BG: Record<string, string> = {
+    Red: 'bg-accent',
+    Yellow: 'bg-primary',
+    Green: 'bg-cyber-green',
+};
+
+/* ─── Section Header ─── */
+
+function SectionHeader({ title, count, colorClass }: { title: string; count: number; colorClass: string }) {
+    return (
+        <div className={`font-display font-bold text-sm uppercase tracking-wider ${colorClass} mb-1`}>
+            {title} <span className="text-white/50">{count}</span>
+        </div>
+    );
+}
+
+/* ─── Main Component ─── */
+
+export function FactionsTab({ onNavigateToCard }: { onNavigateToCard?: (tab: string, itemId: string, factionId?: string) => void }) {
     const { catalog, setCatalog } = useStore();
-    const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
     const { saveFaction: saveFactionDb, deleteFaction: deleteFactionDb } = useCatalog();
     const [isOpen, setIsOpen] = useState(false);
@@ -60,9 +90,6 @@ export function FactionsTab() {
     const [formData, setFormData] = useState<Partial<Faction>>({});
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [search, setSearch] = useState('');
-    const [typeFilter, setTypeFilter] = useState<ModelLineage['type'] | 'all'>('all');
-    const [viewMode, setViewMode] = useState<'list' | 'card'>('card');
-    const [selectedCard, setSelectedCard] = useState<string | null>(null);
 
     const handleSave = () => {
         const newFactions = [...catalog.factions];
@@ -103,67 +130,83 @@ export function FactionsTab() {
     };
 
     const filteredFactions = catalog.factions
-        .filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
+        .filter(f => f.id.startsWith('faction-'))
+        .filter(f => {
+            const q = search.toLowerCase();
+            return f.name.toLowerCase().includes(q) || (f.description?.toLowerCase().includes(q) ?? false);
+        })
         .sort((a, b) => a.name.localeCompare(b.name));
 
-    const getLineagesForFaction = (factionId: string) =>
-        catalog.lineages.filter(l => l.factionIds.includes(factionId));
+    // Faction name lookup for allied labels
+    const factionNames = useMemo(() => {
+        const map: Record<string, string> = {};
+        for (const f of catalog.factions) map[f.id] = f.name;
+        return map;
+    }, [catalog.factions]);
 
-    const getProfilesForLineage = (lineageId: string) =>
-        catalog.profiles.filter(p => p.lineageId === lineageId).sort((a, b) => a.level - b.level);
+    // Pre-compute faction data
+    type CharEntry = { lineageId: string; name: string; type: ModelLineage['type']; profileCount: number; primaryFactionId: string };
+    const factionData = useMemo(() => {
+        const result: Record<string, {
+            lineages: ModelLineage[];
+            native: CharEntry[];
+            allied: CharEntry[];
+            weapons: Weapon[];
+            gears: Weapon[];
+            programs: HackingProgram[];
+            objectives: Objective[];
+        }> = {};
 
-    const filterLineages = (lineages: ModelLineage[]) =>
-        lineages.filter(l => {
-            const matchSearch = l.name.toLowerCase().includes(search.toLowerCase());
-            const matchType = typeFilter === 'all' || l.type === typeFilter;
-            return matchSearch && matchType;
-        });
+        for (const faction of catalog.factions) {
+            const fid = faction.id;
+            const lineages = catalog.lineages.filter(l => l.factionIds.includes(fid));
+            const native: CharEntry[] = [];
+            const allied: CharEntry[] = [];
+            for (const l of lineages) {
+                const entry: CharEntry = {
+                    lineageId: l.id,
+                    name: l.name,
+                    type: l.type,
+                    profileCount: catalog.profiles.filter(p => p.lineageId === l.id).length,
+                    primaryFactionId: l.factionIds[0],
+                };
+                if (l.factionIds[0] === fid) {
+                    native.push(entry);
+                } else {
+                    allied.push(entry);
+                }
+            }
+            const weapons = catalog.weapons.filter(w =>
+                w.isWeapon && !w.isAction && w.factionVariants.some(v => v.factionId === fid)
+            );
+            const gears = catalog.weapons.filter(w =>
+                w.isGear && !w.isAction && w.factionVariants.some(v => v.factionId === fid)
+            );
+            const programs = catalog.programs.filter(p => p.factionId === fid);
+            const objectives = catalog.objectives.filter(o => o.factionId === fid);
 
-    // Collect unique types
-    const allTypes = Array.from(new Set(catalog.lineages.map(l => l.type)));
+            result[fid] = { lineages, native, allied, weapons, gears, programs, objectives };
+        }
+        return result;
+    }, [catalog]);
 
     return (
         <div className="space-y-6">
-            {/* Search, Filters & Actions Bar */}
+            {/* Top Bar */}
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-surface-dark/50 p-4 border border-border">
-                <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="SEARCH UNITS..."
-                    className="bg-black border border-border px-4 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-full md:w-64"
-                />
-                <div className="flex gap-2 font-mono-tech text-xs flex-wrap items-center">
-                    <button
-                        onClick={() => setTypeFilter('all')}
-                        className={`px-4 py-2 font-bold uppercase tracking-wider transition-colors ${
-                            typeFilter === 'all' ? 'bg-primary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
-                        }`}
-                    >
-                        All Types
-                    </button>
-                    {allTypes.map(type => (
-                        <button
-                            key={type}
-                            onClick={() => setTypeFilter(type)}
-                            className={`px-4 py-2 font-bold uppercase tracking-wider transition-colors ${
-                                typeFilter === type ? 'bg-secondary text-black' : 'border border-border text-muted-foreground hover:border-secondary hover:text-secondary'
-                            }`}
-                        >
-                            {type}
-                        </button>
-                    ))}
-                    <div className="w-px h-6 bg-border mx-1" />
-                    <button
-                        onClick={() => setViewMode(v => v === 'list' ? 'card' : 'list')}
-                        className={`px-4 py-2 font-bold uppercase tracking-wider transition-colors border border-border ${
-                            viewMode === 'card' ? 'bg-accent text-white border-accent' : 'text-muted-foreground hover:border-secondary hover:text-secondary'
-                        }`}
-                    >
-                        {viewMode === 'card' ? 'Cards' : 'List'}
-                    </button>
-                    <div className="w-px h-6 bg-border mx-1" />
-                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                        {isAdmin && (
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="SEARCH FACTIONS..."
+                        className="bg-black border border-border px-4 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-full md:w-64"
+                    />
+                    <span className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest whitespace-nowrap">
+                        {filteredFactions.length} faction{filteredFactions.length !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    {isAdmin && (
                         <DialogTrigger asChild>
                             <button
                                 onClick={() => { setEditingFaction(null); setFormData({}); }}
@@ -172,50 +215,49 @@ export function FactionsTab() {
                                 <Plus className="w-4 h-4" /> Faction
                             </button>
                         </DialogTrigger>
-                        )}
-                        <DialogContent className="bg-surface-dark border-border">
-                            <DialogHeader>
-                                <DialogTitle className="font-display uppercase tracking-wider text-primary">
-                                    {editingFaction ? 'Edit Faction' : 'New Faction'}
-                                </DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
-                                    <Input
-                                        value={formData.name || ''}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        placeholder="Faction Name"
-                                        className="bg-black border-border font-mono-tech"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Description</Label>
-                                    <Input
-                                        value={formData.description || ''}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="Short faction description"
-                                        className="bg-black border-border font-mono-tech"
-                                    />
-                                </div>
-                                <ImageInput
-                                    value={formData.imageUrl || ''}
-                                    onChange={(val) => setFormData({ ...formData, imageUrl: val })}
+                    )}
+                    <DialogContent className="bg-surface-dark border-border">
+                        <DialogHeader>
+                            <DialogTitle className="font-display uppercase tracking-wider text-primary">
+                                {editingFaction ? 'Edit Faction' : 'New Faction'}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                                <Input
+                                    value={formData.name || ''}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    placeholder="Faction Name"
+                                    className="bg-black border-border font-mono-tech"
                                 />
-                                <button
-                                    onClick={handleSave}
-                                    className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors"
-                                >
-                                    Save
-                                </button>
                             </div>
-                        </DialogContent>
-                    </Dialog>
-                </div>
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Description</Label>
+                                <Input
+                                    value={formData.description || ''}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    placeholder="Short faction description"
+                                    className="bg-black border-border font-mono-tech"
+                                />
+                            </div>
+                            <ImageInput
+                                value={formData.imageUrl || ''}
+                                onChange={(val) => setFormData({ ...formData, imageUrl: val })}
+                            />
+                            <button
+                                onClick={handleSave}
+                                className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
 
-            {/* Faction Accordion Rows */}
-            <div className="space-y-0">
+            {/* Faction Panels */}
+            <div className="space-y-3">
                 {filteredFactions.length === 0 && (
                     <div className="border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
                         No factions found. Add factions to build your database.
@@ -224,44 +266,54 @@ export function FactionsTab() {
 
                 {filteredFactions.map((faction) => {
                     const factionColor = FACTION_COLOR_MAP[faction.id] ?? DEFAULT_FACTION_COLOR;
-                    const lineages = getLineagesForFaction(faction.id);
-                    const filtered = filterLineages(lineages);
+                    const data = factionData[faction.id];
                     const isExpanded = expandedId === faction.id;
                     const abbr = faction.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
                     const isBase = BASE_FACTION_IDS.has(faction.id);
 
-                    if (filtered.length === 0 && (search || typeFilter !== 'all')) return null;
+                    const native = data?.native ?? [];
+                    const allied = data?.allied ?? [];
+                    const allChars = [...native, ...allied];
+                    const weapons = data?.weapons ?? [];
+                    const gears = data?.gears ?? [];
+                    const programs = data?.programs ?? [];
+                    const objectives = data?.objectives ?? [];
+
+                    // Group allied characters by source faction
+                    const alliedByFaction = new Map<string, CharEntry[]>();
+                    for (const c of allied) {
+                        const arr = alliedByFaction.get(c.primaryFactionId) ?? [];
+                        arr.push(c);
+                        alliedByFaction.set(c.primaryFactionId, arr);
+                    }
 
                     return (
-                        <div key={faction.id} className={`group ${!isExpanded ? 'opacity-90 hover:opacity-100' : ''} transition-opacity`}>
-                            {/* Faction Row */}
+                        <div key={faction.id} className="group">
+                            {/* Header */}
                             <div
                                 role="button"
                                 tabIndex={0}
                                 onClick={() => setExpandedId(isExpanded ? null : faction.id)}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedId(isExpanded ? null : faction.id); } }}
-                                className={`w-full bg-surface-dark hover:bg-tech-gray border-l-4 ${factionColor.border} px-4 py-0 flex items-center justify-between transition-all duration-300 clip-corner-br cursor-pointer`}
+                                className={`w-full bg-surface-dark hover:bg-tech-gray border-l-4 ${factionColor.border} px-4 py-0 flex items-center justify-between transition-all duration-300 cursor-pointer`}
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className={`h-32 w-32 md:h-40 md:w-40 ${factionColor.bg} flex items-center justify-center text-black font-bold font-display text-4xl overflow-hidden shrink-0`}>
+                                    <div className={`h-20 w-20 md:h-24 md:w-24 ${factionColor.bg} flex items-center justify-center text-black font-bold font-display text-2xl overflow-hidden shrink-0`}>
                                         {faction.imageUrl ? (
-                                            <img src={faction.imageUrl} className="w-full h-full object-cover" />
+                                            <img src={faction.imageUrl} className="w-full h-full object-cover" alt={faction.name} />
                                         ) : (
                                             abbr
                                         )}
                                     </div>
                                     <div className="text-left">
-                                        <h2 className="text-2xl font-display font-bold uppercase text-white tracking-wide group-hover:text-primary transition-colors">
+                                        <h2 className="text-xl md:text-2xl font-display font-bold uppercase text-white tracking-wide group-hover:text-primary transition-colors">
                                             {faction.name}
                                         </h2>
                                         {faction.description && (
-                                            <p className="text-sm font-body text-white/70 mt-1 line-clamp-2">
+                                            <p className="text-sm font-body text-white/70 mt-0.5 line-clamp-1">
                                                 {faction.description}
                                             </p>
                                         )}
-                                        <span className="text-xs font-mono-tech text-muted-foreground">
-                                            {filtered.length} unit{filtered.length !== 1 ? 's' : ''}
-                                        </span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -285,105 +337,177 @@ export function FactionsTab() {
                                 </div>
                             </div>
 
-                            {/* Expanded Panel */}
+                            {/* Expanded Detail */}
                             <div
                                 className="grid transition-all duration-500 ease-in-out"
                                 style={{ gridTemplateRows: isExpanded ? '1fr' : '0fr' }}
                             >
                                 <div className="overflow-hidden">
-                                <div className="border-l border-r border-b border-border bg-black/80 p-6">
-                                    {filtered.length === 0 ? (
-                                        <div className="text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest py-6">
-                                            No units registered for this faction.
-                                        </div>
-                                    ) : viewMode === 'card' ? (
-                                        /* ── Card View ── */
-                                        <div className={gridClass}>
-                                            {filtered.map(lineage => {
-                                                const profiles = getProfilesForLineage(lineage.id);
-                                                return profiles.map(profile => (
-                                                    <div key={profile.id} className="w-full" style={cardStyle}>
-                                                        <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={faction.id} />
-                                                        {profiles.length > 1 && (
-                                                            <div className="text-center mt-1">
-                                                                <span className="font-mono-tech text-[10px] text-muted-foreground uppercase">
-                                                                    {profile.level === 0 ? 'Base' : `Rank ${profile.level}`}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ));
-                                            })}
-                                        </div>
-                                    ) : (
-                                        /* ── List View (ProgramCard-inspired) ── */
-                                        <div className={gridClass}>
-                                            {filtered.map(lineage => {
-                                                const profiles = getProfilesForLineage(lineage.id);
-                                                const baseProfile = profiles[0];
-                                                if (!baseProfile) return null;
-                                                const isSelected = selectedCard === lineage.id;
+                                    <div className={`border-l-4 ${factionColor.border} border-b border-r border-border bg-black/80 p-5`}>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                                                return (
-                                                    <div key={lineage.id} className="w-full" style={cardStyle}>
-                                                        <button
-                                                            onClick={() => setSelectedCard(isSelected ? null : lineage.id)}
-                                                            className="relative w-full aspect-[3/2] overflow-hidden border border-border hover:border-secondary transition-all group/tile rounded-sm"
-                                                        >
-                                                            {/* Background image */}
-                                                            {lineage.imageUrl ? (
-                                                                <img
-                                                                    src={lineage.imageUrl}
-                                                                    alt={lineage.name}
-                                                                    className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover/tile:opacity-60 transition-opacity"
-                                                                />
-                                                            ) : (
-                                                                <div className="absolute inset-0 bg-surface-dark" />
-                                                            )}
-                                                            {/* Gradient overlay */}
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                                                            {/* Scanline */}
-                                                            <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.06)_2px,rgba(0,0,0,0.06)_4px)] pointer-events-none" />
-
-                                                            {/* Name + keyword + cost top-left */}
-                                                            <div className="absolute top-1.5 left-2 z-10 text-left">
-                                                                <div className="font-display font-bold text-sm text-white uppercase tracking-wide leading-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
-                                                                    {lineage.name}
+                                            {/* Characters */}
+                                            <div>
+                                                <SectionHeader title="Gang Members" count={allChars.length} colorClass={factionColor.text} />
+                                                <div className="space-y-2">
+                                                    {TYPE_ORDER.map(type => {
+                                                        const items = native.filter(c => c.type === type);
+                                                        return (
+                                                            <div key={type}>
+                                                                <div className={`text-xs font-display font-bold uppercase tracking-wider mb-0.5 ${factionColor.text}`}>
+                                                                    {TYPE_LABEL[type]}
                                                                 </div>
-                                                                {baseProfile.keywords[0] && (
-                                                                    <div className="font-mono-tech text-[9px] text-white/60 uppercase tracking-wider mt-0.5">
-                                                                        {baseProfile.keywords[0]}
+                                                                {items.length === 0 ? (
+                                                                    <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
+                                                                ) : (
+                                                                    <div className="flex flex-wrap gap-1.5">
+                                                                        {items.map(c => {
+                                                                            const lin = catalog.lineages.find(l => l.id === c.lineageId);
+                                                                            const prof = catalog.profiles.find(p => p.lineageId === c.lineageId && (p.level ?? 0) === 0) ?? catalog.profiles.find(p => p.lineageId === c.lineageId);
+                                                                            return (
+                                                                                <CardPreviewTooltip key={c.lineageId} renderCard={() => lin && prof ? <CharacterCard lineage={lin} profile={prof} catalogWeapons={catalog.weapons} activeFactionId={faction.id} /> : <></>}>
+                                                                                    <span
+                                                                                        onClick={() => onNavigateToCard?.('models', c.lineageId)}
+                                                                                        className={`text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border ${factionColor.border} rounded-full text-white cursor-pointer hover:brightness-125 transition-all`}
+                                                                                    >
+                                                                                        {c.name}
+                                                                                    </span>
+                                                                                </CardPreviewTooltip>
+                                                                            );
+                                                                        })}
                                                                     </div>
                                                                 )}
-                                                                <div className="font-mono-tech text-[10px] font-black text-primary mt-0.5">
-                                                                    EB {baseProfile.costEB}
-                                                                </div>
                                                             </div>
-                                                        </button>
-
-                                                        {/* Expanded full CharacterCard */}
-                                                        {isSelected && (
-                                                            <div className="mt-2 space-y-2">
-                                                                {profiles.map(profile => (
-                                                                    <div key={profile.id} className="w-full">
-                                                                        <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={faction.id} />
-                                                                        {profiles.length > 1 && (
-                                                                            <div className="text-center mt-1">
-                                                                                <span className="font-mono-tech text-[10px] text-muted-foreground uppercase">
-                                                                                    {profile.level === 0 ? 'Base' : `Rank ${profile.level}`}
-                                                                                </span>
-                                                                            </div>
-                                                                        )}
+                                                        );
+                                                    })}
+                                                    {alliedByFaction.size > 0 && (
+                                                        <div className="mt-2 pt-2 border-t border-border/50">
+                                                            {Array.from(alliedByFaction.entries()).map(([srcFactionId, items]) => {
+                                                                const srcColor = FACTION_COLOR_MAP[srcFactionId] ?? DEFAULT_FACTION_COLOR;
+                                                                return (
+                                                                    <div key={srcFactionId} className="mb-1.5">
+                                                                        <div className={`text-[10px] font-mono-tech uppercase tracking-widest mb-0.5 ${srcColor.text}`}>
+                                                                            {factionNames[srcFactionId] ?? 'Allied'}
+                                                                        </div>
+                                                                        <div className="flex flex-wrap gap-1.5">
+                                                                            {items.map(c => {
+                                                                                const lin = catalog.lineages.find(l => l.id === c.lineageId);
+                                                                                const prof = catalog.profiles.find(p => p.lineageId === c.lineageId && (p.level ?? 0) === 0) ?? catalog.profiles.find(p => p.lineageId === c.lineageId);
+                                                                                return (
+                                                                                    <CardPreviewTooltip key={c.lineageId} renderCard={() => lin && prof ? <CharacterCard lineage={lin} profile={prof} catalogWeapons={catalog.weapons} activeFactionId={faction.id} /> : <></>}>
+                                                                                        <span
+                                                                                            onClick={() => onNavigateToCard?.('models', c.lineageId)}
+                                                                                            className={`text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border ${srcColor.border} rounded-full text-white/50 cursor-pointer hover:brightness-125 transition-all`}
+                                                                                        >
+                                                                                            {c.name}
+                                                                                        </span>
+                                                                                    </CardPreviewTooltip>
+                                                                                );
+                                                                            })}
+                                                                        </div>
                                                                     </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Weapons + Gears */}
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <SectionHeader title="Weapons" count={weapons.length} colorClass="text-accent" />
+                                                    {weapons.length === 0 ? (
+                                                        <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
+                                                    ) : (
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {weapons.map(w => (
+                                                                <CardPreviewTooltip key={w.id} renderCard={() => <WeaponCard weapon={w} variant={resolveVariant(w.factionVariants, faction.id)} />}>
+                                                                    <span
+                                                                        onClick={() => onNavigateToCard?.('weapons', w.id, faction.id)}
+                                                                        className="text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border border-accent rounded-full text-white cursor-pointer hover:brightness-125 transition-all"
+                                                                    >
+                                                                        {w.name}
+                                                                    </span>
+                                                                </CardPreviewTooltip>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <SectionHeader title="Gears" count={gears.length} colorClass="text-secondary" />
+                                                    {gears.length === 0 ? (
+                                                        <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
+                                                    ) : (
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {gears.map(g => (
+                                                                <CardPreviewTooltip key={g.id} renderCard={() => <WeaponCard weapon={g} variant={resolveVariant(g.factionVariants, faction.id)} />}>
+                                                                    <span
+                                                                        onClick={() => onNavigateToCard?.('gear', g.id, faction.id)}
+                                                                        className="text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border border-secondary rounded-full text-white cursor-pointer hover:brightness-125 transition-all"
+                                                                    >
+                                                                        {g.name}
+                                                                    </span>
+                                                                </CardPreviewTooltip>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Programs + Objectives */}
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <SectionHeader title="Programs" count={programs.length} colorClass="text-white" />
+                                                    {programs.length === 0 ? (
+                                                        <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
+                                                    ) : (
+                                                        <div className="space-y-1">
+                                                            {(['Green', 'Yellow', 'Red'] as const).map(quality => {
+                                                                const items = programs.filter(p => p.quality === quality);
+                                                                return (
+                                                                    <div key={quality}>
+                                                                        <div className="flex flex-wrap gap-1.5">
+                                                                            {items.map(p => (
+                                                                                <CardPreviewTooltip key={p.id} renderCard={() => <ProgramCard program={p} side="front" />}>
+                                                                                    <span
+                                                                                        onClick={() => onNavigateToCard?.('programs', p.id)}
+                                                                                        className={`text-[11px] font-mono-tech font-bold px-2.5 py-0.5 rounded-full ${QUALITY_BG[quality]} text-black cursor-pointer hover:brightness-125 transition-all`}
+                                                                                    >
+                                                                                        {p.name}
+                                                                                    </span>
+                                                                                </CardPreviewTooltip>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <SectionHeader title="Objectives" count={objectives.length} colorClass="text-cyber-green" />
+                                                    {objectives.length === 0 ? (
+                                                        <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
+                                                    ) : (
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {objectives.map(o => (
+                                                                <CardPreviewTooltip key={o.id} renderCard={() => <ObjectiveCard objective={o} />}>
+                                                                    <span
+                                                                        onClick={() => onNavigateToCard?.('objectives', o.id)}
+                                                                        className="text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border border-cyber-green rounded-full text-white cursor-pointer hover:brightness-125 transition-all"
+                                                                    >
+                                                                        {o.name}
+                                                                    </span>
+                                                                </CardPreviewTooltip>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
