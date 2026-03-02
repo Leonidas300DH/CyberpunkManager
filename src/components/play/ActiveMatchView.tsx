@@ -1055,7 +1055,7 @@ export function ActiveMatchView() {
                                             }
                                         }}
                                         style={{ width: cardColW, ...cardStyle }}
-                                        className="shrink-0 sticky left-0 z-10 bg-black"
+                                        className="shrink-0 sticky left-0 z-20 bg-black"
                                     >
                                         {characterCardBlock}
                                         {controlsBlock}
@@ -1065,7 +1065,7 @@ export function ActiveMatchView() {
                                     {equippedItems.length > 0 && (
                                         <SortableContext items={equipDragIds} strategy={verticalListSortingStrategy}>
                                             <div
-                                                className="flex flex-col flex-wrap gap-2 content-start"
+                                                className="relative z-0 flex flex-col flex-wrap gap-2 content-start"
                                                 style={{ maxHeight: measuredH || undefined }}
                                             >
                                                 {equippedItems.map(item => {
