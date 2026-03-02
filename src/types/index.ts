@@ -2,7 +2,7 @@ export type ActionColor = 'Green' | 'Yellow' | 'Red';
 export type SkillType = 'Reflexes' | 'Ranged' | 'Melee' | 'Medical' | 'Tech' | 'Influence' | 'None';
 export type RangeType = 'Reach' | 'Red' | 'Yellow' | 'Green' | 'Long' | 'Self';
 export type ItemCategory = 'Gear' | 'Program' | 'Loot' | 'Objective';
-export type ObjectiveRewardType = 'ongoing' | 'recycle' | 'cybergear';
+export type ObjectiveRewardType = 'ongoing' | 'recycle' | 'cybergear' | 'immediate';
 
 // --- DYNAMIC FACTIONS ---
 export interface Faction {
@@ -100,6 +100,11 @@ export interface HackingProgram {
 }
 
 // --- OBJECTIVES ---
+export interface SkillBonus {
+    skill: SkillType;
+    value: number;
+}
+
 export interface Objective {
     id: string;
     name: string;
@@ -107,13 +112,24 @@ export interface Objective {
     description: string;         // Condition text
     rewardType: ObjectiveRewardType;
     rewardText: string;          // Reward description
-    grantsStreetCred: boolean;
+    grantsStreetCred: number;          // 0 = none, 1 = one star, 2 = two stars
     grantsEB?: number;
     grantsLuck?: number;
     grantsCybergearTo?: string;  // Target description for cybergear
     cybergearEffect?: string;    // Cybergear effect text
     unlocksCardId?: string;      // FK to item/weapon unlocked
     imageUrl?: string;
+    // Skill bonuses displayed as hex icons on the card
+    skillBonuses?: SkillBonus[];
+    armorBonus?: number;
+    // Action granted by the objective (e.g., Commanding Presence)
+    actionSkill?: SkillType;
+    actionRangeRed?: boolean;
+    actionRangeYellow?: boolean;
+    actionRangeGreen?: boolean;
+    actionRangeLong?: boolean;
+    // Faction banner flavor text (e.g., "THREAT RESPONSE" for Max-Tac)
+    factionBanner?: string;
 }
 
 // --- FACTION VARIANTS ---
@@ -188,6 +204,10 @@ export interface MatchTeam {
     targetEB: number; // e.g., 100, 150, or 200
     selectedRecruitIds: string[]; // Array of RecruitedModel IDs going to the match
     equipmentMap: Record<string, string[]>; // recruitId → item IDs (prefix: weapon-* | program-*)
+    // Objectives
+    objectiveIds?: string[];           // IDs of 3 objectives for this match
+    completedObjectiveIds?: string[];  // IDs completed during THIS match
+    carryingLeaderPenalty?: boolean;   // true if Wounded Leader is active
     // Play state (persisted across navigation)
     tokenStates?: Record<string, TokenState[]>;
     deadModelIds?: string[];

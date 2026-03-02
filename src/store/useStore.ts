@@ -22,6 +22,10 @@ export interface TeamBuilderDraft {
     selectedIds: string[];
     equipmentMap: Record<string, string[]>;
     targetEB: number;
+    objectivesEnabled?: boolean;
+    carryingLeaderPenalty?: boolean;
+    drawnObjectiveIds?: string[];
+    selectedObjectiveIds?: string[];
 }
 
 interface StoreState {
@@ -104,6 +108,9 @@ export const useStore = create<StoreState>()(
                         tokenStates: p.activeMatchTeam.tokenStates ?? undefined,
                         deadModelIds: p.activeMatchTeam.deadModelIds ?? undefined,
                         luck: p.activeMatchTeam.luck ?? undefined,
+                        objectiveIds: p.activeMatchTeam.objectiveIds ?? undefined,
+                        completedObjectiveIds: p.activeMatchTeam.completedObjectiveIds ?? undefined,
+                        carryingLeaderPenalty: p.activeMatchTeam.carryingLeaderPenalty ?? undefined,
                     }
                     : null;
                 return {

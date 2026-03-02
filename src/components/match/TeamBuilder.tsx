@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { AlertTriangle, ChevronDown, ChevronUp, Plus, Users, X, GripVertical, List, Maximize2 } from 'lucide-react';
 import { useTeamBuilder } from '@/hooks/useTeamBuilder';
 import { useCardGrid } from '@/hooks/useCardGrid';
+import { ObjectiveDrawer } from '@/components/match/ObjectiveDrawer';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { ProgramCard } from '@/components/programs/ProgramCard';
@@ -134,6 +135,8 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
         validationErrors,
         selectedIds,
         equipmentMap,
+        draft,
+        setDraftPatch,
         toggleSelection,
         assignEquip,
         removeEquip,
@@ -417,6 +420,20 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         </div>
                     )}
                 </div>
+
+                {/* === OBJECTIVES DRAWER === */}
+                {catalog.objectives.length > 0 && (
+                    <div className="mt-6">
+                        <ObjectiveDrawer
+                            campaign={campaign}
+                            objectives={catalog.objectives}
+                            factionId={campaign.factionId}
+                            campaignStreetCred={campaignStreetCred}
+                            draft={draft}
+                            onDraftChange={setDraftPatch}
+                        />
+                    </div>
+                )}
 
                 {/* ═══════════════════════════════════════════
                     SECTION 1 — SQUAD (sortable + droppable)

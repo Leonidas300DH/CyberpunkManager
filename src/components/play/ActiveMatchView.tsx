@@ -6,6 +6,7 @@ import { useStore } from '@/store/useStore';
 import { Weapon, HackingProgram, TokenState, ProgramQuality } from '@/types';
 import { parseEquipmentId, resolveVariant } from '@/lib/variants';
 import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal } from 'lucide-react';
+import { ObjectiveHand } from '@/components/play/ObjectiveHand';
 import { useRef } from 'react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
@@ -245,7 +246,7 @@ function parseDragId(id: string): { itemId: string; sourceRecruitId: string } {
 
 export function ActiveMatchView() {
     const router = useRouter();
-    const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam, displaySettings, playViewSettings, setPlayViewSettings } = useStore();
+    const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam, updateCampaign, displaySettings, playViewSettings, setPlayViewSettings } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const cardColumns = displaySettings?.cardColumns ?? 4;
     // Column width matching CSS grid (gap-4 = 16px) — used for vertical layout
@@ -257,7 +258,7 @@ export function ActiveMatchView() {
     const deadModels = useMemo(() => new Set(deadModelIds), [deadModelIds]);
     const luck = activeMatchTeam?.luck ?? 0;
 
-    const updatePlayState = useCallback((patch: Partial<Pick<NonNullable<typeof activeMatchTeam>, 'tokenStates' | 'deadModelIds' | 'luck' | 'flippedCardKeys'>>) => {
+    const updatePlayState = useCallback((patch: Partial<Pick<NonNullable<typeof activeMatchTeam>, 'tokenStates' | 'deadModelIds' | 'luck' | 'flippedCardKeys' | 'completedObjectiveIds'>>) => {
         if (!activeMatchTeam) return;
         setActiveMatchTeam({ ...activeMatchTeam, ...patch });
     }, [activeMatchTeam, setActiveMatchTeam]);
@@ -421,6 +422,53 @@ export function ActiveMatchView() {
             return next;
         });
     };
+
+    // ── Objectives ──
+    const objectiveIds = activeMatchTeam?.objectiveIds ?? [];
+    const completedObjectiveIds = activeMatchTeam?.completedObjectiveIds ?? [];
+    const matchObjectives = useMemo(() =>
+        objectiveIds.map(id => catalog.objectives.find(o => o.id === id)).filter(Boolean) as import('@/types').Objective[],
+        [objectiveIds, catalog.objectives]
+    );
+    const leaderCardId = activeMatchTeam?.carryingLeaderPenalty
+        ? objectiveIds.find(id => {
+            const obj = catalog.objectives.find(o => o.id === id);
+            return obj && (obj.id.includes('wounded-leader') || obj.name.toLowerCase().includes('wounded leader'));
+        })
+        : undefined;
+
+    const handleCompleteObjective = useCallback((objectiveId: string) => {
+        if (!activeMatchTeam || !campaign) return;
+        const obj = catalog.objectives.find(o => o.id === objectiveId);
+        if (!obj) return;
+
+        const newCompleted = [...completedObjectiveIds, objectiveId];
+        updatePlayState({ completedObjectiveIds: newCompleted });
+
+        // Leader card special case: just clear penalty, don't add to campaign completedObjectives
+        const isLeader = objectiveId === leaderCardId;
+        if (isLeader) return;
+
+        // Apply EB reward to campaign ebBank
+        if (obj.grantsEB && obj.grantsEB > 0) {
+            updateCampaign(campaign.id, { ebBank: campaign.ebBank + obj.grantsEB });
+        }
+
+        // Apply Luck reward to match luck counter
+        if (obj.grantsLuck && obj.grantsLuck > 0) {
+            updatePlayState({ luck: luck + obj.grantsLuck });
+        }
+
+        // For ongoing/cybergear: add to campaign.completedObjectives (permanent)
+        if (obj.rewardType === 'ongoing' || obj.rewardType === 'cybergear') {
+            if (!campaign.completedObjectives.includes(objectiveId)) {
+                updateCampaign(campaign.id, {
+                    completedObjectives: [...campaign.completedObjectives, objectiveId],
+                });
+            }
+        }
+        // recycle/immediate: do NOT add to campaign.completedObjectives (can be drawn again)
+    }, [activeMatchTeam, campaign, catalog.objectives, completedObjectiveIds, leaderCardId, luck, updateCampaign, updatePlayState]);
 
     // ── DnD Handlers ──
 
@@ -751,6 +799,17 @@ export function ActiveMatchView() {
                     </div>
                 </div>
             </div>
+
+            {/* === OBJECTIVES === */}
+            {matchObjectives.length > 0 && (
+                <ObjectiveHand
+                    objectives={matchObjectives}
+                    completedIds={completedObjectiveIds}
+                    carryingLeaderPenalty={activeMatchTeam?.carryingLeaderPenalty}
+                    leaderCardId={leaderCardId}
+                    onComplete={handleCompleteObjective}
+                />
+            )}
 
             {/* === UNIT CARDS === */}
             <SortableContext items={matchRoster.map(r => `squad-${r.id}`)} strategy={characterView === 'vertical' ? verticalListSortingStrategy : horizontalListSortingStrategy}>

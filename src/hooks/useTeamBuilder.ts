@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Campaign, MatchTeam } from '@/types';
-import { useStore } from '@/store/useStore';
+import { useStore, TeamBuilderDraft } from '@/store/useStore';
 import { MathService } from '@/lib/math';
 import { ValidationService } from '@/lib/validation';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,6 +14,8 @@ export interface TeamBuilderHook {
     validationErrors: string[];
     selectedIds: string[];
     equipmentMap: Record<string, string[]>;
+    draft: TeamBuilderDraft;
+    setDraftPatch: (patch: Partial<TeamBuilderDraft>) => void;
     toggleSelection: (id: string) => void;
     assignEquip: (recruitId: string, itemId: string) => void;
     removeEquip: (recruitId: string, itemId: string) => void;
@@ -111,6 +113,10 @@ export function useTeamBuilder(campaign: Campaign): TeamBuilderHook {
         setTeamBuilderDraft(campaign.id, { selectedIds: newIds });
     }, [campaign.id, setTeamBuilderDraft]);
 
+    const setDraftPatch = useCallback((patch: Partial<TeamBuilderDraft>) => {
+        setTeamBuilderDraft(campaign.id, patch);
+    }, [campaign.id, setTeamBuilderDraft]);
+
     const currentTeam: MatchTeam = {
         id: 'temp-team',
         campaignId: campaign.id,
@@ -124,12 +130,31 @@ export function useTeamBuilder(campaign: Campaign): TeamBuilderHook {
     const isValid = validationErrors.length === 0;
 
     const handleStartMatch = () => {
+        // Build objective IDs: selected + leader card if carrying
+        let objectiveIds: string[] | undefined;
+        let carryingLeaderPenalty: boolean | undefined;
+        if (draft.objectivesEnabled && draft.selectedObjectiveIds && draft.selectedObjectiveIds.length > 0) {
+            objectiveIds = [...draft.selectedObjectiveIds];
+            if (draft.carryingLeaderPenalty) {
+                // Find the leader card for this faction and prepend it
+                const leaderCard = catalog.objectives.find(
+                    (o) => o.factionId === campaign.factionId && (
+                        o.id.includes('wounded-leader') || o.name.toLowerCase().includes('wounded leader')
+                    )
+                );
+                if (leaderCard) objectiveIds.unshift(leaderCard.id);
+                carryingLeaderPenalty = true;
+            }
+        }
+
         const matchTeam: MatchTeam = {
             id: uuidv4(),
             campaignId: campaign.id,
             targetEB,
             selectedRecruitIds: selectedIds,
             equipmentMap: equipmentMap,
+            objectiveIds,
+            carryingLeaderPenalty,
         };
         setActiveMatchTeam(matchTeam);
         clearTeamBuilderDraft(campaign.id);
@@ -144,6 +169,8 @@ export function useTeamBuilder(campaign: Campaign): TeamBuilderHook {
         validationErrors,
         selectedIds,
         equipmentMap,
+        draft,
+        setDraftPatch,
         toggleSelection,
         assignEquip,
         removeEquip,
