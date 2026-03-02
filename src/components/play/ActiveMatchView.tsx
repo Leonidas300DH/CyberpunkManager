@@ -259,9 +259,10 @@ export function ActiveMatchView() {
     const luck = activeMatchTeam?.luck ?? 0;
 
     const updatePlayState = useCallback((patch: Partial<Pick<NonNullable<typeof activeMatchTeam>, 'tokenStates' | 'deadModelIds' | 'luck' | 'flippedCardKeys' | 'completedObjectiveIds'>>) => {
-        if (!activeMatchTeam) return;
-        setActiveMatchTeam({ ...activeMatchTeam, ...patch });
-    }, [activeMatchTeam, setActiveMatchTeam]);
+        const current = useStore.getState().activeMatchTeam;
+        if (!current) return;
+        setActiveMatchTeam({ ...current, ...patch });
+    }, [setActiveMatchTeam]);
 
     const setTokenStates = useCallback((updater: (prev: Record<string, TokenState[]>) => Record<string, TokenState[]>) => {
         updatePlayState({ tokenStates: updater(tokenStates) });
