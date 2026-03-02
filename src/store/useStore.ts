@@ -7,6 +7,9 @@ const STORAGE_KEY = 'combat-zone-storage';
 interface DisplaySettings {
     cardColumns: number;
     fontScale: number;
+    programViewMode?: 'list' | 'card' | 'double';
+    gearViewMode?: 'list' | 'card';
+    gearStacked?: boolean;
 }
 
 interface PlayViewSettings {

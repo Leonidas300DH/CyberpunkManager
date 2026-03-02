@@ -171,12 +171,16 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     const { catalog, setCatalog } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
-    const { saveWeapon: saveWeaponDb, deleteWeapon: deleteWeaponDb } = useCatalog();
+    const { saveWeapon: saveWeaponDb, deleteWeapon: deleteWeaponDb, saveProgram: saveProgramDb } = useCatalog();
     // Weapon CRUD
     const [weaponDialogOpen, setWeaponDialogOpen] = useState(false);
     const [editingWeapon, setEditingWeapon] = useState<Weapon | null>(null);
     const [weaponForm, setWeaponForm] = useState<Partial<Weapon>>(EMPTY_WEAPON);
     const [variantRows, setVariantRows] = useState<FactionVariant[]>([{ factionId: 'universal', cost: 0, rarity: 99, reqStreetCred: 0 }]);
+    // Program CRUD
+    const [programDialogOpen, setProgramDialogOpen] = useState(false);
+    const [editingProgram, setEditingProgram] = useState<HackingProgram | null>(null);
+    const [programForm, setProgramForm] = useState<Partial<HackingProgram>>({});
     // Detail view
     const [selectedProgram, setSelectedProgram] = useState<HackingProgram | null>(null);
     // Card flip state (Programs)
@@ -393,11 +397,63 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
         setWeaponDialogOpen(true);
     };
 
+    const openProgramCreate = () => {
+        setEditingProgram(null);
+        setProgramForm({
+            name: '', factionId: factionFilter !== 'all' ? factionFilter : 'all', costEB: 0, reqStreetCred: 0, rarity: 99,
+            imageUrl: '', quality: 'Green', range: 'Red', techTest: false, flavorText: '', loadedText: '',
+            vulnerable: false, runningEffect: '', reloadCondition: 'Manual',
+        });
+        setProgramDialogOpen(true);
+    };
+
+    const openProgramEdit = (prog: HackingProgram) => {
+        setEditingProgram(prog);
+        setProgramForm({ ...prog });
+        setProgramDialogOpen(true);
+    };
+
+    const saveProgramLocal = () => {
+        const currentPrograms = catalog.programs ?? [];
+        let updatedPrograms: HackingProgram[];
+        if (editingProgram) {
+            updatedPrograms = currentPrograms.map(p => p.id === editingProgram.id ? { ...editingProgram, ...programForm } as HackingProgram : p);
+        } else {
+            const newProg: HackingProgram = {
+                id: `program-${uuidv4().slice(0, 8)}`,
+                name: programForm.name || 'New Program',
+                factionId: programForm.factionId || 'all',
+                costEB: programForm.costEB ?? 0,
+                reqStreetCred: programForm.reqStreetCred ?? 0,
+                rarity: programForm.rarity ?? 99,
+                imageUrl: programForm.imageUrl || '',
+                quality: programForm.quality || 'Green',
+                range: programForm.range || 'Red',
+                techTest: programForm.techTest ?? false,
+                flavorText: programForm.flavorText || '',
+                loadedText: programForm.loadedText || '',
+                vulnerable: programForm.vulnerable ?? false,
+                runningEffect: programForm.runningEffect || '',
+                reloadCondition: programForm.reloadCondition || 'Manual',
+            };
+            updatedPrograms = [...currentPrograms, newProg];
+        }
+        const savedProg = editingProgram
+            ? updatedPrograms.find(p => p.id === editingProgram.id)!
+            : updatedPrograms[updatedPrograms.length - 1];
+        setCatalog({ ...catalog, programs: updatedPrograms });
+        if (isAdmin) saveProgramDb(savedProg);
+        setProgramDialogOpen(false);
+        setEditingProgram(null);
+        setProgramForm({});
+    };
+
     // Trigger create from parent toolbar
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        if (triggerCreate > 0 && (activeTab === 'Weapon' || activeTab === 'Gear')) {
-            openWeaponCreate();
+        if (triggerCreate > 0) {
+            if (activeTab === 'Weapon' || activeTab === 'Gear') openWeaponCreate();
+            else if (activeTab === 'Program') openProgramCreate();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [triggerCreate]);
@@ -512,6 +568,11 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                             <span className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider">{factionName}</span>
                                         </div>
                                     </div>
+                                    {isAdmin && (
+                                        <button onClick={(e) => { e.stopPropagation(); openProgramEdit(prog); }} className="absolute top-2 right-2 z-20 p-1 bg-black/70 text-muted-foreground hover:text-primary transition-colors" title="Edit program">
+                                            <Edit className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
                                 </button>
                             );
                         })}
@@ -548,6 +609,97 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                         <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Database query returned zero results.</p>
                     </div>
                 )}
+
+                {/* Program Edit/Create Dialog */}
+                <Dialog open={programDialogOpen} onOpenChange={setProgramDialogOpen}>
+                    <DialogContent className="bg-surface-dark border-border max-w-sm max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
+                        <DialogHeader>
+                            <DialogTitle className="font-display uppercase tracking-wider text-primary">
+                                {editingProgram ? 'Edit Program' : 'New Program'}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-3 py-2">
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                                <Input value={programForm.name || ''} onChange={e => setProgramForm(f => ({ ...f, name: e.target.value }))} placeholder="Program Name" className="bg-black border-border font-mono-tech" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Quality</Label>
+                                    <select value={programForm.quality || 'Green'} onChange={e => setProgramForm(f => ({ ...f, quality: e.target.value as ProgramQuality }))} className="w-full bg-black border border-border px-2 py-1.5 font-mono-tech text-xs text-white">
+                                        <option value="Green">Green</option>
+                                        <option value="Yellow">Yellow</option>
+                                        <option value="Red">Red</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Cost EB</Label>
+                                    <Input type="number" value={programForm.costEB ?? 0} onChange={e => setProgramForm(f => ({ ...f, costEB: Number(e.target.value) }))} className="bg-black border-border font-mono-tech" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Faction</Label>
+                                    <select value={programForm.factionId || 'all'} onChange={e => setProgramForm(f => ({ ...f, factionId: e.target.value }))} className="w-full bg-black border border-border px-2 py-1.5 font-mono-tech text-xs text-white">
+                                        <option value="all">All Factions</option>
+                                        {catalog.factions.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Range</Label>
+                                    <select value={programForm.range || 'Red'} onChange={e => setProgramForm(f => ({ ...f, range: e.target.value as HackingProgram['range'] }))} className="w-full bg-black border border-border px-2 py-1.5 font-mono-tech text-xs text-white">
+                                        {['Red', 'Yellow', 'Green', 'Long', 'LongOnly', 'GreenLong', 'Self'].map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-2">
+                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Rarity</Label>
+                                    <Input type="number" value={programForm.rarity ?? 99} onChange={e => setProgramForm(f => ({ ...f, rarity: Number(e.target.value) }))} className="bg-black border-border font-mono-tech" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">SC Req</Label>
+                                    <Input type="number" value={programForm.reqStreetCred ?? 0} onChange={e => setProgramForm(f => ({ ...f, reqStreetCred: Number(e.target.value) }))} className="bg-black border-border font-mono-tech" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="font-mono-tech text-xs uppercase tracking-widest">Reload</Label>
+                                    <select value={programForm.reloadCondition || 'Manual'} onChange={e => setProgramForm(f => ({ ...f, reloadCondition: e.target.value as HackingProgram['reloadCondition'] }))} className="w-full bg-black border border-border px-2 py-1.5 font-mono-tech text-xs text-white">
+                                        {['Inspire', 'TakenOut', 'Wounded', 'Discard', 'Manual'].map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked={programForm.techTest ?? false} onChange={e => setProgramForm(f => ({ ...f, techTest: e.target.checked }))} className="accent-primary" />
+                                    <span className="font-mono-tech text-xs text-muted-foreground uppercase">Tech Test</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked={programForm.vulnerable ?? false} onChange={e => setProgramForm(f => ({ ...f, vulnerable: e.target.checked }))} className="accent-primary" />
+                                    <span className="font-mono-tech text-xs text-muted-foreground uppercase">Vulnerable</span>
+                                </label>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Flavor Text</Label>
+                                <textarea value={programForm.flavorText || ''} onChange={e => setProgramForm(f => ({ ...f, flavorText: e.target.value }))} rows={2} className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-xs text-white resize-none" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Loaded Text (front)</Label>
+                                <textarea value={programForm.loadedText || ''} onChange={e => setProgramForm(f => ({ ...f, loadedText: e.target.value }))} rows={3} className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-xs text-white resize-none" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Running Effect (back)</Label>
+                                <textarea value={programForm.runningEffect || ''} onChange={e => setProgramForm(f => ({ ...f, runningEffect: e.target.value }))} rows={3} className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-xs text-white resize-none" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Image URL</Label>
+                                <Input value={programForm.imageUrl || ''} onChange={e => setProgramForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="/images/programs/..." className="bg-black border-border font-mono-tech" />
+                            </div>
+                            <button onClick={saveProgramLocal} className="w-full py-2 bg-primary text-black font-display font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors">
+                                {editingProgram ? 'Save Changes' : 'Create Program'}
+                            </button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </>
         );
     }

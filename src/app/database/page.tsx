@@ -56,7 +56,7 @@ const SEARCH_PLACEHOLDER: Record<TabId, string> = {
 };
 
 // Tabs that support +New
-const TABS_WITH_CREATE: TabId[] = ['factions', 'models', 'weapons', 'gear', 'objectives', 'actions'];
+const TABS_WITH_CREATE: TabId[] = ['factions', 'models', 'weapons', 'gear', 'programs', 'objectives', 'actions'];
 
 // Tabs that have view modes
 const TABS_WITH_VIEWS: TabId[] = ['programs', 'weapons', 'gear'];
@@ -70,9 +70,17 @@ export default function DatabasePage() {
     const [factionFilter, setFactionFilter] = useState<string>('all');
     const isAdmin = useIsAdmin();
 
-    const { catalog } = useStore();
+    const { catalog, displaySettings, setDisplaySettings } = useStore();
 
-    // ── Lifted state ──
+    // ── Persisted view modes (from displaySettings) ──
+    const programViewMode = (displaySettings.programViewMode ?? 'list') as ViewMode;
+    const gearViewMode = displaySettings.gearViewMode ?? 'card';
+    const gearStacked = displaySettings.gearStacked ?? true;
+    const setProgramViewMode = (m: ViewMode) => setDisplaySettings({ programViewMode: m });
+    const setGearViewMode = (m: 'list' | 'card') => setDisplaySettings({ gearViewMode: m });
+    const setGearStacked = (fn: (prev: boolean) => boolean) => setDisplaySettings({ gearStacked: fn(gearStacked) });
+
+    // ── Lifted state (session-only) ──
     const [search, setSearch] = useState('');
     const [triggerCreate, setTriggerCreate] = useState(0);
 
@@ -83,17 +91,12 @@ export default function DatabasePage() {
 
     // Programs filter
     const [qualityFilter, setQualityFilter] = useState<ProgramQuality | 'all'>('all');
-    // Programs view mode
-    const [programViewMode, setProgramViewMode] = useState<ViewMode>('list');
 
     // Weapons/Gear filters
     const [highlightNoImage, setHighlightNoImage] = useState(false);
     const [highlightNoPrice, setHighlightNoPrice] = useState(false);
     const [highlightDefaultRarity, setHighlightDefaultRarity] = useState(false);
     const [armorySourceFilter, setArmorySourceFilter] = useState<'all' | 'Custom' | 'Upload' | 'Manual'>('all');
-    // Gear view mode + stacking
-    const [gearViewMode, setGearViewMode] = useState<'list' | 'card'>('card');
-    const [gearStacked, setGearStacked] = useState(true);
 
     // Objectives
     const [showOnlyIncomplete, setShowOnlyIncomplete] = useState(false);
@@ -189,69 +192,6 @@ export default function DatabasePage() {
                             <Plus className="w-3.5 h-3.5" />
                             <span className="hidden md:inline">New</span>
                         </button>
-                    )}
-
-                    {/* Views */}
-                    {showViews && (
-                        <div className="relative">
-                            <button
-                                ref={viewsBtnRef}
-                                onClick={() => { setViewsOpen(v => !v); setFiltersOpen(false); }}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all ${
-                                    viewsOpen ? 'border-secondary text-secondary bg-secondary/10' : 'border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary'
-                                }`}
-                                title="View mode"
-                            >
-                                <Eye className="w-3.5 h-3.5" />
-                                <span className="hidden md:inline">Views</span>
-                            </button>
-                            {viewsOpen && (
-                                <div ref={viewsRef} className="absolute z-50 top-full mt-1 right-0 w-48 bg-surface-dark border border-border p-3 space-y-2">
-                                    {activeTab === 'programs' && (
-                                        <>
-                                            <div className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Program View</div>
-                                            {(['list', 'card', 'double'] as ViewMode[]).map(mode => (
-                                                <button
-                                                    key={mode}
-                                                    onClick={() => { setProgramViewMode(mode); setViewsOpen(false); }}
-                                                    className={`block w-full text-left px-2 py-1 font-mono-tech text-xs uppercase tracking-wider transition-all ${
-                                                        programViewMode === mode ? 'text-cyber-purple bg-cyber-purple/10' : 'text-muted-foreground hover:text-white'
-                                                    }`}
-                                                >
-                                                    {mode === 'list' ? 'List' : mode === 'card' ? 'Card' : 'Double'}
-                                                </button>
-                                            ))}
-                                        </>
-                                    )}
-                                    {(activeTab === 'weapons' || activeTab === 'gear') && (
-                                        <>
-                                            <div className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest mb-1">View Mode</div>
-                                            {(['list', 'card'] as const).map(mode => (
-                                                <button
-                                                    key={mode}
-                                                    onClick={() => { setGearViewMode(mode); setViewsOpen(false); }}
-                                                    className={`block w-full text-left px-2 py-1 font-mono-tech text-xs uppercase tracking-wider transition-all ${
-                                                        gearViewMode === mode ? 'text-secondary bg-secondary/10' : 'text-muted-foreground hover:text-white'
-                                                    }`}
-                                                >
-                                                    {mode === 'list' ? 'List' : 'Card'}
-                                                </button>
-                                            ))}
-                                            <div className="border-t border-border pt-2 mt-2">
-                                                <button
-                                                    onClick={() => setGearStacked(s => !s)}
-                                                    className={`block w-full text-left px-2 py-1 font-mono-tech text-xs uppercase tracking-wider transition-all ${
-                                                        gearStacked ? 'text-secondary bg-secondary/10' : 'text-muted-foreground hover:text-white'
-                                                    }`}
-                                                >
-                                                    {gearStacked ? 'Stacked' : 'Flat'}
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            )}
-                        </div>
                     )}
 
                     {/* Filters */}
@@ -351,6 +291,69 @@ export default function DatabasePage() {
                                                 Incomplete only
                                             </button>
                                         </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Views */}
+                    {showViews && (
+                        <div className="relative">
+                            <button
+                                ref={viewsBtnRef}
+                                onClick={() => { setViewsOpen(v => !v); setFiltersOpen(false); }}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all ${
+                                    viewsOpen ? 'border-secondary text-secondary bg-secondary/10' : 'border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary'
+                                }`}
+                                title="View mode"
+                            >
+                                <Eye className="w-3.5 h-3.5" />
+                                <span className="hidden md:inline">Views</span>
+                            </button>
+                            {viewsOpen && (
+                                <div ref={viewsRef} className="absolute z-50 top-full mt-1 right-0 w-48 bg-surface-dark border border-border p-3 space-y-2">
+                                    {activeTab === 'programs' && (
+                                        <>
+                                            <div className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Program View</div>
+                                            {(['list', 'card', 'double'] as ViewMode[]).map(mode => (
+                                                <button
+                                                    key={mode}
+                                                    onClick={() => { setProgramViewMode(mode); setViewsOpen(false); }}
+                                                    className={`block w-full text-left px-2 py-1 font-mono-tech text-xs uppercase tracking-wider transition-all ${
+                                                        programViewMode === mode ? 'text-cyber-purple bg-cyber-purple/10' : 'text-muted-foreground hover:text-white'
+                                                    }`}
+                                                >
+                                                    {mode === 'list' ? 'List' : mode === 'card' ? 'Card' : 'Double'}
+                                                </button>
+                                            ))}
+                                        </>
+                                    )}
+                                    {(activeTab === 'weapons' || activeTab === 'gear') && (
+                                        <>
+                                            <div className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest mb-1">View Mode</div>
+                                            {(['list', 'card'] as const).map(mode => (
+                                                <button
+                                                    key={mode}
+                                                    onClick={() => { setGearViewMode(mode); setViewsOpen(false); }}
+                                                    className={`block w-full text-left px-2 py-1 font-mono-tech text-xs uppercase tracking-wider transition-all ${
+                                                        gearViewMode === mode ? 'text-secondary bg-secondary/10' : 'text-muted-foreground hover:text-white'
+                                                    }`}
+                                                >
+                                                    {mode === 'list' ? 'List' : 'Card'}
+                                                </button>
+                                            ))}
+                                            <div className="border-t border-border pt-2 mt-2">
+                                                <button
+                                                    onClick={() => setGearStacked(s => !s)}
+                                                    className={`block w-full text-left px-2 py-1 font-mono-tech text-xs uppercase tracking-wider transition-all ${
+                                                        gearStacked ? 'text-secondary bg-secondary/10' : 'text-muted-foreground hover:text-white'
+                                                    }`}
+                                                >
+                                                    {gearStacked ? 'Stacked' : 'Flat'}
+                                                </button>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             )}
