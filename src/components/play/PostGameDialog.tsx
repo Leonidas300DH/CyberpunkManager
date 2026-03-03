@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Campaign, MatchTeam, CatalogData, TokenState, MatchLogEntry } from '@/types';
+import { Campaign, MatchTeam, CatalogData, TokenState, MatchLogEntry, MatchLogRecruit } from '@/types';
 import { canHaveTiers, getBaseProfile, getTierLabel } from '@/lib/tiers';
 import { MathService } from '@/lib/math';
 import { v4 as uuidv4 } from 'uuid';
@@ -231,10 +231,26 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
 
     const handleConfirm = () => {
         const { updates, events } = computeUpdates();
+
+        // Build team snapshot
+        const team: MatchLogRecruit[] = matchRoster.map(recruit => {
+            const tokens: TokenState[] = tokenStates[recruit.id] ?? [];
+            return {
+                recruitId: recruit.id,
+                lineageId: recruit.lineageId,
+                profileId: recruit.currentProfileId,
+                equipmentIds: activeMatchTeam.equipmentMap[recruit.id] ?? [],
+                wasWounded: tokens.some(t => t.wounded),
+                wasKIA: deadModelIds.includes(recruit.id),
+            };
+        });
+
         const logEntry: MatchLogEntry = {
             date: new Date().toISOString(),
             result: matchResult!,
             events,
+            team,
+            targetEB: activeMatchTeam.targetEB,
         };
         // Append to existing matchLog
         const existingLog = campaign.matchLog ?? [];

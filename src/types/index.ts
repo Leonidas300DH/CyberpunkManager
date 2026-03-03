@@ -179,11 +179,23 @@ export interface RecruitedModel {
     purchasedLevel?: number; // 0 = base, 1 = veteran direct, 2 = elite direct
 }
 
+// Snapshot of a recruit in a match log
+export interface MatchLogRecruit {
+    recruitId: string;
+    lineageId: string;
+    profileId: string;
+    equipmentIds: string[]; // weapon/program IDs from equipmentMap
+    wasWounded: boolean;
+    wasKIA: boolean;
+}
+
 // Match log entry for campaign journal
 export interface MatchLogEntry {
     date: string; // ISO timestamp
     result: 'victory' | 'defeat';
     events: string[]; // Human-readable event descriptions
+    team?: MatchLogRecruit[]; // Full team snapshot
+    targetEB?: number;
 }
 
 // The persistent Campaign state (The "HQ")
