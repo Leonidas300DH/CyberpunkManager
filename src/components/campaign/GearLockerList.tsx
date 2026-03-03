@@ -111,7 +111,7 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                         {Array.from(ownedGroups.values()).map(({ weapon, variantFactionId, indices, cost }) => (
                             <CardPreviewTooltip
                                 key={`${weapon.id}@${variantFactionId}`}
-                                renderCard={() => <WeaponTile weapon={weapon} variantFactionId={variantFactionId} />}
+                                renderCard={() => <WeaponCard weapon={weapon} variant={resolveVariant(weapon.factionVariants, variantFactionId)} />}
                             >
                                 <span className={`${CAPSULE} border-secondary`}>
                                     <span>{indices.length > 1 ? `${indices.length}× ` : ''}{weapon.name} · {cost}EB</span>
@@ -221,7 +221,7 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                             return (
                                 <CardPreviewTooltip
                                     key={weapon.id}
-                                    renderCard={() => <WeaponTile weapon={weapon} variantFactionId={campaign.factionId} />}
+                                    renderCard={() => <WeaponCard weapon={weapon} variant={resolveVariant(weapon.factionVariants, campaign.factionId)} />}
                                 >
                                     <span className={`${CAPSULE} border-secondary ${cantAfford ? 'opacity-35' : ''}`}>
                                         <span>{weapon.name}</span>

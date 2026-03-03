@@ -13,6 +13,7 @@ import { useCardGrid } from '@/hooks/useCardGrid';
 import { ObjectiveDrawer } from '@/components/match/ObjectiveDrawer';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
+import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { ProgramTile, QUALITY_COLORS } from '@/components/shared/ProgramTile';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
@@ -748,7 +749,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                         return (
                                                             <CardPreviewTooltip
                                                                 key={key}
-                                                                renderCard={() => <WeaponTile weapon={first.weapon!} variantFactionId={first.variantFactionId!} />}
+                                                                renderCard={() => <WeaponCard weapon={first.weapon!} variant={variant} />}
                                                             >
                                                                 <DraggableCapsule id={`equipped:${recruit.id}:${first.equipId}`}>
                                                                     <span className={`${CAPSULE} border-secondary ml-2`}>
@@ -1140,7 +1141,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                     return (
                                         <CardPreviewTooltip
                                             key={`${weapon.id}@${variantFactionId}`}
-                                            renderCard={() => <WeaponTile weapon={weapon} variantFactionId={variantFactionId} />}
+                                            renderCard={() => <WeaponCard weapon={weapon} variant={variant} />}
                                         >
                                             <DraggableCapsule id={`${equipId}#0`}>
                                                 <span className={`${CAPSULE} border-secondary`}>
