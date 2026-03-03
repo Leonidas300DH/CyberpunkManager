@@ -9,6 +9,16 @@ import { ProgramCard } from '@/components/programs/ProgramCard';
 import { ProgramTile, QUALITY_COLORS } from '@/components/shared/ProgramTile';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { useCardGrid } from '@/hooks/useCardGrid';
+import {
+    DndContext,
+    DragOverlay,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragStartEvent,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import { DraggableCapsule, OwnedDropZone, TrashZone } from '@/components/shared/HqDnd';
 
 interface ProgramVaultListProps {
     campaign: Campaign;
@@ -26,6 +36,9 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('card');
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+    const [activeDragId, setActiveDragId] = useState<string | null>(null);
+
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
     const toggleSection = (key: string) => {
         setExpandedSections(prev => {
@@ -94,7 +107,57 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
 
     const stashCountOf = (id: string) => campaign.hqStash.filter(s => parseStashEntry(s).itemId === id).length;
 
+    // ─── DnD handlers ────────────────────────────────────────────────
+    const handleDragStart = (e: DragStartEvent) => setActiveDragId(e.active.id as string);
+    const handleDragEnd = (e: DragEndEvent) => {
+        setActiveDragId(null);
+        if (!e.over) return;
+        const activeId = e.active.id as string;
+        const overId = String(e.over.id);
+
+        if (activeId.startsWith('buy:') && overId === 'owned-zone') {
+            const programId = activeId.slice('buy:'.length);
+            const program = catalog.programs.find(p => p.id === programId);
+            if (program) handleBuy(program.id, program.costEB);
+        }
+        if (activeId.startsWith('sell:') && overId === 'trash-zone') {
+            const stashIdx = parseInt(activeId.slice('sell:'.length), 10);
+            handleRemove(stashIdx);
+        }
+    };
+
+    const renderDragOverlay = () => {
+        if (!activeDragId) return null;
+        if (activeDragId.startsWith('buy:')) {
+            const programId = activeDragId.slice('buy:'.length);
+            const program = catalog.programs.find(p => p.id === programId);
+            if (!program) return null;
+            const colors = QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green;
+            return (
+                <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${colors.bg} ${colors.text} rounded-full font-bold uppercase shadow-lg`}>
+                    {program.name} · {program.costEB}EB
+                </span>
+            );
+        }
+        if (activeDragId.startsWith('sell:')) {
+            const stashIdx = parseInt(activeDragId.slice('sell:'.length), 10);
+            const entry = campaign.hqStash[stashIdx];
+            if (!entry) return null;
+            const { itemId } = parseStashEntry(entry);
+            const program = catalog.programs.find(p => p.id === itemId);
+            if (!program) return null;
+            const colors = QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green;
+            return (
+                <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${colors.bg} ${colors.text} rounded-full font-bold uppercase shadow-lg`}>
+                    {program.name} · {program.costEB}EB
+                </span>
+            );
+        }
+        return null;
+    };
+
     return (
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="space-y-10">
             {/* ═══ SECTION 1 — YOUR PROGRAMS ═══ */}
             <section>
@@ -111,17 +174,18 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                     </div>
                 </button>
 
+                <OwnedDropZone>
                 {stashPrograms.length === 0 ? (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
                         <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">Vault Empty</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Acquire programs from the catalog below.</p>
+                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Drag a program here or use the + button below.</p>
                     </div>
                 ) : !expandedSections.has('owned') ? (
                     /* Capsule View */
                     <div className="flex flex-wrap gap-1.5 mt-2">
                         {Array.from(ownedGroups.values()).map(({ program, indices }) => (
+                            <DraggableCapsule key={program.id} id={`sell:${indices[indices.length - 1]}`}>
                             <CardPreviewTooltip
-                                key={program.id}
                                 renderCard={() => <ProgramCard program={program} side="front" />}
                             >
                                 <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${(QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green).bg} ${(QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green).text} rounded-full font-bold uppercase hover:brightness-125 transition-all cursor-default`}>
@@ -135,6 +199,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                                     </button>
                                 </span>
                             </CardPreviewTooltip>
+                            </DraggableCapsule>
                         ))}
                     </div>
                 ) : (
@@ -171,6 +236,8 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                         </div>
                     </div>
                 )}
+                <TrashZone visible={activeDragId?.startsWith('sell:') ?? false} />
+                </OwnedDropZone>
             </section>
 
             <div className="border-t border-border" />
@@ -185,7 +252,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                     <div className="border-l-2 border-cyber-purple pl-3">
                         <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">Available Programs</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            {filteredPrograms.length} program{filteredPrograms.length !== 1 ? 's' : ''}
+                            Drag to vault or click +
                         </span>
                     </div>
                 </button>
@@ -199,8 +266,8 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                             const cantAfford = campaign.ebBank < program.costEB;
                             const owned = stashCountOf(program.id);
                             return (
+                                <DraggableCapsule key={program.id} id={`buy:${program.id}`} disabled={cantAfford}>
                                 <CardPreviewTooltip
-                                    key={program.id}
                                     renderCard={() => <ProgramCard program={program} side="front" />}
                                 >
                                     <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${(QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green).bg} ${(QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green).text} rounded-full font-bold uppercase hover:brightness-125 transition-all cursor-default ${cantAfford ? 'opacity-35' : ''}`}>
@@ -219,6 +286,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                                         )}
                                     </span>
                                 </CardPreviewTooltip>
+                                </DraggableCapsule>
                             );
                         })}
                     </div>
@@ -406,5 +474,9 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                 )}
             </section>
         </div>
+        <DragOverlay dropAnimation={null}>
+            {renderDragOverlay()}
+        </DragOverlay>
+        </DndContext>
     );
 }

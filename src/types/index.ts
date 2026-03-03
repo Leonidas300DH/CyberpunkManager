@@ -179,6 +179,13 @@ export interface RecruitedModel {
     purchasedLevel?: number; // 0 = base, 1 = veteran direct, 2 = elite direct
 }
 
+// Match log entry for campaign journal
+export interface MatchLogEntry {
+    date: string; // ISO timestamp
+    result: 'victory' | 'defeat';
+    events: string[]; // Human-readable event descriptions
+}
+
 // The persistent Campaign state (The "HQ")
 export interface Campaign {
     id: string;
@@ -188,6 +195,8 @@ export interface Campaign {
     hqRoster: RecruitedModel[]; // Recruited characters
     hqStash: string[]; // IDs of ItemCards owned but not equipped
     completedObjectives: string[]; // IDs of Objective ItemCards
+    carryingLeaderPenalty?: boolean; // Wounded Leader active
+    matchLog?: MatchLogEntry[]; // Post-game journal
 }
 
 // Token state during active play

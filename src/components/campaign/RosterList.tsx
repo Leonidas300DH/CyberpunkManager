@@ -3,12 +3,22 @@
 import { useState } from 'react';
 import { Campaign } from '@/types';
 import { useStore } from '@/store/useStore';
-import { Plus, Search, X, Trash2, ChevronRight, ChevronDown, ArrowUp } from 'lucide-react';
+import { Plus, Search, X, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { v4 as uuidv4 } from 'uuid';
-import { canHaveTiers, getSurchargeForLevel, getTierLabel, getTierSurcharges } from '@/lib/tiers';
+import { canHaveTiers, getSurchargeForLevel, getTierLabel } from '@/lib/tiers';
+import {
+    DndContext,
+    DragOverlay,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragStartEvent,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import { DraggableCapsule, OwnedDropZone, TrashZone } from '@/components/shared/HqDnd';
 
 interface RosterListProps {
     campaign: Campaign;
@@ -22,6 +32,9 @@ export function RosterList({ campaign }: RosterListProps) {
     const [search, setSearch] = useState('');
     const [expandedAvailable, setExpandedAvailable] = useState<Set<string>>(new Set());
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+    const [activeDragId, setActiveDragId] = useState<string | null>(null);
+
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
     const toggleExpandAvailable = (id: string) => {
         setExpandedAvailable(prev => {
@@ -63,8 +76,6 @@ export function RosterList({ campaign }: RosterListProps) {
     const filterBySearch = (name: string) =>
         !search || name.toLowerCase().includes(search.toLowerCase());
 
-    const surcharges = getTierSurcharges(catalog);
-
     const handleRecruit = (lineageId: string, level: number = 0) => {
         const profile = catalog.profiles.find(p => p.lineageId === lineageId && p.level === level);
         if (!profile) return;
@@ -87,28 +98,6 @@ export function RosterList({ campaign }: RosterListProps) {
         });
     };
 
-    const handleUpgrade = (recruitId: string) => {
-        const recruit = campaign.hqRoster.find(r => r.id === recruitId);
-        if (!recruit) return;
-        const currentProfile = getProfile(recruit.currentProfileId);
-        if (!currentProfile) return;
-        const nextLevel = currentProfile.level + 1;
-        const nextProfile = catalog.profiles.find(p => p.lineageId === recruit.lineageId && p.level === nextLevel);
-        if (!nextProfile) return;
-
-        const currentSurcharge = getSurchargeForLevel(currentProfile.level, catalog);
-        const nextSurcharge = getSurchargeForLevel(nextLevel, catalog);
-        const deltaCost = nextSurcharge - currentSurcharge;
-        if (campaign.ebBank < deltaCost) return;
-
-        updateCampaign(campaign.id, {
-            hqRoster: campaign.hqRoster.map(r =>
-                r.id === recruitId ? { ...r, currentProfileId: nextProfile.id } : r
-            ),
-            ebBank: campaign.ebBank - deltaCost,
-        });
-    };
-
     const handleDismiss = (recruitId: string) => {
         const recruit = campaign.hqRoster.find(r => r.id === recruitId);
         if (!recruit) return;
@@ -126,7 +115,57 @@ export function RosterList({ campaign }: RosterListProps) {
 
     const factionName = catalog.factions.find(f => f.id === campaign.factionId)?.name ?? 'Faction';
 
+    // ─── DnD handlers ────────────────────────────────────────────────
+    const handleDragStart = (e: DragStartEvent) => setActiveDragId(e.active.id as string);
+    const handleDragEnd = (e: DragEndEvent) => {
+        setActiveDragId(null);
+        if (!e.over) return;
+        const activeId = e.active.id as string;
+        const overId = String(e.over.id);
+
+        if (activeId.startsWith('recruit:') && overId === 'owned-zone') {
+            const lineageId = activeId.slice('recruit:'.length);
+            handleRecruit(lineageId);
+        }
+        if (activeId.startsWith('dismiss:') && overId === 'trash-zone') {
+            const recruitId = activeId.slice('dismiss:'.length);
+            handleDismiss(recruitId);
+        }
+    };
+
+    const renderDragOverlay = () => {
+        if (!activeDragId) return null;
+        if (activeDragId.startsWith('recruit:')) {
+            const lineageId = activeDragId.slice('recruit:'.length);
+            const lineage = getLineage(lineageId);
+            const profile = getBaseProfile(lineageId);
+            if (!lineage || !profile) return null;
+            return (
+                <span className={`${CAPSULE} border-primary shadow-lg shadow-primary/30`}>
+                    {lineage.name} · {profile.costEB}EB
+                </span>
+            );
+        }
+        if (activeDragId.startsWith('dismiss:')) {
+            const recruitId = activeDragId.slice('dismiss:'.length);
+            const recruit = campaign.hqRoster.find(r => r.id === recruitId);
+            if (!recruit) return null;
+            const profile = getProfile(recruit.currentProfileId);
+            const lineage = profile ? getLineage(profile.lineageId) : null;
+            if (!lineage || !profile) return null;
+            const baseCost = getBaseProfile(recruit.lineageId)?.costEB ?? 0;
+            const totalCost = baseCost + getSurchargeForLevel(profile.level, catalog);
+            return (
+                <span className={`${CAPSULE} border-primary shadow-lg shadow-primary/30`}>
+                    {lineage.name} · {totalCost}EB
+                </span>
+            );
+        }
+        return null;
+    };
+
     return (
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="space-y-10">
             {/* ═══════════════════════════════════════════
                 SECTION 1 — MY ROSTER
@@ -145,10 +184,11 @@ export function RosterList({ campaign }: RosterListProps) {
                     </div>
                 </button>
 
+                <OwnedDropZone>
                 {campaign.hqRoster.length === 0 ? (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
                         <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">Roster Empty</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Recruit mercs from the catalog below.</p>
+                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Drag a merc here or use the + button below.</p>
                     </div>
                 ) : !expandedSections.has('owned') ? (
                     /* Capsule View */
@@ -162,8 +202,8 @@ export function RosterList({ campaign }: RosterListProps) {
                             const tierLabel = profile.level > 0 ? ` · ${getTierLabel(profile.level)}` : '';
 
                             return (
+                                <DraggableCapsule key={recruit.id} id={`dismiss:${recruit.id}`}>
                                 <CardPreviewTooltip
-                                    key={recruit.id}
                                     renderCard={() => (
                                         <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                     )}
@@ -179,6 +219,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                         </button>
                                     </span>
                                 </CardPreviewTooltip>
+                                </DraggableCapsule>
                             );
                         })}
                     </div>
@@ -190,10 +231,6 @@ export function RosterList({ campaign }: RosterListProps) {
                             const lineage = profile ? getLineage(profile.lineageId) : null;
                             if (!profile || !lineage) return null;
 
-                            const nextLevel = profile.level + 1;
-                            const nextProfile = catalog.profiles.find(p => p.lineageId === recruit.lineageId && p.level === nextLevel);
-                            const canUpgrade = nextProfile && canHaveTiers(lineage);
-                            const upgradeCost = canUpgrade ? getSurchargeForLevel(nextLevel, catalog) - getSurchargeForLevel(profile.level, catalog) : 0;
                             const baseCost = getBaseProfile(recruit.lineageId)?.costEB ?? 0;
                             const refundAmount = baseCost + getSurchargeForLevel(profile.level, catalog);
 
@@ -207,21 +244,6 @@ export function RosterList({ campaign }: RosterListProps) {
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />
                                     </button>
-                                    {canUpgrade && (
-                                        <button
-                                            onClick={() => handleUpgrade(recruit.id)}
-                                            disabled={campaign.ebBank < upgradeCost}
-                                            className={`absolute bottom-1 right-1 z-30 flex items-center gap-1 px-2 py-1 font-mono-tech text-[10px] uppercase border transition-colors opacity-0 group-hover/card:opacity-100 ${
-                                                campaign.ebBank >= upgradeCost
-                                                    ? 'border-primary/70 text-primary bg-black/80 hover:bg-primary/20'
-                                                    : 'border-border text-muted-foreground bg-black/80 cursor-not-allowed'
-                                            }`}
-                                            title={`Upgrade to ${getTierLabel(nextLevel)} — ${upgradeCost} EB`}
-                                        >
-                                            <ArrowUp className="w-3 h-3" />
-                                            {getTierLabel(nextLevel)} {upgradeCost}EB
-                                        </button>
-                                    )}
                                     {recruit.hasMajorInjury && (
                                         <div className="absolute bottom-0 left-0 right-0 bg-yellow-600/80 text-center py-0.5 z-20">
                                             <span className="font-mono-tech text-[10px] text-black font-bold uppercase tracking-widest">Injured</span>
@@ -232,6 +254,8 @@ export function RosterList({ campaign }: RosterListProps) {
                         })}
                     </div>
                 )}
+                <TrashZone visible={activeDragId?.startsWith('dismiss:') ?? false} label="Drop to dismiss" />
+                </OwnedDropZone>
             </section>
 
             {/* Divider */}
@@ -249,7 +273,7 @@ export function RosterList({ campaign }: RosterListProps) {
                     <div className="border-l-2 border-secondary pl-3">
                         <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">Available Mercs</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            Click a card to recruit
+                            Drag to roster or click +
                         </span>
                     </div>
                 </button>
@@ -273,8 +297,8 @@ export function RosterList({ campaign }: RosterListProps) {
                                         const disabled = alreadyRecruited || cantAfford;
 
                                         return (
+                                            <DraggableCapsule key={lineage.id} id={`recruit:${lineage.id}`} disabled={disabled}>
                                             <CardPreviewTooltip
-                                                key={lineage.id}
                                                 renderCard={() => (
                                                     <CharacterCard lineage={lineage} profile={baseProfile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                                 )}
@@ -296,6 +320,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                                     ) : null}
                                                 </span>
                                             </CardPreviewTooltip>
+                                            </DraggableCapsule>
                                         );
                                     })}
                                 </div>
@@ -318,8 +343,8 @@ export function RosterList({ campaign }: RosterListProps) {
                                         const disabled = alreadyRecruited || cantAfford;
 
                                         return (
+                                            <DraggableCapsule key={lineage.id} id={`recruit:${lineage.id}`} disabled={disabled}>
                                             <CardPreviewTooltip
-                                                key={lineage.id}
                                                 renderCard={() => (
                                                     <CharacterCard lineage={lineage} profile={baseProfile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                                 )}
@@ -341,6 +366,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                                     ) : null}
                                                 </span>
                                             </CardPreviewTooltip>
+                                            </DraggableCapsule>
                                         );
                                     })}
                                 </div>
@@ -577,5 +603,9 @@ export function RosterList({ campaign }: RosterListProps) {
                 )}
             </section>
         </div>
+        <DragOverlay dropAnimation={null}>
+            {renderDragOverlay()}
+        </DragOverlay>
+        </DndContext>
     );
 }

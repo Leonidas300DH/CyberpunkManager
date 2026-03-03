@@ -16,7 +16,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                         Jack In
                     </DialogTitle>
                     <DialogDescription className="text-muted-foreground font-body text-sm">
-                        Sign in to sync your campaigns, rosters and stash across devices.
+                        Sign in to save your campaigns across devices and browsers.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -49,7 +49,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                     Continue without account
                 </button>
                 <p className="text-center text-[10px] font-mono-tech text-muted-foreground/60 uppercase tracking-wider -mt-2">
-                    Exploratory mode only — no data will be saved
+                    Local only — your data stays on this device
                 </p>
             </DialogContent>
         </Dialog>

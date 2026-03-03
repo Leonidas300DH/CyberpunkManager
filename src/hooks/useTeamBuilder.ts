@@ -133,9 +133,13 @@ export function useTeamBuilder(campaign: Campaign): TeamBuilderHook {
         // Build objective IDs: selected + leader card if carrying
         let objectiveIds: string[] | undefined;
         let carryingLeaderPenalty: boolean | undefined;
+        // Propagate campaign-level leader penalty
+        if (campaign.carryingLeaderPenalty) {
+            carryingLeaderPenalty = true;
+        }
         if (draft.objectivesEnabled && draft.selectedObjectiveIds && draft.selectedObjectiveIds.length > 0) {
             objectiveIds = [...draft.selectedObjectiveIds];
-            if (draft.carryingLeaderPenalty) {
+            if (draft.carryingLeaderPenalty || campaign.carryingLeaderPenalty) {
                 // Find the leader card for this faction and prepend it
                 const leaderCard = catalog.objectives.find(
                     (o) => o.factionId === campaign.factionId && (

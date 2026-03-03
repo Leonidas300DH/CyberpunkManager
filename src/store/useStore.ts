@@ -31,6 +31,8 @@ export interface TeamBuilderDraft {
     selectedObjectiveIds?: string[];
 }
 
+export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
+
 interface StoreState {
     catalog: CatalogData;
     campaigns: Campaign[];
@@ -38,6 +40,8 @@ interface StoreState {
     displaySettings: DisplaySettings;
     playViewSettings: PlayViewSettings;
     teamBuilderDrafts: Record<string, TeamBuilderDraft>;
+    syncStatus: SyncStatus;
+    syncError: string | null;
 
     // Actions
     setCatalog: (data: StoreState['catalog']) => void;
@@ -49,6 +53,7 @@ interface StoreState {
     setPlayViewSettings: (updates: Partial<PlayViewSettings>) => void;
     setTeamBuilderDraft: (campaignId: string, draft: Partial<TeamBuilderDraft>) => void;
     clearTeamBuilderDraft: (campaignId: string) => void;
+    setSyncStatus: (status: SyncStatus, error?: string | null) => void;
     reset: () => void;
 }
 
@@ -66,6 +71,8 @@ export const useStore = create<StoreState>()(
             displaySettings: { cardColumns: 4, fontScale: 100 },
             playViewSettings: { characterView: 'horizontal', programView: 'card', weaponView: 'card', hideKIA: false, enableGlitch: true, enableCodeRain: true },
             teamBuilderDrafts: {},
+            syncStatus: 'idle',
+            syncError: null,
 
             setCatalog: (data) => set({ catalog: data }),
             addCampaign: (campaign) => set((state) => ({ campaigns: [...state.campaigns, campaign] })),
@@ -96,10 +103,16 @@ export const useStore = create<StoreState>()(
                 delete next[campaignId];
                 return { teamBuilderDrafts: next };
             }),
+            setSyncStatus: (status, error = null) => set({ syncStatus: status, syncError: error }),
             reset: () => set({ campaigns: [], activeMatchTeam: null, teamBuilderDrafts: {} }),
         }),
         {
             name: STORAGE_KEY,
+            partialize: (state) => {
+                // Exclude runtime-only fields from persistence
+                const { syncStatus: _ss, syncError: _se, ...rest } = state;
+                return rest;
+            },
             merge: (persisted, current) => {
                 const p = persisted as Partial<StoreState> | undefined;
                 if (!p) return current;

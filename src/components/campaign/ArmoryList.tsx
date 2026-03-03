@@ -10,6 +10,16 @@ import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { useCardGrid } from '@/hooks/useCardGrid';
+import {
+    DndContext,
+    DragOverlay,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragStartEvent,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import { DraggableCapsule, OwnedDropZone, TrashZone } from '@/components/shared/HqDnd';
 
 interface ArmoryListProps {
     campaign: Campaign;
@@ -23,6 +33,9 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
     const [search, setSearch] = useState('');
     const [viewMode, setViewMode] = useState<'list' | 'card'>('card');
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+    const [activeDragId, setActiveDragId] = useState<string | null>(null);
+
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
     const toggleSection = (key: string) => {
         setExpandedSections(prev => {
@@ -83,7 +96,61 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
 
     const stashCountOf = (id: string) => campaign.hqStash.filter(s => parseStashEntry(s).itemId === id).length;
 
+    // ─── DnD handlers ────────────────────────────────────────────────
+    const handleDragStart = (e: DragStartEvent) => setActiveDragId(e.active.id as string);
+    const handleDragEnd = (e: DragEndEvent) => {
+        setActiveDragId(null);
+        if (!e.over) return;
+        const activeId = e.active.id as string;
+        const overId = String(e.over.id);
+
+        if (activeId.startsWith('buy:') && overId === 'owned-zone') {
+            const rest = activeId.slice('buy:'.length);
+            const { itemId, variantFactionId } = parseStashEntry(rest);
+            const weapon = catalog.weapons.find(w => w.id === itemId);
+            if (!weapon) return;
+            const variant = resolveVariant(weapon.factionVariants, variantFactionId);
+            handleBuy(weapon.id, variant.factionId, variant.cost);
+        }
+        if (activeId.startsWith('sell:') && overId === 'trash-zone') {
+            const stashIdx = parseInt(activeId.slice('sell:'.length), 10);
+            handleRemove(stashIdx);
+        }
+    };
+
+    const renderDragOverlay = () => {
+        if (!activeDragId) return null;
+        if (activeDragId.startsWith('buy:')) {
+            const rest = activeDragId.slice('buy:'.length);
+            const { itemId, variantFactionId } = parseStashEntry(rest);
+            const weapon = catalog.weapons.find(w => w.id === itemId);
+            if (!weapon) return null;
+            const variant = resolveVariant(weapon.factionVariants, variantFactionId);
+            return (
+                <span className={`${CAPSULE} border-secondary shadow-lg shadow-secondary/30`}>
+                    {weapon.name} · {variant.cost}EB
+                </span>
+            );
+        }
+        if (activeDragId.startsWith('sell:')) {
+            const stashIdx = parseInt(activeDragId.slice('sell:'.length), 10);
+            const entry = campaign.hqStash[stashIdx];
+            if (!entry) return null;
+            const { itemId, variantFactionId } = parseStashEntry(entry);
+            const weapon = catalog.weapons.find(w => w.id === itemId);
+            if (!weapon) return null;
+            const variant = resolveVariant(weapon.factionVariants, variantFactionId);
+            return (
+                <span className={`${CAPSULE} border-secondary shadow-lg shadow-secondary/30`}>
+                    {weapon.name} · {variant.cost}EB
+                </span>
+            );
+        }
+        return null;
+    };
+
     return (
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="space-y-10">
             {/* ═══ SECTION 1 — YOUR WEAPONS ═══ */}
             <section>
@@ -100,17 +167,18 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
                     </div>
                 </button>
 
+                <OwnedDropZone>
                 {stashWeapons.length === 0 ? (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
                         <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">Armory Empty</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Acquire weapons from the catalog below.</p>
+                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Drag a weapon here or use the + button below.</p>
                     </div>
                 ) : !expandedSections.has('owned') ? (
                     /* Capsule View */
                     <div className="flex flex-wrap gap-1.5 mt-2">
                         {Array.from(ownedGroups.values()).map(({ weapon, variantFactionId, indices, cost }) => (
+                            <DraggableCapsule key={`${weapon.id}@${variantFactionId}`} id={`sell:${indices[indices.length - 1]}`}>
                             <CardPreviewTooltip
-                                key={`${weapon.id}@${variantFactionId}`}
                                 renderCard={() => <WeaponCard weapon={weapon} variant={resolveVariant(weapon.factionVariants, variantFactionId)} />}
                             >
                                 <span className={`${CAPSULE} border-secondary`}>
@@ -124,6 +192,7 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
                                     </button>
                                 </span>
                             </CardPreviewTooltip>
+                            </DraggableCapsule>
                         ))}
                     </div>
                 ) : (
@@ -190,6 +259,8 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
                         </div>
                     </div>
                 )}
+                <TrashZone visible={activeDragId?.startsWith('sell:') ?? false} />
+                </OwnedDropZone>
             </section>
 
             <div className="border-t border-border" />
@@ -204,7 +275,7 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
                     <div className="border-l-2 border-secondary pl-3">
                         <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">Available Weapons</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            {filteredWeapons.length} item{filteredWeapons.length !== 1 ? 's' : ''}
+                            Drag to armory or click +
                         </span>
                     </div>
                 </button>
@@ -219,8 +290,8 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
                             const cantAfford = campaign.ebBank < variant.cost;
                             const owned = stashCountOf(weapon.id);
                             return (
+                                <DraggableCapsule key={weapon.id} id={`buy:${buildStashEntry(weapon.id, variant.factionId)}`} disabled={cantAfford}>
                                 <CardPreviewTooltip
-                                    key={weapon.id}
                                     renderCard={() => <WeaponCard weapon={weapon} variant={resolveVariant(weapon.factionVariants, campaign.factionId)} />}
                                 >
                                     <span className={`${CAPSULE} border-secondary ${cantAfford ? 'opacity-35' : ''}`}>
@@ -239,6 +310,7 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
                                         )}
                                     </span>
                                 </CardPreviewTooltip>
+                                </DraggableCapsule>
                             );
                         })}
                     </div>
@@ -350,5 +422,9 @@ export function ArmoryList({ campaign }: ArmoryListProps) {
                 )}
             </section>
         </div>
+        <DragOverlay dropAnimation={null}>
+            {renderDragOverlay()}
+        </DragOverlay>
+        </DndContext>
     );
 }

@@ -7,6 +7,8 @@ import { Weapon, HackingProgram, TokenState, ProgramQuality } from '@/types';
 import { parseEquipmentId, resolveVariant } from '@/lib/variants';
 import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal } from 'lucide-react';
 import { ObjectiveHand } from '@/components/play/ObjectiveHand';
+import { PostGameDialog } from '@/components/play/PostGameDialog';
+import { MatchLogEntry } from '@/types';
 import { useRef } from 'react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
@@ -275,6 +277,7 @@ export function ActiveMatchView() {
 
     // UI-only state (not persisted)
     const [selectedToken, setSelectedToken] = useState<{ recruitId: string; index: number } | null>(null);
+    const [showPostGame, setShowPostGame] = useState(false);
 
     // Flipped cards — persisted in activeMatchTeam.flippedCardKeys
     const flippedCards = useMemo(() => new Set(activeMatchTeam?.flippedCardKeys ?? []), [activeMatchTeam?.flippedCardKeys]);
@@ -670,14 +673,18 @@ export function ActiveMatchView() {
         );
     }
 
-    const handleEndMatch = () => {
-        if (confirm("End the match? Progress will be lost.")) {
-            setActiveMatchTeam(null);
-            router.push('/hq');
+    const handleEndMatch = () => setShowPostGame(true);
+
+    const handlePostGameConfirm = (updates: Partial<typeof campaign & Record<string, unknown>>, _logEntry: MatchLogEntry) => {
+        if (campaign) {
+            updateCampaign(campaign.id, updates);
         }
+        setActiveMatchTeam(null);
+        router.push('/hq');
     };
 
     return (
+        <>
         <DndContext
             sensors={sensors}
             onDragStart={handleDragStart}
@@ -1160,5 +1167,17 @@ export function ActiveMatchView() {
             </DragOverlay>
         </div>
         </DndContext>
+
+        {campaign && activeMatchTeam && (
+            <PostGameDialog
+                open={showPostGame}
+                onClose={() => setShowPostGame(false)}
+                campaign={campaign}
+                activeMatchTeam={activeMatchTeam}
+                catalog={catalog}
+                onConfirm={handlePostGameConfirm}
+            />
+        )}
+        </>
     );
 }
