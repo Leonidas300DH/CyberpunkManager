@@ -124,7 +124,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                                 key={program.id}
                                 renderCard={() => <ProgramCard program={program} side="front" />}
                             >
-                                <span className={`${CAPSULE} border-cyber-purple`}>
+                                <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${(QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green).bg} ${(QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green).text} rounded-full font-bold uppercase hover:brightness-125 transition-all cursor-default`}>
                                     <span>{indices.length > 1 ? `${indices.length}× ` : ''}{program.name} · {program.costEB}EB</span>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleRemove(indices[indices.length - 1]); }}
@@ -203,15 +203,15 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                                     key={program.id}
                                     renderCard={() => <ProgramCard program={program} side="front" />}
                                 >
-                                    <span className={`${CAPSULE} border-cyber-purple ${cantAfford ? 'opacity-35' : ''}`}>
+                                    <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${(QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green).bg} ${(QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green).text} rounded-full font-bold uppercase hover:brightness-125 transition-all cursor-default ${cantAfford ? 'opacity-35' : ''}`}>
                                         <span>{program.name}</span>
-                                        <span className="text-muted-foreground">·</span>
+                                        <span className="opacity-60">·</span>
                                         <span className={cantAfford ? 'text-accent' : ''}>{program.costEB}EB</span>
-                                        {owned > 0 && <span className="text-muted-foreground text-[9px]">×{owned}</span>}
+                                        {owned > 0 && <span className="opacity-60 text-[9px]">×{owned}</span>}
                                         {!cantAfford && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleBuy(program.id, program.costEB); }}
-                                                className="ml-0.5 hover:text-cyber-purple transition-colors"
+                                                className="ml-0.5 hover:opacity-60 transition-colors"
                                                 title={`Buy — ${program.costEB} EB`}
                                             >
                                                 <Plus className="w-3 h-3" />
