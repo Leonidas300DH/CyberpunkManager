@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState, useRef, useEffect, useCallback } from 'react';
 import { Campaign, ModelLineage, Weapon, HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
 import { MathService } from '@/lib/math';
 import { parseStashEntry, parseEquipmentId, resolveVariant } from '@/lib/variants';
-import { getTierLabel } from '@/lib/tiers';
+import { getTierLabel, getRecruitBudgetCost } from '@/lib/tiers';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, ChevronDown, ChevronUp, Plus, Users, X, GripVertical, List, Maximize2 } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, Plus, Users, X, GripVertical, List, Maximize2, Minus } from 'lucide-react';
 import { useTeamBuilder } from '@/hooks/useTeamBuilder';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { ObjectiveDrawer } from '@/components/match/ObjectiveDrawer';
@@ -15,6 +15,7 @@ import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { ProgramTile } from '@/components/shared/ProgramTile';
+import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import {
     DndContext,
     DragOverlay,
@@ -40,6 +41,8 @@ interface TeamBuilderProps {
 }
 
 type FilterType = 'all' | ModelLineage['type'];
+
+const CAPSULE = "inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border rounded-full text-white hover:brightness-125 transition-all cursor-default";
 
 // ── Draggable wrapper for equipment items ──
 function DraggableItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -150,13 +153,17 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
     const campaignStreetCred = MathService.calculateCampaignStreetCred(campaign, catalog);
     const { gridClass, cardStyle } = useCardGrid();
     const [filter, setFilter] = useState<FilterType>('all');
-    const [rosterOpen, setRosterOpen] = useState(true);
-    const [gearOpen, setGearOpen] = useState(true);
-    const [programsOpen, setProgramsOpen] = useState(true);
+    const [squadCollapsed, setSquadCollapsed] = useState(true);
+    const [rosterCollapsed, setRosterCollapsed] = useState(true);
+    const [gearCollapsed, setGearCollapsed] = useState(true);
+    const [programsCollapsed, setProgramsCollapsed] = useState(true);
     const [activeDragId, setActiveDragId] = useState<string | null>(null);
     const [overId, setOverId] = useState<string | null>(null);
     const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
     const [compactPrograms, setCompactPrograms] = useState<Set<string>>(new Set());
+    const [equipPickerItem, setEquipPickerItem] = useState<string | null>(null);
+    const [equipPickerAnchor, setEquipPickerAnchor] = useState<{ x: number; y: number } | null>(null);
+    const equipPickerRef = useRef<HTMLDivElement>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -186,7 +193,6 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
     };
 
     // ── Squad and roster separation ──
-    // Maintain selectedIds order for squad display
     const selectedRecruits = selectedIds
         .map(id => campaign.hqRoster.find(r => r.id === id))
         .filter(Boolean) as typeof campaign.hqRoster;
@@ -251,8 +257,50 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
         for (let i = 0; i < count - equipped; i++) availablePrograms.push({ ...data, copyIndex: i });
     });
 
+    // ── Group available weapons/programs for capsule display ──
+    const availableWeaponGroups = new Map<string, { weapon: Weapon; variantFactionId: string; count: number; equipId: string }>();
+    availableWeapons.forEach(({ weapon, variantFactionId }) => {
+        const key = `${weapon.id}@${variantFactionId}`;
+        const existing = availableWeaponGroups.get(key);
+        if (existing) existing.count++;
+        else availableWeaponGroups.set(key, { weapon, variantFactionId, count: 1, equipId: `weapon-${weapon.id}@${variantFactionId}` });
+    });
+    const availableProgramGroups = new Map<string, { program: HackingProgram; factionName: string; count: number; equipId: string }>();
+    availablePrograms.forEach(({ program, factionName }) => {
+        const existing = availableProgramGroups.get(program.id);
+        if (existing) existing.count++;
+        else availableProgramGroups.set(program.id, { program, factionName, count: 1, equipId: `program-${program.id}` });
+    });
+
     const budgetPercent = Math.min(100, Math.round((totalCost / targetEB) * 100));
     const overBudget = totalCost > targetEB;
+
+    // ── Equip picker ──
+    const handleEquipPickerOpen = useCallback((equipId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (selectedIds.length === 1) {
+            assignEquip(selectedIds[0], equipId);
+            return;
+        }
+        setEquipPickerItem(equipId);
+        setEquipPickerAnchor({ x: e.clientX, y: e.clientY });
+    }, [selectedIds, assignEquip]);
+
+    const closeEquipPicker = useCallback(() => {
+        setEquipPickerItem(null);
+        setEquipPickerAnchor(null);
+    }, []);
+
+    useEffect(() => {
+        if (!equipPickerItem) return;
+        const handler = (e: MouseEvent) => {
+            if (equipPickerRef.current && !equipPickerRef.current.contains(e.target as Node)) {
+                closeEquipPicker();
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [equipPickerItem, closeEquipPicker]);
 
     // ── DnD handlers ──
     const handleDragStart = (event: DragStartEvent) => {
@@ -349,9 +397,28 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
     // Is the current over target receiving an equipment drag (not a squad reorder)?
     const isEquipDragOver = (recruitId: string) => {
         if (overId !== recruitId || !activeDragId) return false;
-        // If the active drag is a squad card, it's a reorder — not an equip drop
         if (selectedIds.includes(activeDragId)) return false;
         return true;
+    };
+
+    // ── Helper: resolve equipped items for a recruit ──
+    const resolveEquipped = (recruitId: string) => {
+        const equippedIds = equipmentMap[recruitId] ?? [];
+        return equippedIds.map(eqId => {
+            const parsed = parseEquipmentId(eqId);
+            if (parsed.prefix === 'weapon') {
+                const weapon = catalog.weapons.find(w => w.id === parsed.baseId);
+                return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null, name: weapon.name } : null;
+            }
+            if (parsed.prefix === 'program') {
+                const program = catalog.programs.find(p => p.id === parsed.baseId);
+                return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program, name: program.name } : null;
+            }
+            return null;
+        }).filter(Boolean) as Array<
+            | { equipId: string; type: 'weapon'; weapon: Weapon; variantFactionId: string; program: null; name: string }
+            | { equipId: string; type: 'program'; weapon: null; variantFactionId: undefined; program: HackingProgram; name: string }
+        >;
     };
 
     return (
@@ -439,184 +506,265 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     SECTION 1 — SQUAD (sortable + droppable)
                 ═══════════════════════════════════════════ */}
                 <div className="mt-6 mb-6">
-                    <div className="flex items-center gap-3 mb-4 border-l-2 border-secondary pl-4">
-                        <Users className="w-4 h-4 text-secondary" />
-                        <h2 className="font-display text-2xl text-white uppercase tracking-wider">
-                            Squad
-                        </h2>
-                        <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-wider">
-                            {selectedIds.length} deployed
-                        </span>
-                    </div>
+                    <button
+                        onClick={() => setSquadCollapsed(v => !v)}
+                        className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
+                    >
+                        <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${squadCollapsed ? '-rotate-90' : ''}`} />
+                        <div className="border-l-2 border-secondary pl-3 flex items-center gap-3">
+                            <Users className="w-4 h-4 text-secondary" />
+                            <h2 className="font-display text-2xl text-white uppercase tracking-wider group-hover/collapse:text-secondary transition-colors">
+                                Squad
+                            </h2>
+                            <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-wider">
+                                {selectedIds.length} deployed
+                            </span>
+                        </div>
+                    </button>
 
-                    {selectedRecruits.length > 0 ? (
-                        <SortableContext items={selectedIds} strategy={horizontalListSortingStrategy}>
-                            <div className={gridClass}>
+                    {squadCollapsed ? (
+                        /* ── Squad Capsule View ── */
+                        selectedRecruits.length > 0 ? (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
                                 {selectedRecruits.map(recruit => {
                                     const profile = getProfile(recruit.currentProfileId);
                                     const lineage = profile ? getLineage(profile.lineageId) : null;
                                     if (!profile || !lineage) return null;
+                                    const cost = getRecruitBudgetCost(recruit, catalog);
+                                    const equipped = resolveEquipped(recruit.id);
 
-                                    const equippedIds = equipmentMap[recruit.id] ?? [];
-
-                                    // Resolve equipped items in order
-                                    const equippedItems = equippedIds.map(eqId => {
-                                        const parsed = parseEquipmentId(eqId);
-                                        if (parsed.prefix === 'weapon') {
-                                            const weapon = catalog.weapons.find(w => w.id === parsed.baseId);
-                                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null } : null;
-                                        }
-                                        if (parsed.prefix === 'program') {
-                                            const program = catalog.programs.find(p => p.id === parsed.baseId);
-                                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program } : null;
-                                        }
-                                        return null;
-                                    }).filter(Boolean) as Array<
-                                        | { equipId: string; type: 'weapon'; weapon: Weapon; variantFactionId: string; program: null }
-                                        | { equipId: string; type: 'program'; weapon: null; variantFactionId: undefined; program: HackingProgram }
-                                    >;
+                                    // Group equipped by base identity for multi-copy display
+                                    const groupedEquipped = new Map<string, { items: typeof equipped; name: string; type: 'weapon' | 'program' }>();
+                                    equipped.forEach(item => {
+                                        const key = item.type === 'weapon'
+                                            ? `weapon-${item.weapon!.id}@${item.variantFactionId}`
+                                            : `program-${item.program!.id}`;
+                                        const existing = groupedEquipped.get(key);
+                                        if (existing) existing.items.push(item);
+                                        else groupedEquipped.set(key, { items: [item], name: item.name, type: item.type });
+                                    });
 
                                     return (
-                                        <div key={recruit.id} style={cardStyle}>
-                                            <SortableSquadCard
-                                                id={recruit.id}
-                                                isEquipOver={isEquipDragOver(recruit.id)}
-                                                cardContent={
-                                                    <div className="relative">
-                                                        {/* X button to remove from squad */}
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); toggleSelection(recruit.id); }}
-                                                            onPointerDown={(e) => e.stopPropagation()}
-                                                            className="absolute -top-2 -right-2 z-30 bg-accent text-white p-1 clip-corner-tr shadow-lg border border-black hover:bg-red-500 hover:shadow-[0_0_10px_rgba(255,0,60,0.6)] transition-all"
-                                                            title="Remove from squad"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
-                                                        <div className="absolute -left-1 top-0 bottom-0 w-2 bg-primary z-10 glow-primary" />
-                                                        <div className="border-2 border-primary">
-                                                            <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
-                                                        </div>
-                                                        {profile.level > 0 && (
-                                                            <div className="text-center mt-0.5">
-                                                                <span className={`font-mono-tech text-[9px] uppercase tracking-wider ${profile.level === 1 ? 'text-primary' : 'text-accent'}`}>
-                                                                    {getTierLabel(profile.level)}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                }
-                                            >
-                                                {/* Equipped items */}
-                                                <div className="mt-2 space-y-2">
-                                                    {equippedItems.map((item, idx) => {
-                                                        const dragId = `equipped:${recruit.id}:${item.equipId}`;
-                                                        const isFirst = idx === 0;
-                                                        const isLast = idx === equippedItems.length - 1;
-                                                        const showReorder = equippedItems.length > 1;
-                                                        const isCompact = item.type === 'program' && compactPrograms.has(`${recruit.id}:${item.equipId}`);
+                                        <Fragment key={recruit.id}>
+                                            <CardPreviewTooltip renderCard={() => (
+                                                <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
+                                            )}>
+                                                <span className={`${CAPSULE} border-primary`}>
+                                                    <span>{lineage.name} · {cost}EB</span>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); toggleSelection(recruit.id); }}
+                                                        className="ml-0.5 hover:text-accent transition-colors"
+                                                        title="Remove from squad"
+                                                    >
+                                                        <Minus className="w-3 h-3" />
+                                                    </button>
+                                                </span>
+                                            </CardPreviewTooltip>
 
-                                                        return (
-                                                            <div key={item.equipId} className="relative group/eq">
-                                                                <DraggableItem id={dragId}>
-                                                                    {item.type === 'weapon' ? (
-                                                                        <WeaponTile
-                                                                            weapon={item.weapon}
-                                                                            variantFactionId={item.variantFactionId}
-                                                                            campaignStreetCred={campaignStreetCred}
-                                                                            equippedCount={equippedCounts.get(`weapon-${item.weapon.id}@${item.variantFactionId}`) ?? 0}
-                                                                            overlay={
-                                                                                <div className="absolute top-1 left-10 z-20">
-                                                                                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
-                                                                                </div>
-                                                                            }
-                                                                        />
-                                                                    ) : isCompact ? (
-                                                                        <div className="relative">
-                                                                            <ProgramTile program={item.program} factionName={getFactionName(item.program.factionId)} />
-                                                                            <div className="absolute top-1 left-1 z-20">
-                                                                                <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
-                                                                            </div>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="relative group/card">
-                                                                            <div
-                                                                                className="card-flip-container w-full cursor-pointer"
-                                                                                onClick={(e) => { e.stopPropagation(); toggleFlip(`eq-${item.equipId}`); }}
-                                                                            >
-                                                                                <div className={`card-flip-inner ${flippedCards.has(`eq-${item.equipId}`) ? 'flipped' : ''}`}>
-                                                                                    <div className="card-flip-front">
-                                                                                        <ProgramCard program={item.program} side="front" />
-                                                                                    </div>
-                                                                                    <div className="card-flip-back">
-                                                                                        <ProgramCard program={item.program} side="back" />
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="absolute top-1 left-1 z-20">
-                                                                                <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                </DraggableItem>
-
-                                                                {/* Controls: compact toggle + reorder + remove */}
-                                                                <div className="absolute top-1 right-1 z-20 flex items-center gap-0.5 opacity-0 group-hover/eq:opacity-100 transition-opacity">
-                                                                    {item.type === 'program' && (
-                                                                        <button
-                                                                            onClick={(e) => { e.stopPropagation(); toggleCompact(`${recruit.id}:${item.equipId}`); }}
-                                                                            className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-cyber-purple hover:border-cyber-purple transition-colors"
-                                                                            title={isCompact ? 'Full card' : 'Compact'}
-                                                                        >
-                                                                            {isCompact ? <Maximize2 className="w-3 h-3" /> : <List className="w-3 h-3" />}
-                                                                        </button>
-                                                                    )}
-                                                                    {showReorder && !isFirst && (
-                                                                        <button
-                                                                            onClick={(e) => { e.stopPropagation(); reorderEquip(recruit.id, item.equipId, 'up'); }}
-                                                                            className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-white hover:border-white transition-colors"
-                                                                            title="Move up"
-                                                                        >
-                                                                            <ChevronUp className="w-3 h-3" />
-                                                                        </button>
-                                                                    )}
-                                                                    {showReorder && !isLast && (
-                                                                        <button
-                                                                            onClick={(e) => { e.stopPropagation(); reorderEquip(recruit.id, item.equipId, 'down'); }}
-                                                                            className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-white hover:border-white transition-colors"
-                                                                            title="Move down"
-                                                                        >
-                                                                            <ChevronDown className="w-3 h-3" />
-                                                                        </button>
-                                                                    )}
-                                                                    <button
-                                                                        onClick={(e) => { e.stopPropagation(); removeEquip(recruit.id, item.equipId); }}
-                                                                        className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors"
-                                                                        title="Unequip"
-                                                                    >
-                                                                        <X className="w-3 h-3" />
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                    {equippedIds.length === 0 && (
-                                                        <div className="text-[10px] font-mono-tech text-muted-foreground text-center py-1 border border-dashed border-border">
-                                                            Drop equipment here
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </SortableSquadCard>
-                                        </div>
+                                            {Array.from(groupedEquipped.entries()).map(([key, { items, name, type }]) => {
+                                                const first = items[0];
+                                                const borderColor = type === 'weapon' ? 'border-secondary' : 'border-cyber-purple';
+                                                return (
+                                                    <CardPreviewTooltip
+                                                        key={key}
+                                                        renderCard={() => type === 'weapon'
+                                                            ? <WeaponTile weapon={first.weapon!} variantFactionId={first.variantFactionId!} />
+                                                            : <ProgramCard program={first.program!} side="front" />
+                                                        }
+                                                    >
+                                                        <span className={`${CAPSULE} ${borderColor}`}>
+                                                            <span>{items.length > 1 ? `${items.length}× ` : ''}{name}</span>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); removeEquip(recruit.id, first.equipId); }}
+                                                                className="ml-0.5 hover:text-accent transition-colors"
+                                                                title="Unequip"
+                                                            >
+                                                                <X className="w-3 h-3" />
+                                                            </button>
+                                                        </span>
+                                                    </CardPreviewTooltip>
+                                                );
+                                            })}
+                                        </Fragment>
                                     );
                                 })}
                             </div>
-                        </SortableContext>
-                    ) : (
-                        <div className="border border-dashed border-border p-6 text-center">
-                            <div className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                Select characters from the roster below to build your squad
+                        ) : (
+                            <div className="border border-dashed border-border p-6 text-center">
+                                <div className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                    Select characters from the roster below to build your squad
+                                </div>
                             </div>
-                        </div>
+                        )
+                    ) : (
+                        /* ── Squad Expanded View (existing) ── */
+                        selectedRecruits.length > 0 ? (
+                            <SortableContext items={selectedIds} strategy={horizontalListSortingStrategy}>
+                                <div className={gridClass}>
+                                    {selectedRecruits.map(recruit => {
+                                        const profile = getProfile(recruit.currentProfileId);
+                                        const lineage = profile ? getLineage(profile.lineageId) : null;
+                                        if (!profile || !lineage) return null;
+
+                                        const equippedIds = equipmentMap[recruit.id] ?? [];
+
+                                        const equippedItems = equippedIds.map(eqId => {
+                                            const parsed = parseEquipmentId(eqId);
+                                            if (parsed.prefix === 'weapon') {
+                                                const weapon = catalog.weapons.find(w => w.id === parsed.baseId);
+                                                return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null } : null;
+                                            }
+                                            if (parsed.prefix === 'program') {
+                                                const program = catalog.programs.find(p => p.id === parsed.baseId);
+                                                return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program } : null;
+                                            }
+                                            return null;
+                                        }).filter(Boolean) as Array<
+                                            | { equipId: string; type: 'weapon'; weapon: Weapon; variantFactionId: string; program: null }
+                                            | { equipId: string; type: 'program'; weapon: null; variantFactionId: undefined; program: HackingProgram }
+                                        >;
+
+                                        return (
+                                            <div key={recruit.id} style={cardStyle}>
+                                                <SortableSquadCard
+                                                    id={recruit.id}
+                                                    isEquipOver={isEquipDragOver(recruit.id)}
+                                                    cardContent={
+                                                        <div className="relative">
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); toggleSelection(recruit.id); }}
+                                                                onPointerDown={(e) => e.stopPropagation()}
+                                                                className="absolute -top-2 -right-2 z-30 bg-accent text-white p-1 clip-corner-tr shadow-lg border border-black hover:bg-red-500 hover:shadow-[0_0_10px_rgba(255,0,60,0.6)] transition-all"
+                                                                title="Remove from squad"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                            <div className="absolute -left-1 top-0 bottom-0 w-2 bg-primary z-10 glow-primary" />
+                                                            <div className="border-2 border-primary">
+                                                                <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
+                                                            </div>
+                                                            {profile.level > 0 && (
+                                                                <div className="text-center mt-0.5">
+                                                                    <span className={`font-mono-tech text-[9px] uppercase tracking-wider ${profile.level === 1 ? 'text-primary' : 'text-accent'}`}>
+                                                                        {getTierLabel(profile.level)}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    }
+                                                >
+                                                    {/* Equipped items */}
+                                                    <div className="mt-2 space-y-2">
+                                                        {equippedItems.map((item, idx) => {
+                                                            const dragId = `equipped:${recruit.id}:${item.equipId}`;
+                                                            const isFirst = idx === 0;
+                                                            const isLast = idx === equippedItems.length - 1;
+                                                            const showReorder = equippedItems.length > 1;
+                                                            const isCompact = item.type === 'program' && compactPrograms.has(`${recruit.id}:${item.equipId}`);
+
+                                                            return (
+                                                                <div key={item.equipId} className="relative group/eq">
+                                                                    <DraggableItem id={dragId}>
+                                                                        {item.type === 'weapon' ? (
+                                                                            <WeaponTile
+                                                                                weapon={item.weapon}
+                                                                                variantFactionId={item.variantFactionId}
+                                                                                campaignStreetCred={campaignStreetCred}
+                                                                                equippedCount={equippedCounts.get(`weapon-${item.weapon.id}@${item.variantFactionId}`) ?? 0}
+                                                                                overlay={
+                                                                                    <div className="absolute top-1 left-10 z-20">
+                                                                                        <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
+                                                                                    </div>
+                                                                                }
+                                                                            />
+                                                                        ) : isCompact ? (
+                                                                            <div className="relative">
+                                                                                <ProgramTile program={item.program} factionName={getFactionName(item.program.factionId)} />
+                                                                                <div className="absolute top-1 left-1 z-20">
+                                                                                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="relative group/card">
+                                                                                <div
+                                                                                    className="card-flip-container w-full cursor-pointer"
+                                                                                    onClick={(e) => { e.stopPropagation(); toggleFlip(`eq-${item.equipId}`); }}
+                                                                                >
+                                                                                    <div className={`card-flip-inner ${flippedCards.has(`eq-${item.equipId}`) ? 'flipped' : ''}`}>
+                                                                                        <div className="card-flip-front">
+                                                                                            <ProgramCard program={item.program} side="front" />
+                                                                                        </div>
+                                                                                        <div className="card-flip-back">
+                                                                                            <ProgramCard program={item.program} side="back" />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="absolute top-1 left-1 z-20">
+                                                                                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/eq:opacity-60" />
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </DraggableItem>
+
+                                                                    {/* Controls: compact toggle + reorder + remove */}
+                                                                    <div className="absolute top-1 right-1 z-20 flex items-center gap-0.5 opacity-0 group-hover/eq:opacity-100 transition-opacity">
+                                                                        {item.type === 'program' && (
+                                                                            <button
+                                                                                onClick={(e) => { e.stopPropagation(); toggleCompact(`${recruit.id}:${item.equipId}`); }}
+                                                                                className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-cyber-purple hover:border-cyber-purple transition-colors"
+                                                                                title={isCompact ? 'Full card' : 'Compact'}
+                                                                            >
+                                                                                {isCompact ? <Maximize2 className="w-3 h-3" /> : <List className="w-3 h-3" />}
+                                                                            </button>
+                                                                        )}
+                                                                        {showReorder && !isFirst && (
+                                                                            <button
+                                                                                onClick={(e) => { e.stopPropagation(); reorderEquip(recruit.id, item.equipId, 'up'); }}
+                                                                                className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-white hover:border-white transition-colors"
+                                                                                title="Move up"
+                                                                            >
+                                                                                <ChevronUp className="w-3 h-3" />
+                                                                            </button>
+                                                                        )}
+                                                                        {showReorder && !isLast && (
+                                                                            <button
+                                                                                onClick={(e) => { e.stopPropagation(); reorderEquip(recruit.id, item.equipId, 'down'); }}
+                                                                                className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-white hover:border-white transition-colors"
+                                                                                title="Move down"
+                                                                            >
+                                                                                <ChevronDown className="w-3 h-3" />
+                                                                            </button>
+                                                                        )}
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); removeEquip(recruit.id, item.equipId); }}
+                                                                            className="p-0.5 bg-black/80 border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors"
+                                                                            title="Unequip"
+                                                                        >
+                                                                            <X className="w-3 h-3" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        {equippedIds.length === 0 && (
+                                                            <div className="text-[10px] font-mono-tech text-muted-foreground text-center py-1 border border-dashed border-border">
+                                                                Drop equipment here
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </SortableSquadCard>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </SortableContext>
+                        ) : (
+                            <div className="border border-dashed border-border p-6 text-center">
+                                <div className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                    Select characters from the roster below to build your squad
+                                </div>
+                            </div>
+                        )
                     )}
                 </div>
 
@@ -625,10 +773,10 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                 ═══════════════════════════════════════════ */}
                 <section className="mb-6">
                     <button
-                        onClick={() => setRosterOpen(v => !v)}
+                        onClick={() => setRosterCollapsed(v => !v)}
                         className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
                     >
-                        <ChevronDown className={`w-5 h-5 text-primary transition-transform ${rosterOpen ? '' : '-rotate-90'}`} />
+                        <ChevronDown className={`w-5 h-5 text-primary transition-transform ${rosterCollapsed ? '-rotate-90' : ''}`} />
                         <div className="border-l-2 border-primary pl-3">
                             <h2 className="font-display text-2xl text-white uppercase tracking-wider group-hover/collapse:text-primary transition-colors">
                                 Available Roster
@@ -639,7 +787,50 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         </div>
                     </button>
 
-                    {rosterOpen && (
+                    {rosterCollapsed ? (
+                        /* ── Roster Capsule View ── */
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                            {filteredRoster.length === 0 && unselectedRoster.length === 0 && (
+                                <div className="w-full border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
+                                    {campaign.hqRoster.length === 0
+                                        ? 'No Assets Available. Recruit mercs from HQ first.'
+                                        : 'All characters deployed to squad.'}
+                                </div>
+                            )}
+                            {filteredRoster.map(recruit => {
+                                const profile = getProfile(recruit.currentProfileId);
+                                const lineage = profile ? getLineage(profile.lineageId) : null;
+                                if (!profile || !lineage) return null;
+                                const cost = getRecruitBudgetCost(recruit, catalog);
+                                return (
+                                    <CardPreviewTooltip
+                                        key={recruit.id}
+                                        renderCard={() => (
+                                            <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
+                                        )}
+                                    >
+                                        <span className={`${CAPSULE} border-primary`}>
+                                            <span>{lineage.name} · {cost}EB</span>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); toggleSelection(recruit.id); }}
+                                                className="ml-0.5 hover:text-secondary transition-colors"
+                                                title="Add to squad"
+                                            >
+                                                <Plus className="w-3 h-3" />
+                                            </button>
+                                        </span>
+                                    </CardPreviewTooltip>
+                                );
+                            })}
+                            {campaign.hqRoster.length > 0 && (
+                                <a href="/hq" className={`${CAPSULE} border-primary/50 hover:border-primary text-muted-foreground hover:text-white`}>
+                                    <Plus className="w-3 h-3" />
+                                    <span>Recruit More</span>
+                                </a>
+                            )}
+                        </div>
+                    ) : (
+                        /* ── Roster Expanded View (existing) ── */
                         <>
                             {rosterTypes.length > 1 && (
                                 <div className="flex flex-wrap gap-3 mb-4 text-sm font-mono-tech text-muted-foreground uppercase tracking-widest">
@@ -720,17 +911,17 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                 <div className="border-t border-border mb-6" />
 
                 {/* ═══════════════════════════════════════════
-                    SECTION 3 — WEAPONS & GEAR (collapsible, draggable)
+                    SECTION 3 — WEAPONS & GEARS (collapsible, draggable)
                 ═══════════════════════════════════════════ */}
                 <section className="mb-6">
                     <button
-                        onClick={() => setGearOpen(v => !v)}
+                        onClick={() => setGearCollapsed(v => !v)}
                         className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
                     >
-                        <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${gearOpen ? '' : '-rotate-90'}`} />
+                        <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${gearCollapsed ? '-rotate-90' : ''}`} />
                         <div className="border-l-2 border-secondary pl-3">
                             <h2 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">
-                                Weapons & Gear
+                                Weapons & Gears
                             </h2>
                             <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
                                 {availableWeapons.length}/{stashWeapons.length} available
@@ -738,7 +929,40 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         </div>
                     </button>
 
-                    {gearOpen && (
+                    {gearCollapsed ? (
+                        /* ── Gear Capsule View ── */
+                        stashWeapons.length === 0 ? (
+                            <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                No weapons or gear in stash. Buy from HQ first.
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                                {availableWeapons.length === 0 && stashWeapons.length > 0 && (
+                                    <div className="w-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                        All gear equipped
+                                    </div>
+                                )}
+                                {Array.from(availableWeaponGroups.values()).map(({ weapon, variantFactionId, count, equipId }) => (
+                                    <CardPreviewTooltip
+                                        key={`${weapon.id}@${variantFactionId}`}
+                                        renderCard={() => <WeaponTile weapon={weapon} variantFactionId={variantFactionId} />}
+                                    >
+                                        <span className={`${CAPSULE} border-secondary`}>
+                                            <span>{count > 1 ? `${count}× ` : ''}{weapon.name}</span>
+                                            <button
+                                                onClick={(e) => handleEquipPickerOpen(equipId, e)}
+                                                className="ml-0.5 hover:text-secondary transition-colors"
+                                                title="Equip"
+                                            >
+                                                <Plus className="w-3 h-3" />
+                                            </button>
+                                        </span>
+                                    </CardPreviewTooltip>
+                                ))}
+                            </div>
+                        )
+                    ) : (
+                        /* ── Gear Expanded View (existing) ── */
                         <>
                             {stashWeapons.length === 0 ? (
                                 <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
@@ -783,10 +1007,10 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                 ═══════════════════════════════════════════ */}
                 <section className="mb-6">
                     <button
-                        onClick={() => setProgramsOpen(v => !v)}
+                        onClick={() => setProgramsCollapsed(v => !v)}
                         className="flex items-center gap-2 mb-4 group/collapse w-full text-left"
                     >
-                        <ChevronDown className={`w-5 h-5 text-cyber-purple transition-transform ${programsOpen ? '' : '-rotate-90'}`} />
+                        <ChevronDown className={`w-5 h-5 text-cyber-purple transition-transform ${programsCollapsed ? '-rotate-90' : ''}`} />
                         <div className="border-l-2 border-cyber-purple pl-3">
                             <h2 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">
                                 Programs
@@ -797,7 +1021,40 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         </div>
                     </button>
 
-                    {programsOpen && (
+                    {programsCollapsed ? (
+                        /* ── Programs Capsule View ── */
+                        stashPrograms.length === 0 ? (
+                            <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                No programs in stash. Buy from HQ first.
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                                {availablePrograms.length === 0 && stashPrograms.length > 0 && (
+                                    <div className="w-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
+                                        All programs equipped
+                                    </div>
+                                )}
+                                {Array.from(availableProgramGroups.values()).map(({ program, count, equipId }) => (
+                                    <CardPreviewTooltip
+                                        key={program.id}
+                                        renderCard={() => <ProgramCard program={program} side="front" />}
+                                    >
+                                        <span className={`${CAPSULE} border-cyber-purple`}>
+                                            <span>{count > 1 ? `${count}× ` : ''}{program.name}</span>
+                                            <button
+                                                onClick={(e) => handleEquipPickerOpen(equipId, e)}
+                                                className="ml-0.5 hover:text-cyber-purple transition-colors"
+                                                title="Equip"
+                                            >
+                                                <Plus className="w-3 h-3" />
+                                            </button>
+                                        </span>
+                                    </CardPreviewTooltip>
+                                ))}
+                            </div>
+                        )
+                    ) : (
+                        /* ── Programs Expanded View (existing) ── */
                         <>
                             {stashPrograms.length === 0 ? (
                                 <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
@@ -844,6 +1101,41 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     )}
                 </section>
             </div>
+
+            {/* ── Equip Picker Popover ── */}
+            {equipPickerItem && equipPickerAnchor && (
+                <div
+                    ref={equipPickerRef}
+                    className="fixed z-50 bg-black border border-primary shadow-[0_0_20px_rgba(252,238,10,0.3)] p-2 min-w-[160px]"
+                    style={{ left: equipPickerAnchor.x, top: equipPickerAnchor.y + 8 }}
+                >
+                    <div className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider mb-1.5 px-1">
+                        Equip to:
+                    </div>
+                    {selectedRecruits.length === 0 ? (
+                        <div className="text-[10px] font-mono-tech text-muted-foreground px-1 py-1">
+                            Add characters to squad first
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-0.5">
+                            {selectedRecruits.map(recruit => {
+                                const profile = getProfile(recruit.currentProfileId);
+                                const lineage = profile ? getLineage(profile.lineageId) : null;
+                                if (!profile || !lineage) return null;
+                                return (
+                                    <button
+                                        key={recruit.id}
+                                        onClick={() => { assignEquip(recruit.id, equipPickerItem); closeEquipPicker(); }}
+                                        className="text-left text-[11px] font-mono-tech text-white hover:text-primary hover:bg-primary/10 px-2 py-1 transition-colors"
+                                    >
+                                        {lineage.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Drag overlay — follows pointer */}
             <DragOverlay dropAnimation={null}>

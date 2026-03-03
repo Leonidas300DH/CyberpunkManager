@@ -5,7 +5,10 @@ import { useStore } from '@/store/useStore';
 import { CampaignHeader } from '@/components/campaign/CampaignHeader';
 import { NewCampaignDialog } from '@/components/campaign/NewCampaignDialog';
 import { RosterList } from '@/components/campaign/RosterList';
-import { StashList } from '@/components/campaign/StashList';
+import { ArmoryList } from '@/components/campaign/ArmoryList';
+import { GearLockerList } from '@/components/campaign/GearLockerList';
+import { ProgramVaultList } from '@/components/campaign/ProgramVaultList';
+import { ObjectivesTab } from '@/components/campaign/ObjectivesTab';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 
@@ -46,11 +49,14 @@ const STARTER_IMAGES = Array.from({ length: 18 }, (_, i) => {
     return `https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/campaign-starter/leonidas300_Static_wide_shot_of_the_streets_of_Neo-Tokyo_at_n_${ids[i]}.png`;
 });
 
-type TabId = 'roster' | 'stash' | 'ops' | 'med';
+type TabId = 'roster' | 'armory' | 'gear-locker' | 'programs' | 'objectives' | 'ops' | 'med';
 
 const TABS: { id: TabId; label: string; activeClass: string }[] = [
     { id: 'roster', label: 'Roster', activeClass: 'bg-primary text-black hover:bg-white' },
-    { id: 'stash', label: 'Stash', activeClass: 'bg-secondary text-black hover:bg-white' },
+    { id: 'armory', label: 'Armory', activeClass: 'bg-secondary text-black hover:bg-white' },
+    { id: 'gear-locker', label: 'Equipment Locker', activeClass: 'bg-secondary text-black hover:bg-white' },
+    { id: 'programs', label: 'Program Vault', activeClass: 'bg-cyber-purple text-white hover:bg-purple-300' },
+    { id: 'objectives', label: 'Objectives', activeClass: 'bg-muted text-white' },
     { id: 'ops', label: 'Ops', activeClass: 'bg-accent text-white' },
     { id: 'med', label: 'Med Bay', activeClass: 'bg-white text-black' },
 ];
@@ -162,7 +168,10 @@ export default function HQPage() {
 
                     {/* Tab Content */}
                     {activeTab === 'roster' && <RosterList campaign={selectedCampaign} />}
-                    {activeTab === 'stash' && <StashList campaign={selectedCampaign} />}
+                    {activeTab === 'armory' && <ArmoryList campaign={selectedCampaign} />}
+                    {activeTab === 'gear-locker' && <GearLockerList campaign={selectedCampaign} />}
+                    {activeTab === 'programs' && <ProgramVaultList campaign={selectedCampaign} />}
+                    {activeTab === 'objectives' && <ObjectivesTab />}
                     {activeTab === 'ops' && (
                         <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
                             <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">Operations Offline</h3>
