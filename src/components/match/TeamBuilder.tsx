@@ -14,7 +14,7 @@ import { ObjectiveDrawer } from '@/components/match/ObjectiveDrawer';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { ProgramCard } from '@/components/programs/ProgramCard';
-import { ProgramTile } from '@/components/shared/ProgramTile';
+import { ProgramTile, QUALITY_COLORS } from '@/components/shared/ProgramTile';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import {
     DndContext,
@@ -525,7 +525,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     {squadCollapsed ? (
                         /* ── Squad Capsule View ── */
                         selectedRecruits.length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5 mt-2">
+                            <div className="flex flex-wrap gap-3 mt-2">
                                 {selectedRecruits.map(recruit => {
                                     const profile = getProfile(recruit.currentProfileId);
                                     const lineage = profile ? getLineage(profile.lineageId) : null;
@@ -545,7 +545,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                     });
 
                                     return (
-                                        <Fragment key={recruit.id}>
+                                        <div key={recruit.id} className="flex flex-col items-start gap-1">
                                             <CardPreviewTooltip renderCard={() => (
                                                 <CharacterCard lineage={lineage} profile={profile} catalogWeapons={catalog.weapons} activeFactionId={campaign.factionId} />
                                             )}>
@@ -563,17 +563,34 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
 
                                             {Array.from(groupedEquipped.entries()).map(([key, { items, name, type }]) => {
                                                 const first = items[0];
-                                                const borderColor = type === 'weapon' ? 'border-secondary' : 'border-cyber-purple';
+                                                if (type === 'program') {
+                                                    const qc = QUALITY_COLORS[first.program!.quality] ?? QUALITY_COLORS.Green;
+                                                    return (
+                                                        <CardPreviewTooltip
+                                                            key={key}
+                                                            renderCard={() => <ProgramCard program={first.program!} side="front" />}
+                                                        >
+                                                            <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${qc.bg} ${qc.text} rounded-full font-bold uppercase hover:brightness-125 transition-all cursor-default ml-2`}>
+                                                                <span>{items.length > 1 ? `${items.length}× ` : ''}{name} · {first.program!.costEB}EB</span>
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); removeEquip(recruit.id, first.equipId); }}
+                                                                    className="ml-0.5 hover:text-accent transition-colors"
+                                                                    title="Unequip"
+                                                                >
+                                                                    <X className="w-3 h-3" />
+                                                                </button>
+                                                            </span>
+                                                        </CardPreviewTooltip>
+                                                    );
+                                                }
+                                                const variant = resolveVariant(first.weapon!.factionVariants, first.variantFactionId);
                                                 return (
                                                     <CardPreviewTooltip
                                                         key={key}
-                                                        renderCard={() => type === 'weapon'
-                                                            ? <WeaponTile weapon={first.weapon!} variantFactionId={first.variantFactionId!} />
-                                                            : <ProgramCard program={first.program!} side="front" />
-                                                        }
+                                                        renderCard={() => <WeaponTile weapon={first.weapon!} variantFactionId={first.variantFactionId!} />}
                                                     >
-                                                        <span className={`${CAPSULE} ${borderColor}`}>
-                                                            <span>{items.length > 1 ? `${items.length}× ` : ''}{name}</span>
+                                                        <span className={`${CAPSULE} border-secondary ml-2`}>
+                                                            <span>{items.length > 1 ? `${items.length}× ` : ''}{name} · {variant?.cost ?? '?'}EB</span>
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); removeEquip(recruit.id, first.equipId); }}
                                                                 className="ml-0.5 hover:text-accent transition-colors"
@@ -585,7 +602,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                     </CardPreviewTooltip>
                                                 );
                                             })}
-                                        </Fragment>
+                                        </div>
                                     );
                                 })}
                             </div>
@@ -942,23 +959,26 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                         All gear equipped
                                     </div>
                                 )}
-                                {Array.from(availableWeaponGroups.values()).map(({ weapon, variantFactionId, count, equipId }) => (
-                                    <CardPreviewTooltip
-                                        key={`${weapon.id}@${variantFactionId}`}
-                                        renderCard={() => <WeaponTile weapon={weapon} variantFactionId={variantFactionId} />}
-                                    >
-                                        <span className={`${CAPSULE} border-secondary`}>
-                                            <span>{count > 1 ? `${count}× ` : ''}{weapon.name}</span>
-                                            <button
-                                                onClick={(e) => handleEquipPickerOpen(equipId, e)}
-                                                className="ml-0.5 hover:text-secondary transition-colors"
-                                                title="Equip"
-                                            >
-                                                <Plus className="w-3 h-3" />
-                                            </button>
-                                        </span>
-                                    </CardPreviewTooltip>
-                                ))}
+                                {Array.from(availableWeaponGroups.values()).map(({ weapon, variantFactionId, count, equipId }) => {
+                                    const variant = resolveVariant(weapon.factionVariants, variantFactionId);
+                                    return (
+                                        <CardPreviewTooltip
+                                            key={`${weapon.id}@${variantFactionId}`}
+                                            renderCard={() => <WeaponTile weapon={weapon} variantFactionId={variantFactionId} />}
+                                        >
+                                            <span className={`${CAPSULE} border-secondary`}>
+                                                <span>{count > 1 ? `${count}× ` : ''}{weapon.name} · {variant?.cost ?? '?'}EB</span>
+                                                <button
+                                                    onClick={(e) => handleEquipPickerOpen(equipId, e)}
+                                                    className="ml-0.5 hover:text-secondary transition-colors"
+                                                    title="Equip"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                </button>
+                                            </span>
+                                        </CardPreviewTooltip>
+                                    );
+                                })}
                             </div>
                         )
                     ) : (
@@ -1034,23 +1054,26 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                         All programs equipped
                                     </div>
                                 )}
-                                {Array.from(availableProgramGroups.values()).map(({ program, count, equipId }) => (
-                                    <CardPreviewTooltip
-                                        key={program.id}
-                                        renderCard={() => <ProgramCard program={program} side="front" />}
-                                    >
-                                        <span className={`${CAPSULE} border-cyber-purple`}>
-                                            <span>{count > 1 ? `${count}× ` : ''}{program.name}</span>
-                                            <button
-                                                onClick={(e) => handleEquipPickerOpen(equipId, e)}
-                                                className="ml-0.5 hover:text-cyber-purple transition-colors"
-                                                title="Equip"
-                                            >
-                                                <Plus className="w-3 h-3" />
-                                            </button>
-                                        </span>
-                                    </CardPreviewTooltip>
-                                ))}
+                                {Array.from(availableProgramGroups.values()).map(({ program, count, equipId }) => {
+                                    const qc = QUALITY_COLORS[program.quality] ?? QUALITY_COLORS.Green;
+                                    return (
+                                        <CardPreviewTooltip
+                                            key={program.id}
+                                            renderCard={() => <ProgramCard program={program} side="front" />}
+                                        >
+                                            <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${qc.bg} ${qc.text} rounded-full font-bold uppercase hover:brightness-125 transition-all cursor-default`}>
+                                                <span>{count > 1 ? `${count}× ` : ''}{program.name} · {program.costEB}EB</span>
+                                                <button
+                                                    onClick={(e) => handleEquipPickerOpen(equipId, e)}
+                                                    className="ml-0.5 hover:text-black/60 transition-colors"
+                                                    title="Equip"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                </button>
+                                            </span>
+                                        </CardPreviewTooltip>
+                                    );
+                                })}
                             </div>
                         )
                     ) : (
