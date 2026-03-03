@@ -54,7 +54,6 @@ export interface ModelProfile {
     armor: number; // Native armor
     keywords: string[]; // e.g., ['Netrunner', 'Cyber-Character']
     actions: GameAction[]; // Innate actions
-    passiveRules: string;
     streetCred: number; // 0 = Normal, 1 = Veteran, 2 = Elite
 }
 
@@ -150,6 +149,7 @@ export interface Weapon {
     factionVariants: FactionVariant[];
     isWeapon: boolean;
     isGear: boolean;
+    isAction: boolean;   // true for innate actions & passive rules
     skillReq?: 'Reflexes' | 'Ranged' | 'Melee' | 'Medical' | 'Tech' | 'Influence'; // Skill used — undefined for gear/equipment
     skillBonus?: number; // Bonus value displayed next to skill icon (e.g. +1 Medical)
     grantsArmor?: number; // Armor bonus granted when equipped

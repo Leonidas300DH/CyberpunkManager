@@ -12,6 +12,8 @@ import type {
     ItemCard,
     HackingProgram,
     Objective,
+    SkillBonus,
+    SkillType,
 } from '@/types';
 
 // ─── DB row → TypeScript mappers ────────────────────────────────────────────
@@ -51,7 +53,6 @@ function mapProfile(r: Record<string, unknown>): ModelProfile {
         keywords: (r.keywords as string[]) ?? [],
         actions: (r.actions as ModelProfile['actions']) ?? [],
         streetCred: (r.street_cred as number) ?? 0,
-        passiveRules: (r.passive_rules as string) ?? '',
         gonkActionColor: r.gonk_action_color as ModelProfile['gonkActionColor'],
     };
 }
@@ -64,6 +65,7 @@ function mapWeapon(r: Record<string, unknown>): Weapon {
         factionVariants: (r.faction_variants as Weapon['factionVariants']) ?? [],
         isWeapon: (r.is_weapon as boolean) ?? true,
         isGear: (r.is_gear as boolean) ?? false,
+        isAction: (r.is_action as boolean) ?? false,
         skillReq: r.skill_req as Weapon['skillReq'],
         skillBonus: r.skill_bonus as number | undefined,
         grantsArmor: r.grants_armor as number | undefined,
@@ -116,6 +118,18 @@ function mapProgram(r: Record<string, unknown>): HackingProgram {
 }
 
 function mapObjective(r: Record<string, unknown>): Objective {
+    // Build skill bonuses array from up to 3 slots
+    const skillBonuses: SkillBonus[] = [];
+    if (r.skill_bonus_1_type && r.skill_bonus_1_value) {
+        skillBonuses.push({ skill: r.skill_bonus_1_type as SkillType, value: r.skill_bonus_1_value as number });
+    }
+    if (r.skill_bonus_2_type && r.skill_bonus_2_value) {
+        skillBonuses.push({ skill: r.skill_bonus_2_type as SkillType, value: r.skill_bonus_2_value as number });
+    }
+    if (r.skill_bonus_3_type && r.skill_bonus_3_value) {
+        skillBonuses.push({ skill: r.skill_bonus_3_type as SkillType, value: r.skill_bonus_3_value as number });
+    }
+
     return {
         id: r.id as string,
         name: r.name as string,
@@ -123,13 +137,21 @@ function mapObjective(r: Record<string, unknown>): Objective {
         description: (r.description as string) ?? '',
         rewardType: (r.reward_type as Objective['rewardType']) ?? 'ongoing',
         rewardText: (r.reward_text as string) ?? '',
-        grantsStreetCred: (r.grants_street_cred as boolean) ?? false,
+        grantsStreetCred: Number(r.grants_street_cred) || 0,
         grantsEB: r.grants_eb as number | undefined,
         grantsLuck: r.grants_luck as number | undefined,
         grantsCybergearTo: r.grants_cybergear_to as string | undefined,
         cybergearEffect: r.cybergear_effect as string | undefined,
         unlocksCardId: r.unlocks_card_id as string | undefined,
         imageUrl: r.image_url as string | undefined,
+        skillBonuses: skillBonuses.length > 0 ? skillBonuses : undefined,
+        armorBonus: r.armor_bonus as number | undefined,
+        actionSkill: r.action_skill as SkillType | undefined,
+        actionRangeRed: r.action_range_red as boolean | undefined,
+        actionRangeYellow: r.action_range_yellow as boolean | undefined,
+        actionRangeGreen: r.action_range_green as boolean | undefined,
+        actionRangeLong: r.action_range_long as boolean | undefined,
+        factionBanner: r.faction_banner as string | undefined,
     };
 }
 
@@ -170,7 +192,6 @@ function profileToRow(p: ModelProfile) {
         keywords: p.keywords,
         actions: p.actions,
         street_cred: p.streetCred,
-        passive_rules: p.passiveRules,
         gonk_action_color: p.gonkActionColor,
         updated_at: new Date().toISOString(),
     };
@@ -183,6 +204,7 @@ function weaponToRow(w: Weapon) {
         skill_req: w.skillReq,
         is_weapon: w.isWeapon,
         is_gear: w.isGear,
+        is_action: w.isAction,
         keywords: w.keywords,
         description: w.description,
         image_url: w.imageUrl,
@@ -259,6 +281,19 @@ function objectiveToRow(o: Objective) {
         cybergear_effect: o.cybergearEffect,
         unlocks_card_id: o.unlocksCardId,
         image_url: o.imageUrl,
+        skill_bonus_1_type: o.skillBonuses?.[0]?.skill ?? null,
+        skill_bonus_1_value: o.skillBonuses?.[0]?.value ?? null,
+        skill_bonus_2_type: o.skillBonuses?.[1]?.skill ?? null,
+        skill_bonus_2_value: o.skillBonuses?.[1]?.value ?? null,
+        skill_bonus_3_type: o.skillBonuses?.[2]?.skill ?? null,
+        skill_bonus_3_value: o.skillBonuses?.[2]?.value ?? null,
+        armor_bonus: o.armorBonus ?? null,
+        action_skill: o.actionSkill ?? null,
+        action_range_red: o.actionRangeRed ?? false,
+        action_range_yellow: o.actionRangeYellow ?? false,
+        action_range_green: o.actionRangeGreen ?? false,
+        action_range_long: o.actionRangeLong ?? false,
+        faction_banner: o.factionBanner ?? null,
         updated_at: new Date().toISOString(),
     };
 }

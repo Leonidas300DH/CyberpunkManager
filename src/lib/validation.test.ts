@@ -12,14 +12,14 @@ const mockLeaderProfile: ModelProfile = {
     id: 'prof-lead', lineageId: 'lin-lead', level: 0, costEB: 30,
     actionTokens: { green: 1, yellow: 1, red: 0 },
     skills: { Reflexes: 0, Ranged: 0, Melee: 0, Medical: 0, Tech: 0, Influence: 3, None: 0 },
-    armor: 0, keywords: [], actions: [], passiveRules: ''
+    armor: 0, keywords: [], actions: [], streetCred: 0
 };
 
 const mockGonkProfile: ModelProfile = {
     id: 'prof-gonk', lineageId: 'lin-gonk', level: 0, costEB: 10,
     actionTokens: { green: 1, yellow: 0, red: 0 },
     skills: { Reflexes: 0, Ranged: 0, Melee: 0, Medical: 0, Tech: 0, Influence: 0, None: 0 },
-    armor: 0, keywords: [], actions: [], passiveRules: ''
+    armor: 0, keywords: [], actions: [], streetCred: 0
 };
 
 const mockStore: CatalogData = {

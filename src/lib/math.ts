@@ -51,8 +51,8 @@ export const MathService = {
         // 2. Sum Objective Bonuses
         campaign.completedObjectives.forEach((objId) => {
             const objective = store.objectives?.find((o) => o.id === objId);
-            if (objective && objective.grantsStreetCred) {
-                totalCred += 1;
+            if (objective && objective.grantsStreetCred > 0) {
+                totalCred += objective.grantsStreetCred;
             } else {
                 // Legacy fallback: check items
                 const item = store.items.find((i) => i.id === objId);

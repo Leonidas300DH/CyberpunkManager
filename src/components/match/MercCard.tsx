@@ -1,6 +1,6 @@
 'use client';
 
-import { ModelLineage, ModelProfile } from '@/types';
+import { ModelLineage, ModelProfile, Weapon } from '@/types';
 import { Check } from 'lucide-react';
 
 interface MercCardProps {
@@ -8,6 +8,7 @@ interface MercCardProps {
     profile: ModelProfile;
     isSelected: boolean;
     onClick: () => void;
+    catalogWeapons?: Weapon[];
 }
 
 const TYPE_STYLES: Record<string, { text: string; border: string; glow: string }> = {
@@ -18,8 +19,20 @@ const TYPE_STYLES: Record<string, { text: string; border: string; glow: string }
     Drone:      { text: 'text-cyber-green',   border: 'border-cyber-green',   glow: 'shadow-[0_0_10px_rgba(34,197,94,0.3)]' },
 };
 
-export function MercCard({ lineage, profile, isSelected, onClick }: MercCardProps) {
+export function MercCard({ lineage, profile, isSelected, onClick, catalogWeapons }: MercCardProps) {
     const style = TYPE_STYLES[lineage.type] ?? TYPE_STYLES.Character;
+
+    // Find first passive action (action referencing a weapon with no skill/range) for description
+    const passiveDesc = (() => {
+        for (const action of profile.actions) {
+            if (!action.weaponId) continue;
+            const w = (catalogWeapons ?? []).find(wp => wp.id === action.weaponId);
+            if (w && !w.skillReq && !w.rangeRed && !w.rangeYellow && !w.rangeGreen && !w.rangeLong) {
+                return w.description ? `${w.name}: ${w.description}` : w.name;
+            }
+        }
+        return '';
+    })();
 
     return (
         <div className="relative group cursor-pointer" onClick={onClick}>
@@ -76,9 +89,9 @@ export function MercCard({ lineage, profile, isSelected, onClick }: MercCardProp
                     </div>
 
                     {/* Description */}
-                    {profile.passiveRules && (
+                    {passiveDesc && (
                         <p className="text-muted-foreground text-xs mb-4 leading-relaxed font-mono-tech border-l-2 border-border pl-2 line-clamp-2">
-                            {profile.passiveRules}
+                            {passiveDesc}
                         </p>
                     )}
 

@@ -54,11 +54,11 @@ type TabId = 'roster' | 'armory' | 'gear-locker' | 'programs' | 'objectives' | '
 const TABS: { id: TabId; label: string; activeClass: string }[] = [
     { id: 'roster', label: 'Roster', activeClass: 'bg-primary text-black hover:bg-white' },
     { id: 'armory', label: 'Armory', activeClass: 'bg-secondary text-black hover:bg-white' },
-    { id: 'gear-locker', label: 'Equipment Locker', activeClass: 'bg-secondary text-black hover:bg-white' },
-    { id: 'programs', label: 'Program Vault', activeClass: 'bg-cyber-purple text-white hover:bg-purple-300' },
+    { id: 'gear-locker', label: 'Locker', activeClass: 'bg-secondary text-black hover:bg-white' },
+    { id: 'programs', label: 'Programs', activeClass: 'bg-cyber-purple text-white hover:bg-purple-300' },
     { id: 'objectives', label: 'Objectives', activeClass: 'bg-muted text-white' },
     { id: 'ops', label: 'Ops', activeClass: 'bg-accent text-white' },
-    { id: 'med', label: 'Med Bay', activeClass: 'bg-white text-black' },
+    { id: 'med', label: 'Med', activeClass: 'bg-white text-black' },
 ];
 
 export default function HQPage() {
@@ -146,14 +146,14 @@ export default function HQPage() {
 
                     {/* Tab Navigation */}
                     <div className="flex items-end border-b-2 border-border mb-8 gap-1">
-                        <div className="flex flex-wrap gap-1 flex-1">
+                        <div className="flex gap-1 flex-1 overflow-x-auto">
                             {TABS.map(tab => {
                                 const isActive = activeTab === tab.id;
                                 return (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`clip-tab px-6 md:px-10 py-3 font-display font-bold text-lg uppercase tracking-wider transition-all ${
+                                        className={`clip-tab shrink-0 px-4 md:px-6 py-2.5 font-display font-bold text-sm md:text-base uppercase tracking-wider transition-all ${
                                             isActive
                                                 ? tab.activeClass
                                                 : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'

@@ -313,20 +313,6 @@ function ArmorHex({ value }: { value: number }) {
     );
 }
 
-/** Parse "Name: description" from passiveRules string */
-function parsePassiveRules(text: string): Array<{ name: string; description: string }> {
-    if (!text) return [];
-    const colonIdx = text.indexOf(': ');
-    if (colonIdx > 0 && colonIdx < 30) {
-        const name = text.slice(0, colonIdx);
-        // Verify the name part looks like a title (starts with uppercase, no long sentences)
-        if (/^[A-Z]/.test(name) && !name.includes('.')) {
-            return [{ name, description: text.slice(colonIdx + 2) }];
-        }
-    }
-    return [{ name: '', description: text }];
-}
-
 // ── Main Component ──
 
 interface CharacterCardProps {
@@ -385,8 +371,16 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
 
     // Stats box: auto-height from content (no fixed pixel height)
 
-    // Parse passive rules
-    const passives = parsePassiveRules(profile.passiveRules);
+    // Sort actions: passives (no skill/range on weapon) first, then actions with skill/range
+    const sortedActions = [...profile.actions].sort((a, b) => {
+        const wA = resolveWeapon(a.weaponId);
+        const wB = resolveWeapon(b.weaponId);
+        const isPassiveA = wA ? (!wA.skillReq && !wA.rangeRed && !wA.rangeYellow && !wA.rangeGreen && !wA.rangeLong) : (!a.skillReq || a.skillReq === 'None') && (!a.range || a.range === 'Self');
+        const isPassiveB = wB ? (!wB.skillReq && !wB.rangeRed && !wB.rangeYellow && !wB.rangeGreen && !wB.rangeLong) : (!b.skillReq || b.skillReq === 'None') && (!b.range || b.range === 'Self');
+        if (isPassiveA && !isPassiveB) return -1;
+        if (!isPassiveA && isPassiveB) return 1;
+        return 0;
+    });
 
     return (
         <div className="group relative w-full aspect-[2/3] bg-black text-white font-sans overflow-hidden shadow-2xl rounded-md">
@@ -529,24 +523,8 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
                     className="bg-black/80 backdrop-blur-sm border-[0.5px] border-white/30 px-3 py-px"
                     style={{ clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)' }}
                 >
-                    {/* Passive Rules */}
-                    {passives.map((passive, i) => (
-                        passive.description && (
-                            <div key={`p${i}`}>
-                                {passive.name && (
-                                    <div className="font-display font-black text-sm text-[#22c55e] uppercase tracking-wide">
-                                        {formatCardText(passive.name, i * 100)}
-                                    </div>
-                                )}
-                                <div className="font-body text-[11px] leading-snug text-white/90">
-                                    {formatCardText(passive.description, i * 100 + 50)}
-                                </div>
-                            </div>
-                        )
-                    ))}
-
-                    {/* Weapon / Action entries */}
-                    {profile.actions.map((action, i) => {
+                    {/* Unified actions rendering (passives first, then skill/range actions) */}
+                    {sortedActions.map((action, i) => {
                         const weapon = resolveWeapon(action.weaponId);
                         const src = weapon ? {
                             name: weapon.name,
@@ -569,6 +547,24 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
                             const hasSkill = !!(src.skillReq && SKILL_ICONS[src.skillReq]);
                             const hasArmor = (src.grantsArmor ?? 0) > 0;
                             const hasRange = src.rangeRed || src.rangeYellow || src.rangeGreen || src.rangeLong;
+
+                            // Passive-style rendering: no skill, no range → green title + description
+                            if (!hasSkill && !hasRange && !hasArmor) {
+                                return (
+                                    <div key={action.id}>
+                                        {src.name && (
+                                            <div className="font-display font-black text-sm text-[#22c55e] uppercase tracking-wide">
+                                                {formatCardText(src.name, i * 100)}
+                                            </div>
+                                        )}
+                                        {src.description && (
+                                            <div className="font-body text-[11px] leading-snug text-white/90">
+                                                {formatCardText(src.description, i * 100 + 50)}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
                             const hasRange2 = src.range2Red || src.range2Yellow || src.range2Green || src.range2Long;
                             const lettrine = (hasSkill || hasArmor) && !hasRange;
 
