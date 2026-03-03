@@ -149,7 +149,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                     if (nextProfile) {
                         const lineage = getLineage(recruit.lineageId);
                         newRoster = newRoster.map(r =>
-                            r.id === selectedPromoteId ? { ...r, currentProfileId: nextProfile.id, purchasedLevel: nextProfile.level } : r
+                            r.id === selectedPromoteId ? { ...r, currentProfileId: nextProfile.id } : r
                         );
                         events.push(`${lineage?.name ?? 'Character'} promoted to ${getTierLabel(nextProfile.level)}`);
                     }
