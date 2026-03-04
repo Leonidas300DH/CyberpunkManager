@@ -111,7 +111,7 @@ export const useStore = create<StoreState>()(
             version: 1,
             migrate: (persisted, version) => {
                 const state = persisted as Record<string, unknown>;
-                if (version === 0) {
+                if (!version || version < 1) {
                     // v0→v1: purchasedLevel was incorrectly set by old upgrade system.
                     // Reset to 0 — post-game promotions are free and should not carry surcharge.
                     const campaigns = state.campaigns as Campaign[] | undefined;
