@@ -108,6 +108,19 @@ export const useStore = create<StoreState>()(
         }),
         {
             name: STORAGE_KEY,
+            version: 1,
+            migrate: (persisted, version) => {
+                const state = persisted as Record<string, unknown>;
+                if (version === 0) {
+                    // v0→v1: purchasedLevel was incorrectly set by old upgrade system.
+                    // Reset to 0 — post-game promotions are free and should not carry surcharge.
+                    const campaigns = state.campaigns as Campaign[] | undefined;
+                    campaigns?.forEach(c => {
+                        c.hqRoster?.forEach(r => { r.purchasedLevel = 0; });
+                    });
+                }
+                return state;
+            },
             partialize: (state) => {
                 // Exclude runtime-only fields from persistence
                 const { syncStatus: _ss, syncError: _se, ...rest } = state;
