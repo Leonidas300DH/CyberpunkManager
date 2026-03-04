@@ -8,7 +8,7 @@ import { CharacterCard } from '@/components/characters/CharacterCard';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { v4 as uuidv4 } from 'uuid';
-import { canHaveTiers, getSurchargeForLevel, getTierLabel } from '@/lib/tiers';
+import { canHaveTiers, getRecruitBudgetCost, getSurchargeForLevel, getTierLabel } from '@/lib/tiers';
 import {
     DndContext,
     DragOverlay,
@@ -101,11 +101,7 @@ export function RosterList({ campaign }: RosterListProps) {
     const handleDismiss = (recruitId: string) => {
         const recruit = campaign.hqRoster.find(r => r.id === recruitId);
         if (!recruit) return;
-        const baseProfile = getBaseProfile(recruit.lineageId);
-        const baseCost = baseProfile?.costEB ?? 0;
-        const currentProfile = getProfile(recruit.currentProfileId);
-        const currentLevel = currentProfile?.level ?? 0;
-        const refund = baseCost + getSurchargeForLevel(currentLevel, catalog);
+        const refund = getRecruitBudgetCost(recruit, catalog);
 
         updateCampaign(campaign.id, {
             hqRoster: campaign.hqRoster.filter(r => r.id !== recruitId),
@@ -153,8 +149,7 @@ export function RosterList({ campaign }: RosterListProps) {
             const profile = getProfile(recruit.currentProfileId);
             const lineage = profile ? getLineage(profile.lineageId) : null;
             if (!lineage || !profile) return null;
-            const baseCost = getBaseProfile(recruit.lineageId)?.costEB ?? 0;
-            const totalCost = baseCost + getSurchargeForLevel(profile.level, catalog);
+            const totalCost = getRecruitBudgetCost(recruit, catalog);
             return (
                 <span className={`${CAPSULE} border-primary shadow-lg shadow-primary/30`}>
                     {lineage.name} · {totalCost}EB
@@ -197,8 +192,7 @@ export function RosterList({ campaign }: RosterListProps) {
                             const profile = getProfile(recruit.currentProfileId);
                             const lineage = profile ? getLineage(profile.lineageId) : null;
                             if (!profile || !lineage) return null;
-                            const baseCost = getBaseProfile(recruit.lineageId)?.costEB ?? 0;
-                            const totalCost = baseCost + getSurchargeForLevel(profile.level, catalog);
+                            const totalCost = getRecruitBudgetCost(recruit, catalog);
                             const tierLabel = profile.level > 0 ? ` · ${getTierLabel(profile.level)}` : '';
 
                             return (
@@ -231,8 +225,7 @@ export function RosterList({ campaign }: RosterListProps) {
                             const lineage = profile ? getLineage(profile.lineageId) : null;
                             if (!profile || !lineage) return null;
 
-                            const baseCost = getBaseProfile(recruit.lineageId)?.costEB ?? 0;
-                            const refundAmount = baseCost + getSurchargeForLevel(profile.level, catalog);
+                            const refundAmount = getRecruitBudgetCost(recruit, catalog);
 
                             return (
                                 <div key={recruit.id} className="relative group/card" style={cardStyle}>
