@@ -103,7 +103,7 @@ export function LootTile({ loot, overlay }: LootTileProps) {
                                     )}
                                 </div>
                             )}
-                            <p className="font-body text-[11px] text-white/70 leading-snug line-clamp-2">{descText}</p>
+                            <p className="font-body text-[11px] text-white/70 leading-snug ">{descText}</p>
                         </>
                     );
                 })()}
