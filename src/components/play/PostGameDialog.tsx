@@ -213,6 +213,13 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
             }
         }
 
+        // 3. Loots drawn during match
+        const drawnLootIds = activeMatchTeam.drawnLootIds ?? [];
+        for (const lootId of drawnLootIds) {
+            const loot = (catalog.loots ?? []).find(l => l.id === lootId);
+            events.push(`Looted: ${loot?.name ?? lootId}`);
+        }
+
         const updates: Partial<Campaign> = {
             hqRoster: newRoster,
             ebBank: newEbBank,

@@ -10,8 +10,8 @@ const WEAPON_IMG_DEFAULT = `${WEAPON_IMG_BASE}/default.png`;
  * Falls back to default.png if no custom image exists (handled by onError on <img>).
  */
 export function getWeaponImageUrl(weaponId: string, imageUrl?: string): string {
-    if (imageUrl && imageUrl !== WEAPON_IMG_DEFAULT) return imageUrl;
-    const slug = weaponId.replace(/^weapon-/, '');
+    if (imageUrl && imageUrl !== WEAPON_IMG_DEFAULT && !imageUrl.endsWith('/default.png')) return imageUrl;
+    const slug = weaponId.replace(/^(weapon|item|action)-/, '');
     return `${WEAPON_IMG_BASE}/${slug}.png`;
 }
 
@@ -61,7 +61,7 @@ export function buildStashEntry(itemId: string, variantFactionId: string): strin
  * Legacy entries without @ default to 'universal'.
  */
 export function parseEquipmentId(equipId: string): {
-    prefix: 'weapon' | 'program';
+    prefix: 'weapon' | 'program' | 'loot';
     baseId: string;
     variantFactionId: string;
     copyIndex: number | null;
@@ -76,9 +76,12 @@ export function parseEquipmentId(equipId: string): {
     }
 
     // Determine prefix
-    let prefix: 'weapon' | 'program';
+    let prefix: 'weapon' | 'program' | 'loot';
     let afterPrefix: string;
-    if (rest.startsWith('weapon-')) {
+    if (rest.startsWith('loot-')) {
+        prefix = 'loot';
+        afterPrefix = rest.substring(5);
+    } else if (rest.startsWith('weapon-')) {
         prefix = 'weapon';
         afterPrefix = rest.substring(7); // "weapon-katana@universal"
     } else if (rest.startsWith('program-')) {

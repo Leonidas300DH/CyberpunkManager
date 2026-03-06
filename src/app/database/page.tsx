@@ -8,6 +8,7 @@ import { ModelsTab } from "@/components/database/ModelsTab";
 import { ArmoryContent } from "@/components/database/ArmoryContent";
 import { ObjectivesContent } from "@/components/database/ObjectivesContent";
 import { ActionsContent } from "@/components/database/ActionsContent";
+import { LootsContent } from "@/components/database/LootsContent";
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { Search, Plus, Eye, SlidersHorizontal } from 'lucide-react';
 import type { ProgramQuality } from '@/types';
@@ -21,7 +22,7 @@ const TABS: { id: TabId; label: string; activeClass: string }[] = [
     { id: 'weapons', label: 'Weapons', activeClass: 'bg-accent text-white' },
     { id: 'gear', label: 'Gears', activeClass: 'bg-secondary text-black' },
     { id: 'programs', label: 'Programs', activeClass: 'bg-cyber-purple text-white' },
-    { id: 'loot', label: 'Loot', activeClass: 'bg-primary text-black' },
+    { id: 'loot', label: 'Loot', activeClass: 'bg-purple-500 text-white' },
     { id: 'objectives', label: 'Objectives', activeClass: 'bg-cyber-green text-black' },
     { id: 'actions', label: 'Actions', activeClass: 'bg-emerald-500 text-black' },
 ];
@@ -41,7 +42,6 @@ const ARMORY_MAP: Record<string, 'Weapon' | 'Gear' | 'Program' | 'Loot'> = {
     weapons: 'Weapon',
     gear: 'Gear',
     programs: 'Program',
-    loot: 'Loot',
 };
 
 const SEARCH_PLACEHOLDER: Record<TabId, string> = {
@@ -56,7 +56,7 @@ const SEARCH_PLACEHOLDER: Record<TabId, string> = {
 };
 
 // Tabs that support +New
-const TABS_WITH_CREATE: TabId[] = ['factions', 'models', 'weapons', 'gear', 'programs', 'objectives', 'actions'];
+const TABS_WITH_CREATE: TabId[] = ['factions', 'models', 'weapons', 'gear', 'programs', 'loot', 'objectives', 'actions'];
 
 // Tabs that have view modes
 const TABS_WITH_VIEWS: TabId[] = ['programs', 'weapons', 'gear'];
@@ -485,6 +485,12 @@ export default function DatabasePage() {
             )}
             {activeTab === 'actions' && (
                 <ActionsContent
+                    search={search}
+                    triggerCreate={triggerCreate}
+                />
+            )}
+            {activeTab === 'loot' && (
+                <LootsContent
                     search={search}
                     triggerCreate={triggerCreate}
                 />

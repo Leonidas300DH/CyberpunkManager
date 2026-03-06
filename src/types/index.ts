@@ -168,6 +168,21 @@ export interface Weapon {
     imageFlipY?: boolean;  // CSS scaleY(-1) flip
 }
 
+// --- LOOTS ---
+export interface Loot {
+    id: string;
+    name: string;           // title
+    flavorText: string;     // texte d'ambiance
+    effectText?: string;    // description de l'effet
+    skillReq?: SkillType;
+    skillBonus?: number;
+    rangeRed: boolean;
+    rangeYellow: boolean;
+    rangeGreen: boolean;
+    rangeLong: boolean;
+    armorBonus?: number;
+}
+
 // --- CAMPAIGN & ROSTER MODELLING ---
 export interface RecruitedModel {
     id: string; // Unique instance ID
@@ -232,6 +247,7 @@ export interface MatchTeam {
     // Play state (persisted across navigation)
     tokenStates?: Record<string, TokenState[]>;
     deadModelIds?: string[];
+    drawnLootIds?: string[];
     luck?: number;
     flippedCardKeys?: string[]; // Program card flip state (keys in flippedCards Set)
 }
@@ -245,5 +261,6 @@ export interface CatalogData {
     programs: HackingProgram[];
     weapons: Weapon[];
     objectives: Objective[];
+    loots: Loot[];
     tierSurcharges?: { veteran: number; elite: number };
 }

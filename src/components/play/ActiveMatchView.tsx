@@ -3,9 +3,9 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { Weapon, HackingProgram, TokenState, ProgramQuality } from '@/types';
+import { Weapon, HackingProgram, Loot, TokenState, ProgramQuality } from '@/types';
 import { parseEquipmentId, resolveVariant } from '@/lib/variants';
-import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal } from 'lucide-react';
+import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal, Gift } from 'lucide-react';
 import { ObjectiveHand } from '@/components/play/ObjectiveHand';
 import { PostGameDialog } from '@/components/play/PostGameDialog';
 import { MatchLogEntry } from '@/types';
@@ -13,6 +13,8 @@ import { useRef } from 'react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
+import { LootTile } from '@/components/shared/LootTile';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
@@ -261,7 +263,7 @@ export function ActiveMatchView() {
     const deadModels = useMemo(() => new Set(deadModelIds), [deadModelIds]);
     const luck = activeMatchTeam?.luck ?? 0;
 
-    const updatePlayState = useCallback((patch: Partial<Pick<NonNullable<typeof activeMatchTeam>, 'tokenStates' | 'deadModelIds' | 'luck' | 'flippedCardKeys' | 'completedObjectiveIds'>>) => {
+    const updatePlayState = useCallback((patch: Partial<Pick<NonNullable<typeof activeMatchTeam>, 'tokenStates' | 'deadModelIds' | 'luck' | 'flippedCardKeys' | 'completedObjectiveIds' | 'drawnLootIds'>>) => {
         const current = useStore.getState().activeMatchTeam;
         if (!current) return;
         setActiveMatchTeam({ ...current, ...patch });
@@ -278,6 +280,11 @@ export function ActiveMatchView() {
     // UI-only state (not persisted)
     const [selectedToken, setSelectedToken] = useState<{ recruitId: string; index: number } | null>(null);
     const [showPostGame, setShowPostGame] = useState(false);
+
+    // Draw Loot state
+    const [showLootDialog, setShowLootDialog] = useState(false);
+    const [drawnLoot, setDrawnLoot] = useState<Loot | null>(null);
+    const [lootAssignTarget, setLootAssignTarget] = useState<string>('');
 
     // Flipped cards — persisted in activeMatchTeam.flippedCardKeys
     const flippedCards = useMemo(() => new Set(activeMatchTeam?.flippedCardKeys ?? []), [activeMatchTeam?.flippedCardKeys]);
@@ -511,6 +518,37 @@ export function ActiveMatchView() {
         }
     }, [activeMatchTeam, campaign, catalog.objectives, completedObjectiveIds, leaderCardId, updateCampaign, updatePlayState]);
 
+    // ── Draw Loot ──
+
+    const handleDrawLoot = useCallback(() => {
+        const loots = catalog.loots ?? [];
+        if (loots.length === 0) return;
+        const randomLoot = loots[Math.floor(Math.random() * loots.length)];
+        setDrawnLoot(randomLoot);
+        setLootAssignTarget('');
+        setShowLootDialog(true);
+    }, [catalog.loots]);
+
+    const handleAssignLoot = useCallback(() => {
+        if (!drawnLoot || !lootAssignTarget || !activeMatchTeam) return;
+        // Build equipment ID: loot-{lootId}#N
+        const existingEquip = activeMatchTeam.equipmentMap?.[lootAssignTarget] ?? [];
+        const existingLootCount = existingEquip.filter(id => id.startsWith(`loot-${drawnLoot.id}`)).length;
+        const equipId = `loot-${drawnLoot.id}#${existingLootCount}`;
+        const map = { ...activeMatchTeam.equipmentMap };
+        map[lootAssignTarget] = [...existingEquip, equipId];
+        const drawnIds = [...(activeMatchTeam.drawnLootIds ?? []), drawnLoot.id];
+        setActiveMatchTeam({ ...activeMatchTeam, equipmentMap: map, drawnLootIds: drawnIds });
+        setShowLootDialog(false);
+        setDrawnLoot(null);
+    }, [drawnLoot, lootAssignTarget, activeMatchTeam, setActiveMatchTeam]);
+
+    // Non-KIA recruits for loot assignment
+    const aliveRecruits = useMemo(() => {
+        if (!activeMatchTeam || !campaign) return [];
+        return matchRoster.filter(r => !deadModels.has(r.id));
+    }, [matchRoster, deadModels, activeMatchTeam, campaign]);
+
     // ── DnD Handlers ──
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -620,6 +658,10 @@ export function ActiveMatchView() {
                 return <div className="w-72 opacity-90 pointer-events-none"><WeaponTile weapon={weapon} variantFactionId={parsedOverlay.variantFactionId} activeFactionId={campaign?.factionId} /></div>;
             }
         }
+        if (parsedOverlay.prefix === 'loot') {
+            const loot = (catalog.loots ?? []).find(l => l.id === parsedOverlay.baseId);
+            if (loot) return <div className="w-72 opacity-90 pointer-events-none"><LootTile loot={loot} /></div>;
+        }
         if (itemId.startsWith('program-')) {
             const program = catalog.programs.find(p => p.id === itemId.replace('program-', ''));
             if (program) return <div className="w-40 opacity-90 pointer-events-none"><ProgramCard program={program} side="front" /></div>;
@@ -725,6 +767,16 @@ export function ActiveMatchView() {
                                 <Plus className="w-3 h-3" />
                             </button>
                         </div>
+
+                        {/* Draw Loot */}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleDrawLoot(); }}
+                            className="flex items-center justify-center gap-1.5 h-9 px-4 border border-purple-500 bg-black text-purple-400 font-display font-bold text-xs uppercase tracking-wider hover:bg-purple-500 hover:text-white transition-colors"
+                            title="Draw a random loot card"
+                        >
+                            <Gift className="w-4 h-4" />
+                            Loot
+                        </button>
 
                         <button
                             onClick={(e) => { e.stopPropagation(); inspireTeam(); }}
@@ -880,16 +932,21 @@ export function ActiveMatchView() {
                         const parsed = parseEquipmentId(eqId);
                         if (parsed.prefix === 'weapon') {
                             const weapon = catalog.weapons.find(w => w.id === parsed.baseId);
-                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null } : null;
+                            return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null, loot: null } : null;
                         }
                         if (parsed.prefix === 'program') {
                             const program = catalog.programs.find(p => p.id === parsed.baseId);
-                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program } : null;
+                            return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program, loot: null } : null;
+                        }
+                        if (parsed.prefix === 'loot') {
+                            const loot = (catalog.loots ?? []).find(l => l.id === parsed.baseId);
+                            return loot ? { equipId: eqId, type: 'loot' as const, weapon: null, variantFactionId: undefined, program: null, loot } : null;
                         }
                         return null;
                     }).filter(Boolean) as Array<
-                        | { equipId: string; type: 'weapon'; weapon: Weapon; variantFactionId: string; program: null }
-                        | { equipId: string; type: 'program'; weapon: null; variantFactionId: undefined; program: HackingProgram }
+                        | { equipId: string; type: 'weapon'; weapon: Weapon; variantFactionId: string; program: null; loot: null }
+                        | { equipId: string; type: 'program'; weapon: null; variantFactionId: undefined; program: HackingProgram; loot: null }
+                        | { equipId: string; type: 'loot'; weapon: null; variantFactionId: undefined; program: null; loot: Loot }
                     >;
 
                     // ── Shared sub-components ──
@@ -1046,16 +1103,20 @@ export function ActiveMatchView() {
                                                             <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
                                                         </div>
                                                     )
+                                                ) : item.type === 'loot' ? (
+                                                    <LootTile loot={item.loot} overlay={
+                                                        <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
+                                                    } />
                                                 ) : programView === 'list' ? (
-                                                    <CardPreviewTooltip renderCard={() => <ProgramCard program={item.program} side="front" />}>
-                                                        <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
+                                                    <CardPreviewTooltip renderCard={() => <ProgramCard program={item.program!} side="front" />}>
+                                                        <ProgramTileCompact program={item.program!} factionName={getFactionName(item.program!.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
                                                     </CardPreviewTooltip>
                                                 ) : (
                                                     <div className="relative">
                                                         <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
                                                             <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
-                                                                <div className="card-flip-front"><ProgramCard program={item.program} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
-                                                                <div className="card-flip-back"><ProgramCard program={item.program} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                                <div className="card-flip-front"><ProgramCard program={item.program!} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                                <div className="card-flip-back"><ProgramCard program={item.program!} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
                                                             </div>
                                                         </div>
                                                         <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
@@ -1132,16 +1193,20 @@ export function ActiveMatchView() {
                                                                             <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
                                                                         </div>
                                                                     )
+                                                                ) : item.type === 'loot' ? (
+                                                                    <LootTile loot={item.loot} overlay={
+                                                                        <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
+                                                                    } />
                                                                 ) : programView === 'list' ? (
-                                                                    <CardPreviewTooltip renderCard={() => <ProgramCard program={item.program} side="front" />}>
-                                                                        <ProgramTileCompact program={item.program} factionName={getFactionName(item.program.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
+                                                                    <CardPreviewTooltip renderCard={() => <ProgramCard program={item.program!} side="front" />}>
+                                                                        <ProgramTileCompact program={item.program!} factionName={getFactionName(item.program!.factionId)} onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)} />
                                                                     </CardPreviewTooltip>
                                                                 ) : (
                                                                     <div className="relative">
                                                                         <div className="card-flip-container w-full cursor-pointer" onClick={() => toggleFlip(`play-${recruit.id}-${item.equipId}`)}>
                                                                             <div className={`card-flip-inner ${flippedCards.has(`play-${recruit.id}-${item.equipId}`) ? 'flipped' : ''}`}>
-                                                                                <div className="card-flip-front"><ProgramCard program={item.program} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
-                                                                                <div className="card-flip-back"><ProgramCard program={item.program} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                                                <div className="card-flip-front"><ProgramCard program={item.program!} side="front" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
+                                                                                <div className="card-flip-back"><ProgramCard program={item.program!} side="back" enableCodeRain={enableCodeRain} isFlipped={flippedCards.has(`play-${recruit.id}-${item.equipId}`)} /></div>
                                                                             </div>
                                                                         </div>
                                                                         <div className="absolute top-1 left-1 z-20"><GripVertical className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/equip:opacity-60" /></div>
@@ -1167,6 +1232,63 @@ export function ActiveMatchView() {
             </DragOverlay>
         </div>
         </DndContext>
+
+        {/* Draw Loot Dialog */}
+        <Dialog open={showLootDialog} onOpenChange={setShowLootDialog}>
+            <DialogContent className="bg-black border-purple-500/50 max-w-sm !top-[8vh] !translate-y-0">
+                <DialogHeader>
+                    <DialogTitle className="font-display text-xl uppercase tracking-wider text-purple-400">
+                        <Gift className="w-5 h-5 inline mr-2" />
+                        Loot Drawn!
+                    </DialogTitle>
+                    <DialogDescription className="sr-only">Assign the drawn loot to a character</DialogDescription>
+                </DialogHeader>
+                {drawnLoot && (
+                    <div className="space-y-4 mt-2">
+                        <LootTile loot={drawnLoot} />
+                        {drawnLoot.flavorText && (
+                            <p className="font-mono-tech text-xs text-white/50 italic">&ldquo;{drawnLoot.flavorText}&rdquo;</p>
+                        )}
+                        {drawnLoot.effectText && (
+                            <p className="font-mono-tech text-xs text-white/70">{drawnLoot.effectText}</p>
+                        )}
+                        <div className="space-y-2">
+                            <label className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">Assign to</label>
+                            <select
+                                value={lootAssignTarget}
+                                onChange={(e) => setLootAssignTarget(e.target.value)}
+                                className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-sm text-white"
+                            >
+                                <option value="">Select character...</option>
+                                {aliveRecruits.map(recruit => {
+                                    const lineage = getLineage(recruit.lineageId);
+                                    return (
+                                        <option key={recruit.id} value={recruit.id}>
+                                            {lineage?.name ?? recruit.id}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowLootDialog(false)}
+                                className="flex-1 py-2.5 border border-border text-muted-foreground font-display font-bold text-sm uppercase tracking-wider hover:text-white hover:border-white transition-colors"
+                            >
+                                Discard
+                            </button>
+                            <button
+                                onClick={handleAssignLoot}
+                                disabled={!lootAssignTarget}
+                                className="flex-1 py-2.5 bg-purple-500 hover:bg-purple-400 disabled:opacity-40 text-white font-display font-bold text-sm uppercase tracking-wider transition-colors clip-corner-br"
+                            >
+                                Assign
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </DialogContent>
+        </Dialog>
 
         {campaign && activeMatchTeam && (
             <PostGameDialog
