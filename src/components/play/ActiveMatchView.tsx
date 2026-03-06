@@ -750,6 +750,16 @@ export function ActiveMatchView() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {/* Draw Loot */}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleDrawLoot(); }}
+                            className="flex items-center justify-center gap-1.5 h-9 px-4 bg-purple-500 text-white font-display font-bold text-xs uppercase tracking-wider hover:bg-purple-400 transition-colors"
+                            title="Draw a random loot card"
+                        >
+                            <Gift className="w-4 h-4" />
+                            Loot
+                        </button>
+
                         {/* Luck counter */}
                         <div className="flex items-center justify-center gap-1.5 h-9 px-4 border border-purple-500 bg-black text-purple-400 font-display font-bold text-xs uppercase tracking-wider">
                             <span>Luck</span>
@@ -767,16 +777,6 @@ export function ActiveMatchView() {
                                 <Plus className="w-3 h-3" />
                             </button>
                         </div>
-
-                        {/* Draw Loot */}
-                        <button
-                            onClick={(e) => { e.stopPropagation(); handleDrawLoot(); }}
-                            className="flex items-center justify-center gap-1.5 h-9 px-4 border border-purple-500 bg-black text-purple-400 font-display font-bold text-xs uppercase tracking-wider hover:bg-purple-500 hover:text-white transition-colors"
-                            title="Draw a random loot card"
-                        >
-                            <Gift className="w-4 h-4" />
-                            Loot
-                        </button>
 
                         <button
                             onClick={(e) => { e.stopPropagation(); inspireTeam(); }}
