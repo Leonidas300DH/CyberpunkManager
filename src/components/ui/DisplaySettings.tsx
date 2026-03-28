@@ -7,6 +7,7 @@ import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
 import { getTierSurcharges } from '@/lib/tiers';
 import { cn } from '@/lib/utils';
+import { useT } from '@/i18n';
 
 const MIN_COLS = 2;
 const MAX_COLS = 6;
@@ -18,6 +19,7 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
     const [open, setOpen] = useState(false);
     const panelRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const t = useT();
     const { displaySettings, setDisplaySettings, catalog, setCatalog } = useStore();
     const { cardColumns, fontScale } = displaySettings;
     const isAdmin = useIsAdmin();
@@ -68,12 +70,12 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
                                 : 'bg-surface-dark text-muted-foreground hover:text-secondary hover:border-secondary'
                         )
                 )}
-                title="Display settings"
+                title={t('settings.title')}
             >
                 <Settings className={cn("w-5 h-5", isNavStyle && "z-10")} />
                 {isNavStyle && (
                     <span className="text-[9px] uppercase font-black tracking-widest z-10 opacity-70">
-                        Settings
+                        {t('nav.settings')}
                     </span>
                 )}
             </button>
@@ -90,7 +92,7 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
                     {/* Cards per row */}
                     <div>
                         <label className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest block mb-2">
-                            Cards per row
+                            {t('settings.cardsPerRow')}
                         </label>
                         <div className="flex items-center gap-3">
                             <button
@@ -114,7 +116,7 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
                     {/* Font scale */}
                     <div>
                         <label className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest block mb-2">
-                            Card scale
+                            {t('settings.cardScale')}
                         </label>
                         <div className="flex items-center gap-3">
                             <button
@@ -135,15 +137,46 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
                         </div>
                     </div>
 
+                    {/* Language */}
+                    <div>
+                        <label className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest block mb-2">
+                            {t('settings.language')}
+                        </label>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setDisplaySettings({ locale: 'en' })}
+                                className={cn(
+                                    "flex-1 px-3 py-2 border text-xs font-mono-tech uppercase tracking-wider transition-colors",
+                                    (displaySettings.locale ?? 'en') === 'en'
+                                        ? 'border-secondary bg-secondary text-black'
+                                        : 'border-border text-muted-foreground hover:text-white hover:border-secondary'
+                                )}
+                            >
+                                EN
+                            </button>
+                            <button
+                                onClick={() => setDisplaySettings({ locale: 'fr' })}
+                                className={cn(
+                                    "flex-1 px-3 py-2 border text-xs font-mono-tech uppercase tracking-wider transition-colors",
+                                    displaySettings.locale === 'fr'
+                                        ? 'border-secondary bg-secondary text-black'
+                                        : 'border-border text-muted-foreground hover:text-white hover:border-secondary'
+                                )}
+                            >
+                                FR
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Tier Surcharges (admin only) */}
                     {isAdmin && (
                         <div className="border-t border-border pt-4">
                             <label className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest block mb-2">
-                                Tier Surcharges
+                                {t('settings.tierSurcharges')}
                             </label>
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
-                                    <span className="font-mono-tech text-[10px] uppercase text-muted-foreground">Veteran</span>
+                                    <span className="font-mono-tech text-[10px] uppercase text-muted-foreground">{t('settings.veteran')}</span>
                                     <input
                                         type="number"
                                         value={surcharges.veteran}
@@ -153,7 +186,7 @@ export function DisplaySettings({ direction = 'down' }: { direction?: 'up' | 'do
                                     <span className="font-mono-tech text-[10px] text-muted-foreground">EB</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="font-mono-tech text-[10px] uppercase text-muted-foreground">Elite</span>
+                                    <span className="font-mono-tech text-[10px] uppercase text-muted-foreground">{t('settings.elite')}</span>
                                     <input
                                         type="number"
                                         value={surcharges.elite}
