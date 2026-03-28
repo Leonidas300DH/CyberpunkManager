@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
+import { useT } from '@/i18n';
 import { Weapon, HackingProgram, Loot, TokenState, ProgramQuality } from '@/types';
 import { parseEquipmentId, resolveVariant } from '@/lib/variants';
 import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal, Gift } from 'lucide-react';
@@ -251,6 +252,7 @@ function parseDragId(id: string): { itemId: string; sourceRecruitId: string } {
 
 export function ActiveMatchView() {
     const router = useRouter();
+    const t = useT();
     const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam, updateCampaign, displaySettings, playViewSettings, setPlayViewSettings } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const cardColumns = displaySettings?.cardColumns ?? 4;
@@ -701,15 +703,15 @@ export function ActiveMatchView() {
                 <div className="h-20 w-20 clip-corner-tr bg-surface-dark border border-border flex items-center justify-center">
                     <Swords className="w-10 h-10 text-muted-foreground" />
                 </div>
-                <h2 className="font-display text-3xl text-muted-foreground uppercase tracking-widest">No Active Match</h2>
+                <h2 className="font-display text-3xl text-muted-foreground uppercase tracking-widest">{t('play.noActiveMatch')}</h2>
                 <p className="font-mono-tech text-xs text-muted-foreground uppercase tracking-wider">
-                    Go to Team Builder to deploy your squad
+                    {t('play.goToBuildTeam')}
                 </p>
                 <button
                     onClick={() => router.push('/match')}
                     className="bg-primary text-black font-display font-bold text-sm px-6 py-3 clip-corner-br uppercase tracking-widest hover:bg-white transition-colors"
                 >
-                    Build Team
+                    {t('play.buildTeam')}
                 </button>
             </div>
         );
@@ -741,10 +743,10 @@ export function ActiveMatchView() {
                         <Swords className="w-5 h-5 text-primary" />
                         <div>
                             <h2 className="font-display text-lg font-bold text-white uppercase tracking-wider leading-none">
-                                Active Match
+                                {t('play.activeMatch')}
                             </h2>
                             <span className="text-[9px] font-mono-tech text-secondary uppercase tracking-widest">
-                                {campaign.name} // {doneCount}/{nonGonkRoster.length} done
+                                {campaign.name} // {doneCount}/{nonGonkRoster.length} {t('play.done').toLowerCase()}
                             </span>
                         </div>
                     </div>
@@ -757,12 +759,12 @@ export function ActiveMatchView() {
                             title="Draw a random loot card"
                         >
                             <Gift className="w-4 h-4" />
-                            Loot
+                            {t('play.loot')}
                         </button>
 
                         {/* Luck counter */}
                         <div className="flex items-center justify-center gap-1.5 h-9 px-4 border border-purple-500 bg-black text-purple-400 font-display font-bold text-xs uppercase tracking-wider">
-                            <span>Luck</span>
+                            <span>{t('play.luck')}</span>
                             <button
                                 onClick={(e) => { e.stopPropagation(); setLuck(l => Math.max(0, l - 1)); }}
                                 className="w-5 h-5 flex items-center justify-center hover:text-white transition-colors"
@@ -784,7 +786,7 @@ export function ActiveMatchView() {
                             title="Inspire — reactivate all tokens"
                         >
                             <Zap className="w-4 h-4" />
-                            Inspire
+                            {t('play.inspire')}
                         </button>
 
                         {/* Views dropdown */}
@@ -794,62 +796,62 @@ export function ActiveMatchView() {
                                 className="flex items-center justify-center gap-1.5 h-9 px-4 border border-primary bg-black text-primary font-display font-bold text-xs uppercase tracking-wider hover:text-white transition-colors"
                             >
                                 <Eye className="w-4 h-4" />
-                                Views
+                                {t('play.views')}
                                 <ChevronDown className={`w-3 h-3 transition-transform ${viewsOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {viewsOpen && (
                                 <div className="absolute right-0 top-full mt-1 w-56 bg-black border border-primary/40 shadow-[0_4px_20px_rgba(252,238,10,0.15)] z-50" onClick={(e) => e.stopPropagation()}>
                                     {/* Characters View */}
                                     <div className="px-3 py-2 border-b border-border">
-                                        <div className="text-[10px] font-mono-tech text-primary uppercase tracking-widest mb-1.5">Characters View</div>
+                                        <div className="text-[10px] font-mono-tech text-primary uppercase tracking-widest mb-1.5">{t('play.charactersView')}</div>
                                         <div className="flex gap-1">
                                             <button
                                                 onClick={() => setCharacterView('horizontal')}
                                                 className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-mono-tech uppercase tracking-wider transition-all ${characterView === 'horizontal' ? 'bg-primary text-black font-bold' : 'bg-black border border-border text-muted-foreground hover:text-white'}`}
                                             >
-                                                <Columns3 className="w-3 h-3" /> Horizontal
+                                                <Columns3 className="w-3 h-3" /> {t('play.horizontal')}
                                             </button>
                                             <button
                                                 onClick={() => setCharacterView('vertical')}
                                                 className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-mono-tech uppercase tracking-wider transition-all ${characterView === 'vertical' ? 'bg-primary text-black font-bold' : 'bg-black border border-border text-muted-foreground hover:text-white'}`}
                                             >
-                                                <Rows3 className="w-3 h-3" /> Vertical
+                                                <Rows3 className="w-3 h-3" /> {t('play.vertical')}
                                             </button>
                                         </div>
                                     </div>
                                     {/* Programs View */}
                                     <div className="px-3 py-2 border-b border-border">
-                                        <div className="text-[10px] font-mono-tech text-primary uppercase tracking-widest mb-1.5">Programs View</div>
+                                        <div className="text-[10px] font-mono-tech text-primary uppercase tracking-widest mb-1.5">{t('play.programsView')}</div>
                                         <div className="flex gap-1">
                                             <button
                                                 onClick={() => setProgramView('card')}
                                                 className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-mono-tech uppercase tracking-wider transition-all ${programView === 'card' ? 'bg-primary text-black font-bold' : 'bg-black border border-border text-muted-foreground hover:text-white'}`}
                                             >
-                                                <Square className="w-3 h-3" /> Card
+                                                <Square className="w-3 h-3" /> {t('play.card')}
                                             </button>
                                             <button
                                                 onClick={() => setProgramView('list')}
                                                 className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-mono-tech uppercase tracking-wider transition-all ${programView === 'list' ? 'bg-primary text-black font-bold' : 'bg-black border border-border text-muted-foreground hover:text-white'}`}
                                             >
-                                                <List className="w-3 h-3" /> List
+                                                <List className="w-3 h-3" /> {t('play.list')}
                                             </button>
                                         </div>
                                     </div>
                                     {/* Weapons/Gear View */}
                                     <div className="px-3 py-2 border-b border-border">
-                                        <div className="text-[10px] font-mono-tech text-primary uppercase tracking-widest mb-1.5">Weapons/Gear View</div>
+                                        <div className="text-[10px] font-mono-tech text-primary uppercase tracking-widest mb-1.5">{t('play.weaponsGearView')}</div>
                                         <div className="flex gap-1">
                                             <button
                                                 onClick={() => setWeaponView('card')}
                                                 className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-mono-tech uppercase tracking-wider transition-all ${weaponView === 'card' ? 'bg-primary text-black font-bold' : 'bg-black border border-border text-muted-foreground hover:text-white'}`}
                                             >
-                                                <Square className="w-3 h-3" /> Card
+                                                <Square className="w-3 h-3" /> {t('play.card')}
                                             </button>
                                             <button
                                                 onClick={() => setWeaponView('list')}
                                                 className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-mono-tech uppercase tracking-wider transition-all ${weaponView === 'list' ? 'bg-primary text-black font-bold' : 'bg-black border border-border text-muted-foreground hover:text-white'}`}
                                             >
-                                                <List className="w-3 h-3" /> List
+                                                <List className="w-3 h-3" /> {t('play.list')}
                                             </button>
                                         </div>
                                     </div>
@@ -860,7 +862,7 @@ export function ActiveMatchView() {
                                             className="flex items-center gap-2 w-full text-left text-[10px] font-mono-tech uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
                                         >
                                             {hideKIA ? <EyeOff className="w-3.5 h-3.5 text-accent" /> : <Eye className="w-3.5 h-3.5" />}
-                                            {hideKIA ? 'Show KIA' : 'Hide KIA'}
+                                            {hideKIA ? t('play.showKia') : t('play.hideKia')}
                                         </button>
                                     </div>
                                     {/* Glitch FX */}
@@ -870,7 +872,7 @@ export function ActiveMatchView() {
                                             className="flex items-center gap-2 w-full text-left text-[10px] font-mono-tech uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
                                         >
                                             {enableGlitch ? <Eye className="w-3.5 h-3.5 text-[#00F0FF]" /> : <EyeOff className="w-3.5 h-3.5" />}
-                                            Glitch FX {enableGlitch ? 'On' : 'Off'}
+                                            {enableGlitch ? t('play.glitchFxOn') : t('play.glitchFxOff')}
                                         </button>
                                     </div>
                                     {/* Code Rain FX */}
@@ -880,7 +882,7 @@ export function ActiveMatchView() {
                                             className="flex items-center gap-2 w-full text-left text-[10px] font-mono-tech uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
                                         >
                                             {enableCodeRain ? <Terminal className="w-3.5 h-3.5 text-[#00FF41]" /> : <EyeOff className="w-3.5 h-3.5" />}
-                                            Code FX {enableCodeRain ? 'On' : 'Off'}
+                                            {enableCodeRain ? t('play.codeFxOn') : t('play.codeFxOff')}
                                         </button>
                                     </div>
                                 </div>
@@ -891,7 +893,7 @@ export function ActiveMatchView() {
                             onClick={handleEndMatch}
                             className="flex items-center justify-center h-9 px-4 bg-accent text-white font-display font-bold text-xs uppercase tracking-widest clip-corner-br hover:bg-red-700 transition-colors"
                         >
-                            End Match
+                            {t('play.endMatch')}
                         </button>
                     </div>
                 </div>
@@ -974,7 +976,7 @@ export function ActiveMatchView() {
                                         style={{ transform: 'rotate(-30deg)', boxShadow: '0 0 12px rgba(220,38,38,0.5), inset 0 0 12px rgba(220,38,38,0.15)' }}>
                                         <span className="font-display text-base font-black uppercase tracking-[0.2em] leading-none whitespace-nowrap"
                                             style={{ color: '#dc2626', textShadow: '0 0 6px rgba(220,38,38,0.6)' }}>
-                                            Killed<br/>In Action
+                                            {t('play.killedInAction')}
                                         </span>
                                     </div>
                                 </div>
@@ -983,7 +985,7 @@ export function ActiveMatchView() {
                             {/* Done overlay */}
                             {done && !dead && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/25 z-30">
-                                    <span className="font-display text-2xl font-bold text-muted-foreground uppercase tracking-[0.3em] rotate-[-15deg] drop-shadow-lg">Done</span>
+                                    <span className="font-display text-2xl font-bold text-muted-foreground uppercase tracking-[0.3em] rotate-[-15deg] drop-shadow-lg">{t('play.done')}</span>
                                 </div>
                             )}
 
@@ -993,7 +995,7 @@ export function ActiveMatchView() {
                                     <div className="bg-gradient-to-b from-red-950/80 to-transparent px-3 pt-4 pb-8 flex items-start justify-center">
                                         <span className="font-display text-lg font-black uppercase tracking-[0.25em] animate-redlined-pulse"
                                             style={{ color: '#ff2020', textShadow: '0 0 8px rgba(255,0,0,0.8), 0 0 20px rgba(255,0,0,0.4), 0 0 40px rgba(255,0,0,0.2)' }}>
-                                            Red Lined
+                                            {t('play.redLined')}
                                         </span>
                                     </div>
                                 </div>
@@ -1015,21 +1017,21 @@ export function ActiveMatchView() {
                                                     {isSel && (
                                                         <div className="absolute left-full ml-1 flex gap-[3px] z-40">
                                                             {!token.spent ? (
-                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); spendToken(recruit.id, idx); }} title="Spend" borderColor="border-white/40">
+                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); spendToken(recruit.id, idx); }} title={t('play.activateModel')} borderColor="border-white/40">
                                                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5L5 9.5L10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" /></svg>
                                                                 </ActionBtn>
                                                             ) : (
-                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); reactivateToken(recruit.id, idx); }} title="Reactivate" borderColor="border-secondary/50">
+                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); reactivateToken(recruit.id, idx); }} title={t('play.activateModel')} borderColor="border-secondary/50">
                                                                     <RotateCw className="w-3 h-3 text-secondary" />
                                                                 </ActionBtn>
                                                             )}
                                                             {canWound && (
-                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); woundToken(recruit.id, idx); }} title="Wound" borderColor="border-accent/50">
+                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); woundToken(recruit.id, idx); }} title={t('play.wound')} borderColor="border-accent/50">
                                                                     <Cross className="w-3 h-3 text-accent" />
                                                                 </ActionBtn>
                                                             )}
                                                             {token.wounded && (
-                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); healToken(recruit.id, idx); }} title="Heal" borderColor="border-green-500/50">
+                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); healToken(recruit.id, idx); }} title={t('play.heal')} borderColor="border-green-500/50">
                                                                     <Heart className="w-3 h-3 text-green-500" />
                                                                 </ActionBtn>
                                                             )}
@@ -1052,15 +1054,15 @@ export function ActiveMatchView() {
                                     {!dead ? (
                                         <>
                                             <button onClick={() => inspireTeam()} className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-secondary/20 border border-secondary text-secondary font-display font-bold text-xs uppercase tracking-wider hover:bg-secondary hover:text-black transition-all clip-corner-tr">
-                                                <Zap className="w-3.5 h-3.5" /> Inspire
+                                                <Zap className="w-3.5 h-3.5" /> {t('play.inspire')}
                                             </button>
-                                            <button onClick={() => toggleKill(recruit.id)} className="px-3 py-2 bg-accent/20 border border-accent text-accent font-display font-bold text-xs uppercase tracking-wider hover:bg-accent hover:text-white transition-all clip-corner-br" title="Kill Gonk">
+                                            <button onClick={() => toggleKill(recruit.id)} className="px-3 py-2 bg-accent/20 border border-accent text-accent font-display font-bold text-xs uppercase tracking-wider hover:bg-accent hover:text-white transition-all clip-corner-br" title={t('play.kill')}>
                                                 <Skull className="w-3.5 h-3.5" />
                                             </button>
                                         </>
                                     ) : (
                                         <button onClick={() => toggleKill(recruit.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-surface-dark border border-border text-muted-foreground font-display font-bold text-xs uppercase tracking-wider hover:text-white hover:border-white transition-all">
-                                            <Heart className="w-3.5 h-3.5" /> Revive
+                                            <Heart className="w-3.5 h-3.5" /> {t('play.revive')}
                                         </button>
                                     )}
                                 </div>
@@ -1070,11 +1072,11 @@ export function ActiveMatchView() {
                                 <div className="mt-1">
                                     {!dead ? (
                                         <button onClick={() => toggleKill(recruit.id)} className="w-full flex items-center justify-center gap-1.5 py-2 bg-accent/20 border border-accent text-accent font-display font-bold text-xs uppercase tracking-wider hover:bg-accent hover:text-white transition-all clip-corner-br">
-                                            <Skull className="w-3.5 h-3.5" /> Kill
+                                            <Skull className="w-3.5 h-3.5" /> {t('play.kill')}
                                         </button>
                                     ) : (
                                         <button onClick={() => toggleKill(recruit.id)} className="w-full flex items-center justify-center gap-1.5 py-2 bg-surface-dark border border-border text-muted-foreground font-display font-bold text-xs uppercase tracking-wider hover:text-white hover:border-white transition-all">
-                                            <Heart className="w-3.5 h-3.5" /> Revive
+                                            <Heart className="w-3.5 h-3.5" /> {t('play.revive')}
                                         </button>
                                     )}
                                 </div>
@@ -1239,7 +1241,7 @@ export function ActiveMatchView() {
                 <DialogHeader>
                     <DialogTitle className="font-display text-xl uppercase tracking-wider text-purple-400">
                         <Gift className="w-5 h-5 inline mr-2" />
-                        Loot Drawn!
+                        {t('play.lootDrawn')}
                     </DialogTitle>
                     <DialogDescription className="sr-only">Assign the drawn loot to a character</DialogDescription>
                 </DialogHeader>
@@ -1253,13 +1255,13 @@ export function ActiveMatchView() {
                             <p className="font-mono-tech text-xs text-white/70">{drawnLoot.effectText}</p>
                         )}
                         <div className="space-y-2">
-                            <label className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">Assign to</label>
+                            <label className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{t('play.assignTo')}</label>
                             <select
                                 value={lootAssignTarget}
                                 onChange={(e) => setLootAssignTarget(e.target.value)}
                                 className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-sm text-white"
                             >
-                                <option value="">Select character...</option>
+                                <option value="">{t('play.selectCharacter')}</option>
                                 {aliveRecruits.map(recruit => {
                                     const lineage = getLineage(recruit.lineageId);
                                     return (
@@ -1275,14 +1277,14 @@ export function ActiveMatchView() {
                                 onClick={() => setShowLootDialog(false)}
                                 className="flex-1 py-2.5 border border-border text-muted-foreground font-display font-bold text-sm uppercase tracking-wider hover:text-white hover:border-white transition-colors"
                             >
-                                Discard
+                                {t('play.discard')}
                             </button>
                             <button
                                 onClick={handleAssignLoot}
                                 disabled={!lootAssignTarget}
                                 className="flex-1 py-2.5 bg-purple-500 hover:bg-purple-400 disabled:opacity-40 text-white font-display font-bold text-sm uppercase tracking-wider transition-colors clip-corner-br"
                             >
-                                Assign
+                                {t('play.assign')}
                             </button>
                         </div>
                     </div>

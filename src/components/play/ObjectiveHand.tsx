@@ -6,6 +6,7 @@ import { useCardGrid } from '@/hooks/useCardGrid';
 import { ObjectiveCard, FACTION_COLOR_MAP as OBJ_FACTION_COLOR } from '@/components/shared/ObjectiveCard';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { Target, ChevronDown, ChevronUp, Check, AlertTriangle, Undo2 } from 'lucide-react';
+import { useT } from '@/i18n';
 
 interface ObjectiveHandProps {
     objectives: Objective[];
@@ -17,6 +18,7 @@ interface ObjectiveHandProps {
 }
 
 export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty, leaderCardId, onComplete, onUncomplete }: ObjectiveHandProps) {
+    const t = useT();
     const [open, setOpen] = useState(true);
     const [confirmingId, setConfirmingId] = useState<string | null>(null);
     const { gridClass } = useCardGrid();
@@ -43,7 +45,7 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
                 <button onClick={() => setOpen(!open)} className="flex items-center gap-2 shrink-0">
                     <Target className="w-3.5 h-3.5 text-primary" />
                     <span className="font-display text-xs font-bold text-white uppercase tracking-wider">
-                        Objectives
+                        {t('play.objectives')}
                     </span>
                 </button>
                 {!open && objectives.map((obj) => {
@@ -62,7 +64,7 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
                     );
                 })}
                 <span className="text-[9px] font-mono-tech text-muted-foreground">
-                    {completedCount}/{totalCount} completed
+                    {t('play.completedCount', { completed: completedCount, total: totalCount })}
                 </span>
                 <button onClick={() => setOpen(!open)} className="ml-auto">
                     {open ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
@@ -123,7 +125,7 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
                                                     <div className="text-center">
                                                         <Check className="w-8 h-8 text-emerald-400 mx-auto mb-1" />
                                                         <span className="text-[10px] font-mono-tech text-emerald-400 uppercase tracking-wider animate-pulse">
-                                                            Tap again to complete
+                                                            {t('play.tapToComplete')}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -134,7 +136,7 @@ export function ObjectiveHand({ objectives, completedIds, carryingLeaderPenalty,
                                                     <div className="text-center">
                                                         <Undo2 className="w-8 h-8 text-amber-400 mx-auto mb-1" />
                                                         <span className="text-[10px] font-mono-tech text-amber-400 uppercase tracking-wider animate-pulse">
-                                                            Tap again to undo
+                                                            {t('play.tapToUndo')}
                                                         </span>
                                                     </div>
                                                 </div>
