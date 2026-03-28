@@ -7,6 +7,7 @@ import { canHaveTiers, getBaseProfile, getTierLabel } from '@/lib/tiers';
 import { MathService } from '@/lib/math';
 import { v4 as uuidv4 } from 'uuid';
 import { Trophy, Skull, ChevronRight, ShieldAlert, UserPlus, ArrowUp, Ban, Check, AlertTriangle } from 'lucide-react';
+import { useT } from '@/i18n';
 
 type Step = 'result' | 'promotion' | 'casualties' | 'summary';
 type MatchResult = 'victory' | 'defeat';
@@ -29,6 +30,7 @@ const BTN_OUTLINE = `${BTN} border border-border text-muted-foreground hover:tex
 const STEP_LABEL = "font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground mb-3";
 
 export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catalog, onConfirm }: PostGameDialogProps) {
+    const t = useT();
     const [step, setStep] = useState<Step>('result');
     const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
 
@@ -91,7 +93,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
 
             // Check if wounded (any token with wounded: true)
             const tokens: TokenState[] = tokenStates[recruit.id] ?? [];
-            const wasWounded = tokens.some(t => t.wounded);
+            const wasWounded = tokens.some(tok => tok.wounded);
             const wasKIA = deadModelIds.includes(recruit.id);
 
             return wasWounded || wasKIA;
@@ -247,7 +249,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                 lineageId: recruit.lineageId,
                 profileId: recruit.currentProfileId,
                 equipmentIds: activeMatchTeam.equipmentMap[recruit.id] ?? [],
-                wasWounded: tokens.some(t => t.wounded),
+                wasWounded: tokens.some(tok => tok.wounded),
                 wasKIA: deadModelIds.includes(recruit.id),
             };
         });
@@ -293,21 +295,21 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
     // ── Step 1: Result ──
     const renderResult = () => (
         <div className="space-y-4">
-            <p className={STEP_LABEL}>Step 1 — Match Outcome</p>
+            <p className={STEP_LABEL}>{`${t('postGame.step1')} — ${t('postGame.matchOutcome')}`}</p>
             <div className="grid grid-cols-2 gap-3">
                 <button
                     onClick={() => setMatchResult('victory')}
                     className={`flex flex-col items-center gap-2 p-6 border-2 transition-all ${matchResult === 'victory' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/50 hover:text-white'}`}
                 >
                     <Trophy className="w-8 h-8" />
-                    <span className="font-display font-bold text-lg uppercase">Victory</span>
+                    <span className="font-display font-bold text-lg uppercase">{t('postGame.victory')}</span>
                 </button>
                 <button
                     onClick={() => setMatchResult('defeat')}
                     className={`flex flex-col items-center gap-2 p-6 border-2 transition-all ${matchResult === 'defeat' ? 'border-accent bg-accent/10 text-accent' : 'border-border text-muted-foreground hover:border-accent/50 hover:text-white'}`}
                 >
                     <Skull className="w-8 h-8" />
-                    <span className="font-display font-bold text-lg uppercase">Defeat</span>
+                    <span className="font-display font-bold text-lg uppercase">{t('postGame.defeat')}</span>
                 </button>
             </div>
             <div className="flex justify-end pt-2">
@@ -321,8 +323,8 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
     // ── Step 2: Promotion ──
     const renderPromotion = () => (
         <div className="space-y-4">
-            <p className={STEP_LABEL}>Step 2 — Promotion Reward</p>
-            <p className="text-sm text-muted-foreground">Victory grants one free promotion or Merc recruitment.</p>
+            <p className={STEP_LABEL}>{`${t('postGame.step2')} — ${t('postGame.promotionReward')}`}</p>
+            <p className="text-sm text-muted-foreground">{t('postGame.promotionDesc')}</p>
 
             <div className="space-y-2">
                 {/* Promote option */}
@@ -332,11 +334,11 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                 >
                     <ArrowUp className={`w-5 h-5 mt-0.5 shrink-0 ${promotionChoice === 'promote' ? 'text-primary' : 'text-muted-foreground'}`} />
                     <div className="flex-1">
-                        <div className="font-display font-bold text-sm uppercase">Promote a character</div>
+                        <div className="font-display font-bold text-sm uppercase">{t('postGame.promoteCharacter')}</div>
                         {promotionChoice === 'promote' && (
                             <div className="mt-2 space-y-1">
                                 {promotionEligible.length === 0 ? (
-                                    <p className="text-xs text-muted-foreground italic">No eligible characters</p>
+                                    <p className="text-xs text-muted-foreground italic">{t('postGame.noEligible')}</p>
                                 ) : promotionEligible.map(recruit => {
                                     const profile = getProfile(recruit.currentProfileId)!;
                                     const lineage = getLineage(recruit.lineageId)!;
@@ -363,11 +365,11 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                 >
                     <UserPlus className={`w-5 h-5 mt-0.5 shrink-0 ${promotionChoice === 'recruit-merc' ? 'text-secondary' : 'text-muted-foreground'}`} />
                     <div className="flex-1">
-                        <div className="font-display font-bold text-sm uppercase">Recruit a Merc</div>
+                        <div className="font-display font-bold text-sm uppercase">{t('postGame.recruitMerc')}</div>
                         {promotionChoice === 'recruit-merc' && (
                             <div className="mt-2 space-y-1">
                                 {mercLineages.length === 0 ? (
-                                    <p className="text-xs text-muted-foreground italic">No Mercs available</p>
+                                    <p className="text-xs text-muted-foreground italic">{t('postGame.noMercs')}</p>
                                 ) : mercLineages.map(lineage => {
                                     const base = getBaseProfile(lineage.id, catalog);
                                     if (!base) return null;
@@ -377,7 +379,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                                             onClick={(e) => { e.stopPropagation(); setSelectedMercLineageId(lineage.id); }}
                                             className={`w-full text-left px-2 py-1.5 text-xs font-mono-tech border transition-colors ${selectedMercLineageId === lineage.id ? 'border-secondary text-secondary bg-secondary/10' : 'border-border text-white hover:border-secondary/50'}`}
                                         >
-                                            {lineage.name} — {base.costEB} EB (free)
+                                            {lineage.name} — {base.costEB} EB ({t('postGame.free')})
                                         </button>
                                     );
                                 })}
@@ -392,7 +394,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                     onClick={() => setPromotionChoice('decline')}
                 >
                     <Ban className={`w-5 h-5 shrink-0 ${promotionChoice === 'decline' ? 'text-white' : 'text-muted-foreground'}`} />
-                    <div className="font-display font-bold text-sm uppercase">Decline</div>
+                    <div className="font-display font-bold text-sm uppercase">{t('postGame.decline')}</div>
                 </label>
             </div>
 
@@ -415,9 +417,9 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
     // ── Step 3: Casualties ──
     const renderCasualties = () => (
         <div className="space-y-4">
-            <p className={STEP_LABEL}>Step {matchResult === 'victory' ? 3 : 2} — Casualty Rolls</p>
+            <p className={STEP_LABEL}>{`Step ${matchResult === 'victory' ? 3 : 2} — ${t('postGame.casualtyRolls')}`}</p>
             <p className="text-sm text-muted-foreground">
-                Roll a die for each wounded/KIA Veteran or Elite. On a fumble → Major Injury.
+                {t('postGame.casualtyDesc')}
             </p>
 
             <div className="space-y-2">
@@ -428,7 +430,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
 
                     const tokens: TokenState[] = tokenStates[recruit.id] ?? [];
                     const wasKIA = deadModelIds.includes(recruit.id);
-                    const wasWounded = tokens.some(t => t.wounded);
+                    const wasWounded = tokens.some(tok => tok.wounded);
                     const decision = casualtyDecisions[recruit.id];
 
                     return (
@@ -441,8 +443,8 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
-                                    {wasKIA && <span className="font-mono-tech text-[9px] bg-accent/20 text-accent px-1.5 py-0.5 uppercase">KIA</span>}
-                                    {wasWounded && !wasKIA && <span className="font-mono-tech text-[9px] bg-yellow-600/20 text-yellow-500 px-1.5 py-0.5 uppercase">Wounded</span>}
+                                    {wasKIA && <span className="font-mono-tech text-[9px] bg-accent/20 text-accent px-1.5 py-0.5 uppercase">{t('play.kia')}</span>}
+                                    {wasWounded && !wasKIA && <span className="font-mono-tech text-[9px] bg-yellow-600/20 text-yellow-500 px-1.5 py-0.5 uppercase">{t('postGame.wounded')}</span>}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
@@ -450,13 +452,13 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                                     onClick={() => setCasualtyDecisions(prev => ({ ...prev, [recruit.id]: 'safe' }))}
                                     className={`flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-display font-bold uppercase border transition-colors ${decision === 'safe' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-border text-muted-foreground hover:border-emerald-500/50'}`}
                                 >
-                                    <Check className="w-3.5 h-3.5" /> Safe
+                                    <Check className="w-3.5 h-3.5" /> {t('postGame.safe')}
                                 </button>
                                 <button
                                     onClick={() => setCasualtyDecisions(prev => ({ ...prev, [recruit.id]: 'major-injury' }))}
                                     className={`flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-display font-bold uppercase border transition-colors ${decision === 'major-injury' ? 'border-accent bg-accent/10 text-accent' : 'border-border text-muted-foreground hover:border-accent/50'}`}
                                 >
-                                    <AlertTriangle className="w-3.5 h-3.5" /> Major Injury
+                                    <AlertTriangle className="w-3.5 h-3.5" /> {t('postGame.majorInjury')}
                                 </button>
                             </div>
                             {decision === 'major-injury' && (
@@ -485,14 +487,14 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
     // ── Step 4: Summary ──
     const renderSummary = () => (
         <div className="space-y-4">
-            <p className={STEP_LABEL}>Summary — Post-Game Report</p>
+            <p className={STEP_LABEL}>{`Summary — ${t('postGame.postGameReport')}`}</p>
 
             <div className="border border-border divide-y divide-border">
                 {/* Result */}
                 <div className="flex items-center gap-2 px-3 py-2">
                     {matchResult === 'victory' ? <Trophy className="w-4 h-4 text-primary" /> : <Skull className="w-4 h-4 text-accent" />}
                     <span className={`font-display font-bold text-sm uppercase ${matchResult === 'victory' ? 'text-primary' : 'text-accent'}`}>
-                        {matchResult}
+                        {matchResult === 'victory' ? t('postGame.victory') : t('postGame.defeat')}
                     </span>
                 </div>
 
@@ -510,7 +512,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
 
                 {/* Street Cred */}
                 <div className="flex items-center justify-between px-3 py-2">
-                    <span className="text-xs font-mono-tech text-muted-foreground uppercase">Street Cred</span>
+                    <span className="text-xs font-mono-tech text-muted-foreground uppercase">{t('hq.streetCred')}</span>
                     <span className={`font-mono-tech text-sm font-bold ${scChanged ? 'text-primary' : 'text-white'}`}>
                         {scBefore} {scChanged ? `→ ${scAfter}` : ''}
                     </span>
@@ -520,7 +522,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
                 {scAfter > scBefore && (
                     <div className="flex items-center gap-2 px-3 py-2 bg-primary/5">
                         <ShieldAlert className="w-4 h-4 text-primary shrink-0" />
-                        <span className="text-xs font-mono-tech text-primary">Check Supply — new gear may be available at SC {scAfter}</span>
+                        <span className="text-xs font-mono-tech text-primary">{t('postGame.checkSupply')}</span>
                     </div>
                 )}
             </div>
@@ -528,7 +530,7 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
             <div className="flex justify-between pt-2">
                 <button onClick={goBack} className={BTN_OUTLINE}>Back</button>
                 <button onClick={handleConfirm} className={BTN_ACCENT}>
-                    Return to HQ
+                    {t('postGame.returnToHQ')}
                 </button>
             </div>
         </div>
