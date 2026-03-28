@@ -10,6 +10,7 @@ interface DisplaySettings {
     programViewMode?: 'list' | 'card' | 'double';
     gearViewMode?: 'list' | 'card';
     gearStacked?: boolean;
+    locale?: 'en' | 'fr';
 }
 
 interface PlayViewSettings {
@@ -57,7 +58,7 @@ interface StoreState {
     reset: () => void;
 }
 
-const emptyCatalog: CatalogData = { factions: [], lineages: [], profiles: [], items: [], programs: [], weapons: [], objectives: [] };
+const emptyCatalog: CatalogData = { factions: [], lineages: [], profiles: [], items: [], programs: [], weapons: [], objectives: [], loots: [] };
 
 // ─── STORE ────────────────────────────────────────────────────────────
 // Catalog starts empty — populated by useCatalog from Supabase relational tables.
