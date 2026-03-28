@@ -9,6 +9,7 @@ export interface Faction {
     id: string;
     name: string; // e.g., "Tyger Claws", "Custom Gang"
     description?: string;
+    description_fr?: string;
     imageUrl?: string; // Rendered as aspect-square
 }
 
@@ -67,6 +68,7 @@ export interface ItemCard {
     keywords: string[]; // e.g., ['Bulky', 'Cybergear']
     grantedActions: GameAction[]; // Actions added to the model equipping it
     passiveRules: string;
+    passiveRules_fr?: string;
     grantsStreetCredBonus?: number; // Used mainly for Completed Objectives
     summonsDroneLineageId?: string; // FK to ModelLineage if this program deploys a Drone
     imageUrl?: string; // Rendered as aspect-square
@@ -92,9 +94,12 @@ export interface HackingProgram {
     range: ProgramRange;         // Range indicator
     techTest: boolean;           // Requires a Tech skill test
     flavorText: string;           // Flavor/ambiance text (italics + quotes on front)
+    flavorText_fr?: string;
     loadedText: string;          // Front card rules text
+    loadedText_fr?: string;
     vulnerable: boolean;         // Grants Vulnerable keyword
     runningEffect: string;       // Back card effect text
+    runningEffect_fr?: string;
     reloadCondition: ReloadCondition; // How to reload/flip the card back
 }
 
@@ -107,10 +112,13 @@ export interface SkillBonus {
 export interface Objective {
     id: string;
     name: string;
+    name_fr?: string;
     factionId: string;           // FK to Faction
     description: string;         // Condition text
+    description_fr?: string;
     rewardType: ObjectiveRewardType;
     rewardText: string;          // Reward description
+    rewardText_fr?: string;
     grantsStreetCred: number;          // 0 = none, 1 = one star, 2 = two stars
     grantsEB?: number;
     grantsLuck?: number;
@@ -129,6 +137,7 @@ export interface Objective {
     actionRangeLong?: boolean;
     // Faction banner flavor text (e.g., "THREAT RESPONSE" for Max-Tac)
     factionBanner?: string;
+    factionBanner_fr?: string;
 }
 
 // --- FACTION VARIANTS ---
@@ -162,6 +171,7 @@ export interface Weapon {
     range2Green?: boolean;
     range2Long?: boolean;
     description: string;
+    description_fr?: string;
     keywords: string[];    // e.g., ['Bulky', 'Deadly']
     grantsNetrunner?: boolean; // true = equipping this allows hacking programs
     imageUrl?: string;     // Illustration in /images/weapons/
@@ -172,8 +182,11 @@ export interface Weapon {
 export interface Loot {
     id: string;
     name: string;           // title
+    name_fr?: string;
     flavorText: string;     // texte d'ambiance
+    flavorText_fr?: string;
     effectText?: string;    // description de l'effet
+    effectText_fr?: string;
     skillReq?: SkillType;
     skillBonus?: number;
     rangeRed: boolean;

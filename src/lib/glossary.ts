@@ -8,6 +8,7 @@ export const RULEBOOK_SOURCE = 'Cyberpunk_Rulebook_v26.pdf';
 export interface GlossaryEntry {
     term: string;
     definition: string;
+    definition_fr?: string;
     page?: string;
     /** Whether this term should be detected & linked in card text */
     highlight?: boolean;

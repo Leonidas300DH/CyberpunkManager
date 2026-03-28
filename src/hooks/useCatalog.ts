@@ -12,6 +12,7 @@ import type {
     ItemCard,
     HackingProgram,
     Objective,
+    Loot,
     SkillBonus,
     SkillType,
 } from '@/types';
@@ -23,6 +24,7 @@ function mapFaction(r: Record<string, unknown>): Faction {
         id: r.id as string,
         name: r.name as string,
         description: r.description as string | undefined,
+        description_fr: r.description_fr as string | undefined,
         imageUrl: r.image_url as string | undefined,
     };
 }
@@ -79,6 +81,7 @@ function mapWeapon(r: Record<string, unknown>): Weapon {
         range2Green: r.range2_green as boolean | undefined,
         range2Long: r.range2_long as boolean | undefined,
         description: (r.description as string) ?? '',
+        description_fr: r.description_fr as string | undefined,
         keywords: (r.keywords as string[]) ?? [],
         imageUrl: r.image_url as string | undefined,
     };
@@ -93,6 +96,7 @@ function mapItem(r: Record<string, unknown>): ItemCard {
         keywords: (r.keywords as string[]) ?? [],
         grantedActions: (r.granted_actions as ItemCard['grantedActions']) ?? [],
         passiveRules: (r.passive_rules as string) ?? '',
+        passiveRules_fr: (r.passive_rules_fr as string) ?? undefined,
         imageUrl: r.image_url as string | undefined,
     };
 }
@@ -110,9 +114,12 @@ function mapProgram(r: Record<string, unknown>): HackingProgram {
         range: r.range as HackingProgram['range'],
         techTest: (r.tech_test as boolean) ?? false,
         flavorText: (r.flavor_text as string) ?? '',
+        flavorText_fr: (r.flavor_text_fr as string) ?? undefined,
         loadedText: (r.loaded_text as string) ?? '',
+        loadedText_fr: (r.loaded_text_fr as string) ?? undefined,
         vulnerable: (r.vulnerable as boolean) ?? false,
         runningEffect: (r.running_effect as string) ?? '',
+        runningEffect_fr: (r.running_effect_fr as string) ?? undefined,
         reloadCondition: r.reload_condition as HackingProgram['reloadCondition'],
     };
 }
@@ -133,10 +140,13 @@ function mapObjective(r: Record<string, unknown>): Objective {
     return {
         id: r.id as string,
         name: r.name as string,
+        name_fr: r.name_fr as string | undefined,
         factionId: r.faction_id as string,
         description: (r.description as string) ?? '',
+        description_fr: r.description_fr as string | undefined,
         rewardType: (r.reward_type as Objective['rewardType']) ?? 'ongoing',
         rewardText: (r.reward_text as string) ?? '',
+        rewardText_fr: r.reward_text_fr as string | undefined,
         grantsStreetCred: Number(r.grants_street_cred) || 0,
         grantsEB: r.grants_eb as number | undefined,
         grantsLuck: r.grants_luck as number | undefined,
@@ -152,6 +162,7 @@ function mapObjective(r: Record<string, unknown>): Objective {
         actionRangeGreen: r.action_range_green as boolean | undefined,
         actionRangeLong: r.action_range_long as boolean | undefined,
         factionBanner: r.faction_banner as string | undefined,
+        factionBanner_fr: r.faction_banner_fr as string | undefined,
     };
 }
 
@@ -162,6 +173,7 @@ function factionToRow(f: Faction) {
         id: f.id,
         name: f.name,
         description: f.description,
+        description_fr: f.description_fr,
         image_url: f.imageUrl,
         updated_at: new Date().toISOString(),
     };
@@ -207,6 +219,7 @@ function weaponToRow(w: Weapon) {
         is_action: w.isAction,
         keywords: w.keywords,
         description: w.description,
+        description_fr: w.description_fr,
         image_url: w.imageUrl,
         source: w.source,
         grants_armor: w.grantsArmor,
@@ -234,6 +247,7 @@ function itemToRow(i: ItemCard) {
         category: i.category,
         keywords: i.keywords,
         passive_rules: i.passiveRules,
+        passive_rules_fr: i.passiveRules_fr,
         granted_actions: i.grantedActions,
         updated_at: new Date().toISOString(),
     };
@@ -258,8 +272,11 @@ function programToRow(p: HackingProgram) {
         rarity: p.rarity,
         req_street_cred: p.reqStreetCred,
         flavor_text: p.flavorText,
+        flavor_text_fr: p.flavorText_fr,
         loaded_text: p.loadedText,
+        loaded_text_fr: p.loadedText_fr,
         running_effect: p.runningEffect,
+        running_effect_fr: p.runningEffect_fr,
         tech_test: p.techTest,
         vulnerable: p.vulnerable,
         updated_at: new Date().toISOString(),
@@ -270,10 +287,13 @@ function objectiveToRow(o: Objective) {
     return {
         id: o.id,
         name: o.name,
+        name_fr: o.name_fr,
         faction_id: o.factionId,
         description: o.description,
+        description_fr: o.description_fr,
         reward_type: o.rewardType,
         reward_text: o.rewardText,
+        reward_text_fr: o.rewardText_fr,
         grants_street_cred: o.grantsStreetCred,
         grants_eb: o.grantsEB,
         grants_luck: o.grantsLuck,
@@ -294,6 +314,46 @@ function objectiveToRow(o: Objective) {
         action_range_green: o.actionRangeGreen ?? false,
         action_range_long: o.actionRangeLong ?? false,
         faction_banner: o.factionBanner ?? null,
+        faction_banner_fr: o.factionBanner_fr ?? null,
+        updated_at: new Date().toISOString(),
+    };
+}
+
+function mapLoot(r: Record<string, unknown>): Loot {
+    return {
+        id: r.id as string,
+        name: r.name as string,
+        name_fr: r.name_fr as string | undefined,
+        flavorText: (r.flavor_text as string) ?? '',
+        flavorText_fr: r.flavor_text_fr as string | undefined,
+        effectText: r.effect_text as string | undefined,
+        effectText_fr: r.effect_text_fr as string | undefined,
+        skillReq: r.skill_req as Loot['skillReq'],
+        skillBonus: r.skill_bonus as number | undefined,
+        rangeRed: (r.range_red as boolean) ?? false,
+        rangeYellow: (r.range_yellow as boolean) ?? false,
+        rangeGreen: (r.range_green as boolean) ?? false,
+        rangeLong: (r.range_long as boolean) ?? false,
+        armorBonus: r.armor_bonus as number | undefined,
+    };
+}
+
+function lootToRow(l: Loot) {
+    return {
+        id: l.id,
+        name: l.name,
+        name_fr: l.name_fr ?? null,
+        flavor_text: l.flavorText,
+        flavor_text_fr: l.flavorText_fr ?? null,
+        effect_text: l.effectText ?? null,
+        effect_text_fr: l.effectText_fr ?? null,
+        skill_req: l.skillReq ?? null,
+        skill_bonus: l.skillBonus ?? null,
+        range_red: l.rangeRed,
+        range_yellow: l.rangeYellow,
+        range_green: l.rangeGreen,
+        range_long: l.rangeLong,
+        armor_bonus: l.armorBonus ?? null,
         updated_at: new Date().toISOString(),
     };
 }
@@ -310,7 +370,7 @@ export function useCatalog() {
 
         (async () => {
             try {
-                const [factionsRes, lineagesRes, lfRes, profilesRes, weaponsRes, itemsRes, programsRes, configRes, objectivesRes] = await Promise.all([
+                const [factionsRes, lineagesRes, lfRes, profilesRes, weaponsRes, itemsRes, programsRes, configRes, objectivesRes, lootsRes] = await Promise.all([
                     supabase.from('factions').select('*'),
                     supabase.from('lineages').select('*'),
                     supabase.from('lineage_factions').select('*'),
@@ -320,6 +380,7 @@ export function useCatalog() {
                     supabase.from('programs').select('*'),
                     supabase.from('app_config').select('*').eq('key', 'tier_surcharges').maybeSingle(),
                     supabase.from('objectives').select('*'),
+                    supabase.from('loots').select('*'),
                 ]);
 
                 if (factionsRes.error || lineagesRes.error || profilesRes.error || weaponsRes.error) {
@@ -328,6 +389,10 @@ export function useCatalog() {
 
                 if (objectivesRes.error) {
                     console.warn('[Catalog] objectives fetch failed (non-fatal):', objectivesRes.error.message);
+                }
+
+                if (lootsRes.error) {
+                    console.warn('[Catalog] loots fetch failed (non-fatal):', lootsRes.error.message);
                 }
 
                 // Build factionIds lookup from junction table
@@ -346,6 +411,7 @@ export function useCatalog() {
                     items: (itemsRes.data ?? []).map(mapItem),
                     programs: (programsRes.data ?? []).map(mapProgram),
                     objectives: (objectivesRes.data ?? []).map(mapObjective),
+                    loots: (lootsRes.data ?? []).map(mapLoot),
                     tierSurcharges: (configRes.data?.value as { veteran: number; elite: number }) ?? { veteran: 5, elite: 10 },
                 };
 
@@ -363,6 +429,7 @@ export function useCatalog() {
                         programs: seed.HACKING_PROGRAMS,
                         weapons: seed.WEAPONS,
                         objectives: (seed as { OBJECTIVES?: Objective[] }).OBJECTIVES ?? [],
+                        loots: (seed as { LOOTS?: Loot[] }).LOOTS ?? [],
                         tierSurcharges: seed.TIER_SURCHARGES,
                     };
                     useStore.setState({ catalog: fallback });
@@ -446,6 +513,16 @@ export function useCatalog() {
         if (error) console.error('[Catalog] deleteObjective error:', error.message);
     }, []);
 
+    const saveLoot = useCallback(async (loot: Loot) => {
+        const { error } = await supabase.from('loots').upsert(lootToRow(loot));
+        if (error) console.error('[Catalog] saveLoot error:', error.message);
+    }, []);
+
+    const deleteLoot = useCallback(async (lootId: string) => {
+        const { error } = await supabase.from('loots').delete().eq('id', lootId);
+        if (error) console.error('[Catalog] deleteLoot error:', error.message);
+    }, []);
+
     const saveTierSurcharges = useCallback(async (surcharges: { veteran: number; elite: number }) => {
         const { error } = await supabase.from('app_config').upsert({
             key: 'tier_surcharges',
@@ -468,6 +545,8 @@ export function useCatalog() {
         saveProgram,
         saveObjective,
         deleteObjective,
+        saveLoot,
+        deleteLoot,
         saveTierSurcharges,
     };
 }
