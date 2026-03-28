@@ -9,9 +9,11 @@ import { DisplaySettings } from '@/components/ui/DisplaySettings';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStore } from '@/store/useStore';
 import { AuthDialog } from '@/components/auth/AuthDialog';
+import { useT } from '@/i18n';
 
 export function BottomNav() {
     const pathname = usePathname();
+    const t = useT();
     const { user, loading, signOut } = useAuth();
     const [authOpen, setAuthOpen] = useState(false);
     const campaigns = useStore((s) => s.campaigns);
@@ -21,10 +23,10 @@ export function BottomNav() {
     const hasCampaigns = campaigns.length > 0;
 
     const navItems = [
-        { name: 'HQ', href: '/hq', icon: Home, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/HQ.png' },
-        { name: 'Team Builder', href: '/match', icon: Swords, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/team.png' },
-        { name: 'Play', href: '/play', icon: TabletSmartphone, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/battle.png' },
-        { name: 'Database', href: '/database', icon: Database, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/database.png' },
+        { name: t('nav.hq'), href: '/hq', icon: Home, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/HQ.png' },
+        { name: t('nav.teamBuilder'), href: '/match', icon: Swords, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/team.png' },
+        { name: t('nav.play'), href: '/play', icon: TabletSmartphone, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/battle.png' },
+        { name: t('nav.database'), href: '/database', icon: Database, bg: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/menus/database.png' },
     ];
 
     // ─── Sync button rendering ────────────────────────────────────────
