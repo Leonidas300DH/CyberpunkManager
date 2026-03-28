@@ -125,7 +125,8 @@ export function useTeamBuilder(campaign: Campaign): TeamBuilderHook {
         equipmentMap: equipmentMap,
     };
 
-    const validationErrors = ValidationService.validateRoster(currentTeam, campaign, catalog);
+    const locale = useStore.getState().displaySettings.locale ?? 'en';
+    const validationErrors = ValidationService.validateRoster(currentTeam, campaign, catalog, locale);
     const totalCost = MathService.calculateTeamCost(currentTeam, campaign, catalog);
     const isValid = validationErrors.length === 0;
 

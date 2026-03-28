@@ -1,9 +1,12 @@
 import { Campaign, MatchTeam, CatalogData } from '@/types';
 import { MathService } from './math';
 import { resolveVariant, parseEquipmentId } from './variants';
+import { getT } from '@/i18n';
+import type { Locale } from '@/i18n';
 
 export const ValidationService = {
-    validateRoster: (team: MatchTeam, campaign: Campaign, store: CatalogData): string[] => {
+    validateRoster: (team: MatchTeam, campaign: Campaign, store: CatalogData, locale: Locale = 'en'): string[] => {
+        const t = getT(locale);
         const errors: string[] = [];
 
         // Helper to get recruited models
@@ -17,8 +20,8 @@ export const ValidationService = {
             return lineage?.type === 'Leader';
         }).length;
 
-        if (leaderCount === 0) errors.push('Missing Leader!');
-        if (leaderCount > 1) errors.push('Only one Leader allowed!');
+        if (leaderCount === 0) errors.push(t('validation.missingLeader'));
+        if (leaderCount > 1) errors.push(t('validation.onlyOneLeader'));
 
         // 2. Gonk Quota: Total quantity of 'Gonk' <= Total Influence
         const gonkQuantity = recruits.reduce((sum, r) => {
@@ -28,13 +31,13 @@ export const ValidationService = {
 
         const totalInfluence = MathService.calculateCampaignInfluence(campaign, store);
         if (gonkQuantity > totalInfluence) {
-            errors.push(`Too many Gonks! (${gonkQuantity}/${totalInfluence})`);
+            errors.push(t('validation.tooManyGonks', { count: gonkQuantity, max: totalInfluence }));
         }
 
         // 3. Budget Limit: Total Roster Cost <= MatchTeam.targetEB
         const totalCost = MathService.calculateTeamCost(team, campaign, store);
         if (totalCost > team.targetEB) {
-            errors.push(`Budget exceeded! (${totalCost}/${team.targetEB} EB)`);
+            errors.push(t('validation.budgetExceeded', { cost: totalCost, budget: team.targetEB }));
         }
 
         // 4. Street Cred Limit: Item reqStreetCred <= Total Street Cred
@@ -47,7 +50,7 @@ export const ValidationService = {
                 if (item) {
                     const variant = resolveVariant(item.factionVariants, campaign.factionId);
                     if (variant.reqStreetCred > campaignStreetCred) {
-                        errors.push(`Item '${item.name}' requires Street Cred ${variant.reqStreetCred} (Have: ${campaignStreetCred})`);
+                        errors.push(t('validation.itemRequiresStreetCred', { name: item.name, required: variant.reqStreetCred, have: campaignStreetCred }));
                     }
                 }
             });
@@ -66,7 +69,7 @@ export const ValidationService = {
             if (item) {
                 const variant = resolveVariant(item.factionVariants, campaign.factionId);
                 if (count > variant.rarity) {
-                    errors.push(`Item '${item.name}' exceeds rarity limit (${count}/${variant.rarity})`);
+                    errors.push(t('validation.itemExceedsRarity', { name: item.name, count, max: variant.rarity }));
                 }
             }
         });
@@ -86,14 +89,14 @@ export const ValidationService = {
             // 6. Bulky
             const bulkyCount = items.filter(i => i.keywords.includes('Bulky')).length;
             if (bulkyCount > 1) {
-                errors.push(`${lineage.name} has too many Bulky items (${bulkyCount})`);
+                errors.push(t('validation.tooManyBulky', { name: lineage.name, count: bulkyCount }));
             }
 
             // 7. Cybergear
             const isCyberChar = profile.keywords.includes('Cyber-Character');
             items.forEach(i => {
                 if (i.keywords.includes('Cybergear') && !isCyberChar) {
-                    errors.push(`${lineage.name} cannot equip Cybergear '${i.name}'`);
+                    errors.push(t('validation.cannotEquipCybergear', { name: lineage.name, item: i.name }));
                 }
             });
 
@@ -115,16 +118,16 @@ export const ValidationService = {
             const totalProgramCount = matchProgramCount + hqPrograms.length;
 
             if (totalProgramCount > 0 && !canRunPrograms) {
-                errors.push(`${lineage.name} cannot equip Programs (needs Netrunner keyword or a Net Deck)`);
+                errors.push(t('validation.cannotEquipPrograms', { name: lineage.name }));
             }
             if (totalProgramCount > 0 && canRunPrograms && totalProgramCount > profile.skills.Tech) {
-                errors.push(`${lineage.name} has too many Programs (${totalProgramCount}/${profile.skills.Tech})`);
+                errors.push(t('validation.tooManyPrograms', { name: lineage.name, count: totalProgramCount, max: profile.skills.Tech }));
             }
 
             // 9. Faction Purity — Edgerunners are recruitable by any faction
             const isEdgerunner = lineage.factionIds.includes('faction-edgerunners');
             if (!lineage.isMerc && !isEdgerunner && !lineage.factionIds.includes(campaign.factionId)) {
-                errors.push(`${lineage.name} belongs to wrong Faction!`);
+                errors.push(t('validation.wrongFaction', { name: lineage.name }));
             }
         });
 
