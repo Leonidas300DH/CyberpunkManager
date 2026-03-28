@@ -9,6 +9,7 @@ import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { v4 as uuidv4 } from 'uuid';
 import { canHaveTiers, getRecruitBudgetCost, getSurchargeForLevel, getTierLabel } from '@/lib/tiers';
+import { useT } from '@/i18n';
 import {
     DndContext,
     DragOverlay,
@@ -27,6 +28,7 @@ interface RosterListProps {
 const CAPSULE = "inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border rounded-full text-white hover:brightness-125 transition-all cursor-default";
 
 export function RosterList({ campaign }: RosterListProps) {
+    const t = useT();
     const { catalog, updateCampaign } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const [search, setSearch] = useState('');
@@ -172,7 +174,7 @@ export function RosterList({ campaign }: RosterListProps) {
                 >
                     <ChevronDown className={`w-5 h-5 text-primary transition-transform ${!expandedSections.has('owned') ? '-rotate-90' : ''}`} />
                     <div className="border-l-2 border-primary pl-3">
-                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-primary transition-colors">Your Roster</h3>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-primary transition-colors">{t('hq.yourRoster')}</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
                             {campaign.hqRoster.length} merc{campaign.hqRoster.length !== 1 ? 's' : ''} recruited
                         </span>
@@ -182,8 +184,8 @@ export function RosterList({ campaign }: RosterListProps) {
                 <OwnedDropZone>
                 {campaign.hqRoster.length === 0 ? (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">Roster Empty</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Drag a merc here or use the + button below.</p>
+                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('hq.rosterEmpty')}</h3>
+                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('hq.dragMercHere')}</p>
                     </div>
                 ) : !expandedSections.has('owned') ? (
                     /* Capsule View */
@@ -239,7 +241,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                     </button>
                                     {recruit.hasMajorInjury && (
                                         <div className="absolute bottom-0 left-0 right-0 bg-yellow-600/80 text-center py-0.5 z-20">
-                                            <span className="font-mono-tech text-[10px] text-black font-bold uppercase tracking-widest">Injured</span>
+                                            <span className="font-mono-tech text-[10px] text-black font-bold uppercase tracking-widest">{t('postGame.majorInjury')}</span>
                                         </div>
                                     )}
                                 </div>
@@ -247,7 +249,7 @@ export function RosterList({ campaign }: RosterListProps) {
                         })}
                     </div>
                 )}
-                <TrashZone visible={activeDragId?.startsWith('dismiss:') ?? false} label="Drop to dismiss" />
+                <TrashZone visible={activeDragId?.startsWith('dismiss:') ?? false} label={t('hq.dismiss')} />
                 </OwnedDropZone>
             </section>
 
@@ -264,9 +266,9 @@ export function RosterList({ campaign }: RosterListProps) {
                 >
                     <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${!expandedSections.has('available') ? '-rotate-90' : ''}`} />
                     <div className="border-l-2 border-secondary pl-3">
-                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">Available Mercs</h3>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">{t('hq.availableMercs')}</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            Drag to roster or click +
+                            {t('hq.dragToRoster')}
                         </span>
                     </div>
                 </button>
@@ -301,7 +303,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                                     <span className="text-muted-foreground">·</span>
                                                     <span className={cantAfford && !alreadyRecruited ? 'text-accent' : ''}>{cost}EB</span>
                                                     {alreadyRecruited ? (
-                                                        <span className="text-muted-foreground text-[9px] ml-0.5">Recruited</span>
+                                                        <span className="text-muted-foreground text-[9px] ml-0.5">{t('hq.recruited')}</span>
                                                     ) : !cantAfford ? (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); handleRecruit(lineage.id); }}
@@ -324,7 +326,7 @@ export function RosterList({ campaign }: RosterListProps) {
                         {mercLineages.filter(l => filterBySearch(l.name)).length > 0 && (
                             <div>
                                 <div className="font-mono-tech text-[10px] uppercase tracking-widest text-secondary font-bold mb-1.5">
-                                    Mercenaries
+                                    {t('hq.mercenaries')}
                                 </div>
                                 <div className="flex flex-wrap gap-1.5">
                                     {mercLineages.filter(l => filterBySearch(l.name)).map(lineage => {
@@ -347,7 +349,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                                     <span className="text-muted-foreground">·</span>
                                                     <span className={cantAfford && !alreadyRecruited ? 'text-accent' : ''}>{cost}EB</span>
                                                     {alreadyRecruited ? (
-                                                        <span className="text-muted-foreground text-[9px] ml-0.5">Recruited</span>
+                                                        <span className="text-muted-foreground text-[9px] ml-0.5">{t('hq.recruited')}</span>
                                                     ) : !cantAfford ? (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); handleRecruit(lineage.id); }}
@@ -376,7 +378,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                 <input
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="SEARCH..."
+                                    placeholder={t('database.search').toUpperCase()}
                                     className="w-full bg-black border border-border pl-10 pr-8 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none"
                                 />
                                 {search && (
@@ -424,7 +426,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                                         </div>
                                                         {alreadyRecruited ? (
                                                             <div className="absolute inset-0 z-30 flex items-center justify-center">
-                                                                <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest font-bold bg-black/80 px-2 py-0.5 border border-border">Recruited</span>
+                                                                <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest font-bold bg-black/80 px-2 py-0.5 border border-border">{t('hq.recruited')}</span>
                                                             </div>
                                                         ) : (
                                                             <button
@@ -466,7 +468,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                                 )}
                                                 {alreadyRecruited ? (
                                                     <div className="absolute inset-0 z-30 flex items-center justify-center">
-                                                        <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest font-bold bg-black/80 px-2 py-0.5 border border-border">Recruited</span>
+                                                        <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest font-bold bg-black/80 px-2 py-0.5 border border-border">{t('hq.recruited')}</span>
                                                     </div>
                                                 ) : (
                                                     <button
@@ -494,7 +496,7 @@ export function RosterList({ campaign }: RosterListProps) {
                         {mercLineages.filter(l => filterBySearch(l.name)).length > 0 && (
                             <div>
                                 <div className="font-mono-tech text-[10px] uppercase tracking-widest text-secondary font-bold border-b border-border pb-1 mb-3">
-                                    Mercenaries
+                                    {t('hq.mercenaries')}
                                 </div>
                                 <div className={gridClass}>
                                     {mercLineages.filter(l => filterBySearch(l.name)).map(lineage => {
@@ -527,7 +529,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                                         </div>
                                                         {alreadyRecruited ? (
                                                             <div className="absolute inset-0 z-30 flex items-center justify-center">
-                                                                <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest font-bold bg-black/80 px-2 py-0.5 border border-border">Recruited</span>
+                                                                <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest font-bold bg-black/80 px-2 py-0.5 border border-border">{t('hq.recruited')}</span>
                                                             </div>
                                                         ) : (
                                                             <button
@@ -569,7 +571,7 @@ export function RosterList({ campaign }: RosterListProps) {
                                                 )}
                                                 {alreadyRecruited ? (
                                                     <div className="absolute inset-0 z-30 flex items-center justify-center">
-                                                        <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest font-bold bg-black/80 px-2 py-0.5 border border-border">Recruited</span>
+                                                        <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest font-bold bg-black/80 px-2 py-0.5 border border-border">{t('hq.recruited')}</span>
                                                     </div>
                                                 ) : (
                                                     <button

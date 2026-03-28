@@ -5,6 +5,7 @@ import { useStore } from '@/store/useStore';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
+import { useT } from '@/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 // Plus removed — create triggered from parent toolbar
 import type { Objective, ObjectiveRewardType } from '@/types';
@@ -61,6 +62,7 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
     const { gridClass } = useCardGrid();
     const isAdmin = useIsAdmin();
     const { saveObjective: saveObjectiveDb, deleteObjective: deleteObjectiveDb } = useCatalog();
+    const t = useT();
 
     // Highlight scroll-to effect
     useEffect(() => {
@@ -229,8 +231,8 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
 
             {filteredObjectives.length === 0 && (
                 <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                    <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">No Objectives Found</h3>
-                    <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Database query returned zero results.</p>
+                    <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('database.noObjectivesFound')}</h3>
+                    <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
                 </div>
             )}
 
@@ -239,7 +241,7 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
                 <DialogContent className="bg-surface-dark border-border max-w-sm max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
                     <DialogHeader>
                         <DialogTitle className="font-display uppercase tracking-wider text-primary">
-                            {editingObjective ? 'Edit Objective' : 'New Objective'}
+                            {editingObjective ? t('database.editObjective') : t('database.newObjective')}
                         </DialogTitle>
                     </DialogHeader>
 
@@ -373,7 +375,7 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
                             disabled={!objectiveForm.name?.trim() || !objectiveForm.factionId}
                             className="w-full py-2 font-mono-tech text-sm font-bold uppercase tracking-wider bg-secondary text-black hover:bg-secondary/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
-                            {editingObjective ? 'Save Changes' : 'Create Objective'}
+                            {editingObjective ? t('database.saveChanges') : t('database.createObjective')}
                         </button>
                     </div>
                 </DialogContent>

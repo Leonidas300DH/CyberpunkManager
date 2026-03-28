@@ -4,6 +4,7 @@ import { useState, useRef, useLayoutEffect, useEffect, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
+import { useT } from '@/i18n';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { WeaponCard, FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
 import { formatCardText } from '@/lib/formatCardText';
@@ -74,12 +75,17 @@ const TAB_STYLES: Record<string, { border: string; text: string; gradient: strin
 };
 
 /** Upload image to Supabase Storage → public URL */
-function WeaponImageUpload({ value, onChange, weaponName, flipped, onFlip }: { value: string; onChange: (url: string) => void; weaponName: string; flipped?: boolean; onFlip?: () => void }) {
+function WeaponImageUpload({ value, onChange, weaponId, weaponName, flipped, onFlip }: { value: string; onChange: (url: string) => void; weaponId?: string; weaponName: string; flipped?: boolean; onFlip?: () => void }) {
     const fileRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
+    const t = useT();
+    // Show the same resolved image as the card (handles default.png → slug-derived)
+    const displayUrl = weaponId ? getWeaponImageUrl(weaponId, value || undefined) : value;
 
     const handleFile = async (file: File) => {
-        const slug = (weaponName.trim() || 'unnamed-weapon').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        const slug = weaponId
+            ? weaponId.replace(/^(weapon|item|action)-/, '')
+            : (weaponName.trim() || 'unnamed-weapon').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         setUploading(true);
         try {
             const { supabase } = await import('@/lib/supabase');
@@ -123,31 +129,31 @@ function WeaponImageUpload({ value, onChange, weaponName, flipped, onFlip }: { v
                 disabled={uploading}
                 className="relative w-full aspect-square border border-border bg-black flex items-center justify-center overflow-hidden cursor-pointer hover:border-secondary transition-colors group disabled:opacity-50"
             >
-                {value ? (
-                    <img src={value} alt="" className="w-full h-full object-cover" style={{ transform: flipped ? 'scaleY(-1)' : undefined }} />
+                {displayUrl ? (
+                    <img src={displayUrl} alt="" className="w-full h-full object-cover" style={{ transform: flipped ? 'scaleY(-1)' : undefined }} />
                 ) : (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-secondary transition-colors">
                         <Upload className="w-8 h-8" />
-                        <span className="font-mono-tech text-[10px] uppercase tracking-widest">Click to upload</span>
+                        <span className="font-mono-tech text-[10px] uppercase tracking-widest">{t('database.clickToUpload')}</span>
                     </div>
                 )}
-                {value && (
+                {displayUrl && (
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="flex items-center gap-2 text-white">
                             <Upload className="w-5 h-5" />
-                            <span className="font-mono-tech text-xs uppercase tracking-wider">{uploading ? 'Processing...' : 'Replace'}</span>
+                            <span className="font-mono-tech text-xs uppercase tracking-wider">{uploading ? t('database.processing') : t('database.replace')}</span>
                         </div>
                     </div>
                 )}
             </button>
-            {value && onFlip && (
+            {displayUrl && onFlip && (
                 <button
                     type="button"
                     onClick={onFlip}
                     className={`mt-1 flex items-center gap-1.5 px-2 py-1 text-[10px] font-mono-tech uppercase tracking-wider border transition-colors ${flipped ? 'border-secondary text-secondary bg-secondary/10' : 'border-border text-muted-foreground hover:text-white hover:border-white'}`}
                 >
                     <FlipVertical2 className="w-3.5 h-3.5" />
-                    Flip vertical{flipped ? ' (on)' : ''}
+                    {t('database.flipVertical')}{flipped ? ' (on)' : ''}
                 </button>
             )}
         </div>
@@ -173,6 +179,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
     const { saveWeapon: saveWeaponDb, deleteWeapon: deleteWeaponDb, saveProgram: saveProgramDb } = useCatalog();
+    const t = useT();
     // Weapon CRUD
     const [weaponDialogOpen, setWeaponDialogOpen] = useState(false);
     const [editingWeapon, setEditingWeapon] = useState<Weapon | null>(null);
@@ -281,25 +288,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
 
     const weapons = catalog.weapons ?? [];
 
-    // Runtime image probe via fetch HEAD — deterministic URLs mean we must check if the file actually exists
-    const [missingImageIds, setMissingImageIds] = useState<Set<string>>(new Set());
-    const weaponIds = useMemo(() => weapons.map(w => w.id).join(','), [weapons]);
-    useEffect(() => {
-        const ids = weaponIds.split(',').filter(Boolean);
-        if (ids.length === 0) return;
-        let cancelled = false;
-        const weaponMap = new Map(weapons.map(w => [w.id, w]));
-        Promise.all(ids.map(id =>
-            fetch(getWeaponImageUrl(id, weaponMap.get(id)?.imageUrl), { method: 'HEAD' })
-                .then(res => res.ok ? null : id)
-                .catch(() => id)
-        )).then(results => {
-            if (cancelled) return;
-            setMissingImageIds(new Set(results.filter((id): id is string => id !== null)));
-        });
-        return () => { cancelled = true; };
-    }, [weaponIds]);
-    const hasNoImage = (w: Weapon) => missingImageIds.has(w.id);
+    const hasNoImage = (w: Weapon) => !w.imageUrl || w.imageUrl === '' || w.imageUrl.endsWith('/default.png');
 
     const isWeaponHighlighted = (w: Weapon) => {
         return (highlightNoImage && hasNoImage(w)) ||
@@ -360,7 +349,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                     onClick={() => setSelectedProgram(null)}
                     className="flex items-center gap-2 text-muted-foreground hover:text-white font-mono-tech text-sm uppercase tracking-wider mb-4 transition-colors"
                 >
-                    <ChevronLeft className="w-4 h-4" /> Back to Programs
+                    <ChevronLeft className="w-4 h-4" /> {t('database.backToPrograms')}
                 </button>
                 <div className="flex flex-col xl:flex-row gap-6 items-start">
                     <div className="flex flex-col lg:flex-row gap-6 items-start">
@@ -620,8 +609,8 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
 
                 {filteredPrograms.length === 0 && (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">No Programs Found</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Database query returned zero results.</p>
+                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('database.noResultsFound')}</h3>
+                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
                     </div>
                 )}
 
@@ -630,12 +619,12 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                     <DialogContent className="bg-surface-dark border-border max-w-sm max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
                         <DialogHeader>
                             <DialogTitle className="font-display uppercase tracking-wider text-primary">
-                                {editingProgram ? 'Edit Program' : 'New Program'}
+                                {editingProgram ? t('database.editProgram') : t('database.newProgram')}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3 py-2">
                             <div className="space-y-2">
-                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.name')}</Label>
                                 <Input value={programForm.name || ''} onChange={e => setProgramForm(f => ({ ...f, name: e.target.value }))} placeholder="Program Name" className="bg-black border-border font-mono-tech" />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
@@ -656,7 +645,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                 <div className="space-y-2">
                                     <Label className="font-mono-tech text-xs uppercase tracking-widest">Faction</Label>
                                     <select value={programForm.factionId || 'all'} onChange={e => setProgramForm(f => ({ ...f, factionId: e.target.value }))} className="w-full bg-black border border-border px-2 py-1.5 font-mono-tech text-xs text-white">
-                                        <option value="all">All Factions</option>
+                                        <option value="all">{t('database.allFactions')}</option>
                                         {catalog.factions.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                                     </select>
                                 </div>
@@ -710,7 +699,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                 <Input value={programForm.imageUrl || ''} onChange={e => setProgramForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="/images/programs/..." className="bg-black border-border font-mono-tech" />
                             </div>
                             <button onClick={saveProgramLocal} className="w-full py-2 bg-primary text-black font-display font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors">
-                                {editingProgram ? 'Save Changes' : 'Create Program'}
+                                {editingProgram ? t('database.saveChanges') : t('database.createProgram')}
                             </button>
                         </div>
                     </DialogContent>
@@ -734,18 +723,18 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                     <DialogContent className="bg-surface-dark border-border max-w-sm max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
                         <DialogHeader>
                             <DialogTitle className="font-display uppercase tracking-wider text-primary">
-                                {editingWeapon ? 'Edit Weapon' : 'New Weapon'}
+                                {editingWeapon ? t('database.editWeapon') : t('database.newWeapon')}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3 py-2">
-                            <WeaponImageUpload value={weaponForm.imageUrl || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} weaponName={weaponForm.name || ''} flipped={!!weaponForm.imageFlipY} onFlip={() => setWeaponForm(f => ({ ...f, imageFlipY: !f.imageFlipY }))} />
+                            <WeaponImageUpload value={weaponForm.imageUrl || ''} onChange={(val) => setWeaponForm({ ...weaponForm, imageUrl: val })} weaponId={editingWeapon?.id} weaponName={weaponForm.name || ''} flipped={!!weaponForm.imageFlipY} onFlip={() => setWeaponForm(f => ({ ...f, imageFlipY: !f.imageFlipY }))} />
                             <div className="space-y-2">
-                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.name')}</Label>
                                 <Input value={weaponForm.name || ''} onChange={(e) => setWeaponForm({ ...weaponForm, name: e.target.value })} placeholder="Weapon Name" className="bg-black border-border font-mono-tech" />
                             </div>
                             {/* Faction Variants Table */}
                             <div className="space-y-2">
-                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Faction Variants</Label>
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.factionVariants')}</Label>
                                 <div className="border border-border bg-black">
                                     <div className="grid grid-cols-[1fr_50px_50px_50px_28px] gap-1 px-2 py-1 border-b border-border text-[9px] font-mono-tech text-muted-foreground uppercase tracking-wider">
                                         <span>Faction</span><span>Cred</span><span>EB</span><span>Rarity</span><span></span>
@@ -855,7 +844,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Description</Label>
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.description')}</Label>
                                 <textarea
                                     value={weaponForm.description || ''}
                                     onChange={(e) => setWeaponForm({ ...weaponForm, description: e.target.value })}
@@ -864,7 +853,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                     className="w-full bg-black border border-border px-3 py-2 font-mono-tech text-sm text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none resize-none"
                                 />
                             </div>
-                            <button onClick={saveWeapon} className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors">Save</button>
+                            <button onClick={saveWeapon} className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors">{t('database.save')}</button>
                         </div>
                     </DialogContent>
                 </Dialog>
@@ -1103,8 +1092,8 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
 
                 {variantCards.length === 0 && (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">No Gear Found</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Database query returned zero results.</p>
+                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('database.noResultsFound')}</h3>
+                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
                     </div>
                 )}
             </>
@@ -1170,8 +1159,8 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
 
             {filteredItems.length === 0 && (
                 <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                    <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">No {activeTab} Found</h3>
-                    <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Database query returned zero results.</p>
+                    <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('database.noResultsFound')}</h3>
+                    <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
                 </div>
             )}
         </>

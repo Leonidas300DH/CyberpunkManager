@@ -2,13 +2,16 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
-import { Weapon, FactionVariant } from '@/types';
+import { Weapon, FactionVariant, ModelLineage, ModelProfile } from '@/types';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
+import { useT } from '@/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Edit, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
+import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
+import { CharacterCard } from '@/components/characters/CharacterCard';
 
 // ── Skill icons (same as CharacterCard) ──
 const SKILL_ICONS: Record<string, { src: string; color: string }> = {
@@ -81,11 +84,11 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
     const { catalog, setCatalog } = useStore();
     const isAdmin = useIsAdmin();
     const { saveWeapon, deleteWeapon: deleteWeaponDb } = useCatalog();
+    const t = useT();
 
     const [editingAction, setEditingAction] = useState<Weapon | null>(null);
     const [actionForm, setActionForm] = useState(EMPTY_ACTION_FORM);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     // Filter actions from catalog
     const actions = useMemo(() => {
@@ -104,16 +107,18 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
         );
     }, [actions, search]);
 
-    // Build action → characters lookup
+    // Build action → characters lookup (with lineage+profile for card preview)
     const actionToCharacters = useMemo(() => {
-        if (!catalog) return new Map<string, Array<{ lineageName: string; profileId: string }>>();
-        const map = new Map<string, Array<{ lineageName: string; profileId: string }>>();
+        type CharEntry = { lineageName: string; profileId: string; lineage: ModelLineage; profile: ModelProfile };
+        if (!catalog) return new Map<string, CharEntry[]>();
+        const map = new Map<string, CharEntry[]>();
         for (const profile of catalog.profiles) {
             for (const action of profile.actions) {
                 if (!action.weaponId) continue;
                 if (!map.has(action.weaponId)) map.set(action.weaponId, []);
                 const lineage = catalog.lineages.find(l => l.id === profile.lineageId);
-                const entry = { lineageName: lineage?.name ?? profile.lineageId, profileId: profile.id };
+                if (!lineage) continue;
+                const entry = { lineageName: lineage.name, profileId: profile.id, lineage, profile };
                 // Deduplicate by lineage name (multiple tiers of same lineage share the action)
                 const list = map.get(action.weaponId)!;
                 if (!list.some(e => e.lineageName === entry.lineageName)) {
@@ -215,7 +220,7 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
             {/* Count */}
             <div className="flex items-center justify-end mb-4">
                 <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest">
-                    {filteredActions.length} actions
+                    {filteredActions.length} {t('database.actions')}
                 </span>
             </div>
 
@@ -226,7 +231,6 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
                     const hasRange = action.rangeRed || action.rangeYellow || action.rangeGreen || action.rangeLong;
                     const isPassive = !hasSkill && !hasRange;
                     const characters = actionToCharacters.get(action.id) ?? [];
-                    const isExpanded = expandedId === action.id;
 
                     return (
                         <div
@@ -298,33 +302,30 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
                                     </p>
                                 )}
 
-                                {/* Used by characters — collapsible */}
+                                {/* Used by characters */}
                                 {characters.length > 0 && (
                                     <div className="border-t border-border/50 pt-2 mt-auto">
-                                        <button
-                                            onClick={() => setExpandedId(isExpanded ? null : action.id)}
-                                            className="flex items-center gap-1 w-full text-left"
-                                        >
-                                            {isExpanded
-                                                ? <ChevronDown className="w-3 h-3 text-muted-foreground" />
-                                                : <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                                            }
-                                            <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest">
-                                                Used by {characters.length} character{characters.length > 1 ? 's' : ''}
-                                            </span>
-                                        </button>
-                                        {isExpanded && (
-                                            <div className="mt-1.5 flex flex-wrap gap-1">
-                                                {characters.map(c => (
-                                                    <span
-                                                        key={c.profileId}
-                                                        className="px-2 py-0.5 bg-black/60 border border-border/40 font-mono-tech text-[10px] text-white/70 uppercase"
-                                                    >
+                                        <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest block mb-1.5">
+                                            {t('database.usedBy', { count: characters.length })}{characters.length > 1 ? 's' : ''}
+                                        </span>
+                                        <div className="flex flex-wrap gap-1">
+                                            {characters.map(c => (
+                                                <CardPreviewTooltip
+                                                    key={c.profileId}
+                                                    renderCard={() => (
+                                                        <CharacterCard
+                                                            lineage={c.lineage}
+                                                            profile={c.profile}
+                                                            catalogWeapons={catalog!.weapons}
+                                                        />
+                                                    )}
+                                                >
+                                                    <span className="inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border border-border/40 rounded-full text-white/70 uppercase hover:brightness-125 transition-all cursor-default">
                                                         {c.lineageName}
                                                     </span>
-                                                ))}
-                                            </div>
-                                        )}
+                                                </CardPreviewTooltip>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
 
@@ -338,7 +339,7 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
 
             {filteredActions.length === 0 && (
                 <div className="border-2 border-dashed border-border rounded-lg p-12 text-center text-muted-foreground font-mono-tech text-sm uppercase tracking-widest">
-                    {search ? 'No matching actions' : 'No actions in catalog'}
+                    {t('database.noActionsFound')}
                 </div>
             )}
 
@@ -347,14 +348,14 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
                 <DialogContent className="bg-surface-dark border-border text-white max-w-sm max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
                     <DialogHeader>
                         <DialogTitle className="font-display uppercase tracking-wider">
-                            {editingAction ? 'Edit Action' : 'New Action'}
+                            {editingAction ? t('database.editAction') : t('database.newAction')}
                         </DialogTitle>
                     </DialogHeader>
 
                     <div className="space-y-4 mt-4">
                         {/* Name */}
                         <div className="space-y-2">
-                            <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                            <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.name')}</Label>
                             <Input
                                 value={actionForm.name}
                                 onChange={(e) => setActionForm({ ...actionForm, name: e.target.value })}
@@ -424,7 +425,7 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
 
                         {/* Description */}
                         <div className="space-y-2">
-                            <Label className="font-mono-tech text-xs uppercase tracking-widest">Description</Label>
+                            <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.description')}</Label>
                             <textarea
                                 value={actionForm.description}
                                 onChange={(e) => setActionForm({ ...actionForm, description: e.target.value })}
@@ -440,7 +441,7 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
                             disabled={!actionForm.name.trim()}
                             className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-black font-display font-bold uppercase tracking-wider text-sm transition-colors clip-corner-br"
                         >
-                            {editingAction ? 'Save Changes' : 'Create Action'}
+                            {editingAction ? t('database.saveChanges') : t('database.createAction')}
                         </button>
                     </div>
                 </DialogContent>

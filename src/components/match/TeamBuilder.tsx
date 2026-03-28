@@ -36,6 +36,7 @@ import {
     horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useT } from '@/i18n';
 
 interface TeamBuilderProps {
     campaign: Campaign;
@@ -72,6 +73,7 @@ function SortableSquadCard({
     children: React.ReactNode;
     cardContent: React.ReactNode;
 }) {
+    const t = useT();
     const {
         attributes,
         listeners,
@@ -111,7 +113,7 @@ function SortableSquadCard({
             {isEquipOver && (
                 <div className="absolute inset-0 bg-secondary/10 pointer-events-none z-20 flex items-center justify-center">
                     <span className="font-mono-tech text-xs text-secondary uppercase tracking-widest bg-black/80 px-3 py-1 border border-secondary">
-                        Drop to equip
+                        {t('team.dropToEquip')}
                     </span>
                 </div>
             )}
@@ -200,6 +202,7 @@ function SquadDropZone({ isOver, children }: { isOver: boolean; children: React.
 
 // ── Squad trash zone (squad → remove) ──
 function SquadTrashZone({ isOver }: { isOver: boolean }) {
+    const t = useT();
     const { setNodeRef } = useDroppable({ id: 'squad-trash' });
     return (
         <div
@@ -211,12 +214,13 @@ function SquadTrashZone({ isOver }: { isOver: boolean }) {
             }`}
         >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Remove from squad</span>
+            <span>{t('team.removeFromSquad')}</span>
         </div>
     );
 }
 
 export function TeamBuilder({ campaign }: TeamBuilderProps) {
+    const t = useT();
     const {
         targetEB,
         setTargetEB,
@@ -590,7 +594,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest shrink-0">
-                                Match Budget
+                                {t('team.matchBudget')}
                             </div>
                             <div className="flex items-end gap-1">
                                 <span className={`text-2xl font-display font-bold leading-none ${overBudget ? 'text-accent' : 'text-white'}`}>
@@ -622,7 +626,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                             }`}
                         >
                             {!isValid && <AlertTriangle className="w-4 h-4" />}
-                            <span>Deploy</span>
+                            <span>{t('team.deploy')}</span>
                             <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
@@ -634,7 +638,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                             <div className="bg-accent/10 border-l-2 border-accent p-2">
                                 <div className="flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-wider mb-1">
                                     <AlertTriangle className="h-3 w-3" />
-                                    <span>Warnings</span>
+                                    <span>{t('team.warnings')}</span>
                                 </div>
                                 <ul className="list-disc list-inside text-[10px] text-muted-foreground font-mono-tech">
                                     {validationErrors.map((err, i) => <li key={i}>{err}</li>)}
@@ -670,10 +674,10 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         <div className="border-l-2 border-secondary pl-3 flex items-center gap-3">
                             <Users className="w-4 h-4 text-secondary" />
                             <h2 className="font-display text-2xl text-white uppercase tracking-wider group-hover/collapse:text-secondary transition-colors">
-                                Squad
+                                {t('team.squad')}
                             </h2>
                             <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-wider">
-                                {selectedIds.length} deployed
+                                {selectedIds.length} {t('team.deployed')}
                             </span>
                         </div>
                     </button>
@@ -782,7 +786,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                             <SquadDropZone isOver={overId === 'squad-drop-zone'}>
                                 <div className="border border-dashed border-border p-6 text-center">
                                     <div className="text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                        Select characters from the roster below to build your squad
+                                        {t('team.selectCharsFromRoster')}
                                     </div>
                                 </div>
                             </SquadDropZone>
@@ -939,7 +943,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                         })}
                                                         {equippedIds.length === 0 && (
                                                             <div className="text-[10px] font-mono-tech text-muted-foreground text-center py-1 border border-dashed border-border">
-                                                                Drop equipment here
+                                                                {t('team.dropEquipmentHere')}
                                                             </div>
                                                         )}
                                                     </div>
@@ -970,10 +974,10 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         <ChevronDown className={`w-5 h-5 text-primary transition-transform ${rosterCollapsed ? '-rotate-90' : ''}`} />
                         <div className="border-l-2 border-primary pl-3">
                             <h2 className="font-display text-2xl text-white uppercase tracking-wider group-hover/collapse:text-primary transition-colors">
-                                Available Roster
+                                {t('team.availableRoster')}
                             </h2>
                             <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                                {unselectedRoster.length} available
+                                {unselectedRoster.length} {t('team.available')}
                             </span>
                         </div>
                     </button>
@@ -984,8 +988,8 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                             {filteredRoster.length === 0 && unselectedRoster.length === 0 && (
                                 <div className="w-full border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
                                     {campaign.hqRoster.length === 0
-                                        ? 'No Assets Available. Recruit mercs from HQ first.'
-                                        : 'All characters deployed to squad.'}
+                                        ? t('team.noAssetsAvailable')
+                                        : t('team.allDeployed')}
                                 </div>
                             )}
                             {filteredRoster.map(recruit => {
@@ -1019,7 +1023,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                             {campaign.hqRoster.length > 0 && (
                                 <a href="/hq" className={`${CAPSULE} border-primary/50 hover:border-primary text-muted-foreground hover:text-white`}>
                                     <Plus className="w-3 h-3" />
-                                    <span>Recruit More</span>
+                                    <span>{t('team.recruitMore')}</span>
                                 </a>
                             )}
                         </div>
@@ -1091,7 +1095,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                                 Recruit More
                                             </span>
                                             <span className="font-mono-tech text-xs text-secondary mt-3 opacity-0 group-hover:opacity-100 uppercase tracking-wider transition-opacity bg-black px-2 py-1 border border-secondary/30">
-                                                Go to HQ Roster
+                                                {t('team.goToHqRoster')}
                                             </span>
                                         </a>
                                     </div>
@@ -1115,10 +1119,10 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${gearCollapsed ? '-rotate-90' : ''}`} />
                         <div className="border-l-2 border-secondary pl-3">
                             <h2 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">
-                                Weapons & Gears
+                                {t('team.weaponsAndGear')}
                             </h2>
                             <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                                {availableWeapons.length}/{stashWeapons.length} available
+                                {availableWeapons.length}/{stashWeapons.length} {t('team.available')}
                             </span>
                         </div>
                     </button>
@@ -1127,13 +1131,13 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         /* ── Gear Capsule View ── */
                         stashWeapons.length === 0 ? (
                             <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                No weapons or gear in stash. Buy from HQ first.
+                                {t('team.noWeaponsInStash')}
                             </div>
                         ) : (
                             <div className="flex flex-wrap gap-1.5 mt-2">
                                 {availableWeapons.length === 0 && stashWeapons.length > 0 && (
                                     <div className="w-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                        All gear equipped
+                                        {t('team.allGearEquipped')}
                                     </div>
                                 )}
                                 {Array.from(availableWeaponGroups.values()).map(({ weapon, variantFactionId, count, equipId }) => {
@@ -1166,7 +1170,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         <>
                             {stashWeapons.length === 0 ? (
                                 <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                    No weapons or gear in stash. Buy from HQ first.
+                                    {t('team.noWeaponsInStash')}
                                 </div>
                             ) : (
                                 <div className={gridClass}>
@@ -1193,7 +1197,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                     })}
                                     {availableWeapons.length === 0 && stashWeapons.length > 0 && (
                                         <div className="col-span-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                            All gear equipped
+                                            {t('team.allGearEquipped')}
                                         </div>
                                     )}
                                 </div>
@@ -1213,10 +1217,10 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         <ChevronDown className={`w-5 h-5 text-cyber-purple transition-transform ${programsCollapsed ? '-rotate-90' : ''}`} />
                         <div className="border-l-2 border-cyber-purple pl-3">
                             <h2 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">
-                                Programs
+                                {t('team.programs')}
                             </h2>
                             <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                                {availablePrograms.length}/{stashPrograms.length} available
+                                {availablePrograms.length}/{stashPrograms.length} {t('team.available')}
                             </span>
                         </div>
                     </button>
@@ -1225,13 +1229,13 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         /* ── Programs Capsule View ── */
                         stashPrograms.length === 0 ? (
                             <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                No programs in stash. Buy from HQ first.
+                                {t('team.noProgramsInStash')}
                             </div>
                         ) : (
                             <div className="flex flex-wrap gap-1.5 mt-2">
                                 {availablePrograms.length === 0 && stashPrograms.length > 0 && (
                                     <div className="w-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                        All programs equipped
+                                        {t('team.allProgramsEquipped')}
                                     </div>
                                 )}
                                 {Array.from(availableProgramGroups.values()).map(({ program, count, equipId }) => {
@@ -1264,7 +1268,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                         <>
                             {stashPrograms.length === 0 ? (
                                 <div className="border border-dashed border-border p-6 text-center text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                    No programs in stash. Buy from HQ first.
+                                    {t('team.noProgramsInStash')}
                                 </div>
                             ) : (
                                 <div className={gridClass}>
@@ -1298,7 +1302,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                     })}
                                     {availablePrograms.length === 0 && stashPrograms.length > 0 && (
                                         <div className="col-span-full text-center py-4 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">
-                                            All programs equipped
+                                            {t('team.allProgramsEquipped')}
                                         </div>
                                     )}
                                 </div>
@@ -1316,11 +1320,11 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     style={{ left: equipPickerAnchor.x, top: equipPickerAnchor.y + 8 }}
                 >
                     <div className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider mb-1.5 px-1">
-                        Equip to:
+                        {t('team.equipTo')}
                     </div>
                     {selectedRecruits.length === 0 ? (
                         <div className="text-[10px] font-mono-tech text-muted-foreground px-1 py-1">
-                            Add characters to squad first
+                            {t('team.addCharactersFirst')}
                         </div>
                     ) : (
                         <div className="flex flex-col gap-0.5">

@@ -19,6 +19,7 @@ import {
     type DragEndEvent,
 } from '@dnd-kit/core';
 import { DraggableCapsule, OwnedDropZone, TrashZone } from '@/components/shared/HqDnd';
+import { useT } from '@/i18n';
 
 interface ProgramVaultListProps {
     campaign: Campaign;
@@ -29,6 +30,7 @@ type ViewMode = 'list' | 'card' | 'double';
 const CAPSULE = "inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border rounded-full text-white hover:brightness-125 transition-all cursor-default";
 
 export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
+    const t = useT();
     const { catalog, updateCampaign } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const [search, setSearch] = useState('');
@@ -167,7 +169,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                 >
                     <ChevronDown className={`w-5 h-5 text-cyber-purple transition-transform ${!expandedSections.has('owned') ? '-rotate-90' : ''}`} />
                     <div className="border-l-2 border-cyber-purple pl-3">
-                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">Your Programs</h3>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">{t('hq.yourPrograms')}</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
                             {stashPrograms.length} program{stashPrograms.length !== 1 ? 's' : ''} stored
                         </span>
@@ -177,8 +179,8 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                 <OwnedDropZone>
                 {stashPrograms.length === 0 ? (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">Vault Empty</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Drag a program here or use the + button below.</p>
+                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('hq.vaultEmpty')}</h3>
+                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('hq.dragProgramHere')}</p>
                     </div>
                 ) : !expandedSections.has('owned') ? (
                     /* Capsule View */
@@ -206,7 +208,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                     /* Expanded View */
                     <div>
                         <div className="font-mono-tech text-[10px] uppercase tracking-widest text-cyber-purple font-bold border-b border-border pb-1 mb-2">
-                            Netrunning Programs — {stashPrograms.length} program{stashPrograms.length !== 1 ? 's' : ''}
+                            {t('hq.netrunningPrograms')} — {stashPrograms.length} program{stashPrograms.length !== 1 ? 's' : ''}
                         </div>
                         <div className={gridClass}>
                             {stashPrograms.map(({ program, stashIdx }) => (
@@ -250,9 +252,9 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                 >
                     <ChevronDown className={`w-5 h-5 text-cyber-purple transition-transform ${!expandedSections.has('available') ? '-rotate-90' : ''}`} />
                     <div className="border-l-2 border-cyber-purple pl-3">
-                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">Available Programs</h3>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-cyber-purple transition-colors">{t('hq.availablePrograms')}</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            Drag to vault or click +
+                            {t('hq.dragToVault')}
                         </span>
                     </div>
                 </button>
@@ -261,7 +263,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                     /* Capsule View */
                     <div className="flex flex-wrap gap-1.5 mt-2">
                         {filteredPrograms.length === 0 ? (
-                            <div className="w-full text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">No programs available.</div>
+                            <div className="w-full text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">{t('hq.noProgramsFound')}</div>
                         ) : filteredPrograms.map(program => {
                             const cantAfford = campaign.ebBank < program.costEB;
                             const owned = stashCountOf(program.id);
@@ -300,7 +302,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                                     <input
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        placeholder="SEARCH..."
+                                        placeholder={t('database.search').toUpperCase()}
                                         className="w-full bg-black border border-border pl-10 pr-8 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-purple-400 focus:outline-none"
                                     />
                                     {search && (
@@ -468,7 +470,7 @@ export function ProgramVaultList({ campaign }: ProgramVaultListProps) {
                         )}
 
                         {filteredPrograms.length === 0 && (
-                            <div className="text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">No programs available.</div>
+                            <div className="text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">{t('hq.noProgramsFound')}</div>
                         )}
                     </>
                 )}

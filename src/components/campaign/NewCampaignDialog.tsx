@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { v4 as uuidv4 } from 'uuid';
+import { useT } from '@/i18n';
 
 interface NewCampaignDialogProps {
     onCampaignCreated?: (id: string) => void;
@@ -16,6 +17,7 @@ interface NewCampaignDialogProps {
 }
 
 export function NewCampaignDialog({ onCampaignCreated, trigger }: NewCampaignDialogProps) {
+    const t = useT();
     const { catalog, addCampaign } = useStore();
     const [isOpen, setIsOpen] = useState(false);
     const [name, setName] = useState('');
@@ -44,15 +46,15 @@ export function NewCampaignDialog({ onCampaignCreated, trigger }: NewCampaignDia
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                {trigger || <Button>New Campaign</Button>}
+                {trigger || <Button>{t('hq.newCampaign')}</Button>}
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Start New Campaign</DialogTitle>
+                    <DialogTitle>{t('hq.startNewCampaign')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label>Campaign Name</Label>
+                        <Label>{t('hq.campaignName')}</Label>
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -60,10 +62,10 @@ export function NewCampaignDialog({ onCampaignCreated, trigger }: NewCampaignDia
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label>Faction</Label>
+                        <Label>{t('hq.faction')}</Label>
                         <Select onValueChange={setFactionId} value={factionId}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Select Faction" />
+                                <SelectValue placeholder={t('hq.selectFaction')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {catalog.factions.map(f => (
@@ -73,7 +75,7 @@ export function NewCampaignDialog({ onCampaignCreated, trigger }: NewCampaignDia
                         </Select>
                     </div>
                     <Button onClick={handleCreate} disabled={!name || !factionId} className="w-full">
-                        Start Campaign
+                        {t('hq.startCampaign')}
                     </Button>
                 </div>
             </DialogContent>

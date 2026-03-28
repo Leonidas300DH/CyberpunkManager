@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { ItemCard, ItemCategory } from '@/types';
 import { resolveVariant } from '@/lib/variants';
+import { useT } from '@/i18n';
 
 const CATEGORY_STYLES: Record<ItemCategory, { border: string; text: string; bg: string; glow: string }> = {
     Gear: { border: 'border-secondary', text: 'text-secondary', bg: 'bg-secondary', glow: 'group-hover:shadow-[0_0_10px_rgba(0,240,255,0.3)]' },
@@ -14,6 +15,7 @@ const CATEGORY_STYLES: Record<ItemCategory, { border: string; text: string; bg: 
 
 export function ItemsTab() {
     const { catalog } = useStore();
+    const t = useT();
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<ItemCategory | 'all'>('all');
 
@@ -39,7 +41,7 @@ export function ItemsTab() {
                 <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="SEARCH ITEMS..."
+                    placeholder={t('database.search').toUpperCase()}
                     className="bg-black border border-border px-4 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none w-full md:w-64"
                 />
                 <div className="flex gap-2 font-mono-tech text-xs flex-wrap">
@@ -49,7 +51,7 @@ export function ItemsTab() {
                             categoryFilter === 'all' ? 'bg-primary text-black' : 'border border-border text-muted-foreground hover:border-primary hover:text-primary'
                         }`}
                     >
-                        All Items
+                        {t('database.allItems')}
                     </button>
                     {categories.map(cat => {
                         const style = CATEGORY_STYLES[cat];
@@ -144,7 +146,7 @@ export function ItemsTab() {
 
             {filteredItems.length === 0 && (
                 <div className="border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
-                    No items found. Add items to your catalog.
+                    {t('database.noItemsFound')}
                 </div>
             )}
         </div>

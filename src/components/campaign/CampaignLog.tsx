@@ -6,6 +6,7 @@ import { useStore } from '@/store/useStore';
 import { parseEquipmentId } from '@/lib/variants';
 import { getTierLabel } from '@/lib/tiers';
 import { Trophy, Skull, ChevronRight, ChevronDown, Heart, Swords, Shield } from 'lucide-react';
+import { useT } from '@/i18n';
 
 interface CampaignLogProps {
     campaign: Campaign;
@@ -90,6 +91,7 @@ function RecruitRow({ recruit }: { recruit: MatchLogRecruit }) {
 }
 
 function MatchEntry({ entry, matchNumber }: { entry: MatchLogEntry; matchNumber: number }) {
+    const t = useT();
     const [expanded, setExpanded] = useState(matchNumber <= 1); // Latest match expanded by default (matchNumber=1 in reversed view)
     const date = new Date(entry.date);
     const dateStr = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -147,7 +149,7 @@ function MatchEntry({ entry, matchNumber }: { entry: MatchLogEntry; matchNumber:
                             <div className="px-4 py-1.5 bg-white/[0.02]">
                                 <span className="font-mono-tech text-[9px] uppercase tracking-widest text-muted-foreground font-bold">
                                     <Swords className="w-3 h-3 inline mr-1 -mt-px" />
-                                    Squad
+                                    {t('team.squad')}
                                 </span>
                             </div>
                             <div className="divide-y divide-border/20">
@@ -164,7 +166,7 @@ function MatchEntry({ entry, matchNumber }: { entry: MatchLogEntry; matchNumber:
                             <div className="px-4 py-1.5 bg-white/[0.02]">
                                 <span className="font-mono-tech text-[9px] uppercase tracking-widest text-muted-foreground font-bold">
                                     <Shield className="w-3 h-3 inline mr-1 -mt-px" />
-                                    Post-Game
+                                    {t('postGame.postGameReport')}
                                 </span>
                             </div>
                             <div className="divide-y divide-border/20">
@@ -180,7 +182,7 @@ function MatchEntry({ entry, matchNumber }: { entry: MatchLogEntry; matchNumber:
 
                     {entry.events.length === 0 && team.length === 0 && (
                         <div className="px-4 py-3">
-                            <span className="text-xs font-mono-tech text-muted-foreground italic">No details recorded</span>
+                            <span className="text-xs font-mono-tech text-muted-foreground italic">{t('common.empty')}</span>
                         </div>
                     )}
                 </div>
@@ -190,13 +192,14 @@ function MatchEntry({ entry, matchNumber }: { entry: MatchLogEntry; matchNumber:
 }
 
 export function CampaignLog({ campaign }: CampaignLogProps) {
+    const t = useT();
     const log = campaign.matchLog ?? [];
 
     if (log.length === 0) {
         return (
             <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">No Records</h3>
-                <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Complete a match to start your campaign journal.</p>
+                <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('hq.noRecords')}</h3>
+                <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('hq.completeMatchJournal')}</p>
             </div>
         );
     }
@@ -210,7 +213,7 @@ export function CampaignLog({ campaign }: CampaignLogProps) {
             {/* Stats */}
             <div className="flex items-center gap-6 px-4 py-3 border border-border bg-black/50">
                 <div className="flex items-center gap-2">
-                    <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest">Matches</span>
+                    <span className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest">{t('hq.matches')}</span>
                     <span className="font-display font-bold text-lg text-white">{log.length}</span>
                 </div>
                 <div className="w-px h-6 bg-border" />

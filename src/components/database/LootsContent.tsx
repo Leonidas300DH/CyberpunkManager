@@ -5,6 +5,7 @@ import { useStore } from '@/store/useStore';
 import { Loot } from '@/types';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
+import { useT } from '@/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -83,6 +84,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
     const { catalog, setCatalog } = useStore();
     const isAdmin = useIsAdmin();
     const { saveLoot, deleteLoot: deleteLootDb } = useCatalog();
+    const t = useT();
 
     const [editingLoot, setEditingLoot] = useState<Loot | null>(null);
     const [lootForm, setLootForm] = useState(EMPTY_LOOT_FORM);
@@ -190,7 +192,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
             {/* Count */}
             <div className="flex items-center justify-end mb-4">
                 <span className="font-mono-tech text-xs text-muted-foreground uppercase tracking-widest">
-                    {filteredLoots.length} loots
+                    {filteredLoots.length} {t('database.loots')}
                 </span>
             </div>
 
@@ -303,7 +305,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
 
             {filteredLoots.length === 0 && (
                 <div className="border-2 border-dashed border-border rounded-lg p-12 text-center text-muted-foreground font-mono-tech text-sm uppercase tracking-widest">
-                    {search ? 'No matching loots' : 'No loots in catalog'}
+                    {t('database.noLootsFound')}
                 </div>
             )}
 
@@ -312,14 +314,14 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
                 <DialogContent className="bg-surface-dark border-border text-white max-w-sm max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
                     <DialogHeader>
                         <DialogTitle className="font-display uppercase tracking-wider">
-                            {editingLoot ? 'Edit Loot' : 'New Loot'}
+                            {editingLoot ? t('database.editLoot') : t('database.newLoot')}
                         </DialogTitle>
                     </DialogHeader>
 
                     <div className="space-y-4 mt-4">
                         {/* Name */}
                         <div className="space-y-2">
-                            <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                            <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.name')}</Label>
                             <Input
                                 value={lootForm.name}
                                 onChange={(e) => setLootForm({ ...lootForm, name: e.target.value })}
@@ -428,7 +430,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
                             disabled={!lootForm.name.trim()}
                             className="w-full py-3 bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-white font-display font-bold uppercase tracking-wider text-sm transition-colors clip-corner-br"
                         >
-                            {editingLoot ? 'Save Changes' : 'Create Loot'}
+                            {editingLoot ? t('database.saveChanges') : t('database.createLoot')}
                         </button>
                     </div>
                 </DialogContent>

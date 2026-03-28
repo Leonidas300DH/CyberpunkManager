@@ -7,6 +7,7 @@ import { CharacterCard } from '@/components/characters/CharacterCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
+import { useT } from '@/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +35,7 @@ const EMPTY_ACTION: () => GameAction = () => ({
 function CharacterImageUpload({ value, onChange, charId, flippedY, onFlipY, flippedX, onFlipX }: { value: string; onChange: (url: string) => void; charId: string; flippedY?: boolean; onFlipY?: () => void; flippedX?: boolean; onFlipX?: () => void }) {
     const fileRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
+    const t = useT();
 
     const handleFile = async (file: File) => {
         const slug = (charId.replace(/^lineage-/, '') || 'unnamed-char').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -82,14 +84,14 @@ function CharacterImageUpload({ value, onChange, charId, flippedY, onFlipY, flip
                 ) : (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover/img:text-secondary transition-colors">
                         <Upload className="w-8 h-8" />
-                        <span className="font-mono-tech text-[10px] uppercase tracking-widest">Click to upload</span>
+                        <span className="font-mono-tech text-[10px] uppercase tracking-widest">{t('database.clickToUpload')}</span>
                     </div>
                 )}
                 {value && (
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="flex items-center gap-2 text-white">
                             <Upload className="w-5 h-5" />
-                            <span className="font-mono-tech text-xs uppercase tracking-wider">{uploading ? 'Processing...' : 'Replace'}</span>
+                            <span className="font-mono-tech text-xs uppercase tracking-wider">{uploading ? t('database.processing') : t('database.replace')}</span>
                         </div>
                     </div>
                 )}
@@ -217,6 +219,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
     const { gridClass, cardStyle } = useCardGrid();
     const isAdmin = useIsAdmin();
     const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, deleteProfile: deleteProfileDb, saveWeapon } = useCatalog();
+    const t = useT();
 
     // Highlight scroll-to effect
     useEffect(() => {
@@ -578,7 +581,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
             {/* Card Grid with expand/collapse tiers */}
             {filtered.length === 0 ? (
                 <div className="border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
-                    No units found.
+                    {t('database.noUnitsFound')}
                 </div>
             ) : (
                 <div className={gridClass}>
@@ -610,7 +613,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                                     >
                                         <ChevronRight className="w-3 h-3" />
                                         <span className="font-mono-tech text-[10px] uppercase tracking-wider">
-                                            {profiles.length} versions
+                                            {t('database.versions', { count: profiles.length })}
                                         </span>
                                     </button>
                                 </div>
@@ -655,7 +658,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                 <DialogContent className="bg-surface-dark border-border max-w-md max-h-[85vh] overflow-y-auto !top-[8vh] !translate-y-0">
                     <DialogHeader>
                         <DialogTitle className="font-display uppercase tracking-wider text-primary">
-                            Edit Character
+                            {t('database.editCharacter')}
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-2">
@@ -672,10 +675,10 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
 
                         {/* ── Lineage Section ── */}
                         <div className="border border-border/50 p-3 space-y-3">
-                            <span className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Lineage</span>
+                            <span className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">{t('database.lineage')}</span>
 
                             <div className="space-y-2">
-                                <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                                <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.name')}</Label>
                                 <Input
                                     value={lineageForm.name || ''}
                                     onChange={(e) => setLineageForm({ ...lineageForm, name: e.target.value })}
@@ -734,7 +737,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
 
                         {/* ── Profile Section ── */}
                         <div className="border border-border/50 p-3 space-y-3">
-                            <span className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Profile</span>
+                            <span className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">{t('database.profile')}</span>
 
                             <div className="grid grid-cols-3 gap-3">
                                 <div className="space-y-1">
@@ -976,14 +979,14 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                             if (hasVet && hasElite) return null;
                             return (
                                 <div className="border border-border/50 p-3 space-y-2">
-                                    <span className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Create Tier Version</span>
+                                    <span className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">{t('database.createTierVersion')}</span>
                                     <div className="flex gap-2">
                                         {!hasVet && (
                                             <button
                                                 onClick={() => { saveCharacter(); addTierVersion(editingLineage!, 1); }}
                                                 className="flex-1 py-2 font-mono-tech text-xs uppercase tracking-wider border border-primary/50 text-primary hover:bg-primary/10 transition-colors"
                                             >
-                                                + Add Veteran
+                                                {t('database.addVeteran')}
                                             </button>
                                         )}
                                         {hasVet && !hasElite && (
@@ -991,7 +994,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                                                 onClick={() => { saveCharacter(); addTierVersion(editingLineage!, 2); }}
                                                 className="flex-1 py-2 font-mono-tech text-xs uppercase tracking-wider border border-accent/50 text-accent hover:bg-accent/10 transition-colors"
                                             >
-                                                + Add Elite
+                                                {t('database.addElite')}
                                             </button>
                                         )}
                                     </div>
@@ -1004,7 +1007,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                             onClick={saveCharacter}
                             className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors"
                         >
-                            Save
+                            {t('common.save')}
                         </button>
                     </div>
                 </DialogContent>
@@ -1015,7 +1018,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                 <DialogContent className="max-w-sm max-h-[75vh] overflow-y-auto bg-black border-emerald-500/50 text-white !top-[12vh] !translate-y-0">
                     <DialogHeader>
                         <DialogTitle className="font-display text-lg tracking-wider text-emerald-400">
-                            {editingCatalogAction ? 'Edit Action' : 'Create Action'}
+                            {editingCatalogAction ? t('database.editAction') : t('database.createAction')}
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 pt-2">
@@ -1105,7 +1108,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                             disabled={!actionCatalogForm.name.trim()}
                             className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-black font-display font-bold uppercase tracking-wider py-2.5 clip-corner-br transition-colors"
                         >
-                            {editingCatalogAction ? 'Update Action' : 'Create & Link'}
+                            {editingCatalogAction ? t('database.updateAction') : t('database.createAndLink')}
                         </button>
                     </div>
                 </DialogContent>

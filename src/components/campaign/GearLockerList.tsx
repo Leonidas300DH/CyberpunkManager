@@ -20,6 +20,7 @@ import {
     type DragEndEvent,
 } from '@dnd-kit/core';
 import { DraggableCapsule, OwnedDropZone, TrashZone } from '@/components/shared/HqDnd';
+import { useT } from '@/i18n';
 
 interface GearLockerListProps {
     campaign: Campaign;
@@ -28,6 +29,7 @@ interface GearLockerListProps {
 const CAPSULE = "inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 bg-black border rounded-full text-white hover:brightness-125 transition-all cursor-default";
 
 export function GearLockerList({ campaign }: GearLockerListProps) {
+    const t = useT();
     const { catalog, updateCampaign } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const [search, setSearch] = useState('');
@@ -160,7 +162,7 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                 >
                     <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${!expandedSections.has('owned') ? '-rotate-90' : ''}`} />
                     <div className="border-l-2 border-secondary pl-3">
-                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">Your Equipment</h3>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">{t('hq.yourEquipment')}</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
                             {stashGear.length} item{stashGear.length !== 1 ? 's' : ''} stored
                         </span>
@@ -170,8 +172,8 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                 <OwnedDropZone>
                 {stashGear.length === 0 ? (
                     <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">Locker Empty</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">Drag equipment here or use the + button below.</p>
+                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('hq.lockerEmpty')}</h3>
+                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('hq.dragEquipmentHere')}</p>
                     </div>
                 ) : !expandedSections.has('owned') ? (
                     /* Capsule View */
@@ -200,7 +202,7 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                     <div>
                         <div className="flex items-center justify-between border-b border-border pb-1 mb-2">
                             <span className="font-mono-tech text-[10px] uppercase tracking-widest text-secondary font-bold">
-                                Equipment — {stashGear.length} item{stashGear.length !== 1 ? 's' : ''}
+                                {t('hq.yourEquipment')} — {stashGear.length} item{stashGear.length !== 1 ? 's' : ''}
                             </span>
                             <div className="flex gap-1">
                                 {([
@@ -273,9 +275,9 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                 >
                     <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${!expandedSections.has('available') ? '-rotate-90' : ''}`} />
                     <div className="border-l-2 border-secondary pl-3">
-                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">Available Equipment</h3>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-secondary transition-colors">{t('hq.availableEquipment')}</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            Drag to locker or click +
+                            {t('hq.dragToLocker')}
                         </span>
                     </div>
                 </button>
@@ -284,7 +286,7 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                     /* Capsule View */
                     <div className="flex flex-wrap gap-1.5 mt-2">
                         {filteredGear.length === 0 ? (
-                            <div className="w-full text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">No equipment found.</div>
+                            <div className="w-full text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">{t('hq.noEquipmentFound')}</div>
                         ) : filteredGear.map(weapon => {
                             const variant = resolveVariant(weapon.factionVariants, campaign.factionId);
                             const cantAfford = campaign.ebBank < variant.cost;
@@ -323,7 +325,7 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                                 <input
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="SEARCH..."
+                                    placeholder={t('database.search').toUpperCase()}
                                     className="w-full bg-black border border-border pl-10 pr-8 py-2 font-mono-tech text-sm uppercase text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none"
                                 />
                                 {search && (
@@ -415,7 +417,7 @@ export function GearLockerList({ campaign }: GearLockerListProps) {
                                 );
                             })}
                             {filteredGear.length === 0 && (
-                                <div className="col-span-full text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">No equipment found.</div>
+                                <div className="col-span-full text-center py-8 text-muted-foreground font-mono-tech text-xs uppercase tracking-widest">{t('hq.noEquipmentFound')}</div>
                             )}
                         </div>
                     </>

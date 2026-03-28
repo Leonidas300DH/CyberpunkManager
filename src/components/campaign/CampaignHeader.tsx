@@ -5,6 +5,7 @@ import { Campaign, Faction } from '@/types';
 import { useStore } from '@/store/useStore';
 import { MathService } from '@/lib/math';
 import { Pencil } from 'lucide-react';
+import { useT } from '@/i18n';
 
 const FACTION_COLORS: Record<string, { border: string; text: string; bg: string; glow: string }> = {
     'faction-arasaka':    { border: 'border-red-600',     text: 'text-red-500',     bg: 'bg-red-600',     glow: 'shadow-[0_0_20px_rgba(220,38,38,0.4)]' },
@@ -29,6 +30,7 @@ interface CampaignHeaderProps {
 }
 
 export function CampaignHeader({ campaign, faction }: CampaignHeaderProps) {
+    const t = useT();
     const { catalog, updateCampaign } = useStore();
     const streetCred = MathService.calculateCampaignStreetCred(campaign, catalog);
     const influence = MathService.calculateCampaignInfluence(campaign, catalog);
@@ -90,7 +92,7 @@ export function CampaignHeader({ campaign, faction }: CampaignHeaderProps) {
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-8 bg-primary" />
                             <div>
-                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">Funds</div>
+                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">{t('hq.funds')}</div>
                                 <div className="text-xl font-mono-tech font-bold text-primary leading-tight">€${campaign.ebBank.toLocaleString()}</div>
                             </div>
                         </div>
@@ -98,7 +100,7 @@ export function CampaignHeader({ campaign, faction }: CampaignHeaderProps) {
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-8 bg-secondary" />
                             <div>
-                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">Street Cred</div>
+                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">{t('hq.streetCred')}</div>
                                 <div className="text-xl font-mono-tech font-bold text-secondary leading-tight">LVL {streetCred}</div>
                             </div>
                         </div>
@@ -106,7 +108,7 @@ export function CampaignHeader({ campaign, faction }: CampaignHeaderProps) {
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-8 bg-accent" />
                             <div className="text-center">
-                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">Influence</div>
+                                <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest leading-none">{t('hq.influence')}</div>
                                 <div className="text-xl font-mono-tech font-bold text-accent leading-tight">{influence}</div>
                             </div>
                         </div>
