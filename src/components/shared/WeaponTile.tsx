@@ -108,7 +108,7 @@ export function WeaponTile({ weapon, variantFactionId, activeFactionId, overlay,
             </div>
             <div className="relative z-10 flex-1 px-3 py-2 flex flex-col gap-0.5">
                 <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover/tile:text-secondary transition-colors">
-                    {weapon.name}
+                    {loc(weapon as unknown as Record<string, unknown>, 'name')}
                 </h3>
                 {(() => {
                     const hasSkill = !!(weapon.skillReq && SKILL_ICON[weapon.skillReq]);

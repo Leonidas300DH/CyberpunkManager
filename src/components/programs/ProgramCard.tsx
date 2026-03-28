@@ -216,7 +216,8 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
     const { catalog } = useStore();
     const loc = useLocalized();
     const t = useT();
-    const { nameRef, nameSize } = useAutoNameSize(program.name);
+    const programName = loc(program as unknown as Record<string, unknown>, 'name');
+    const { nameRef, nameSize } = useAutoNameSize(programName);
 
     const factionName = program.factionId === 'all'
         ? 'Universal'
@@ -275,7 +276,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 0.9, gap: 0 }}
                     >
                         <span ref={nameRef} className="mr-[-2px] font-display text-xl uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900, fontSize: `${nameSize}px` }}>
-                            {program.name}
+                            {programName}
                         </span>
                         <span className="mr-[-4px] font-mono-tech text-[12px] text-black/80 uppercase tracking-wide [-webkit-text-stroke:0.5px_rgba(255,255,255,0.5)]" style={{ fontWeight: 900 }}>
                             {factionName}
@@ -417,7 +418,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 0.9, gap: 0 }}
                 >
                     <span ref={nameRef} className="mr-[-2px] font-display text-xl uppercase tracking-normal text-black [-webkit-text-stroke:0.5px_rgba(255,255,255,0.6)]" style={{ fontWeight: 900, fontSize: `${nameSize}px` }}>
-                        {program.name}
+                        {programName}
                     </span>
                     <span className="mr-[-4px] font-mono-tech text-[12px] text-black/80 uppercase tracking-wide [-webkit-text-stroke:0.5px_rgba(255,255,255,0.5)]" style={{ fontWeight: 900 }}>
                         {factionName}

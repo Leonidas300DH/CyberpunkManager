@@ -62,6 +62,7 @@ export interface ModelProfile {
 export interface ItemCard {
     id: string;
     name: string;
+    name_fr?: string;
     category: ItemCategory; // 'Program' handles Hacking
     factionVariants: FactionVariant[];
     source?: WeaponSource;
@@ -85,6 +86,7 @@ export type ReloadCondition = 'Inspire' | 'TakenOut' | 'Wounded' | 'Discard' | '
 export interface HackingProgram {
     id: string;
     name: string;
+    name_fr?: string;
     factionId: string;           // FK to Faction, 'all' = universal
     costEB: number;
     reqStreetCred: number;
@@ -154,6 +156,7 @@ export interface FactionVariant {
 export interface Weapon {
     id: string;
     name: string;
+    name_fr?: string;
     source: WeaponSource;
     factionVariants: FactionVariant[];
     isWeapon: boolean;

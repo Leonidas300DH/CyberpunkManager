@@ -44,7 +44,7 @@ export function LootTile({ loot, overlay }: LootTileProps) {
             </div>
             <div className="relative z-10 flex-1 px-3 py-2 flex flex-col gap-0.5">
                 <h3 className="font-display font-bold text-sm uppercase leading-tight text-purple-300 group-hover/tile:text-purple-200 transition-colors">
-                    {loot.name}
+                    {loc(loot as unknown as Record<string, unknown>, 'name')}
                 </h3>
                 {(() => {
                     const lettrine = (hasSkill || hasArmor) && !hasRange;

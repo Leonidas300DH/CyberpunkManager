@@ -246,7 +246,7 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
                                 {/* Header: name + admin buttons */}
                                 <div className="flex items-start justify-between gap-2 mb-2">
                                     <h3 className="font-display font-black text-base text-emerald-400 uppercase tracking-wide leading-tight">
-                                        {action.name}
+                                        {loc(action as unknown as Record<string, unknown>, 'name')}
                                     </h3>
                                     {isAdmin && (
                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">

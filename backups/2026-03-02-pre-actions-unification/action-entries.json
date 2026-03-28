@@ -1,0 +1,4006 @@
+[
+  {
+    "id": "action-the-gal-with-the-plan",
+    "name": "THE GAL WITH THE PLAN",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a visible model is targeted with a successful Blast, you may immediately move one friendly model within the Blast radius YELLOW.",
+    "keywords": []
+  },
+  {
+    "id": "action-canny",
+    "name": "Canny",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When starting a move action, all friendly Gonks within RED may also move the same color range.",
+    "keywords": []
+  },
+  {
+    "id": "action-roller-blades",
+    "name": "Roller Blades",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If Andrea moves one full Green without obstacles, she can take a free, non move, Green action, once per activation.",
+    "keywords": []
+  },
+  {
+    "id": "action-crowd-control-intimidating",
+    "name": "Crowd Control & Intimidating",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If there are no other rivals within YELLOW, can React against first model entering this range. All ennemy influencing actions automatically fail against this model.",
+    "keywords": []
+  },
+  {
+    "id": "action-scrapyard-kingdom",
+    "name": "Scrapyard Kingdom",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When another visible friendly model discards an equipped Loot card, this model may use an Action Token to equip the discarded Loot card.",
+    "keywords": []
+  },
+  {
+    "id": "action-sumotori",
+    "name": "Sumotori",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All of this model's melee attacks gains Stun 1. Successful attacks also Push the opponent. Cannot make Ranged Attacks.",
+    "keywords": []
+  },
+  {
+    "id": "action-mad-calculus",
+    "name": "Mad Calculus",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model makes an attack with Blast, when choosing a target, it may give the attack Indirect and Dangerous.",
+    "keywords": []
+  },
+  {
+    "id": "action-rage",
+    "name": "RAGE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If the first action of this model's activation is a melee attack, it gains Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-cripple",
+    "name": "Cripple",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "On successful melee or hacking attack against a rival, if it's possible, target must also replace one of it's Green tokens with a Yellow one.",
+    "keywords": []
+  },
+  {
+    "id": "action-my-circus-my-monkeys",
+    "name": "My Circus, My Monkeys",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a visible Bozo uses the Loot Gear or Loot Goods action, gain one Luck token.",
+    "keywords": []
+  },
+  {
+    "id": "action-efficient",
+    "name": "Efficient",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After this models activation, activate another Arasaka within RED, if this model has taken out a rival during its activation.",
+    "keywords": []
+  },
+  {
+    "id": "action-devious",
+    "name": "Devious",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If this model is not visible to any rivals when it is activated, may move YELLOW for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-devious-deadly",
+    "name": "Devious & Deadly",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model's melee attacks gain Accurate. If this model is not visible to any rivals when it is activated, it may move YELLOW for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-short-fuse",
+    "name": "Short Fuse",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Actions targeting this model are Dangerous for models within RED.",
+    "keywords": []
+  },
+  {
+    "id": "action-instigator",
+    "name": "Instigator",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model activates, a friendly Gonk within RED may immediately take one action.",
+    "keywords": []
+  },
+  {
+    "id": "action-block-party",
+    "name": "Block Party",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Teams including this model as their Leader may include Party Gang models in addition to regular Zoner models. This team uses Party Gang objectives instead of Zoner objectives (though it uses Zoner Gear as normal).",
+    "keywords": []
+  },
+  {
+    "id": "action-outsider",
+    "name": "Outsider",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may be kept in reserve, unless the scenario specifically bars reserves.",
+    "keywords": []
+  },
+  {
+    "id": "action-modified-combat-visors",
+    "name": "Modified Combat Visors",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When making ranged attacks, ignore cover modifiers. All ranged attacks gain Pierce 1.",
+    "keywords": []
+  },
+  {
+    "id": "action-brainburn-link-cybergear",
+    "name": "Brainburn Link (Cybergear)",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Target exchanges 1 GREEN Action Token for 1 YELLOW Action Token.",
+    "keywords": []
+  },
+  {
+    "id": "action-entry-plan",
+    "name": "Entry Plan",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model ends a move on elevated terrain, another visible friendly model may move Yellow.",
+    "keywords": []
+  },
+  {
+    "id": "action-pull-focus",
+    "name": "Pull Focus",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model activates, a friendly, visible character may take a GREEN action, without using an Action Token.",
+    "keywords": []
+  },
+  {
+    "id": "action-teamwork",
+    "name": "TEAMWORK",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a friendly model within RED takes an action, it may add this model's Influence to the roll. A model may only benefit from one other model's Influence ability per action.",
+    "keywords": []
+  },
+  {
+    "id": "action-dead-lucky-sewer-savvy",
+    "name": "Dead Lucky & Sewer-Savvy",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model takes out a rival, gain one Luck token. If no rivals have line of sight to this model when its activation ends, it may move GREEN.",
+    "keywords": []
+  },
+  {
+    "id": "action-rocket-skates",
+    "name": "Rocket Skates",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model activates, it may move GREEN for free. This model's basic move actions gain Dangerous.",
+    "keywords": []
+  },
+  {
+    "id": "action-connected",
+    "name": "Connected",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When you activate this model, you may refresh an action on visible, friendly character.",
+    "keywords": []
+  },
+  {
+    "id": "action-quick-rip",
+    "name": "Quick-Rip",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Can Heal 1 wound on a cyberequipped character after a successful Tech skill test.",
+    "keywords": []
+  },
+  {
+    "id": "action-power-chord",
+    "name": "POWER CHORD",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model's activation ends, you may choose 1 visible rival character with at least 1 Ready Action Token: Your opponent must activate it next.",
+    "keywords": []
+  },
+  {
+    "id": "action-high-pressure-fix",
+    "name": "HIGH PRESSURE FIX",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Whenever a visible friendly Drone or Robot within GREEN of this model would suffer a wound, this model may choose to suffer the wound instead.",
+    "keywords": []
+  },
+  {
+    "id": "action-focus-fire",
+    "name": "FOCUS FIRE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a friendly Lawman within YELLOW takes a Rapid attack, it may gain Pierce 2, but may not use Walking Fire.",
+    "keywords": []
+  },
+  {
+    "id": "action-drone-controller-crab",
+    "name": "DRONE CONTROLLER (CRaB)",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may equip the CRaB Drone Controller program for free, regardless of Street Cred.",
+    "keywords": []
+  },
+  {
+    "id": "action-brawler",
+    "name": "Brawler",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After being hit by a successful attack, refresh all of this model's Action Tokens. This model ignores Unwieldy on gear.",
+    "keywords": []
+  },
+  {
+    "id": "action-squad-leader",
+    "name": "Squad Leader",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model’s activation ends, he can activate up to two friendly CTAC models within YELLOW one after the other.",
+    "keywords": []
+  },
+  {
+    "id": "action-high-powered-rounds",
+    "name": "High Powered Rounds",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Can ignore one wall or obstacle while checking for line of sight and cover for ranged attack.",
+    "keywords": []
+  },
+  {
+    "id": "action-tactical-coordination",
+    "name": "Tactical Coordination",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Can move ,then shoot in a single action.",
+    "keywords": []
+  },
+  {
+    "id": "action-intruder-alert",
+    "name": "INTRUDER ALERT",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a visible enemy ends a basic move action, this model may [RE]act to the action as if it had wounded this model.",
+    "keywords": []
+  },
+  {
+    "id": "action-high-ground",
+    "name": "HIGH GROUND",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When you Inspire Your Team, if this model is on elevated terrain, it may make a ranged attack for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-survivor",
+    "name": "Survivor",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may spend a Luck token instead of taking a wound.",
+    "keywords": []
+  },
+  {
+    "id": "action-neural-reprogrammer-cybergear-this-model",
+    "name": "Neural Reprogrammer (Cybergear): This model may us",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Neural Reprogrammer (Cybergear): This model may use its Tech Skill for any action it takes. Doing so makes that action Dangerous.",
+    "keywords": []
+  },
+  {
+    "id": "action-double-act",
+    "name": "Double Act",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Both models must be placed within 1\"\" of each other. When Active, may take, 2 actions with each model. It takes a total of 4 wounds to take them out. Each drops a Body token.",
+    "keywords": []
+  },
+  {
+    "id": "action-heightened-reflexes",
+    "name": "Heightened Reflexes",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model makes an attack as a [RE]act the attack gains Accurate and Deadly.",
+    "keywords": []
+  },
+  {
+    "id": "action-breacher",
+    "name": "BREACHER",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model gains +2 on Attack rolls opposed by the Obstacle die.",
+    "keywords": []
+  },
+  {
+    "id": "action-always-prepared",
+    "name": "Always Prepared",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Once per game, when you Inspire Your Team, you may select one Gear worth 2 ED or less that this model could have legally equipped before the game and equip it for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-full-prepper",
+    "name": "Full Prepper",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Once per game, when you Inspire Your Team, you may select one Gear worth 5 EB or less that this model could have legally equipped before the game and equip it to this model for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-cooked-it-up-myself",
+    "name": "Cooked It Up Myself",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may equip one piece of Gear at the start of the game ignoring all Faction and Street Cred requirements. This Gear costs 1 additional EB.",
+    "keywords": []
+  },
+  {
+    "id": "action-feeling-lucky",
+    "name": "Feeling Lucky",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model makes an attack, before rolling, you may discard a Luck token in order to give the attack Deadly.",
+    "keywords": []
+  },
+  {
+    "id": "action-synthesize",
+    "name": "Synthesize",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All other visible friendly models may refresh 1 Action Token if this model passes an Influence skill test against the obstacle dice (one test per model).",
+    "keywords": []
+  },
+  {
+    "id": "action-bomb-disposal",
+    "name": "BOMB DISPOSAL",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All models within RED may use this model's Tech skill to oppose attacks from Blast attacks.",
+    "keywords": []
+  },
+  {
+    "id": "action-power-chord-1",
+    "name": "Power Chord",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model's activation ends, you may choose one visible rival with at least one Read Action Token that your opponent must activate next.",
+    "keywords": []
+  },
+  {
+    "id": "action-puppeteer",
+    "name": "Puppeteer",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "As an action, attempt to take control of rival Net-Deck user, roll against his Tech skill. Control is lost when all target's actions are spent, or at the end of activation.",
+    "keywords": []
+  },
+  {
+    "id": "action-micromanage",
+    "name": "MICROMANAGE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Friendly characters within YELLOW gain +1 Influence. | Cyberdeck (Cybergear): This model gains Netrunner.",
+    "keywords": []
+  },
+  {
+    "id": "action-pneumatic-cyberfist-cybergear-dangerous-",
+    "name": "Pneumatic Cyberfist (Cybergear): Dangerous, Deadly",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Pneumatic Cyberfist (Cybergear): Dangerous, Deadly.",
+    "keywords": []
+  },
+  {
+    "id": "action-power-and-influence",
+    "name": "POWER AND INFLUENCE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Activate a visible friendly character. | Pneumatic Cyberfist (Cybergear): Dangerous, Deadly.",
+    "keywords": []
+  },
+  {
+    "id": "action-the-last-laugh",
+    "name": "THE LAST LAUGH",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model is taken out, before removing it, place an Impact token in base contact with it (this model is the original target). All models within RED must win a Reflexes roll vs. the Obstacle die or suffer a wound. The Obstacle die gains a bonus equal to this model's Tech Skill.",
+    "keywords": []
+  },
+  {
+    "id": "action-on-the-record",
+    "name": "ON THE RECORD",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Until you Inspire Your Team, whenever a visible rival model makes an attack action, that action gains Dangerous.",
+    "keywords": []
+  },
+  {
+    "id": "action-i-know-a-guy",
+    "name": "I KNOW A GUY",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All Gear equipped to this model at the start of the game costs 1 less EB (to a minimum of 1).\nTRENCH COAT: Whenever this model would draw 1 Loot, it draws 2 Loot instead. When this model ends a basic move action within reach of a friendly model, it may discard 1 Loot card and equip it to the friendly model.",
+    "keywords": []
+  },
+  {
+    "id": "action-punching-down",
+    "name": "Punching Down",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model gains +1 to all attack rolls which target a wounded character.",
+    "keywords": []
+  },
+  {
+    "id": "action-hardboiled",
+    "name": "Hardboiled",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When refreshed, place a Luck token on this card. This model may spend these tokens to take a free action before or after another friendly character's activation",
+    "keywords": []
+  },
+  {
+    "id": "action-feedback",
+    "name": "Feedback",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This action targets all rivals within GREEN range. Select one action token on each rival who failed an opposed Influence skill test and flip it to exhausted.",
+    "keywords": []
+  },
+  {
+    "id": "action-junkbot",
+    "name": "Junkbot",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model gains +1 to all rolls for each Loot it has equipped, to a maximum of +2.",
+    "keywords": []
+  },
+  {
+    "id": "action-guns",
+    "name": "Guns!",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If the first action is a ranged attack, she gains +1 to Tech. If the second action is also a ranged attack, she gains +3 to Tech.",
+    "keywords": []
+  },
+  {
+    "id": "action-inspiring",
+    "name": "Inspiring",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After this model inflicts a wound in melee, refresh up to one Action Token on all other visible friendly characters.",
+    "keywords": []
+  },
+  {
+    "id": "action-embittered",
+    "name": "Embittered",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a GREEN Action Token on this model is wounded, replace it with a YELLOW Action Token (instead of RED).",
+    "keywords": []
+  },
+  {
+    "id": "action-martial-arts",
+    "name": "Martial Arts",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Melee attacks gain Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-enhanced-response-time",
+    "name": "Enhanced Response Time",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After this model takes a [RE]action, it may move RED for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-coordinated-assault",
+    "name": "Coordinated Assault",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model ends a move on elevated terrain, another visible friendly model may move YELLOW.",
+    "keywords": []
+  },
+  {
+    "id": "action-trick-shot",
+    "name": "Trick Shot",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may treat all Grenades as Indirect attacks.",
+    "keywords": []
+  },
+  {
+    "id": "action-cpr",
+    "name": "CPR",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If a friendly character within Yellow dies, as a reaction, may move into reach and attempt Triage.",
+    "keywords": []
+  },
+  {
+    "id": "action-company-man",
+    "name": "Company Man",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Whenever your opponent Inspires his Team, refresh one of this model's Action Tokens.",
+    "keywords": []
+  },
+  {
+    "id": "action-scary",
+    "name": "Scary",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Gonks must roll against the Environment Dice to do a Melee or Ranged attack against this model.",
+    "keywords": []
+  },
+  {
+    "id": "action-neural-sightlink",
+    "name": "NEURAL SIGHTLINK",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If there is another friendly Cyber-Character within GREEN of the target, this model's ranged attacks gain Accurate. | Quick-Rip (Cybergear): Heal 1 wound on a Cyber-character.",
+    "keywords": []
+  },
+  {
+    "id": "action-don-t-anger-ms-mittens",
+    "name": "DON'T ANGER MS MITTENS",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Melee attacks targeting this model gain Dangerous.",
+    "keywords": []
+  },
+  {
+    "id": "action-surveillance-scan",
+    "name": "SURVEILLANCE SCAN",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If there are any visible rivals when this model activates, it may move YELLOW for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-earn-the-ears",
+    "name": "EARN THE EARS",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After this model takes a successful Action opposed by the Obstacle die, it may move RED.",
+    "keywords": []
+  },
+  {
+    "id": "action-brazen",
+    "name": "Brazen",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model gains +1 to ranged attacks when not in cover, relative to its targets.",
+    "keywords": []
+  },
+  {
+    "id": "action-bulletproof-loyal",
+    "name": "Bulletproof & Loyal",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may spend a Luck token to negate a wound. When a visible friendly Leader is wounded, this model may [RE]act.",
+    "keywords": []
+  },
+  {
+    "id": "action-ms-chief-when-this-model-s-activation-en",
+    "name": "Ms. Chief: When this model’s activation ends, all ",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Ms. Chief: When this model’s activation ends, all friendly Bozos visible to it may move RED. Then you may discard 1 Luck token to have 1 of them make 1 free Melee Attack.",
+    "keywords": []
+  },
+  {
+    "id": "action-ms-chief-when-this-model-s-activation-en-1",
+    "name": "Ms. Chief: When this model's activation ends, all ",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Ms. Chief: When this model's activation ends, all friendly Bozos visible to it may move RED. Then you may discard 1 Luck token to have 1 of them make 1 free Melee Attack.",
+    "keywords": []
+  },
+  {
+    "id": "action-never-fade-away",
+    "name": "Never Fade Away",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model would be taken out, roll against Environment Dice. On success, stay with 1 wound remaining.",
+    "keywords": []
+  },
+  {
+    "id": "action-embittered-pull-ranks",
+    "name": "Embittered & Pull Ranks",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a GREEN Token on this model is wounded, replace it with a YELLOW Token (instead of RED]. Activate another Lawman within GREEN with a successful Influence roll.",
+    "keywords": []
+  },
+  {
+    "id": "action-braindance-cripple",
+    "name": "Braindance & Cripple",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "On successful Tech test, a visible rival within YELLOW exchanges 1 GREEN for 1 YELLOW Action Token.",
+    "keywords": []
+  },
+  {
+    "id": "action-animal",
+    "name": "ANIMAL",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may only make basic melee and move actions. This model may not climb.\nVICIOUS JAWS: This model's melee Crits are Deadly.",
+    "keywords": []
+  },
+  {
+    "id": "action-k9-handler",
+    "name": "K9 Handler",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model is Active, a visible, friendly K9 may also take actions as if it was active.",
+    "keywords": []
+  },
+  {
+    "id": "action-handler",
+    "name": "HANDLER",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model is Active, a visible friendly K-9 may also take actions as if it was active (you may alternate actions between the K-9 and this model).",
+    "keywords": []
+  },
+  {
+    "id": "action-bravado",
+    "name": "Bravado",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Karo gains +1 to her melee attacks if another friendly model is visible.",
+    "keywords": []
+  },
+  {
+    "id": "action-street-samurai",
+    "name": "Street Samurai",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Cannot make Ranged Attacks.",
+    "keywords": []
+  },
+  {
+    "id": "action-tech-wiz",
+    "name": "TECH-WIZ",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "While there are no rivals within RED, this model may add its Tech to one dice roll during each activation (in addition to other modifiers). | Tool Kit: When this model discards a Loot card, it may roll a RED die. If it rolls a 5+ the Loot is not discarded.",
+    "keywords": []
+  },
+  {
+    "id": "action-cyber-ninja",
+    "name": "Cyber Ninja",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If this model is not visible to any rivals when it is activated, it may move GREEN and do a GREEN Melee Attack.",
+    "keywords": []
+  },
+  {
+    "id": "action-protector",
+    "name": "PROTECTOR",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may [RE]act when any visible friendly model within RED is wounded, instead of the target.",
+    "keywords": []
+  },
+  {
+    "id": "action-net-empath-synops",
+    "name": "Net Empath & Synops",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "May perform Triage regardless of distance. At the beginning of her activation, can load a program without spending an action.",
+    "keywords": []
+  },
+  {
+    "id": "action-synops",
+    "name": "Synops",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "At the beginning of his activation, can load a program without spending an action.",
+    "keywords": []
+  },
+  {
+    "id": "action-hey-over-here",
+    "name": "Hey, Over Here!",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Friendly models within RED may use the Loot Goods and Loot Gear actions for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-air-evac",
+    "name": "AIR EVAC",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After the game, if this model was not taken out, your wounded Veterans and Mercs do not need to roll to determine a Major Injury (only Veterans and Mercs that were taken out will need to roll).\nIntimidating Sunglasses: +1 Influence.",
+    "keywords": []
+  },
+  {
+    "id": "action-bandolier",
+    "name": "BANDOLIER",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model would discard a Gear or Loot card as part of an action on that card, it may choose to discard a Luck token instead.",
+    "keywords": []
+  },
+  {
+    "id": "action-death-from-the-sky",
+    "name": "Death From The Sky",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Ignores obstacles and Mines. Cannot be blocked by an opponent model while moving.",
+    "keywords": []
+  },
+  {
+    "id": "action-takes-one-to-kill-one",
+    "name": "TAKES ONE TO KILL ONE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model's RED attacks that target Cyber-Characters are YELLOW.",
+    "keywords": []
+  },
+  {
+    "id": "action-raking-fire",
+    "name": "RAKING FIRE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model's Ranged attacks may trade Torrent for Rapid 2.",
+    "keywords": []
+  },
+  {
+    "id": "action-cyber-lock",
+    "name": "CYBER-LOCK",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model's Program actions that target Cyber-Characters gain Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-high-alert",
+    "name": "HIGH ALERT!",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a visible friendly model takes a [RE]action, it may use one of this model's Ready Action tokens instead of one of its own.",
+    "keywords": []
+  },
+  {
+    "id": "action-singular-focus",
+    "name": "Singular Focus",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model is refreshed, choose a visible rival. Until this model is refreshed, all friendly models' ranged attacks vs. the chosen rival are ACCURATE.",
+    "keywords": []
+  },
+  {
+    "id": "action-emergency-lift",
+    "name": "EMERGENCY LIFT",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Target a Body token that was dropped by a friendly Veteran. Remove the token, the Veteran that dropped it does not need to roll for Major Injury after the game.",
+    "keywords": []
+  },
+  {
+    "id": "action-drone-controller-media",
+    "name": "DRONE CONTROLLER (MEDIA)",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may equip the Media Drone Controller program for free, regardless of Street Cred.",
+    "keywords": []
+  },
+  {
+    "id": "action-military-training",
+    "name": "Military Training",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Can move RED and make an action during the same activation, using the initial token.",
+    "keywords": []
+  },
+  {
+    "id": "action-connected-1",
+    "name": "CONNECTED",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When you activate this model, you may refresh one Action Token on another visible friendly character.",
+    "keywords": []
+  },
+  {
+    "id": "action-repel",
+    "name": "REPEL",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model does not suffer damage from falling.",
+    "keywords": []
+  },
+  {
+    "id": "action-sweet-tongue",
+    "name": "Sweet Tongue",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may always choose to defend against Melee attacks targeting it with its Influence instead of its Melee.",
+    "keywords": []
+  },
+  {
+    "id": "action-sweet-tongue-1",
+    "name": "SWEET TONGUE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may always choose to defend against Melee attacks targeting it with its Influence instead of its Melee.",
+    "keywords": []
+  },
+  {
+    "id": "action-take-it-easy",
+    "name": "Take It Easy",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Spend one action to pick up a luck token.",
+    "keywords": []
+  },
+  {
+    "id": "action-high-ground-1",
+    "name": "High Ground",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When you Inspire Your Team, if this model is on elevated terrain, it may make a ranged attack for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-grenadier",
+    "name": "Grenadier",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When using Blast attacks, this model may move the Impact token after succeeding, as long as the original target is still hit by the Blast.",
+    "keywords": []
+  },
+  {
+    "id": "action-lockout",
+    "name": "Lockout",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After you finish Nemo's Activation you may choose a visible friend or enemy to activate.",
+    "keywords": []
+  },
+  {
+    "id": "action-lookout",
+    "name": "Lookout",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After you finish this model's activation, you may choose a visible friend or rival to activate.",
+    "keywords": []
+  },
+  {
+    "id": "action-firewall",
+    "name": "FIREWALL",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Other friendly models within GREEN gain a bonus to their Tech equal to this model's Tech while being targeted by a rival Program.\nNEURAL UPLINK (Cybergear): All visible friendly Gonks may move YELLOW.",
+    "keywords": []
+  },
+  {
+    "id": "action-outsider-1",
+    "name": "OUTSIDER",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may be kept in Reserve, unless the scenario specifically bars Reserves.",
+    "keywords": []
+  },
+  {
+    "id": "action-servant-s-mask",
+    "name": "SERVANT'S MASK",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may start in Reserve. When it enters from Reserve, it may be placed anywhere at least YELLOW from a Rival model.",
+    "keywords": []
+  },
+  {
+    "id": "action-video-record",
+    "name": "VIDEO RECORD",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If this model survives the game and you win, you may discard this model from your HQ to promote one additional character to a Veteran (or hire an additional Veteran Merc; this model may not be hired by this ability).",
+    "keywords": []
+  },
+  {
+    "id": "action-team-player",
+    "name": "TEAM PLAYER",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If this model is activated using a friendly model's Influence action it gains +1 to all rolls during the activation.",
+    "keywords": []
+  },
+  {
+    "id": "action-steady-hand",
+    "name": "Steady Hand",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model ignores walking fire penalties when making Rapid attacks.",
+    "keywords": []
+  },
+  {
+    "id": "action-predator",
+    "name": "Predator",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Add 2 to Attacks rolls when targeting wounded rivals.",
+    "keywords": []
+  },
+  {
+    "id": "action-exos-attack-configuration",
+    "name": "Exos Attack Configuration",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Can spend 2 actions to perform single ranged attack, it will ignore obstacle cover and double Shooting skill points.",
+    "keywords": []
+  },
+  {
+    "id": "action-pratfall",
+    "name": "Pratfall",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model fumbles, gain one Luck token (it may not be used to reroll the fumble).",
+    "keywords": []
+  },
+  {
+    "id": "action-quick-reload",
+    "name": "QUICK RELOAD",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "QUICK RELOAD",
+    "keywords": []
+  },
+  {
+    "id": "action-utter-loyalty",
+    "name": "UTTER LOYALTY",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model's activation ends, you may activate another friendly Tyger Claw.",
+    "keywords": []
+  },
+  {
+    "id": "action-security-scan",
+    "name": "SECURITY SCAN",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may [RE]act when any visible friendly model is wounded, instead of the target.",
+    "keywords": []
+  },
+  {
+    "id": "action-sniper-s-nest",
+    "name": "Sniper's Nest",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If this model did not move during its activation, its ranged attacks gain Accurate and Deadly.",
+    "keywords": []
+  },
+  {
+    "id": "action-net-suit",
+    "name": "NET SUIT",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model ends its activation, another visible friendly model may move GREEN.",
+    "keywords": []
+  },
+  {
+    "id": "action-medic",
+    "name": "MEDIC!",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All wounded friendly characters may use an Action Token during their activations to move this model towards the wounded model a distance equal to the Action Token used.",
+    "keywords": []
+  },
+  {
+    "id": "action-agile",
+    "name": "Agile",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After wounding a rival, can take free RED movement action before the rival reacts.",
+    "keywords": []
+  },
+  {
+    "id": "action-high-alert-1",
+    "name": "High Alert",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a visible friendly model takes a [RE]action, it may use one of this model's Ready Action Tokens instead of one of its own.",
+    "keywords": []
+  },
+  {
+    "id": "action-steady",
+    "name": "Steady",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If the first action of this model's activation is a ranged attack, it gains Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-synthesize-1",
+    "name": "SYNTHESIZE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All other visible friendly models may refresh 1 Action Token.",
+    "keywords": []
+  },
+  {
+    "id": "action-juggler",
+    "name": "Juggler",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model's Melee Attacks are Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-hardboiled-1",
+    "name": "HARDBOILED",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Place 1 Luck token on this card when you Inspire Your Team. This model may spend 1 of these tokens to take an action before or after a friendly character's activation for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-unstoppable",
+    "name": "Unstoppable",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model cannot be stunned, or it's movement obstructed by any ability or program.",
+    "keywords": []
+  },
+  {
+    "id": "action-neural-uplink-cybergear",
+    "name": "Neural Uplink (Cybergear)",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All visible friendly Gonks may move YELLOW.",
+    "keywords": []
+  },
+  {
+    "id": "action-firewall-1",
+    "name": "Firewall",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All friendly characters may use this model's TECH skill when targeted by a TECH action.",
+    "keywords": []
+  },
+  {
+    "id": "action-improvised-tech",
+    "name": "IMPROVISED TECH",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Friendly models gain +1 to all Tech rolls that target a rival within RED of this model.",
+    "keywords": []
+  },
+  {
+    "id": "action-stun-baton-riot-shield",
+    "name": "Stun Baton & Riot Shield",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Can move and attack during the same action.",
+    "keywords": []
+  },
+  {
+    "id": "action-wild-beat",
+    "name": "WILD BEAT",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Until you Inspire Your Team, enemy models within YELLOW that have a RED Action Token and are targeted with an attack must pass an Influence test Vs. the Obstacle die or defend with their RED Action Token.",
+    "keywords": []
+  },
+  {
+    "id": "action-adrenaline",
+    "name": "Adrenaline",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Each time a ranged or melee attack scores a hit, Rogue gets +1 for her next attack of the same type, during the same activation.",
+    "keywords": []
+  },
+  {
+    "id": "action-fortune-favor-fools",
+    "name": "Fortune Favor Fools",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model gets +2 to any defence roll as long as none of his action token are spent.",
+    "keywords": []
+  },
+  {
+    "id": "action-devious-1",
+    "name": "DEVIOUS",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If this model is not visible to any rivals when it is activated, it may move YELLOW for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-focused",
+    "name": "FOCUSED",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If no rivals are within YELLOW, this model's ranged attacks gain Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-optical-camouflage-fast-huge-this-model-",
+    "name": "Optical Camouflage, Fast, Huge: This model can onl",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Optical Camouflage, Fast, Huge: This model can only be aimed and fired at if it is visible to the attacker at the beginning of its activation. Can move twice in 1 action but only where its base fits.",
+    "keywords": []
+  },
+  {
+    "id": "action-surveillance-scan-1",
+    "name": "Surveillance Scan",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If there are any visible rivals when this model activates, it may move YELLOW for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-chain-of-command",
+    "name": "Chain of command",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Any friendly Lawman within RED of this model may use its skill modifier instead of its own.",
+    "keywords": []
+  },
+  {
+    "id": "action-power-influence",
+    "name": "Power Influence",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Activate a visible friendly character if this model passes an Influence skill test against the obstacle dice.",
+    "keywords": []
+  },
+  {
+    "id": "action-got-your-back",
+    "name": "Got Your Back",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Friendly characters within RED of this model gain Accurate to their basic ranged attacks.",
+    "keywords": []
+  },
+  {
+    "id": "action-call-it-in",
+    "name": "Call It In",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model is targeted by an attack that fails, one other friendly model may move GREEN.",
+    "keywords": []
+  },
+  {
+    "id": "action-expendable-loyal",
+    "name": "Expendable & Loyal",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After being taken out, make one GREEN [RE]action before being removed. If it is in the Path of Attack to a higher-INF Tyger Claw, it may become the target before dice are rolled.",
+    "keywords": []
+  },
+  {
+    "id": "action-sidewalk-surfing",
+    "name": "Sidewalk Surfing",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model activates, it may roll a RED die. On a fumble, it suffers a wound. On any other roll, it may move YELLOW for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-pride-s-rake",
+    "name": "PRIDE'S RAKE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model and friendly models within RED gain Accurate on attacks made as a [RE]action.",
+    "keywords": []
+  },
+  {
+    "id": "action-have-some-soup",
+    "name": "HAVE SOME SOUP",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Heal 1.",
+    "keywords": []
+  },
+  {
+    "id": "action-mastermind",
+    "name": "Mastermind",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After finishing this character's activation, you may activate any other friendly Zoner.",
+    "keywords": []
+  },
+  {
+    "id": "action-careful-aim",
+    "name": "CAREFUL AIM",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When shooting into a brawl, this model attacks normally (it does not risk hitting other brawling targets).",
+    "keywords": []
+  },
+  {
+    "id": "action-prototype-a",
+    "name": "Prototype A",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "In a melee, can use rivals weapons.1 action.",
+    "keywords": []
+  },
+  {
+    "id": "action-pride-s-pounce",
+    "name": "PRIDE'S POUNCE",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model and friendly models within RED gain Deadly Crits on attacks made as a [RE]action.",
+    "keywords": []
+  },
+  {
+    "id": "action-precise",
+    "name": "Precise",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When making a Ranged Attack at a target in YELLOW, gains Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-protector-1",
+    "name": "Protector",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "If this model is in a rival's path of attack, the attack must target this model instead of the initial one.",
+    "keywords": []
+  },
+  {
+    "id": "action-reposition",
+    "name": "Reposition",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After a visible friendly model within Yellow suffers a wound, this model may move RED.",
+    "keywords": []
+  },
+  {
+    "id": "action-got-your-back-1",
+    "name": "GOT YOUR BACK",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Basic Ranged Attacks made by friendly characters within RED gain Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-riot-shield",
+    "name": "RIOT SHIELD",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Once per activation, when this model is the target of a rival's melee attack, you may force the rival to reroll.",
+    "keywords": []
+  },
+  {
+    "id": "action-limited-autonomy",
+    "name": "Limited Autonomy",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model can only move when within RED of another friendly character.",
+    "keywords": []
+  },
+  {
+    "id": "action-advanced-thermo-optics",
+    "name": "Advanced Thermo Optics",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Ignores cover penalties or Optical Camouflage when making Ranged Attacks",
+    "keywords": []
+  },
+  {
+    "id": "action-prove-your-worth",
+    "name": "Prove your worth",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Attacks with Blast that target rival models within RED gain Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-access-matrix",
+    "name": "Access Matrix",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When opposing rival Netrunner during Combat Netrunning, Gain +1 Tech Skill and Accurate. | Neural Reprogrammer (Cybergear): This model may use its Tech Skill for any action it takes. Doing so makes that action Dangerous.",
+    "keywords": []
+  },
+  {
+    "id": "action-quick-thinker",
+    "name": "Quick Thinker",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All actions this model takes using an equipped Loot gain Accurate.",
+    "keywords": []
+  },
+  {
+    "id": "action-walking-tank",
+    "name": "Walking Tank",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Can carry two Bulky gears.",
+    "keywords": []
+  },
+  {
+    "id": "action-huge-clumsy",
+    "name": "Huge & Clumsy",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Cannot be stunned. Cannot move more than Yellow. Opponents get +1 to Melee attack against this Model.",
+    "keywords": []
+  },
+  {
+    "id": "action-cyber-necromancy",
+    "name": "Cyber Necromancy",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "As an action, this character may cause a dead body with augmented limbs to perform ranged attack action with it's weapon.",
+    "keywords": []
+  },
+  {
+    "id": "action-furious-charge-smoke-bomb",
+    "name": "Furious Charge & Smoke Bomb",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model can move YELLOW (GREEN if on Motorcyle) and perform melee attack during the same action. It can spend an action to exit melee or ignore rival (RE)action.",
+    "keywords": []
+  },
+  {
+    "id": "action-tactical-training",
+    "name": "Tactical Training",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "After discarding a Gear card for any reason, this model may refresh one of its Action Tokens.",
+    "keywords": []
+  },
+  {
+    "id": "action-rocket-jump",
+    "name": "ROCKET JUMP",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model may suffer a wound to automatically pass any Reflexes rolls while climbing.",
+    "keywords": []
+  },
+  {
+    "id": "action-survivor-1",
+    "name": "SURVIVOR",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model would take a wound you may discard a Luck token to ignore the wound.",
+    "keywords": []
+  },
+  {
+    "id": "action-street-snares",
+    "name": "STREET SNARES",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Rival's basic Move actions that start within RED of this model lose Easy and gain Dangerous.",
+    "keywords": []
+  },
+  {
+    "id": "action-jammer",
+    "name": "Jammer",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "No other model within RED may use Tech skills.",
+    "keywords": []
+  },
+  {
+    "id": "action-explosive",
+    "name": "Explosive",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When taken out of action, this model exploses. Roll Green for Blast damage for all models (except other Velo Mekanic Shapu) within RED.",
+    "keywords": []
+  },
+  {
+    "id": "action-the-silver-hand-show-time",
+    "name": "The Silver Hand & Show Time!",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "All ranged attacks are accurate and gain deadly crits. Does not benefit from cover.",
+    "keywords": []
+  },
+  {
+    "id": "action-hood-watch",
+    "name": "HOOD WATCH",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a visible rival takes out a friendly model, this model may make a free Ranged attack against the rival.",
+    "keywords": []
+  },
+  {
+    "id": "action-buddy-system",
+    "name": "BUDDY SYSTEM",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When a friendly model within RED suffers a wound, this model may move RED for free.",
+    "keywords": []
+  },
+  {
+    "id": "action-cheater",
+    "name": "Cheater",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "When this model is targeted by an attack, before rolling, may discard a Luck token to move GREEN. If it is no longer a valid target, the action fails (Action Token still used).",
+    "keywords": []
+  },
+  {
+    "id": "action-witness-me",
+    "name": "Witness Me",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "This model gains +1 Melee while within YELLOW of another friendly character.",
+    "keywords": []
+  },
+  {
+    "id": "action-pistolero",
+    "name": "Pistolero",
+    "source": "Custom",
+    "factionVariants": [
+      {
+        "factionId": "universal",
+        "cost": 0,
+        "rarity": 99,
+        "reqStreetCred": 0
+      }
+    ],
+    "isWeapon": false,
+    "isGear": false,
+    "isAction": true,
+    "rangeRed": false,
+    "rangeYellow": false,
+    "rangeGreen": false,
+    "rangeLong": false,
+    "description": "Ranged attacks gain Deadly if the target is within Yellow.",
+    "keywords": []
+  }
+]

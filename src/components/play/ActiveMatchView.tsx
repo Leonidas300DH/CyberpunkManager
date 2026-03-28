@@ -214,6 +214,7 @@ const FACTION_COLOR_MAP: Record<string, string> = {
 // ── Compact program tile (matches Database list view exactly) ──
 
 function ProgramTileCompact({ program, factionName, onClick }: { program: HackingProgram; factionName: string; onClick?: () => void }) {
+    const loc = useLocalized();
     const qs = QUALITY_STYLES[program.quality];
     const fColor = FACTION_COLOR_MAP[program.factionId] ?? 'border-gray-500';
     return (
@@ -232,7 +233,7 @@ function ProgramTileCompact({ program, factionName, onClick }: { program: Hackin
                     <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
                 </div>
                 <div className="flex-1 px-3 py-2 flex flex-col min-h-[100px]">
-                    <h3 className={`font-display font-bold text-base uppercase leading-tight ${qs.text} group-hover:text-white transition-colors`}>{program.name}</h3>
+                    <h3 className={`font-display font-bold text-base uppercase leading-tight ${qs.text} group-hover:text-white transition-colors`}>{loc(program as unknown as Record<string, unknown>, 'name')}</h3>
                     <span className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider">{factionName}</span>
                 </div>
             </div>

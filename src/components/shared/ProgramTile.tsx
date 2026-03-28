@@ -32,7 +32,7 @@ export function ProgramTile({ program, factionName, overlay }: { program: Hackin
             </div>
             <div className="relative z-10 flex-1 px-3 py-2 flex flex-col gap-0.5">
                 <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover/tile:text-purple-400 transition-colors">
-                    {program.name}
+                    {loc(program as unknown as Record<string, unknown>, 'name')}
                 </h3>
                 <div className="flex gap-2 items-center">
                     <span className={`text-[9px] font-mono-tech uppercase tracking-wider font-bold ${qColor.text === 'text-black' ? 'text-muted-foreground' : qColor.text}`}>

@@ -529,7 +529,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
                     {sortedActions.map((action, i) => {
                         const weapon = resolveWeapon(action.weaponId);
                         const src = weapon ? {
-                            name: weapon.name,
+                            name: loc(weapon as unknown as Record<string, unknown>, 'name'),
                             skillReq: weapon.skillReq,
                             skillBonus: weapon.skillBonus,
                             grantsArmor: weapon.grantsArmor,

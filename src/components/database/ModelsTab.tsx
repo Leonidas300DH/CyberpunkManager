@@ -7,7 +7,7 @@ import { CharacterCard } from '@/components/characters/CharacterCard';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
-import { useT } from '@/i18n';
+import { useT, useLocalized } from '@/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -186,13 +186,17 @@ function LinkedActionSummary({ action, catalog, onEdit }: {
     catalog: { weapons: Weapon[] };
     onEdit: (weapon: Weapon) => void;
 }) {
+    const loc = useLocalized();
     const linkedWeapon = catalog.weapons.find(w => w.id === action.weaponId);
     const isActionType = linkedWeapon?.isAction;
+    const displayName = linkedWeapon
+        ? loc(linkedWeapon as unknown as Record<string, unknown>, 'name')
+        : action.name;
     return (
         <div className="bg-black/50 border border-border/30 px-2 py-1.5">
             <div className="flex items-start justify-between gap-2">
                 <span className="font-mono-tech text-[9px] text-white/60 flex-1">
-                    <span className="font-bold text-emerald-400 uppercase">{action.name}</span>
+                    <span className="font-bold text-emerald-400 uppercase">{displayName}</span>
                     {action.skillReq && action.skillReq !== 'None' && <> · {action.skillReq}{linkedWeapon?.skillBonus ? ` +${linkedWeapon.skillBonus}` : ''}</>}
                     {action.keywords.length > 0 && <> · {action.keywords.join(', ')}</>}
                     {action.effectDescription && (
@@ -220,6 +224,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
     const isAdmin = useIsAdmin();
     const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, deleteProfile: deleteProfileDb, saveWeapon } = useCatalog();
     const t = useT();
+    const loc = useLocalized();
 
     // Highlight scroll-to effect
     useEffect(() => {
@@ -872,21 +877,21 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                                                 {availableWeapons.filter(w => w.isWeapon).length > 0 && (
                                                     <optgroup label="Weapons">
                                                         {availableWeapons.filter(w => w.isWeapon).map(w => (
-                                                            <option key={w.id} value={w.id}>{w.name}</option>
+                                                            <option key={w.id} value={w.id}>{loc(w as unknown as Record<string, unknown>, 'name')}</option>
                                                         ))}
                                                     </optgroup>
                                                 )}
                                                 {availableWeapons.filter(w => w.isGear).length > 0 && (
                                                     <optgroup label="Gear">
                                                         {availableWeapons.filter(w => w.isGear).map(w => (
-                                                            <option key={w.id} value={w.id}>{w.name}</option>
+                                                            <option key={w.id} value={w.id}>{loc(w as unknown as Record<string, unknown>, 'name')}</option>
                                                         ))}
                                                     </optgroup>
                                                 )}
                                                 {availableWeapons.filter(w => w.isAction).length > 0 && (
                                                     <optgroup label="Actions">
                                                         {availableWeapons.filter(w => w.isAction).map(w => (
-                                                            <option key={w.id} value={w.id}>{w.name}</option>
+                                                            <option key={w.id} value={w.id}>{loc(w as unknown as Record<string, unknown>, 'name')}</option>
                                                         ))}
                                                     </optgroup>
                                                 )}

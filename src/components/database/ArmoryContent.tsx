@@ -366,7 +366,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                     <div className="flex-1 min-w-[240px]">
                         <div className="bg-surface-dark border border-border">
                             <div className="bg-black px-3 py-2 border-b border-border">
-                                <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">{selectedProgram.name}</h3>
+                                <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">{loc(selectedProgram as unknown as Record<string, unknown>, 'name')}</h3>
                             </div>
                             <div className="divide-y divide-border">
                                 {[
@@ -568,7 +568,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                                 <div className="font-mono-tech text-[7px] text-black/70 font-bold">EB</div>
                                             </div>
                                             <div className="flex-1 px-3 py-2 flex flex-col min-h-[100px]">
-                                                <h3 className={`font-display font-bold text-base uppercase leading-tight ${qs.text} group-hover:text-white transition-colors`}>{prog.name}</h3>
+                                                <h3 className={`font-display font-bold text-base uppercase leading-tight ${qs.text} group-hover:text-white transition-colors`}>{loc(prog as unknown as Record<string, unknown>, 'name')}</h3>
                                                 <span className="text-[10px] font-mono-tech text-muted-foreground uppercase tracking-wider">{factionName}</span>
                                             </div>
                                         </div>
@@ -909,7 +909,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                     <div className="flex-1 px-3 py-2 flex flex-col gap-0.5">
                                         <div className="flex justify-between items-start">
                                             <div className="flex-1">
-                                                <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{weapon.name}</h3>
+                                                <h3 className="font-display font-bold text-sm uppercase leading-tight text-white group-hover:text-secondary transition-colors">{loc(weapon as unknown as Record<string, unknown>, 'name')}</h3>
                                                 <span className={`text-[9px] font-mono-tech uppercase tracking-wider ${variantTextColor}`}>
                                                     {variantFactionName}
                                                 </span>

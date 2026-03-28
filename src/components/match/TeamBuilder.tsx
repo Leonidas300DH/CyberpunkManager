@@ -36,7 +36,7 @@ import {
     horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useT } from '@/i18n';
+import { useT, useLocalized } from '@/i18n';
 
 interface TeamBuilderProps {
     campaign: Campaign;
@@ -221,6 +221,7 @@ function SquadTrashZone({ isOver }: { isOver: boolean }) {
 
 export function TeamBuilder({ campaign }: TeamBuilderProps) {
     const t = useT();
+    const loc = useLocalized();
     const {
         targetEB,
         setTargetEB,
@@ -510,7 +511,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     const variant = resolveVariant(weapon.factionVariants, parsed.variantFactionId);
                     return (
                         <span className={`${CAPSULE} border-secondary shadow-[0_0_12px_rgba(0,240,255,0.4)]`}>
-                            {weapon.name} · {variant?.cost ?? '?'}EB
+                            {loc(weapon as unknown as Record<string, unknown>, 'name')} · {variant?.cost ?? '?'}EB
                         </span>
                     );
                 }
@@ -519,7 +520,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                     const variant = resolveVariant(weapon.factionVariants, parsed.variantFactionId);
                     return (
                         <span className={`${CAPSULE} border-secondary shadow-[0_0_12px_rgba(0,240,255,0.4)]`}>
-                            {weapon.name} · {variant?.cost ?? '?'}EB
+                            {loc(weapon as unknown as Record<string, unknown>, 'name')} · {variant?.cost ?? '?'}EB
                         </span>
                     );
                 }
@@ -539,7 +540,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                 if ((programsCollapsed && !activeDragId.startsWith('equipped:')) || (squadCollapsed && activeDragId.startsWith('equipped:'))) {
                     return (
                         <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${qc.bg} ${qc.text} rounded-full font-bold uppercase shadow-lg`}>
-                            {program.name} · {program.costEB}EB
+                            {loc(program as unknown as Record<string, unknown>, 'name')} · {program.costEB}EB
                         </span>
                     );
                 }
@@ -568,11 +569,11 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
             const parsed = parseEquipmentId(eqId);
             if (parsed.prefix === 'weapon') {
                 const weapon = catalog.weapons.find(w => w.id === parsed.baseId);
-                return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null, name: weapon.name } : null;
+                return weapon ? { equipId: eqId, type: 'weapon' as const, weapon, variantFactionId: parsed.variantFactionId, program: null, name: loc(weapon as unknown as Record<string, unknown>, 'name') } : null;
             }
             if (parsed.prefix === 'program') {
                 const program = catalog.programs.find(p => p.id === parsed.baseId);
-                return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program, name: program.name } : null;
+                return program ? { equipId: eqId, type: 'program' as const, weapon: null, variantFactionId: undefined, program, name: loc(program as unknown as Record<string, unknown>, 'name') } : null;
             }
             return null;
         }).filter(Boolean) as Array<
@@ -1149,7 +1150,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                         >
                                             <DraggableCapsule id={`${equipId}#0`}>
                                                 <span className={`${CAPSULE} border-secondary`}>
-                                                    <span>{count > 1 ? `${count}× ` : ''}{weapon.name} · {variant?.cost ?? '?'}EB</span>
+                                                    <span>{count > 1 ? `${count}× ` : ''}{loc(weapon as unknown as Record<string, unknown>, 'name')} · {variant?.cost ?? '?'}EB</span>
                                                     <button
                                                         onClick={(e) => handleEquipPickerOpen(equipId, e)}
                                                         onPointerDown={(e) => e.stopPropagation()}
@@ -1247,7 +1248,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                         >
                                             <DraggableCapsule id={`${equipId}#0`}>
                                                 <span className={`inline-flex items-center gap-1 text-[11px] font-mono-tech px-2.5 py-0.5 ${qc.bg} ${qc.text} rounded-full font-bold uppercase hover:brightness-125 transition-all cursor-default`}>
-                                                    <span>{count > 1 ? `${count}× ` : ''}{program.name} · {program.costEB}EB</span>
+                                                    <span>{count > 1 ? `${count}× ` : ''}{loc(program as unknown as Record<string, unknown>, 'name')} · {program.costEB}EB</span>
                                                     <button
                                                         onClick={(e) => handleEquipPickerOpen(equipId, e)}
                                                         onPointerDown={(e) => e.stopPropagation()}

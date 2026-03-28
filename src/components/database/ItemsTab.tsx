@@ -95,7 +95,7 @@ export function ItemsTab() {
                                         {/* Item Header */}
                                         <div className="bg-black p-3 border-b border-border flex justify-between items-start">
                                             <div>
-                                                <h4 className="font-display text-lg text-white uppercase tracking-tight leading-tight">{item.name}</h4>
+                                                <h4 className="font-display text-lg text-white uppercase tracking-tight leading-tight">{loc(item as unknown as Record<string, unknown>, 'name')}</h4>
                                                 <div className="flex gap-2 mt-1 flex-wrap">
                                                     {item.keywords.map((kw, i) => (
                                                         <span key={i} className="text-[10px] font-mono-tech text-muted-foreground border border-border px-1 uppercase">{kw}</span>
@@ -120,7 +120,7 @@ export function ItemsTab() {
                                                 <div className="space-y-1">
                                                     {item.grantedActions.map(action => (
                                                         <div key={action.id} className="flex justify-between items-center text-[10px] border-t border-border pt-1">
-                                                            <span className="font-mono-tech text-white uppercase">{action.name}</span>
+                                                            <span className="font-mono-tech text-white uppercase">{loc(action as unknown as Record<string, unknown>, 'name')}</span>
                                                             <span className={`font-mono-tech ${style.text}`}>{action.range}</span>
                                                         </div>
                                                     ))}

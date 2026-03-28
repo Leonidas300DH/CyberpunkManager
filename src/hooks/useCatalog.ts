@@ -63,6 +63,7 @@ function mapWeapon(r: Record<string, unknown>): Weapon {
     return {
         id: r.id as string,
         name: r.name as string,
+        name_fr: r.name_fr as string | undefined,
         source: (r.source as Weapon['source']) ?? 'Custom',
         factionVariants: (r.faction_variants as Weapon['factionVariants']) ?? [],
         isWeapon: (r.is_weapon as boolean) ?? true,
@@ -91,6 +92,7 @@ function mapItem(r: Record<string, unknown>): ItemCard {
     return {
         id: r.id as string,
         name: r.name as string,
+        name_fr: r.name_fr as string | undefined,
         category: (r.category as ItemCard['category']) ?? 'Gear',
         factionVariants: (r.faction_variants as ItemCard['factionVariants']) ?? [],
         keywords: (r.keywords as string[]) ?? [],
@@ -105,6 +107,7 @@ function mapProgram(r: Record<string, unknown>): HackingProgram {
     return {
         id: r.id as string,
         name: r.name as string,
+        name_fr: r.name_fr as string | undefined,
         factionId: (r.faction_id as string) ?? 'all',
         costEB: (r.cost_eb as number) ?? 0,
         reqStreetCred: (r.req_street_cred as number) ?? 0,
@@ -213,6 +216,7 @@ function weaponToRow(w: Weapon) {
     return {
         id: w.id,
         name: w.name,
+        name_fr: w.name_fr,
         skill_req: w.skillReq,
         is_weapon: w.isWeapon,
         is_gear: w.isGear,
@@ -242,6 +246,7 @@ function itemToRow(i: ItemCard) {
     return {
         id: i.id,
         name: i.name,
+        name_fr: i.name_fr,
         image_url: i.imageUrl,
         faction_variants: i.factionVariants,
         category: i.category,
@@ -257,6 +262,7 @@ function programToRow(p: HackingProgram) {
     return {
         id: p.id,
         name: p.name,
+        name_fr: p.name_fr,
         quality: p.quality,
         range: p.range,
         reload_condition: p.reloadCondition,
