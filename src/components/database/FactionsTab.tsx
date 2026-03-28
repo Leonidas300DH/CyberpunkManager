@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Trash2, Edit, ChevronRight } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
+import { useT, useLocalized } from '@/i18n';
 
 // Per-faction signature colors (border + bg + text variants)
 const FACTION_COLOR_MAP: Record<string, { border: string; bg: string; text: string }> = {
@@ -47,13 +48,6 @@ const TYPE_COLORS: Record<ModelLineage['type'], string> = {
 };
 
 const TYPE_ORDER: ModelLineage['type'][] = ['Leader', 'Character', 'Specialist', 'Gonk', 'Drone'];
-const TYPE_LABEL: Record<ModelLineage['type'], string> = {
-    Leader: 'Leaders',
-    Character: 'Characters',
-    Gonk: 'Gonks',
-    Specialist: 'Specialists',
-    Drone: 'Drones',
-};
 
 // Base faction IDs that cannot be deleted (hardcoded for safety)
 const BASE_FACTION_IDS = new Set([
@@ -85,6 +79,16 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
     const { catalog, setCatalog } = useStore();
     const isAdmin = useIsAdmin();
     const { saveFaction: saveFactionDb, deleteFaction: deleteFactionDb } = useCatalog();
+    const t = useT();
+    const loc = useLocalized();
+
+    const TYPE_LABEL: Record<ModelLineage['type'], string> = {
+        Leader: t('types.leader'),
+        Character: t('types.character'),
+        Gonk: t('types.gonk'),
+        Specialist: t('types.specialist'),
+        Drone: t('types.drone'),
+    };
     const [isOpen, setIsOpen] = useState(false);
     const [editingFaction, setEditingFaction] = useState<Faction | null>(null);
     const [formData, setFormData] = useState<Partial<Faction>>({});
@@ -216,12 +220,12 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
                 <DialogContent className="bg-surface-dark border-border">
                     <DialogHeader>
                         <DialogTitle className="font-display uppercase tracking-wider text-primary">
-                            {editingFaction ? 'Edit Faction' : 'New Faction'}
+                            {editingFaction ? t('database.editFaction') : t('database.newFaction')}
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label className="font-mono-tech text-xs uppercase tracking-widest">Name</Label>
+                            <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.name')}</Label>
                             <Input
                                 value={formData.name || ''}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -230,7 +234,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="font-mono-tech text-xs uppercase tracking-widest">Description</Label>
+                            <Label className="font-mono-tech text-xs uppercase tracking-widest">{t('database.description')}</Label>
                             <Input
                                 value={formData.description || ''}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -246,7 +250,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
                             onClick={handleSave}
                             className="w-full bg-primary hover:bg-white text-black font-display font-bold uppercase tracking-wider py-3 clip-corner-br transition-colors"
                         >
-                            Save
+                            {t('database.save')}
                         </button>
                     </div>
                 </DialogContent>
@@ -256,7 +260,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
             <div className="space-y-3">
                 {filteredFactions.length === 0 && (
                     <div className="border border-dashed border-border p-8 text-center text-muted-foreground font-mono-tech uppercase text-xs tracking-widest">
-                        No factions found. Add factions to build your database.
+                        {t('database.noFactions')}
                     </div>
                 )}
 
@@ -307,7 +311,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
                                         </h2>
                                         {faction.description && (
                                             <p className="text-sm font-body text-white/70 mt-0.5 line-clamp-1">
-                                                {faction.description}
+                                                {loc(faction as unknown as Record<string, unknown>, 'description')}
                                             </p>
                                         )}
                                     </div>
@@ -344,7 +348,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
 
                                             {/* Characters */}
                                             <div>
-                                                <SectionHeader title="Gang Members" count={allChars.length} colorClass={factionColor.text} />
+                                                <SectionHeader title={t('database.gangMembers')} count={allChars.length} colorClass={factionColor.text} />
                                                 <div className="space-y-2">
                                                     {TYPE_ORDER.map(type => {
                                                         const items = native.filter(c => c.type === type);
@@ -412,7 +416,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
                                             {/* Weapons + Gears */}
                                             <div className="space-y-4">
                                                 <div>
-                                                    <SectionHeader title="Weapons" count={weapons.length} colorClass="text-accent" />
+                                                    <SectionHeader title={t('database.weapons')} count={weapons.length} colorClass="text-accent" />
                                                     {weapons.length === 0 ? (
                                                         <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
                                                     ) : (
@@ -431,7 +435,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <SectionHeader title="Gears" count={gears.length} colorClass="text-secondary" />
+                                                    <SectionHeader title={t('database.gear')} count={gears.length} colorClass="text-secondary" />
                                                     {gears.length === 0 ? (
                                                         <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
                                                     ) : (
@@ -454,7 +458,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
                                             {/* Programs + Objectives */}
                                             <div className="space-y-4">
                                                 <div>
-                                                    <SectionHeader title="Programs" count={programs.length} colorClass="text-white" />
+                                                    <SectionHeader title={t('database.programs')} count={programs.length} colorClass="text-white" />
                                                     {programs.length === 0 ? (
                                                         <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
                                                     ) : (
@@ -482,7 +486,7 @@ export function FactionsTab({ onNavigateToCard, factionFilter, search = '', trig
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <SectionHeader title="Objectives" count={objectives.length} colorClass="text-cyber-green" />
+                                                    <SectionHeader title={t('database.objectives')} count={objectives.length} colorClass="text-cyber-green" />
                                                     {objectives.length === 0 ? (
                                                         <span className="text-[10px] font-mono-tech text-muted-foreground italic">--</span>
                                                     ) : (
