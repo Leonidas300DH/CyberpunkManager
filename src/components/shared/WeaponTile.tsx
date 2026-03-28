@@ -4,6 +4,7 @@ import { Weapon } from '@/types';
 import { resolveVariant, getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 import { formatCardText } from '@/lib/formatCardText';
 import { FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
+import { useLocalized } from '@/i18n';
 
 const OFF = 'rgba(100,100,100,0.35)';
 const OFF_STROKE = 'rgba(255,255,255,0.3)';
@@ -66,6 +67,7 @@ const SKILL_ICON: Record<string, string> = {
 };
 
 export function WeaponTile({ weapon, variantFactionId, activeFactionId, overlay, campaignStreetCred, equippedCount }: WeaponTileProps) {
+    const loc = useLocalized();
     const variant = resolveVariant(weapon.factionVariants, variantFactionId);
     const showRarity = variant.rarity < 99;
     const showStreetCred = (variant.reqStreetCred ?? 0) > 0;
@@ -138,7 +140,7 @@ export function WeaponTile({ weapon, variantFactionId, activeFactionId, overlay,
                                     {skillEl}
                                     {armorEl}
                                 </div>
-                                <p className="font-body text-[11px] text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                <p className="font-body text-[11px] text-white/70 leading-snug">{formatCardText(loc(weapon as unknown as Record<string, unknown>, 'description'))}</p>
                             </div>
                         );
                     }
@@ -155,7 +157,7 @@ export function WeaponTile({ weapon, variantFactionId, activeFactionId, overlay,
                                     )}
                                 </div>
                             )}
-                            <p className="font-body text-[11px] text-white/70 leading-snug line-clamp-2">{formatCardText(weapon.description)}</p>
+                            <p className="font-body text-[11px] text-white/70 leading-snug line-clamp-2">{formatCardText(loc(weapon as unknown as Record<string, unknown>, 'description'))}</p>
                         </>
                     );
                 })()}

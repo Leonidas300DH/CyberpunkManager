@@ -102,6 +102,59 @@ export type Translations = {
     'database.addElite': string;
     'database.createTierVersion': string;
     'database.flipVertical': string;
+    // ── Database page titles ──
+    'database.title.factions': string;
+    'database.title.models': string;
+    'database.title.weapons': string;
+    'database.title.gear': string;
+    'database.title.programs': string;
+    'database.title.loot': string;
+    'database.title.objectives': string;
+    'database.title.actions': string;
+    'database.accent.factions': string;
+    'database.accent.models': string;
+    'database.accent.weapons': string;
+    'database.accent.gear': string;
+    'database.accent.programs': string;
+    'database.accent.loot': string;
+    'database.accent.objectives': string;
+    'database.accent.actions': string;
+    'database.subtitle.factions': string;
+    'database.subtitle.models': string;
+    'database.subtitle.weapons': string;
+    'database.subtitle.gear': string;
+    'database.subtitle.programs': string;
+    'database.subtitle.loot': string;
+    'database.subtitle.objectives': string;
+    'database.subtitle.actions': string;
+    // ── Database search placeholders ──
+    'database.searchFactions': string;
+    'database.searchModels': string;
+    'database.searchWeapons': string;
+    'database.searchGear': string;
+    'database.searchPrograms': string;
+    'database.searchLoot': string;
+    'database.searchObjectives': string;
+    'database.searchActions': string;
+    // ── Program card reload conditions ──
+    'program.reloadInspire': string;
+    'program.reloadTakenOut': string;
+    'program.reloadWounded': string;
+    'program.reloadDiscard': string;
+    'program.reloadManual': string;
+    // ── Objective card labels ──
+    'objective.condition': string;
+    'objective.reward': string;
+    'objective.badge.ongoing': string;
+    'objective.badge.recycle': string;
+    'objective.badge.cybergear': string;
+    'objective.badge.immediate': string;
+    'objective.badge.tooltip.ongoing': string;
+    'objective.badge.tooltip.recycle': string;
+    'objective.badge.tooltip.cybergear': string;
+    'objective.badge.tooltip.immediate': string;
+    // ── HQ mercs count ──
+    'hq.mercsRecruited': string;
 
     // ── HQ / Campaign ──
     'hq.title': string;

@@ -3,6 +3,7 @@
 import React from 'react';
 import { useStore } from '@/store/useStore';
 import { useCardGrid } from '@/hooks/useCardGrid';
+import { useLocalized, useT } from '@/i18n';
 import type { Objective } from '@/types';
 
 export const FACTION_COLOR_MAP: Record<string, string> = {
@@ -59,11 +60,11 @@ export const FACTION_TEXT_MAP: Record<string, string> = {
     'deck-street-justice': 'text-black',
 };
 
-export const REWARD_BADGE: Record<string, { label: string; cls: string; tooltip: string }> = {
-    ongoing: { label: 'ONGOING', cls: 'bg-emerald-600 text-white', tooltip: 'This reward stays active for the rest of the game once the condition is met.' },
-    recycle: { label: 'RECYCLE', cls: 'bg-amber-600 text-white', tooltip: 'After resolving, shuffle this card back into the deck. It can be drawn again.' },
-    cybergear: { label: 'CYBERGEAR', cls: 'bg-cyan-600 text-white', tooltip: 'Completing this objective grants a permanent Cybergear upgrade to a model.' },
-    immediate: { label: 'IMMEDIATE', cls: 'bg-red-600 text-white', tooltip: 'This reward fires instantly when the objective condition is met during the game.' },
+export const REWARD_BADGE: Record<string, { cls: string }> = {
+    ongoing:   { cls: 'bg-emerald-600 text-white' },
+    recycle:   { cls: 'bg-amber-600 text-white' },
+    cybergear: { cls: 'bg-cyan-600 text-white' },
+    immediate: { cls: 'bg-red-600 text-white' },
 };
 
 const SKILL_ICON: Record<string, string> = {
@@ -117,6 +118,8 @@ interface ObjectiveCardProps {
 export function ObjectiveCard({ objective, isAdmin, onEdit, onDelete, overlay }: ObjectiveCardProps) {
     const { catalog } = useStore();
     const { cardStyle } = useCardGrid();
+    const loc = useLocalized();
+    const t = useT();
 
     const faction = catalog.factions.find(f => f.id === objective.factionId);
     const factionName = faction?.name ?? objective.factionId;
@@ -173,7 +176,7 @@ export function ObjectiveCard({ objective, isAdmin, onEdit, onDelete, overlay }:
                     </span>
                     {objective.factionBanner && (
                         <span className="text-[8px] font-mono-tech italic text-muted-foreground">
-                            {objective.factionBanner}
+                            {loc(objective as unknown as Record<string, unknown>, 'factionBanner')}
                         </span>
                     )}
                     {placeholder && (
@@ -189,10 +192,10 @@ export function ObjectiveCard({ objective, isAdmin, onEdit, onDelete, overlay }:
                 {/* Condition */}
                 <div className="mb-2">
                     <div className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest mb-0.5">
-                        Condition
+                        {t('objective.condition')}
                     </div>
                     <p className={`text-xs leading-relaxed ${placeholder ? 'text-orange-400/60 italic' : 'text-gray-300'}`}>
-                        {placeholder ? 'Awaiting close-up photo...' : colorizeText(objective.description)}
+                        {placeholder ? 'Awaiting close-up photo...' : colorizeText(loc(objective as unknown as Record<string, unknown>, 'description'))}
                     </p>
                 </div>
 
@@ -203,13 +206,13 @@ export function ObjectiveCard({ objective, isAdmin, onEdit, onDelete, overlay }:
                 <div className="mb-2">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                         <span className="text-[9px] font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            Reward
+                            {t('objective.reward')}
                         </span>
                         {!placeholder && (
                             <span className={`relative text-[8px] font-mono-tech font-bold uppercase px-1.5 py-px rounded-sm cursor-help group/tip ${badge.cls}`}>
-                                {badge.label}
+                                {t(`objective.badge.${objective.rewardType}` as Parameters<typeof t>[0])}
                                 <span className="pointer-events-none absolute left-0 top-full mt-1 z-40 w-48 px-2 py-1.5 rounded bg-black/95 border border-border text-[10px] font-mono-tech font-normal normal-case tracking-normal text-gray-200 leading-snug opacity-0 group-hover/tip:opacity-100 transition-opacity">
-                                    {badge.tooltip}
+                                    {t(`objective.badge.tooltip.${objective.rewardType}` as Parameters<typeof t>[0])}
                                 </span>
                             </span>
                         )}
@@ -230,7 +233,7 @@ export function ObjectiveCard({ objective, isAdmin, onEdit, onDelete, overlay }:
                         )}
                     </div>
                     <p className={`text-xs leading-relaxed ${placeholder ? 'text-orange-400/60 italic' : 'text-gray-300'}`}>
-                        {placeholder ? 'Awaiting close-up photo...' : colorizeText(objective.rewardText)}
+                        {placeholder ? 'Awaiting close-up photo...' : colorizeText(loc(objective as unknown as Record<string, unknown>, 'rewardText'))}
                     </p>
                 </div>
 

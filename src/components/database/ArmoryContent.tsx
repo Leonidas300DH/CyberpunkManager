@@ -4,7 +4,7 @@ import { useState, useRef, useLayoutEffect, useEffect, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types';
 import { ProgramCard } from '@/components/programs/ProgramCard';
-import { useT } from '@/i18n';
+import { useT, useLocalized } from '@/i18n';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { WeaponCard, FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
 import { formatCardText } from '@/lib/formatCardText';
@@ -180,6 +180,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     const isAdmin = useIsAdmin();
     const { saveWeapon: saveWeaponDb, deleteWeapon: deleteWeaponDb, saveProgram: saveProgramDb } = useCatalog();
     const t = useT();
+    const loc = useLocalized();
     // Weapon CRUD
     const [weaponDialogOpen, setWeaponDialogOpen] = useState(false);
     const [editingWeapon, setEditingWeapon] = useState<Weapon | null>(null);
@@ -948,7 +949,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                                             {skillEl}
                                                             {armorEl}
                                                         </div>
-                                                        <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                                        <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(loc(weapon as unknown as Record<string, unknown>, 'description'))}</p>
                                                     </div>
                                                 );
                                             }
@@ -976,7 +977,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                                             )}
                                                         </div>
                                                     )}
-                                                    <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                                    <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(loc(weapon as unknown as Record<string, unknown>, 'description'))}</p>
                                                 </>
                                             );
                                         })()}

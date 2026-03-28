@@ -2,6 +2,7 @@
 
 import { HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
+import { useLocalized, useT } from '@/i18n';
 import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@/lib/glossary';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 
@@ -9,12 +10,12 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { CodeRainCanvas } from '@/components/effects/CodeRainCanvas';
 import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
 
-const RELOAD_TEXT: Record<string, string> = {
-    Inspire: 'Reload when you Inspire Your Team.',
-    TakenOut: 'Reload when a rival is Taken Out.',
-    Wounded: 'Reload when this model is Wounded.',
-    Discard: 'Single use — Discard after Running.',
-    Manual: 'Use an Action Token to Reload.',
+const RELOAD_KEY: Record<string, string> = {
+    Inspire:  'program.reloadInspire',
+    TakenOut: 'program.reloadTakenOut',
+    Wounded:  'program.reloadWounded',
+    Discard:  'program.reloadDiscard',
+    Manual:   'program.reloadManual',
 };
 
 const COLOR_WORDS: Record<string, string> = {
@@ -213,13 +214,17 @@ function useAutoFontSize(deps: unknown[]) {
 
 export function ProgramCard({ program, side, enableCodeRain, isFlipped }: ProgramCardProps) {
     const { catalog } = useStore();
+    const loc = useLocalized();
+    const t = useT();
     const { nameRef, nameSize } = useAutoNameSize(program.name);
 
     const factionName = program.factionId === 'all'
         ? 'Universal'
         : catalog.factions.find(f => f.id === program.factionId)?.name ?? 'Unknown';
 
-    const reloadText = RELOAD_TEXT[program.reloadCondition] ?? '';
+    const reloadKey = RELOAD_KEY[program.reloadCondition];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const reloadText = reloadKey ? t(reloadKey as any) : '';
 
     const { cardRef, textRef, fontSize } = useAutoFontSize([program.id, side]);
 
@@ -234,9 +239,10 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
     const cyanGradient = `linear-gradient(to bottom, #22d3ee 40%, #ffffff)`;
 
     // Compose back effect text
+    const runningEffect = loc(program as unknown as Record<string, unknown>, 'runningEffect');
     const backParts: string[] = [];
     if (program.vulnerable) backParts.push('Vulnerable.');
-    if (program.runningEffect) backParts.push(program.runningEffect);
+    if (runningEffect) backParts.push(runningEffect);
     if (reloadText) backParts.push(reloadText);
 
     // === FRONT CARD ===
@@ -362,11 +368,19 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                             className="font-mono-tech leading-snug whitespace-pre-wrap text-white/90 text-justify text-left pr-3 pb-2"
                             style={{ fontSize: `${fontSize}px` }}
                         >
-                            {program.flavorText && (
-                                <span className="italic text-white/70">&ldquo;{program.flavorText}&rdquo;</span>
-                            )}
-                            {program.flavorText && program.loadedText && <br />}
-                            {formatCardText(program.loadedText)}
+                            {(() => {
+                                const flavorText = loc(program as unknown as Record<string, unknown>, 'flavorText');
+                                const loadedText = loc(program as unknown as Record<string, unknown>, 'loadedText');
+                                return (
+                                    <>
+                                        {flavorText && (
+                                            <span className="italic text-white/70">&ldquo;{flavorText}&rdquo;</span>
+                                        )}
+                                        {flavorText && loadedText && <br />}
+                                        {formatCardText(loadedText)}
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>

@@ -2,6 +2,7 @@
 
 import { Loot } from '@/types';
 import { Shield } from 'lucide-react';
+import { useLocalized } from '@/i18n';
 
 const OFF = 'rgba(100,100,100,0.35)';
 const OFF_STROKE = 'rgba(255,255,255,0.3)';
@@ -30,6 +31,7 @@ interface LootTileProps {
 }
 
 export function LootTile({ loot, overlay }: LootTileProps) {
+    const loc = useLocalized();
     const hasSkill = !!(loot.skillReq && SKILL_ICON[loot.skillReq]);
     const hasRange = loot.rangeRed || loot.rangeYellow || loot.rangeGreen || loot.rangeLong;
     const hasArmor = loot.armorBonus != null && loot.armorBonus > 0;
@@ -66,7 +68,7 @@ export function LootTile({ loot, overlay }: LootTileProps) {
                         </div>
                     );
 
-                    const descText = loot.effectText || loot.flavorText;
+                    const descText = loc(loot as unknown as Record<string, unknown>, 'effectText') || loc(loot as unknown as Record<string, unknown>, 'flavorText');
 
                     if (lettrine) {
                         return (

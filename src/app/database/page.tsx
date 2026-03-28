@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
+import { useT } from '@/i18n';
 import { FACTION_COLOR_MAP } from '@/components/shared/ObjectiveCard';
 import { FactionsTab } from "@/components/database/FactionsTab";
 import { ModelsTab } from "@/components/database/ModelsTab";
@@ -16,43 +17,21 @@ import type { ProgramQuality } from '@/types';
 type TabId = 'factions' | 'models' | 'weapons' | 'gear' | 'programs' | 'loot' | 'objectives' | 'actions';
 type ViewMode = 'list' | 'card' | 'double';
 
-const TABS: { id: TabId; label: string; activeClass: string }[] = [
-    { id: 'factions', label: 'Factions', activeClass: 'bg-accent text-white' },
-    { id: 'models', label: 'Characters', activeClass: 'bg-secondary text-black' },
-    { id: 'weapons', label: 'Weapons', activeClass: 'bg-accent text-white' },
-    { id: 'gear', label: 'Gears', activeClass: 'bg-secondary text-black' },
-    { id: 'programs', label: 'Programs', activeClass: 'bg-cyber-purple text-white' },
-    { id: 'loot', label: 'Loot', activeClass: 'bg-purple-500 text-white' },
-    { id: 'objectives', label: 'Objectives', activeClass: 'bg-cyber-green text-black' },
-    { id: 'actions', label: 'Actions', activeClass: 'bg-emerald-500 text-black' },
+const TABS: { id: TabId; activeClass: string }[] = [
+    { id: 'factions', activeClass: 'bg-accent text-white' },
+    { id: 'models', activeClass: 'bg-secondary text-black' },
+    { id: 'weapons', activeClass: 'bg-accent text-white' },
+    { id: 'gear', activeClass: 'bg-secondary text-black' },
+    { id: 'programs', activeClass: 'bg-cyber-purple text-white' },
+    { id: 'loot', activeClass: 'bg-purple-500 text-white' },
+    { id: 'objectives', activeClass: 'bg-cyber-green text-black' },
+    { id: 'actions', activeClass: 'bg-emerald-500 text-black' },
 ];
-
-const PAGE_TITLE: Record<TabId, { title: string; accent: string; subtitle: string }> = {
-    factions: { title: 'Faction', accent: 'Registry', subtitle: 'Accessing Night City PD Database... Encrypted files decrypted.' },
-    models: { title: 'Character', accent: 'Database', subtitle: 'Known operatives // Profiles & lineages' },
-    weapons: { title: 'Weapon', accent: 'Arsenal', subtitle: 'Firearms & blades // Night City armory clearance' },
-    gear: { title: 'Gear', accent: 'Locker', subtitle: 'Equipment catalog // Armor & cyberware' },
-    programs: { title: 'Netrunner', accent: 'Programs', subtitle: 'ICE breakers & daemons // Handle with care' },
-    loot: { title: 'Street', accent: 'Loot', subtitle: 'Salvage & contraband // Night City black market' },
-    objectives: { title: 'Mission', accent: 'Objectives', subtitle: 'Contract targets // Complete for street cred' },
-    actions: { title: 'Action', accent: 'Library', subtitle: 'Innate abilities & passive rules // Character actions catalog' },
-};
 
 const ARMORY_MAP: Record<string, 'Weapon' | 'Gear' | 'Program' | 'Loot'> = {
     weapons: 'Weapon',
     gear: 'Gear',
     programs: 'Program',
-};
-
-const SEARCH_PLACEHOLDER: Record<TabId, string> = {
-    factions: 'Search factions...',
-    models: 'Search characters...',
-    weapons: 'Search weapons...',
-    gear: 'Search gear...',
-    programs: 'Search programs...',
-    loot: 'Search loot...',
-    objectives: 'Search objectives...',
-    actions: 'Search actions...',
 };
 
 // Tabs that support +New
@@ -65,6 +44,7 @@ const TABS_WITH_VIEWS: TabId[] = ['programs', 'weapons', 'gear'];
 const TABS_WITH_FILTERS: TabId[] = ['models', 'weapons', 'gear', 'programs', 'objectives'];
 
 export default function DatabasePage() {
+    const t = useT();
     const [activeTab, setActiveTab] = useState<TabId>('factions');
     const [highlightTarget, setHighlightTarget] = useState<{ tab: string; itemId: string; factionId?: string; ts: number } | null>(null);
     const [factionFilter, setFactionFilter] = useState<string>('all');
@@ -143,7 +123,13 @@ export default function DatabasePage() {
         return () => document.removeEventListener('mousedown', handleClick);
     }, [viewsOpen, filtersOpen]);
 
-    const page = PAGE_TITLE[activeTab];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tt = t as (key: string) => string;
+    const pageTitle = tt(`database.title.${activeTab}`);
+    const pageAccent = tt(`database.accent.${activeTab}`);
+    const pageSubtitle = tt(`database.subtitle.${activeTab}`);
+    const cap = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const searchPlaceholder = tt(`database.search${cap}`);
 
     const showCreate = isAdmin && TABS_WITH_CREATE.includes(activeTab);
     const showViews = TABS_WITH_VIEWS.includes(activeTab);
@@ -159,12 +145,12 @@ export default function DatabasePage() {
                 <div className="border-l-4 border-primary pl-6 py-2">
                     <h1
                         className="text-5xl md:text-6xl font-display font-bold text-white uppercase tracking-tighter mb-2 glitch-text"
-                        data-text={`${page.title} ${page.accent}`}
+                        data-text={`${pageTitle} ${pageAccent}`}
                     >
-                        {page.title} <span className="text-primary">{page.accent}</span>
+                        {pageTitle} <span className="text-primary">{pageAccent}</span>
                     </h1>
                     <p className="font-mono-tech text-secondary text-sm uppercase tracking-widest">
-                        {page.subtitle}
+                        {pageSubtitle}
                     </p>
                 </div>
 
@@ -179,7 +165,7 @@ export default function DatabasePage() {
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                placeholder={SEARCH_PLACEHOLDER[activeTab]}
+                                placeholder={searchPlaceholder}
                                 className="bg-black border border-border pl-8 pr-3 py-1.5 font-mono-tech text-xs text-white placeholder:text-muted-foreground focus:border-secondary focus:outline-none w-44 md:w-56"
                             />
                         </div>
@@ -445,7 +431,7 @@ export default function DatabasePage() {
                                         : 'bg-black text-muted-foreground border border-border border-b-0 hover:text-secondary hover:border-secondary hover:bg-surface-dark'
                                 }`}
                             >
-                                {tab.label}
+                                {tt(`database.${tab.id}`)}
                             </button>
                         );
                     })}

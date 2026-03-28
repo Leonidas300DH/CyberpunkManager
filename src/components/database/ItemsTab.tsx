@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { ItemCard, ItemCategory } from '@/types';
 import { resolveVariant } from '@/lib/variants';
-import { useT } from '@/i18n';
+import { useT, useLocalized } from '@/i18n';
 
 const CATEGORY_STYLES: Record<ItemCategory, { border: string; text: string; bg: string; glow: string }> = {
     Gear: { border: 'border-secondary', text: 'text-secondary', bg: 'bg-secondary', glow: 'group-hover:shadow-[0_0_10px_rgba(0,240,255,0.3)]' },
@@ -16,6 +16,7 @@ const CATEGORY_STYLES: Record<ItemCategory, { border: string; text: string; bg: 
 export function ItemsTab() {
     const { catalog } = useStore();
     const t = useT();
+    const loc = useLocalized();
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<ItemCategory | 'all'>('all');
 
@@ -111,7 +112,7 @@ export function ItemsTab() {
                                         <div className="p-3 flex-1">
                                             {item.passiveRules && (
                                                 <div className={`bg-black/50 border-l-2 ${style.border} pl-2 py-1 mb-2`}>
-                                                    <p className="text-xs font-mono-tech text-muted-foreground leading-tight">{item.passiveRules}</p>
+                                                    <p className="text-xs font-mono-tech text-muted-foreground leading-tight">{loc(item as unknown as Record<string, unknown>, 'passiveRules')}</p>
                                                 </div>
                                             )}
 

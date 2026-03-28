@@ -5,6 +5,7 @@ import { ModelLineage, ModelProfile, SkillType, RangeType, Weapon } from '@/type
 import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@/lib/glossary';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
+import { useLocalized } from '@/i18n';
 import { Edit, Trash2 } from 'lucide-react';
 
 // ── Faction colors for the Identity Rail ──
@@ -336,6 +337,7 @@ interface CharacterCardProps {
 }
 
 export function CharacterCard({ lineage, profile, hideTokens = false, enableGlitch = false, glitchDamage = 0, isKIA = false, triggerGlitch = 0, isAdmin = false, onEdit, onDelete, catalogWeapons, activeFactionId }: CharacterCardProps) {
+    const loc = useLocalized();
 
     // Weapon lookup for weapon-linked actions
     const resolveWeapon = (weaponId?: string): Weapon | undefined =>
@@ -540,7 +542,7 @@ export function CharacterCard({ lineage, profile, hideTokens = false, enableGlit
                             range2Green: weapon.range2Green,
                             range2Long: weapon.range2Long,
                             keywords: weapon.keywords,
-                            description: weapon.description,
+                            description: loc(weapon as unknown as Record<string, unknown>, 'description'),
                         } : null;
 
                         if (src) {

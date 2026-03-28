@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { useT } from '@/i18n';
+import { useT, useLocalized } from '@/i18n';
 import { Weapon, HackingProgram, Loot, TokenState, ProgramQuality } from '@/types';
 import { parseEquipmentId, resolveVariant } from '@/lib/variants';
 import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal, Gift } from 'lucide-react';
@@ -253,6 +253,7 @@ function parseDragId(id: string): { itemId: string; sourceRecruitId: string } {
 export function ActiveMatchView() {
     const router = useRouter();
     const t = useT();
+    const loc = useLocalized();
     const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam, updateCampaign, displaySettings, playViewSettings, setPlayViewSettings } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const cardColumns = displaySettings?.cardColumns ?? 4;
@@ -1248,11 +1249,11 @@ export function ActiveMatchView() {
                 {drawnLoot && (
                     <div className="space-y-4 mt-2">
                         <LootTile loot={drawnLoot} />
-                        {drawnLoot.flavorText && (
-                            <p className="font-mono-tech text-xs text-white/50 italic">&ldquo;{drawnLoot.flavorText}&rdquo;</p>
+                        {loc(drawnLoot as unknown as Record<string, unknown>, 'flavorText') && (
+                            <p className="font-mono-tech text-xs text-white/50 italic">&ldquo;{loc(drawnLoot as unknown as Record<string, unknown>, 'flavorText')}&rdquo;</p>
                         )}
-                        {drawnLoot.effectText && (
-                            <p className="font-mono-tech text-xs text-white/70">{drawnLoot.effectText}</p>
+                        {loc(drawnLoot as unknown as Record<string, unknown>, 'effectText') && (
+                            <p className="font-mono-tech text-xs text-white/70">{loc(drawnLoot as unknown as Record<string, unknown>, 'effectText')}</p>
                         )}
                         <div className="space-y-2">
                             <label className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{t('play.assignTo')}</label>

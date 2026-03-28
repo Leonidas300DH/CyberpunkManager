@@ -176,7 +176,7 @@ export function RosterList({ campaign }: RosterListProps) {
                     <div className="border-l-2 border-primary pl-3">
                         <h3 className="font-display text-xl font-bold uppercase tracking-wider text-white group-hover/collapse:text-primary transition-colors">{t('hq.yourRoster')}</h3>
                         <span className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">
-                            {campaign.hqRoster.length} merc{campaign.hqRoster.length !== 1 ? 's' : ''} recruited
+                            {t('hq.mercsRecruited', { count: campaign.hqRoster.length })}
                         </span>
                     </div>
                 </button>
