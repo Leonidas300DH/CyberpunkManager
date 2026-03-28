@@ -1135,7 +1135,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                             <div className="p-3 flex-1">
                                 {item.passiveRules && (
                                     <div className={`bg-black/50 border-l-2 ${tab.border} pl-2 py-1 mb-2`}>
-                                        <p className="text-xs font-mono-tech text-muted-foreground leading-tight">{item.passiveRules}</p>
+                                        <p className="text-xs font-mono-tech text-muted-foreground leading-tight">{loc(item as unknown as Record<string, unknown>, 'passiveRules')}</p>
                                     </div>
                                 )}
                                 {item.grantedActions.length > 0 && (

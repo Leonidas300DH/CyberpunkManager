@@ -47,6 +47,7 @@ export type Translations = {
     'database.programs': string;
     'database.objectives': string;
     'database.loots': string;
+    'database.loot': string;
     'database.items': string;
     'database.gangMembers': string;
     'database.noFactions': string;
@@ -81,6 +82,8 @@ export type Translations = {
     'database.createObjective': string;
     'database.createAndLink': string;
     'database.updateAction': string;
+    // ── Loot card labels ──
+    'loot.armor': string;
     // ── Database empty states ──
     'database.noUnitsFound': string;
     'database.noResultsFound': string;

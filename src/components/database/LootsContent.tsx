@@ -5,7 +5,7 @@ import { useStore } from '@/store/useStore';
 import { Loot } from '@/types';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
-import { useT } from '@/i18n';
+import { useT, useLocalized } from '@/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -85,6 +85,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
     const isAdmin = useIsAdmin();
     const { saveLoot, deleteLoot: deleteLootDb } = useCatalog();
     const t = useT();
+    const loc = useLocalized();
 
     const [editingLoot, setEditingLoot] = useState<Loot | null>(null);
     const [lootForm, setLootForm] = useState(EMPTY_LOOT_FORM);
@@ -216,7 +217,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
                                 {/* Header: name + admin buttons */}
                                 <div className="flex items-start justify-between gap-2 mb-2">
                                     <h3 className="font-display font-black text-base text-purple-400 uppercase tracking-wide leading-tight">
-                                        {loot.name}
+                                        {loc(loot as unknown as Record<string, unknown>, 'name')}
                                     </h3>
                                     {isAdmin && (
                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -239,7 +240,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
                                 {/* Flavor text */}
                                 {loot.flavorText && (
                                     <p className="font-mono-tech text-xs text-white/50 italic leading-relaxed mb-3">
-                                        &ldquo;{loot.flavorText}&rdquo;
+                                        &ldquo;{loc(loot as unknown as Record<string, unknown>, 'flavorText')}&rdquo;
                                     </p>
                                 )}
 
@@ -279,7 +280,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
                                         {/* Effect text */}
                                         {loot.effectText && (
                                             <p className="font-mono-tech text-xs text-muted-foreground leading-relaxed">
-                                                {loot.effectText}
+                                                {loc(loot as unknown as Record<string, unknown>, 'effectText')}
                                             </p>
                                         )}
 
@@ -288,7 +289,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
                                             <div className="flex items-center gap-1 mt-2">
                                                 <Shield className="w-3.5 h-3.5 text-cyan-400" />
                                                 <span className="font-display font-black text-xs text-cyan-400">
-                                                    +{loot.armorBonus} Armor
+                                                    +{loot.armorBonus} {t('loot.armor')}
                                                 </span>
                                             </div>
                                         )}

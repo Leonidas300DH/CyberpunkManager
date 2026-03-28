@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Weapon, FactionVariant } from '@/types';
 import { useStore } from '@/store/useStore';
 import { formatCardText } from '@/lib/formatCardText';
+import { useLocalized } from '@/i18n';
 import { Edit, Trash2 } from 'lucide-react';
 import { getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 
@@ -147,6 +148,7 @@ interface WeaponCardProps {
 
 export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: WeaponCardProps) {
     const { catalog } = useStore();
+    const loc = useLocalized();
     const { cardRef, textRef, fontSize } = useAutoFontSize([weapon.id, variant.factionId]);
     const { nameRef, nameSize } = useAutoNameSize(weapon.name);
 
@@ -273,7 +275,7 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                                         {skillEl}
                                         {armorEl}
                                     </div>
-                                    <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                    <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(loc(weapon as unknown as Record<string, unknown>, 'description'))}</p>
                                 </div>
                             );
                         }
@@ -301,7 +303,7 @@ export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: Weapo
                                         )}
                                     </div>
                                 )}
-                                <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(weapon.description)}</p>
+                                <p className="text-[11px] font-mono-tech text-white/70 leading-snug">{formatCardText(loc(weapon as unknown as Record<string, unknown>, 'description'))}</p>
                             </>
                         );
                     })()}

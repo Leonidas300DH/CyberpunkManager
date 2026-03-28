@@ -1,6 +1,7 @@
 'use client';
 
 import { HackingProgram } from '@/types';
+import { useLocalized } from '@/i18n';
 
 export const QUALITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
     Green: { bg: 'bg-cyber-green', text: 'text-black', border: 'border-cyber-green' },
@@ -9,6 +10,7 @@ export const QUALITY_COLORS: Record<string, { bg: string; text: string; border: 
 };
 
 export function ProgramTile({ program, factionName, overlay }: { program: HackingProgram; factionName: string; overlay?: React.ReactNode }) {
+    const loc = useLocalized();
     const qColor = QUALITY_COLORS[program.quality];
     return (
         <div className="relative group/tile bg-surface-dark border border-border hover:border-purple-400 transition-all overflow-hidden flex">
@@ -41,7 +43,7 @@ export function ProgramTile({ program, factionName, overlay }: { program: Hackin
                         <span className="text-[9px] font-mono-tech text-yellow-500 uppercase">SC {program.reqStreetCred}</span>
                     )}
                 </div>
-                <p className="font-body text-[11px] text-white/70 leading-snug line-clamp-2">{program.loadedText}</p>
+                <p className="font-body text-[11px] text-white/70 leading-snug line-clamp-2">{loc(program as unknown as Record<string, unknown>, 'loadedText')}</p>
             </div>
             {overlay}
         </div>

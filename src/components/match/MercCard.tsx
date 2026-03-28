@@ -1,6 +1,7 @@
 'use client';
 
 import { ModelLineage, ModelProfile, Weapon } from '@/types';
+import { useLocalized } from '@/i18n';
 import { Check } from 'lucide-react';
 
 interface MercCardProps {
@@ -21,6 +22,7 @@ const TYPE_STYLES: Record<string, { text: string; border: string; glow: string }
 
 export function MercCard({ lineage, profile, isSelected, onClick, catalogWeapons }: MercCardProps) {
     const style = TYPE_STYLES[lineage.type] ?? TYPE_STYLES.Character;
+    const loc = useLocalized();
 
     // Find first passive action (action referencing a weapon with no skill/range) for description
     const passiveDesc = (() => {
@@ -28,7 +30,8 @@ export function MercCard({ lineage, profile, isSelected, onClick, catalogWeapons
             if (!action.weaponId) continue;
             const w = (catalogWeapons ?? []).find(wp => wp.id === action.weaponId);
             if (w && !w.skillReq && !w.rangeRed && !w.rangeYellow && !w.rangeGreen && !w.rangeLong) {
-                return w.description ? `${w.name}: ${w.description}` : w.name;
+                const desc = loc(w as unknown as Record<string, unknown>, 'description');
+                return desc ? `${w.name}: ${desc}` : w.name;
             }
         }
         return '';
