@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-const supabase = createClient('https://nknlxlmmliccsfsndnba.supabase.co', 'sb_secret_qyooV5ULfdIzK4Uahd496w_eVqQenE3');
+const supabase = createClient('https://nknlxlmmliccsfsndnba.supabase.co', process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
 async function main() {
   const { data } = await supabase.from('objectives').select('id, name, faction_id, reward_type, grants_street_cred');

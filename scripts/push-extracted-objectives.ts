@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { EXTRACTED_DATA } from './extracted_data';
 
-const SERVICE_ROLE_KEY = 'sb_secret_qyooV5ULfdIzK4Uahd496w_eVqQenE3';
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(
   'https://nknlxlmmliccsfsndnba.supabase.co',
   SERVICE_ROLE_KEY
