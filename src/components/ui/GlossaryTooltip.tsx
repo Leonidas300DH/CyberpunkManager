@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { type GlossaryEntry, RULEBOOK_SOURCE } from '@/lib/glossary';
+import { useLocalized } from '@/i18n';
 
 interface Props {
     entry: GlossaryEntry;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function GlossaryTooltip({ entry, children, className = '' }: Props) {
+    const loc = useLocalized();
     const [show, setShow] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0, showBelow: false });
     const spanRef = useRef<HTMLSpanElement>(null);
@@ -80,7 +82,7 @@ export function GlossaryTooltip({ entry, children, className = '' }: Props) {
                             {entry.term}
                         </div>
                         <div className="font-body text-white/85 text-xs leading-relaxed">
-                            {entry.definition}
+                            {loc(entry as unknown as Record<string, unknown>, 'definition')}
                         </div>
                         {entry.page && (
                             <div className="font-mono text-white/35 mt-2 text-[10px]">
