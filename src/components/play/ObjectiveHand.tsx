@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { Objective } from '@/types';
 import { useCardGrid } from '@/hooks/useCardGrid';
-import { ObjectiveCard, FACTION_COLOR_MAP as OBJ_FACTION_COLOR } from '@/components/shared/ObjectiveCard';
+import { ObjectiveCard } from '@/components/shared/ObjectiveCard';
+import { FACTION_BORDER_CLASS as OBJ_FACTION_COLOR } from '@/lib/constants/factionColors';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { Target, ChevronDown, ChevronUp, Check, AlertTriangle, Undo2 } from 'lucide-react';
 import { useT } from '@/i18n';

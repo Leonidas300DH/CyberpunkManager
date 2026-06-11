@@ -5,24 +5,7 @@ import { Weapon, Faction } from '@/types';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Search } from 'lucide-react';
-
-const FACTION_COLOR_MAP: Record<string, string> = {
-    'faction-arasaka':     'border-red-600',
-    'faction-bozos':       'border-purple-500',
-    'faction-danger-gals': 'border-pink-400',
-    'faction-edgerunners': 'border-emerald-500',
-    'faction-gen-red':     'border-white',
-    'faction-lawmen':      'border-blue-500',
-    'faction-maelstrom':   'border-red-700',
-    'faction-trauma-team': 'border-white',
-    'faction-tyger-claws': 'border-cyan-400',
-    'faction-zoners':      'border-orange-500',
-    'faction-6th-street':  'border-amber-500',
-    'faction-max-tac':     'border-indigo-400',
-    'faction-militech':    'border-lime-500',
-    'faction-piranhas':    'border-teal-400',
-    'faction-wild-things': 'border-rose-500',
-};
+import { FACTION_BORDER_CLASS as FACTION_COLOR_MAP } from '@/lib/constants/factionColors';
 
 interface WeaponPickerModalProps {
     open: boolean;

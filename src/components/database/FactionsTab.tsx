@@ -18,26 +18,7 @@ import { Trash2, Edit, ChevronRight } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
 import { useT, useLocalized } from '@/i18n';
-
-// Per-faction signature colors (border + bg + text variants)
-const FACTION_COLOR_MAP: Record<string, { border: string; bg: string; text: string }> = {
-    'faction-arasaka':    { border: 'border-red-600',    bg: 'bg-red-600',    text: 'text-red-600' },
-    'faction-bozos':      { border: 'border-purple-500', bg: 'bg-purple-500', text: 'text-purple-500' },
-    'faction-danger-gals':{ border: 'border-pink-400',   bg: 'bg-pink-400',   text: 'text-pink-400' },
-    'faction-edgerunners':{ border: 'border-emerald-500',bg: 'bg-emerald-500',text: 'text-emerald-500' },
-    'faction-gen-red':    { border: 'border-white',      bg: 'bg-white',      text: 'text-white' },
-    'faction-lawmen':     { border: 'border-blue-500',   bg: 'bg-blue-500',   text: 'text-blue-500' },
-    'faction-maelstrom':  { border: 'border-red-700',    bg: 'bg-red-700',    text: 'text-red-700' },
-    'faction-trauma-team':{ border: 'border-white',      bg: 'bg-white',      text: 'text-white' },
-    'faction-tyger-claws':{ border: 'border-cyan-400',   bg: 'bg-cyan-400',   text: 'text-cyan-400' },
-    'faction-zoners':     { border: 'border-orange-500', bg: 'bg-orange-500', text: 'text-orange-500' },
-    'faction-6th-street': { border: 'border-amber-500',  bg: 'bg-amber-500',  text: 'text-amber-500' },
-    'faction-max-tac':    { border: 'border-indigo-400', bg: 'bg-indigo-400', text: 'text-indigo-400' },
-    'faction-militech':   { border: 'border-lime-500',   bg: 'bg-lime-500',   text: 'text-lime-500' },
-    'faction-piranhas':   { border: 'border-teal-400',   bg: 'bg-teal-400',   text: 'text-teal-400' },
-    'faction-wild-things':{ border: 'border-rose-500',   bg: 'bg-rose-500',   text: 'text-rose-500' },
-};
-const DEFAULT_FACTION_COLOR = { border: 'border-gray-500', bg: 'bg-gray-500', text: 'text-gray-500' };
+import { FACTION_COLOR_TRIO as FACTION_COLOR_MAP, DEFAULT_FACTION_COLOR } from '@/lib/constants/factionColors';
 
 const TYPE_COLORS: Record<ModelLineage['type'], string> = {
     Leader: 'text-accent',

@@ -3,7 +3,7 @@
 import { Weapon } from '@/types';
 import { resolveVariant, getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 import { formatCardText } from '@/lib/formatCardText';
-import { FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
+import { FACTION_SIDEBAR_COLOR } from '@/lib/constants/factionColors';
 import { SKILL_ICON } from '@/lib/constants/skills';
 import { useLocalized } from '@/i18n';
 import { RangeArrows } from '@/components/shared/RangeArrows';

@@ -9,6 +9,7 @@ import { Edit, Trash2 } from 'lucide-react';
 import { getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 import { SKILL_ICON as SKILL_ICONS } from '@/lib/constants/skills';
 import { RangeArrows } from '@/components/shared/RangeArrows';
+import { FACTION_TEXT_CLASS as FACTION_TEXT_COLOR_MAP, getSidebarGradient } from '@/lib/constants/factionColors';
 
 const DEFAULT_WEAPON_IMAGE = WEAPON_IMG_DEFAULT;
 
@@ -37,22 +38,6 @@ function useAutoNameSize(name: string) {
 
     return { nameRef: ref, nameSize: size };
 }
-
-const FACTION_TEXT_COLOR_MAP: Record<string, string> = {
-    'faction-arasaka': 'text-red-600',
-    'faction-bozos': 'text-purple-500',
-    'faction-danger-gals': 'text-pink-400',
-    'faction-edgerunners': 'text-emerald-500',
-    'faction-gen-red': 'text-white',
-    'faction-lawmen': 'text-blue-500',
-    'faction-maelstrom': 'text-red-700',
-    'faction-trauma-team': 'text-white',
-    'faction-tyger-claws': 'text-cyan-400',
-    'faction-zoners': 'text-orange-500',
-    'faction-6th-street': 'text-amber-500',
-    'all': 'text-gray-500',
-    'universal': 'text-gray-500',
-};
 
 // --- Auto font size (same logic as ProgramCard) ---
 const BASE_FONT = 14;
@@ -95,27 +80,6 @@ function useAutoFontSize(deps: unknown[]) {
     }, [recalc]);
 
     return { cardRef, textRef, fontSize };
-}
-
-// --- Faction → sidebar hex color ---
-export const FACTION_SIDEBAR_COLOR: Record<string, string> = {
-    'universal': '#666666',
-    'faction-arasaka': '#dc2626',
-    'faction-bozos': '#a855f7',
-    'faction-danger-gals': '#f472b6',
-    'faction-edgerunners': '#10b981',
-    'faction-gen-red': '#ffffff',
-    'faction-lawmen': '#3b82f6',
-    'faction-maelstrom': '#b91c1c',
-    'faction-trauma-team': '#ffffff',
-    'faction-tyger-claws': '#22d3ee',
-    'faction-zoners': '#f97316',
-    'faction-6th-street': '#f59e0b',
-};
-
-export function getSidebarGradient(factionId: string): string {
-    const color = FACTION_SIDEBAR_COLOR[factionId] ?? '#666666';
-    return `linear-gradient(to bottom, ${color} 40%, #ffffff)`;
 }
 
 interface WeaponCardProps {

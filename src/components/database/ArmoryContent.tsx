@@ -6,8 +6,9 @@ import { HackingProgram, ProgramQuality, Weapon, FactionVariant } from '@/types'
 import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useT, useLocalized } from '@/i18n';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
-import { WeaponCard, FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
+import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { SKILL_ICON } from '@/lib/constants/skills';
+import { FACTION_SIDEBAR_COLOR, FACTION_BORDER_CLASS as FACTION_COLOR_MAP, FACTION_TEXT_CLASS as FACTION_TEXT_COLOR_MAP } from '@/lib/constants/factionColors';
 import { RangeArrows } from '@/components/shared/RangeArrows';
 import { formatCardText } from '@/lib/formatCardText';
 import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
@@ -26,46 +27,6 @@ const QUALITY_STYLES: Record<ProgramQuality, { bg: string; text: string; border:
     Green: { bg: 'bg-emerald-500', text: 'text-emerald-400', border: 'border-emerald-500', glow: 'shadow-[0_0_10px_rgba(16,185,129,0.4)]' },
     Yellow: { bg: 'bg-yellow-500', text: 'text-yellow-400', border: 'border-yellow-500', glow: 'shadow-[0_0_10px_rgba(234,179,8,0.4)]' },
     Red: { bg: 'bg-red-600', text: 'text-red-400', border: 'border-red-600', glow: 'shadow-[0_0_10px_rgba(220,38,38,0.4)]' },
-};
-
-const FACTION_COLOR_MAP: Record<string, string> = {
-    'faction-arasaka': 'border-red-600',
-    'faction-bozos': 'border-purple-500',
-    'faction-danger-gals': 'border-pink-400',
-    'faction-edgerunners': 'border-emerald-500',
-    'faction-gen-red': 'border-white',
-    'faction-lawmen': 'border-blue-500',
-    'faction-maelstrom': 'border-red-700',
-    'faction-trauma-team': 'border-white',
-    'faction-tyger-claws': 'border-cyan-400',
-    'faction-zoners': 'border-orange-500',
-    'faction-6th-street': 'border-amber-500',
-    'faction-max-tac':    'border-indigo-400',
-    'faction-militech':   'border-lime-500',
-    'faction-piranhas':   'border-teal-400',
-    'faction-wild-things':'border-rose-500',
-    'all': 'border-gray-500',
-    'universal': 'border-gray-500',
-};
-
-const FACTION_TEXT_COLOR_MAP: Record<string, string> = {
-    'faction-arasaka': 'text-red-600',
-    'faction-bozos': 'text-purple-500',
-    'faction-danger-gals': 'text-pink-400',
-    'faction-edgerunners': 'text-emerald-500',
-    'faction-gen-red': 'text-white',
-    'faction-lawmen': 'text-blue-500',
-    'faction-maelstrom': 'text-red-700',
-    'faction-trauma-team': 'text-white',
-    'faction-tyger-claws': 'text-cyan-400',
-    'faction-zoners': 'text-orange-500',
-    'faction-6th-street': 'text-amber-500',
-    'faction-max-tac':    'text-indigo-400',
-    'faction-militech':   'text-lime-500',
-    'faction-piranhas':   'text-teal-400',
-    'faction-wild-things':'text-rose-500',
-    'all': 'text-gray-500',
-    'universal': 'text-gray-500',
 };
 
 const TAB_STYLES: Record<string, { border: string; text: string; gradient: string; glow: string }> = {

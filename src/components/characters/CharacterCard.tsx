@@ -7,37 +7,9 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
 import { SKILL_ICONS, SKILL_ORDER } from '@/lib/constants/skills';
 import { RangeArrows, rangeTypeToFlags } from '@/components/shared/RangeArrows';
+import { FACTION_RAIL_COLORS, DEFAULT_RAIL, FACTION_DISPLAY_NAMES } from '@/lib/constants/factionColors';
 import { useLocalized } from '@/i18n';
 import { Edit, Trash2 } from 'lucide-react';
-
-// ── Faction colors for the Identity Rail ──
-const FACTION_RAIL_COLORS: Record<string, { dark: string; mid: string; light: string }> = {
-    'faction-arasaka':     { dark: '#4a0000', mid: '#b91c1c', light: '#f87171' },
-    'faction-bozos':       { dark: '#3b0764', mid: '#a855f7', light: '#d8b4fe' },
-    'faction-danger-gals': { dark: '#4a0028', mid: '#f472b6', light: '#fbcfe8' },
-    'faction-edgerunners': { dark: '#003322', mid: '#10b981', light: '#6ee7b7' },
-    'faction-gen-red':     { dark: '#1a1a1a', mid: '#a0a0a0', light: '#e0e0e0' },
-    'faction-lawmen':      { dark: '#001a4a', mid: '#3b82f6', light: '#93c5fd' },
-    'faction-maelstrom':   { dark: '#3a0000', mid: '#b91c1c', light: '#dc2626' },
-    'faction-trauma-team': { dark: '#1a1a1a', mid: '#a0a0a0', light: '#e0e0e0' },
-    'faction-tyger-claws': { dark: '#003a3a', mid: '#22d3ee', light: '#a5f3fc' },
-    'faction-zoners':      { dark: '#3a1a00', mid: '#f97316', light: '#fdba74' },
-    'faction-6th-street':  { dark: '#3a2a00', mid: '#f59e0b', light: '#fcd34d' },
-    'faction-max-tac':     { dark: '#000d1a', mid: '#1d4ed8', light: '#3b82f6' },
-    'faction-piranhas':    { dark: '#3a1a00', mid: '#f97316', light: '#fdba74' },
-    'faction-militech':    { dark: '#1a2a1a', mid: '#4ade80', light: '#86efac' },
-    'faction-wild-things': { dark: '#2a1a00', mid: '#d97706', light: '#fbbf24' },
-};
-const DEFAULT_RAIL = { dark: '#1a1a1a', mid: '#8a8a8a', light: '#e0e0e0' };
-
-// ── Faction keyword names (must match actual profile keywords for reordering) ──
-const FACTION_DISPLAY_NAMES: Record<string, string> = {
-    'faction-arasaka': 'Arasaka', 'faction-bozos': 'Bozo', 'faction-danger-gals': 'Danger Gal',
-    'faction-edgerunners': 'Edgerunner', 'faction-gen-red': 'Gen Red', 'faction-lawmen': 'Lawman',
-    'faction-maelstrom': 'Maelstrom', 'faction-max-tac': 'Max-Tac', 'faction-militech': 'Militech',
-    'faction-piranhas': 'Piranha', 'faction-trauma-team': 'Trauma Team', 'faction-tyger-claws': 'Tyger Claw',
-    'faction-wild-things': 'Wild Thing', 'faction-zoners': 'Zoner', 'faction-6th-street': '6th Street',
-};
 
 // ── Color words ──
 const COLOR_WORDS: Record<string, string> = {

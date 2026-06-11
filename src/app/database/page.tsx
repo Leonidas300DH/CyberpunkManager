@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { useT } from '@/i18n';
-import { FACTION_COLOR_MAP } from '@/components/shared/ObjectiveCard';
+import { FACTION_BORDER_CLASS as FACTION_COLOR_MAP } from '@/lib/constants/factionColors';
 import { FactionsTab } from "@/components/database/FactionsTab";
 import { ModelsTab } from "@/components/database/ModelsTab";
 import { ArmoryContent } from "@/components/database/ArmoryContent";

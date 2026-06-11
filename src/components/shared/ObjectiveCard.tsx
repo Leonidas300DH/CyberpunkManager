@@ -7,60 +7,7 @@ import { useLocalized, useT } from '@/i18n';
 import type { Objective } from '@/types';
 import { SKILL_ICON_LOCAL as SKILL_ICON } from '@/lib/constants/skills';
 import { RANGE_ARROW_POINTS, RANGE_ARROW_VIEWBOX } from '@/lib/constants/rangeArrows';
-
-export const FACTION_COLOR_MAP: Record<string, string> = {
-    'faction-arasaka': 'border-red-600',
-    'faction-bozos': 'border-purple-500',
-    'faction-danger-gals': 'border-pink-400',
-    'faction-edgerunners': 'border-emerald-500',
-    'faction-gen-red': 'border-white',
-    'faction-lawmen': 'border-blue-500',
-    'faction-maelstrom': 'border-red-700',
-    'faction-trauma-team': 'border-white',
-    'faction-tyger-claws': 'border-cyan-400',
-    'faction-zoners': 'border-orange-500',
-    'faction-6th-street': 'border-amber-500',
-    'faction-max-tac': 'border-indigo-400',
-    'faction-militech': 'border-lime-500',
-    'faction-piranhas': 'border-teal-400',
-    'faction-wild-things': 'border-rose-500',
-    'deck-corpo-crimes': 'border-red-500',
-    'deck-public-enemies': 'border-violet-500',
-    'deck-street-justice': 'border-yellow-500',
-};
-
-export const FACTION_BG_MAP: Record<string, string> = {
-    'faction-arasaka': 'bg-red-600',
-    'faction-bozos': 'bg-purple-500',
-    'faction-danger-gals': 'bg-pink-400',
-    'faction-edgerunners': 'bg-emerald-500',
-    'faction-gen-red': 'bg-white',
-    'faction-lawmen': 'bg-blue-500',
-    'faction-maelstrom': 'bg-red-700',
-    'faction-trauma-team': 'bg-white',
-    'faction-tyger-claws': 'bg-cyan-400',
-    'faction-zoners': 'bg-orange-500',
-    'faction-6th-street': 'bg-amber-500',
-    'faction-max-tac': 'bg-indigo-400',
-    'faction-militech': 'bg-lime-500',
-    'faction-piranhas': 'bg-teal-400',
-    'faction-wild-things': 'bg-rose-500',
-    'deck-corpo-crimes': 'bg-red-500',
-    'deck-public-enemies': 'bg-violet-500',
-    'deck-street-justice': 'bg-yellow-500',
-};
-
-export const FACTION_TEXT_MAP: Record<string, string> = {
-    'faction-gen-red': 'text-black',
-    'faction-trauma-team': 'text-black',
-    'faction-danger-gals': 'text-black',
-    'faction-tyger-claws': 'text-black',
-    'faction-6th-street': 'text-black',
-    'faction-militech': 'text-black',
-    'faction-edgerunners': 'text-black',
-    'faction-piranhas': 'text-black',
-    'deck-street-justice': 'text-black',
-};
+import { FACTION_BORDER_CLASS as FACTION_COLOR_MAP, FACTION_BG_CLASS as FACTION_BG_MAP, FACTION_ON_BG_TEXT_CLASS as FACTION_TEXT_MAP } from '@/lib/constants/factionColors';
 
 export const REWARD_BADGE: Record<string, { cls: string }> = {
     ongoing:   { cls: 'bg-emerald-600 text-white' },
