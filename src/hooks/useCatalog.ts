@@ -422,7 +422,7 @@ export function useCatalog() {
                     tierSurcharges: (configRes.data?.value as { veteran: number; elite: number }) ?? { veteran: 5, elite: 10 },
                 };
 
-                useStore.setState({ catalog });
+                useStore.setState({ catalog, catalogStatus: 'ready' });
                 console.log(`[Catalog] Loaded from tables (${catalog.profiles.length} profiles, ${catalog.weapons.length} weapons)`);
             } catch (err) {
                 console.error('[Catalog] Table fetch failed, falling back to seed:', err);
@@ -439,7 +439,7 @@ export function useCatalog() {
                         loots: (seed as { LOOTS?: Loot[] }).LOOTS ?? [],
                         tierSurcharges: seed.TIER_SURCHARGES,
                     };
-                    useStore.setState({ catalog: fallback });
+                    useStore.setState({ catalog: fallback, catalogStatus: 'fallback' });
                     console.log(`[Catalog] Seed fallback loaded (${fallback.profiles.length} profiles)`);
                 } catch (seedErr) {
                     console.error('[Catalog] Seed fallback also failed:', seedErr);

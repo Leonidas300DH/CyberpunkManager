@@ -33,9 +33,11 @@ export interface TeamBuilderDraft {
 }
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
+export type CatalogStatus = 'loading' | 'ready' | 'fallback';
 
 interface StoreState {
     catalog: CatalogData;
+    catalogStatus: CatalogStatus;
     campaigns: Campaign[];
     activeMatchTeam: MatchTeam | null;
     displaySettings: DisplaySettings;
@@ -67,6 +69,7 @@ export const useStore = create<StoreState>()(
     persist(
         (set) => ({
             catalog: emptyCatalog,
+            catalogStatus: 'loading' as CatalogStatus,
             campaigns: [],
             activeMatchTeam: null,
             displaySettings: { cardColumns: 4, fontScale: 100 },
