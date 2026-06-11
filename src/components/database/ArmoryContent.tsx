@@ -8,6 +8,7 @@ import { useT, useLocalized } from '@/i18n';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { WeaponCard, FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
 import { SKILL_ICON } from '@/lib/constants/skills';
+import { RangeArrows } from '@/components/shared/RangeArrows';
 import { formatCardText } from '@/lib/formatCardText';
 import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -524,17 +525,6 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
         });
     };
 
-    const OFF = 'rgba(100,100,100,0.35)';
-    const OFF_STROKE = 'rgba(255,255,255,0.3)';
-    const ON_STROKE = 'white';
-    const AP = {
-        red:    '1,1 44,1 49,11 44,21 5,21',
-        yellow: '52,1 95,1 100,11 95,21 52,21 57,11',
-        green:  '103,1 145,1 150,11 145,21 103,21 108,11',
-        long:   '153,1 218,1 223,11 218,21 153,21 158,11',
-        plusCx: 188,
-    };
-
     if (activeTab === 'Program') {
         return (
             <>
@@ -962,18 +952,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                                             {armorEl}
                                                             {showRange && (
                                                                 <div className="w-[60%]">
-                                                                    <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
-                                                                        <polygon points={AP.red} fill={weapon.rangeRed ? '#dc2626' : OFF} stroke={weapon.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeRed ? 1 : 0.5} />
-                                                                        <polygon points={AP.yellow} fill={weapon.rangeYellow ? '#eab308' : OFF} stroke={weapon.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeYellow ? 1 : 0.5} />
-                                                                        <polygon points={AP.green} fill={weapon.rangeGreen ? '#22c55e' : OFF} stroke={weapon.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.rangeGreen ? 1 : 0.5} />
-                                                                        {weapon.rangeLong && (
-                                                                            <>
-                                                                                <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                                                                <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                                <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                            </>
-                                                                        )}
-                                                                    </svg>
+                                                                    <RangeArrows red={!!weapon.rangeRed} yellow={!!weapon.rangeYellow} green={!!weapon.rangeGreen} long={!!weapon.rangeLong} />
                                                                 </div>
                                                             )}
                                                         </div>
@@ -988,18 +967,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                                                     <img src={skillIcon} alt={weapon.skillReq!} className="w-12 h-12 -my-[3px] shrink-0 object-contain" />
                                                 )}
                                                 <div className="w-[60%]">
-                                                    <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
-                                                        <polygon points={AP.red} fill={weapon.range2Red ? '#dc2626' : OFF} stroke={weapon.range2Red ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Red ? 1 : 0.5} />
-                                                        <polygon points={AP.yellow} fill={weapon.range2Yellow ? '#eab308' : OFF} stroke={weapon.range2Yellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Yellow ? 1 : 0.5} />
-                                                        <polygon points={AP.green} fill={weapon.range2Green ? '#22c55e' : OFF} stroke={weapon.range2Green ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={weapon.range2Green ? 1 : 0.5} />
-                                                        {weapon.range2Long && (
-                                                            <>
-                                                                <polygon points={AP.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                                                <line x1={AP.plusCx} y1="8" x2={AP.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                                <line x1={AP.plusCx - 3} y1="11" x2={AP.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                            </>
-                                                        )}
-                                                    </svg>
+                                                    <RangeArrows red={!!weapon.range2Red} yellow={!!weapon.range2Yellow} green={!!weapon.range2Green} long={!!weapon.range2Long} />
                                                 </div>
                                             </div>
                                         )}

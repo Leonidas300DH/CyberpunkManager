@@ -10,6 +10,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { CodeRainCanvas } from '@/components/effects/CodeRainCanvas';
 import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
 import { SKILL_ICON } from '@/lib/constants/skills';
+import { RangeArrows, programRangeToSegments } from '@/components/shared/RangeArrows';
 
 const RELOAD_KEY: Record<string, string> = {
     Inspire:  'program.reloadInspire',
@@ -311,43 +312,9 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                             />
                         )}
                         {/* Range Arrows — interlocking chevrons */}
-                        {program.range !== 'Self' && (() => {
-                            const r = program.range;
-                            const hasLong = r === 'Long' || r === 'LongOnly' || r === 'GreenLong';
-                            const GREY = '#666666';
-                            const OFF = 'rgba(100,100,100,0.35)';
-                            const OFF_STROKE = 'rgba(255,255,255,0.3)';
-                            const ON_STROKE = 'white';
-                            const redFill = (r === 'LongOnly' || r === 'GreenLong') ? GREY
-                                : '#dc2626';
-                            const redActive = !(r === 'LongOnly' || r === 'GreenLong');
-                            const yellowFill = (r === 'LongOnly' || r === 'GreenLong') ? GREY
-                                : ['Yellow', 'Green', 'Long'].includes(r) ? '#eab308' : OFF;
-                            const yellowActive = !((r === 'LongOnly' || r === 'GreenLong') || !['Yellow', 'Green', 'Long'].includes(r));
-                            const greenFill = r === 'LongOnly' ? GREY
-                                : ['Green', 'Long', 'GreenLong'].includes(r) ? '#22c55e' : OFF;
-                            const greenActive = !(r === 'LongOnly') && ['Green', 'Long', 'GreenLong'].includes(r);
-                            const longFill = hasLong ? '#111111' : OFF;
-                            return (
-                                <svg viewBox="0 0 228 22" className="w-[65%] h-auto" fill="none">
-                                    <polygon points="1,1 44,1 49,11 44,21 5,21"
-                                        fill={redFill} stroke={redActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
-                                        opacity={redActive ? 1 : 0.5} />
-                                    <polygon points="52,1 95,1 100,11 95,21 52,21 57,11"
-                                        fill={yellowFill} stroke={yellowActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
-                                        opacity={yellowActive ? 1 : 0.5} />
-                                    <polygon points="103,1 145,1 150,11 145,21 103,21 108,11"
-                                        fill={greenFill} stroke={greenActive ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
-                                        opacity={greenActive ? 1 : 0.5} />
-                                    {hasLong && (<>
-                                        <polygon points="153,1 218,1 223,11 218,21 153,21 158,11"
-                                            fill={longFill} stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                        <line x1="188" y1="8" x2="188" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                        <line x1="185" y1="11" x2="191" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                    </>)}
-                                </svg>
-                            );
-                        })()}
+                        {program.range !== 'Self' && (
+                            <RangeArrows {...programRangeToSegments(program.range)} className="w-[65%] h-auto" />
+                        )}
                     </div>
                 )}
 

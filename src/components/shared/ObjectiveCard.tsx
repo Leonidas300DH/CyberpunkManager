@@ -6,6 +6,7 @@ import { useCardGrid } from '@/hooks/useCardGrid';
 import { useLocalized, useT } from '@/i18n';
 import type { Objective } from '@/types';
 import { SKILL_ICON_LOCAL as SKILL_ICON } from '@/lib/constants/skills';
+import { RANGE_ARROW_POINTS, RANGE_ARROW_VIEWBOX } from '@/lib/constants/rangeArrows';
 
 export const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-arasaka': 'border-red-600',
@@ -267,18 +268,19 @@ export function ObjectiveCard({ objective, isAdmin, onEdit, onDelete, overlay }:
                                 {SKILL_ICON[objective.actionSkill] && (
                                     <img src={SKILL_ICON[objective.actionSkill]} alt={objective.actionSkill} className="w-10 h-10 -my-[3px]" />
                                 )}
-                                <svg viewBox="0 0 228 22" className="h-[18px] w-auto">
+                                {/* Deliberately flat/different rendering from the shared RangeArrows — coordinates only are shared */}
+                                <svg viewBox={RANGE_ARROW_VIEWBOX} className="h-[18px] w-auto">
                                     {objective.actionRangeRed && (
-                                        <polygon points="1,1 44,1 49,11 44,21 5,21" fill="#ef4444" opacity="0.8" />
+                                        <polygon points={RANGE_ARROW_POINTS.red} fill="#ef4444" opacity="0.8" />
                                     )}
                                     {objective.actionRangeYellow && (
-                                        <polygon points="52,1 95,1 100,11 95,21 52,21 57,11" fill="#eab308" opacity="0.8" />
+                                        <polygon points={RANGE_ARROW_POINTS.yellow} fill="#eab308" opacity="0.8" />
                                     )}
                                     {objective.actionRangeGreen && (
-                                        <polygon points="103,1 145,1 150,11 145,21 103,21 108,11" fill="#22c55e" opacity="0.8" />
+                                        <polygon points={RANGE_ARROW_POINTS.green} fill="#22c55e" opacity="0.8" />
                                     )}
                                     {objective.actionRangeLong && (
-                                        <polygon points="153,1 218,1 223,11 218,21 153,21 158,11" fill="#3b82f6" opacity="0.8" />
+                                        <polygon points={RANGE_ARROW_POINTS.long} fill="#3b82f6" opacity="0.8" />
                                     )}
                                 </svg>
                             </div>

@@ -11,47 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Edit, Trash2, Shield } from 'lucide-react';
 import { SKILL_ICONS } from '@/lib/constants/skills';
-
-// Range arrows (single consistent coordinates)
-const RA = {
-    red:    '1,1 44,1 49,11 44,21 5,21',
-    yellow: '52,1 95,1 100,11 95,21 52,21 57,11',
-    green:  '103,1 145,1 150,11 145,21 103,21 108,11',
-    long:   '153,1 218,1 223,11 218,21 153,21 158,11',
-    plusCx: 188,
-};
+import { RangeArrows } from '@/components/shared/RangeArrows';
 
 function RangeArrowsSmall({ rangeRed, rangeYellow, rangeGreen, rangeLong }: {
     rangeRed: boolean; rangeYellow: boolean; rangeGreen: boolean; rangeLong: boolean;
 }) {
-    if (!rangeRed && !rangeYellow && !rangeGreen && !rangeLong) return null;
-    const OFF = 'rgba(100,100,100,0.35)';
-    const OFF_STROKE = 'rgba(255,255,255,0.3)';
-    const ON_STROKE = 'white';
-    return (
-        <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
-            <polygon points={RA.red}
-                fill={rangeRed ? '#dc2626' : OFF}
-                stroke={rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
-                opacity={rangeRed ? 1 : 0.5} />
-            <polygon points={RA.yellow}
-                fill={rangeYellow ? '#eab308' : OFF}
-                stroke={rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
-                opacity={rangeYellow ? 1 : 0.5} />
-            <polygon points={RA.green}
-                fill={rangeGreen ? '#22c55e' : OFF}
-                stroke={rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round"
-                opacity={rangeGreen ? 1 : 0.5} />
-            {rangeLong && (
-                <>
-                    <polygon points={RA.long}
-                        fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                    <line x1={RA.plusCx} y1="8" x2={RA.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                    <line x1={RA.plusCx - 3} y1="11" x2={RA.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                </>
-            )}
-        </svg>
-    );
+    return <RangeArrows red={rangeRed} yellow={rangeYellow} green={rangeGreen} long={rangeLong} />;
 }
 
 function slugify(text: string): string {

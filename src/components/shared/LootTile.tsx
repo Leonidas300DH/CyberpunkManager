@@ -4,18 +4,7 @@ import { Loot } from '@/types';
 import { Shield } from 'lucide-react';
 import { useLocalized } from '@/i18n';
 import { SKILL_ICON } from '@/lib/constants/skills';
-
-const OFF = 'rgba(100,100,100,0.35)';
-const OFF_STROKE = 'rgba(255,255,255,0.3)';
-const ON_STROKE = 'white';
-
-const PTS = {
-    red:    '1,1 44,1 49,11 44,21 5,21',
-    yellow: '52,1 95,1 100,11 95,21 52,21 57,11',
-    green:  '103,1 145,1 150,11 145,21 103,21 108,11',
-    long:   '153,1 218,1 223,11 218,21 153,21 158,11',
-    plusCx: 188,
-};
+import { RangeArrows } from '@/components/shared/RangeArrows';
 
 interface LootTileProps {
     loot: Loot;
@@ -81,18 +70,7 @@ export function LootTile({ loot, overlay }: LootTileProps) {
                                     {armorEl}
                                     {hasRange && (
                                         <div className="w-[60%]">
-                                            <svg viewBox="0 0 228 22" className="w-full h-auto" fill="none">
-                                                <polygon points={PTS.red} fill={loot.rangeRed ? '#dc2626' : OFF} stroke={loot.rangeRed ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={loot.rangeRed ? 1 : 0.5} />
-                                                <polygon points={PTS.yellow} fill={loot.rangeYellow ? '#eab308' : OFF} stroke={loot.rangeYellow ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={loot.rangeYellow ? 1 : 0.5} />
-                                                <polygon points={PTS.green} fill={loot.rangeGreen ? '#22c55e' : OFF} stroke={loot.rangeGreen ? ON_STROKE : OFF_STROKE} strokeWidth="1.5" strokeLinejoin="round" opacity={loot.rangeGreen ? 1 : 0.5} />
-                                                {loot.rangeLong && (
-                                                    <>
-                                                        <polygon points={PTS.long} fill="#111111" stroke={ON_STROKE} strokeWidth="1.5" strokeLinejoin="round" />
-                                                        <line x1={PTS.plusCx} y1="8" x2={PTS.plusCx} y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                        <line x1={PTS.plusCx - 3} y1="11" x2={PTS.plusCx + 3} y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                                                    </>
-                                                )}
-                                            </svg>
+                                            <RangeArrows red={!!loot.rangeRed} yellow={!!loot.rangeYellow} green={!!loot.rangeGreen} long={!!loot.rangeLong} />
                                         </div>
                                     )}
                                 </div>
