@@ -303,6 +303,7 @@ export const fr: Translations = {
     // ── Action dock (play) ──
     'play.spend': 'Dépenser',
     'play.reactivate': 'Réactiver',
+    'play.flatlined': 'Flatlined',
 
     // ── CyberConfirm dialogs ──
     'confirm.securityOverride': 'Contrôle de sécurité requis',

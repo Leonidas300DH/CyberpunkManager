@@ -335,6 +335,7 @@ export type Translations = {
     // ── Action dock (play) ──
     'play.spend': string;
     'play.reactivate': string;
+    'play.flatlined': string;
 
     // ── CyberConfirm dialogs ──
     'confirm.securityOverride': string;

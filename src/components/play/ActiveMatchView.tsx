@@ -6,7 +6,7 @@ import { useStore } from '@/store/useStore';
 import { useT, useLocalized } from '@/i18n';
 import { Weapon, HackingProgram, Loot, TokenState, ProgramQuality } from '@/types';
 import { parseEquipmentId, resolveVariant } from '@/lib/variants';
-import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal, Gift } from 'lucide-react';
+import { Swords, Skull, Zap, Heart, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal, Gift } from 'lucide-react';
 import { ObjectiveHand } from '@/components/play/ObjectiveHand';
 import { PostGameDialog } from '@/components/play/PostGameDialog';
 import { MatchLogEntry } from '@/types';
@@ -17,6 +17,7 @@ import { notifySuccess, notifyInfo } from '@/lib/notify';
 import { useCyberConfirm } from '@/components/ui/CyberConfirm';
 import { TokenShape } from '@/components/play/TokenShape';
 import { ActionDock } from '@/components/play/ActionDock';
+import { MatchFX, type MatchFXEvent } from '@/components/play/MatchFX';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { LootTile } from '@/components/shared/LootTile';
@@ -183,6 +184,24 @@ export function ActiveMatchView() {
     const [showPostGame, setShowPostGame] = useState(false);
     const { confirm: confirmAction, confirmDialog } = useCyberConfirm();
 
+    // Match cinematics (UI-only) — full-screen overlay + per-card animation
+    const [fxEvent, setFxEvent] = useState<MatchFXEvent | null>(null);
+    const [cardFx, setCardFx] = useState<Record<string, { kind: 'wound' | 'heal'; key: number }>>({});
+    const fireFx = useCallback((kind: MatchFXEvent['kind'], recruitId?: string) => {
+        setFxEvent(prev => ({ kind, key: (prev?.key ?? 0) + 1 }));
+        if (recruitId && kind !== 'kia') {
+            setCardFx(prev => ({ ...prev, [recruitId]: { kind, key: (prev[recruitId]?.key ?? 0) + 1 } }));
+        }
+    }, []);
+    const clearCardFx = useCallback((recruitId: string) => {
+        setCardFx(prev => {
+            if (!prev[recruitId]) return prev;
+            const next = { ...prev };
+            delete next[recruitId];
+            return next;
+        });
+    }, []);
+
     // Draw Loot state
     const [showLootDialog, setShowLootDialog] = useState(false);
     const [drawnLoot, setDrawnLoot] = useState<Loot | null>(null);
@@ -284,8 +303,12 @@ export function ActiveMatchView() {
     const woundToken = (recruitId: string, idx: number) => {
         updateToken(recruitId, idx, { wounded: true });
         setGlitchTriggers(prev => ({ ...prev, [recruitId]: (prev[recruitId] ?? 0) + 1 }));
+        if (enableGlitch) fireFx('wound', recruitId);
     };
-    const healToken = (recruitId: string, idx: number) => updateToken(recruitId, idx, { wounded: false });
+    const healToken = (recruitId: string, idx: number) => {
+        updateToken(recruitId, idx, { wounded: false });
+        if (enableGlitch) fireFx('heal', recruitId);
+    };
 
     const inspireTeam = () => {
         setTokenStates(prev => {
@@ -326,6 +349,7 @@ export function ActiveMatchView() {
             updatePlayState({ deadModelIds: deadModelIds.filter(d => d !== id) });
         } else {
             updatePlayState({ deadModelIds: [...deadModelIds, id] });
+            if (enableGlitch) fireFx('kia');
         }
     };
 
@@ -858,8 +882,17 @@ export function ActiveMatchView() {
 
                     // ── Shared sub-components ──
 
+                    const fx = cardFx[recruit.id];
                     const characterCardBlock = (
-                        <div className="relative">
+                        <div
+                            className={`relative ${fx?.kind === 'wound' ? 'animate-glitch-shake' : ''}`}
+                            onAnimationEnd={(e) => { if (e.animationName === 'glitch-shake' || e.animationName === 'scanline-sweep') clearCardFx(recruit.id); }}
+                        >
+                            {fx?.kind === 'heal' && (
+                                <div className="absolute inset-0 z-40 overflow-hidden pointer-events-none">
+                                    <div className="animate-scanline-sweep" />
+                                </div>
+                            )}
                             <div className={`transition-all ${
                                 dead
                                     ? 'border-2 border-accent/60 grayscale'
@@ -1153,7 +1186,7 @@ export function ActiveMatchView() {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setShowLootDialog(false)}
+                                onClick={() => { setShowLootDialog(false); if (drawnLoot) notifyInfo(t('notify.lootDiscarded'), drawnLoot.name); }}
                                 className="flex-1 py-2.5 border border-border text-muted-foreground font-display font-bold text-sm uppercase tracking-wider hover:text-white hover:border-white transition-colors"
                             >
                                 {t('play.discard')}
@@ -1202,6 +1235,7 @@ export function ActiveMatchView() {
                 />
             );
         })()}
+        <MatchFX event={fxEvent} />
         {confirmDialog}
         </>
     );

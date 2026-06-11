@@ -360,4 +360,47 @@
   }
   .highlight-flash { animation: highlight-flash 2s ease-out; }
 
+  /* === MATCH FX (wound / heal / KIA cinematics) === */
+  .animate-glitch-shake {
+    animation: glitch-shake 0.3s cubic-bezier(.25, .46, .45, .94) 2;
+  }
+
+  /* Cyan scanline sweeping a card on heal — apply to an absolute child */
+  .animate-scanline-sweep {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(to top, rgba(0, 240, 255, 0.35), transparent);
+    border-top: 1px solid rgba(0, 240, 255, 0.8);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+    pointer-events: none;
+    animation: scanline-sweep 0.8s linear;
+  }
+
+  /* Full-screen red flash on wound */
+  @keyframes fx-flash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .animate-fx-flash { animation: fx-flash 0.35s ease-out forwards; }
+
+  /* FLATLINED stamp slam-in */
+  @keyframes fx-stamp {
+    0% { transform: rotate(-12deg) scale(2.4); opacity: 0; }
+    55% { transform: rotate(-12deg) scale(0.95); opacity: 1; }
+    70% { transform: rotate(-12deg) scale(1.06); }
+    100% { transform: rotate(-12deg) scale(1); opacity: 1; }
+  }
+  .animate-fx-stamp { animation: fx-stamp 0.45s cubic-bezier(.2, .9, .3, 1.2) both; }
+
+  /* KIA veil fade in/out */
+  @keyframes fx-veil {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .animate-fx-veil { animation: fx-veil 1.2s ease-in-out forwards; }
+
 }
