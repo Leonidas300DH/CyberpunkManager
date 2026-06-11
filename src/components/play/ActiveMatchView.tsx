@@ -154,7 +154,7 @@ export function ActiveMatchView() {
     const router = useRouter();
     const t = useT();
     const loc = useLocalized();
-    const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam, updateCampaign, displaySettings, playViewSettings, setPlayViewSettings } = useStore();
+    const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam, updateCampaign, playViewSettings, setPlayViewSettings } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
     const cardColumns = useEffectiveColumns();
     // Column width matching CSS grid (gap-4 = 16px) — used for vertical layout
