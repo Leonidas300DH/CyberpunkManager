@@ -5,19 +5,7 @@ import { useStore } from '@/store/useStore';
 import { CampaignHeader } from '@/components/campaign/CampaignHeader';
 import { TeamBuilder } from '@/components/match/TeamBuilder';
 import { cn } from '@/lib/utils';
-
-const FACTION_ACCENT: Record<string, string> = {
-    'faction-arasaka':     'border-red-600',
-    'faction-bozos':       'border-purple-500',
-    'faction-danger-gals': 'border-pink-400',
-    'faction-edgerunners': 'border-emerald-500',
-    'faction-gen-red':     'border-white',
-    'faction-lawmen':      'border-blue-500',
-    'faction-maelstrom':   'border-red-700',
-    'faction-trauma-team': 'border-white',
-    'faction-tyger-claws': 'border-cyan-400',
-    'faction-zoners':      'border-orange-500',
-};
+import { FACTION_BORDER_CLASS as FACTION_ACCENT } from '@/lib/constants/factionColors';
 
 export default function MatchPage() {
     const { campaigns, catalog } = useStore();

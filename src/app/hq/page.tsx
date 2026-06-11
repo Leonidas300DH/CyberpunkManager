@@ -12,19 +12,7 @@ import { ObjectivesTab } from '@/components/campaign/ObjectivesTab';
 import { CampaignLog } from '@/components/campaign/CampaignLog';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
-
-const FACTION_ACCENT: Record<string, string> = {
-    'faction-arasaka':     'border-red-600',
-    'faction-bozos':       'border-purple-500',
-    'faction-danger-gals': 'border-pink-400',
-    'faction-edgerunners': 'border-emerald-500',
-    'faction-gen-red':     'border-white',
-    'faction-lawmen':      'border-blue-500',
-    'faction-maelstrom':   'border-red-700',
-    'faction-trauma-team': 'border-white',
-    'faction-tyger-claws': 'border-cyan-400',
-    'faction-zoners':      'border-orange-500',
-};
+import { FACTION_BORDER_CLASS as FACTION_ACCENT } from '@/lib/constants/factionColors';
 
 const STARTER_IMAGES = Array.from({ length: 18 }, (_, i) => {
     const ids = [
