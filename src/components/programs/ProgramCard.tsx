@@ -3,8 +3,9 @@
 import { HackingProgram } from '@/types';
 import { useStore } from '@/store/useStore';
 import { useLocalized, useT } from '@/i18n';
-import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@/lib/glossary';
+import { findGlossaryEntry } from '@/lib/glossary';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
+import { formatCardText } from '@/lib/formatCardText';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { CodeRainCanvas } from '@/components/effects/CodeRainCanvas';
@@ -21,123 +22,15 @@ const RELOAD_KEY: Record<string, string> = {
     Manual:   'program.reloadManual',
 };
 
-const COLOR_WORDS: Record<string, string> = {
-    RED: '#dc2626',
-    YELLOW: '#eab308',
-    GREEN: '#22c55e',
-};
-
 /* ── Sidebar stat layout tuning ─────────────────────────────────── */
 const SIDEBAR_EB_LINE     = 'font-mono-tech text-[11px] text-black font-black tracking-wider'; // "EB N" same as CharacterCard
 const SIDEBAR_RAR_SIZE    = 'text-[10px]'; // Rarity label
 const SIDEBAR_SC_STAR     = 'text-xs';     // ★ icon size
 const SIDEBAR_SC_NUM      = 'text-sm';     // Street cred number
 
-/** Process a plain string segment to detect & wrap glossary terms */
-function linkGlossaryTerms(text: string, keyBase: number): React.ReactNode[] {
-    if (!GLOSSARY_HIGHLIGHT_REGEX && !REACT_TERM_REGEX) return [text];
-
-    // Collect all matches from both regexes
-    const matches: Array<{ index: number; length: number; word: string }> = [];
-
-    if (GLOSSARY_HIGHLIGHT_REGEX) {
-        const re = new RegExp(GLOSSARY_HIGHLIGHT_REGEX.source, 'gi');
-        let m: RegExpExecArray | null;
-        while ((m = re.exec(text)) !== null) {
-            matches.push({ index: m.index, length: m[0].length, word: m[0] });
-        }
-    }
-    {
-        const re = new RegExp(REACT_TERM_REGEX.source, 'gi');
-        let m: RegExpExecArray | null;
-        while ((m = re.exec(text)) !== null) {
-            matches.push({ index: m.index, length: m[0].length, word: m[0] });
-        }
-    }
-
-    if (matches.length === 0) return [text];
-
-    // Sort by position, then deduplicate overlapping matches (keep longest)
-    matches.sort((a, b) => a.index - b.index || b.length - a.length);
-    const deduped: typeof matches = [];
-    for (const m of matches) {
-        const prev = deduped[deduped.length - 1];
-        if (prev && m.index < prev.index + prev.length) continue; // overlapping → skip
-        deduped.push(m);
-    }
-
-    const parts: React.ReactNode[] = [];
-    let lastIndex = 0;
-    let k = keyBase;
-
-    for (const m of deduped) {
-        if (m.index > lastIndex) parts.push(text.slice(lastIndex, m.index));
-
-        // [RE]action → look up as "[re]action"
-        const lookupWord = m.word.startsWith('[') ? '[RE]action' : m.word;
-        const entry = findGlossaryEntry(lookupWord);
-        if (entry) {
-            parts.push(
-                <GlossaryTooltip key={`g${k++}`} entry={entry}>{m.word}</GlossaryTooltip>,
-            );
-        } else {
-            parts.push(m.word);
-        }
-        lastIndex = m.index + m.length;
-    }
-    if (lastIndex < text.length) parts.push(text.slice(lastIndex));
-    return parts;
-}
-
 /** Trim leading spaces per line, colorize RED/YELLOW/GREEN, link glossary terms */
-function formatCardText(text: string): React.ReactNode[] {
-    const cleaned = text
-        .replace(/\|/g, '\n')
-        .split('\n')
-        .map(line => line.trimStart())
-        .join('\n');
-
-    // Pass 1: split on color words
-    const afterColors: React.ReactNode[] = [];
-    const colorRe = /\b(RED|YELLOW|GREEN)\b/g;
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = colorRe.exec(cleaned)) !== null) {
-        if (match.index > lastIndex) {
-            afterColors.push(cleaned.slice(lastIndex, match.index));
-        }
-        const word = match[1];
-        afterColors.push(
-            <span
-                key={`c${match.index}`}
-                className="font-bold"
-                style={{
-                    color: COLOR_WORDS[word],
-                    WebkitTextStroke: '0.3px rgba(255,255,255,0.4)',
-                }}
-            >
-                {word}
-            </span>,
-        );
-        lastIndex = colorRe.lastIndex;
-    }
-    if (lastIndex < cleaned.length) {
-        afterColors.push(cleaned.slice(lastIndex));
-    }
-
-    // Pass 2: for each remaining string segment, detect glossary terms
-    const result: React.ReactNode[] = [];
-    let keyCounter = 0;
-    for (const part of afterColors) {
-        if (typeof part === 'string') {
-            result.push(...linkGlossaryTerms(part, keyCounter));
-            keyCounter += 200;
-        } else {
-            result.push(part);
-        }
-    }
-    return result;
+function formatProgramText(text: string): React.ReactNode[] {
+    return formatCardText(text, 0, { normalizeMultiline: true });
 }
 
 interface ProgramCardProps {
@@ -279,7 +172,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                                             <span className="italic text-white/70">&ldquo;{flavorText}&rdquo;</span>
                                         )}
                                         {flavorText && loadedText && <br />}
-                                        {formatCardText(loadedText)}
+                                        {formatProgramText(loadedText)}
                                     </>
                                 );
                             })()}
@@ -375,7 +268,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                                     <span key={i} className="text-red-500 font-bold">Vulnerable. </span>
                                 );
                             }
-                            return <React.Fragment key={i}>{formatCardText(part)}{i < backParts.length - 1 ? ' ' : ''}</React.Fragment>;
+                            return <React.Fragment key={i}>{formatProgramText(part)}{i < backParts.length - 1 ? ' ' : ''}</React.Fragment>;
                         })}
                     </div>
                 </div>

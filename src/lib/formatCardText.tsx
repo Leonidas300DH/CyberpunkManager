@@ -51,8 +51,20 @@ function linkGlossaryTerms(text: string, keyBase: number): React.ReactNode[] {
     return parts;
 }
 
+interface FormatCardTextOptions {
+    /** Replace '|' with newlines and trim leading spaces per line before colorizing (ProgramCard behavior) */
+    normalizeMultiline?: boolean;
+}
+
 /** Colorize RED/YELLOW/GREEN words (bold + colored), then link glossary terms */
-export function formatCardText(text: string, keyBase: number = 0): React.ReactNode[] {
+export function formatCardText(text: string, keyBase: number = 0, opts: FormatCardTextOptions = {}): React.ReactNode[] {
+    if (opts.normalizeMultiline) {
+        text = text
+            .replace(/\|/g, '\n')
+            .split('\n')
+            .map(line => line.trimStart())
+            .join('\n');
+    }
     const colorRe = /\b(RED|YELLOW|GREEN)\b/g;
     const afterColors: React.ReactNode[] = [];
     let lastIndex = 0;
