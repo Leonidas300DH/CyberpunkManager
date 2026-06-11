@@ -19,6 +19,7 @@ import { TokenShape } from '@/components/play/TokenShape';
 import { ActionDock } from '@/components/play/ActionDock';
 import { MatchFX, type MatchFXEvent } from '@/components/play/MatchFX';
 import { MatchResultScreen } from '@/components/play/MatchResultScreen';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { LootTile } from '@/components/shared/LootTile';
@@ -228,21 +229,10 @@ export function ActiveMatchView() {
     };
     const [viewsOpen, setViewsOpen] = useState(false);
     const [glitchTriggers, setGlitchTriggers] = useState<Record<string, number>>({});
-    const viewsRef = useRef<HTMLDivElement>(null);
     const [cardHeights, setCardHeights] = useState<Record<string, number>>({});
     const [cardWidths, setCardWidths] = useState<Record<string, number>>({});
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-
-    // Close Views dropdown on outside click
-    useEffect(() => {
-        if (!viewsOpen) return;
-        const handler = (e: MouseEvent) => {
-            if (viewsRef.current && !viewsRef.current.contains(e.target as Node)) setViewsOpen(false);
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, [viewsOpen]);
 
     const campaign = useMemo(() => {
         if (!activeMatchTeam) return null;
@@ -728,17 +718,18 @@ export function ActiveMatchView() {
                         </button>
 
                         {/* Views dropdown */}
-                        <div ref={viewsRef} className="relative">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setViewsOpen(v => !v); }}
-                                className="flex items-center justify-center gap-1.5 h-9 px-4 border border-primary bg-black text-primary font-display font-bold text-xs uppercase tracking-wider hover:text-white transition-colors"
-                            >
-                                <Eye className="w-4 h-4" />
-                                {t('play.views')}
-                                <ChevronDown className={`w-3 h-3 transition-transform ${viewsOpen ? 'rotate-180' : ''}`} />
-                            </button>
-                            {viewsOpen && (
-                                <div className="absolute right-0 top-full mt-1 w-56 bg-black border border-primary/40 shadow-[0_4px_20px_rgba(252,238,10,0.15)] z-50" onClick={(e) => e.stopPropagation()}>
+                        <Popover open={viewsOpen} onOpenChange={setViewsOpen}>
+                            <PopoverTrigger asChild>
+                                <button
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex items-center justify-center gap-1.5 h-9 px-4 border border-primary bg-black text-primary font-display font-bold text-xs uppercase tracking-wider hover:text-white transition-colors"
+                                >
+                                    <Eye className="w-4 h-4" />
+                                    {t('play.views')}
+                                    <ChevronDown className={`w-3 h-3 transition-transform ${viewsOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-56 p-0 bg-black border border-primary/40 shadow-[0_4px_20px_rgba(252,238,10,0.15)]" onClick={(e) => e.stopPropagation()}>
                                     {/* Characters View */}
                                     <div className="px-3 py-2 border-b border-border">
                                         <div className="text-[10px] font-mono-tech text-primary uppercase tracking-widest mb-1.5">{t('play.charactersView')}</div>
@@ -823,9 +814,8 @@ export function ActiveMatchView() {
                                             {enableCodeRain ? t('play.codeFxOn') : t('play.codeFxOff')}
                                         </button>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                            </PopoverContent>
+                        </Popover>
 
                         <button
                             onClick={handleEndMatch}
