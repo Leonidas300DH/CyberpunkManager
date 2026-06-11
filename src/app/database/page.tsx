@@ -12,6 +12,7 @@ import { ActionsContent } from "@/components/database/ActionsContent";
 import { LootsContent } from "@/components/database/LootsContent";
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { Search, Plus, Eye, SlidersHorizontal } from 'lucide-react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import type { ProgramQuality } from '@/types';
 
 type TabId = 'factions' | 'models' | 'weapons' | 'gear' | 'programs' | 'loot' | 'objectives' | 'actions';
@@ -101,27 +102,9 @@ export default function DatabasePage() {
         setHighlightTarget({ tab, itemId, factionId, ts: Date.now() });
     }, []);
 
-    // ── Popover state ──
+    // ── Popover state (Radix-controlled, kept for trigger styling) ──
     const [viewsOpen, setViewsOpen] = useState(false);
     const [filtersOpen, setFiltersOpen] = useState(false);
-    const viewsRef = useRef<HTMLDivElement>(null);
-    const viewsBtnRef = useRef<HTMLButtonElement>(null);
-    const filtersRef = useRef<HTMLDivElement>(null);
-    const filtersBtnRef = useRef<HTMLButtonElement>(null);
-
-    useEffect(() => {
-        if (!viewsOpen && !filtersOpen) return;
-        function handleClick(e: MouseEvent) {
-            if (viewsOpen && viewsRef.current && !viewsRef.current.contains(e.target as Node) && viewsBtnRef.current && !viewsBtnRef.current.contains(e.target as Node)) {
-                setViewsOpen(false);
-            }
-            if (filtersOpen && filtersRef.current && !filtersRef.current.contains(e.target as Node) && filtersBtnRef.current && !filtersBtnRef.current.contains(e.target as Node)) {
-                setFiltersOpen(false);
-            }
-        }
-        document.addEventListener('mousedown', handleClick);
-        return () => document.removeEventListener('mousedown', handleClick);
-    }, [viewsOpen, filtersOpen]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tt = t as (key: string) => string;
@@ -184,20 +167,19 @@ export default function DatabasePage() {
 
                         {/* Filters */}
                     {showFilters && (
-                        <div className="relative">
-                            <button
-                                ref={filtersBtnRef}
-                                onClick={() => { setFiltersOpen(v => !v); setViewsOpen(false); }}
-                                className={`flex items-center justify-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all md:min-w-[100px] ${
-                                    filtersOpen ? 'border-secondary text-secondary bg-secondary/10' : 'border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary'
-                                }`}
-                                title="Filters"
-                            >
-                                <SlidersHorizontal className="w-3.5 h-3.5" />
-                                <span className="hidden md:inline">Filters</span>
-                            </button>
-                            {filtersOpen && (
-                                <div ref={filtersRef} className="absolute z-50 top-full mt-1 right-0 w-72 bg-surface-dark border border-border p-3 space-y-3">
+                        <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+                            <PopoverTrigger asChild>
+                                <button
+                                    className={`flex items-center justify-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all md:min-w-[100px] ${
+                                        filtersOpen ? 'border-secondary text-secondary bg-secondary/10' : 'border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary'
+                                    }`}
+                                    title="Filters"
+                                >
+                                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                                    <span className="hidden md:inline">Filters</span>
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-72 p-3 space-y-3">
 
                                     {/* Models filters */}
                                     {activeTab === 'models' && (
@@ -280,28 +262,26 @@ export default function DatabasePage() {
                                             </button>
                                         </div>
                                     )}
-                                </div>
-                            )}
-                        </div>
+                            </PopoverContent>
+                        </Popover>
                     )}
                     </div>
 
                     {/* Row 2: Views (right-aligned below row 1) */}
                     {showViews && (
-                        <div className="relative">
-                            <button
-                                ref={viewsBtnRef}
-                                onClick={() => { setViewsOpen(v => !v); setFiltersOpen(false); }}
-                                className={`flex items-center justify-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all md:min-w-[100px] ${
-                                    viewsOpen ? 'border-secondary text-secondary bg-secondary/10' : 'border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary'
-                                }`}
-                                title="View mode"
-                            >
-                                <Eye className="w-3.5 h-3.5" />
-                                <span className="hidden md:inline">Views</span>
-                            </button>
-                            {viewsOpen && (
-                                <div ref={viewsRef} className="absolute z-50 top-full mt-1 right-0 w-48 bg-surface-dark border border-border p-3 space-y-2">
+                        <Popover open={viewsOpen} onOpenChange={setViewsOpen}>
+                            <PopoverTrigger asChild>
+                                <button
+                                    className={`flex items-center justify-center gap-1.5 px-3 py-1.5 border font-mono-tech text-xs uppercase tracking-wider transition-all md:min-w-[100px] ${
+                                        viewsOpen ? 'border-secondary text-secondary bg-secondary/10' : 'border-border bg-black text-muted-foreground hover:border-secondary hover:text-secondary'
+                                    }`}
+                                    title="View mode"
+                                >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    <span className="hidden md:inline">Views</span>
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-48 p-3 space-y-2">
                                     {activeTab === 'programs' && (
                                         <>
                                             <div className="font-mono-tech text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Program View</div>
@@ -344,9 +324,8 @@ export default function DatabasePage() {
                                             </div>
                                         </>
                                     )}
-                                </div>
-                            )}
-                        </div>
+                            </PopoverContent>
+                        </Popover>
                     )}
                 </div>
             </div>
