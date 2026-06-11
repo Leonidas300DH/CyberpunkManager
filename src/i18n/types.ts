@@ -336,6 +336,7 @@ export type Translations = {
     'play.spend': string;
     'play.reactivate': string;
     'play.flatlined': string;
+    'play.matchOutcome': string;
 
     // ── CyberConfirm dialogs ──
     'confirm.securityOverride': string;

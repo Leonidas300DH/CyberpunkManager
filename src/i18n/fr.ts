@@ -304,6 +304,7 @@ export const fr: Translations = {
     'play.spend': 'Dépenser',
     'play.reactivate': 'Réactiver',
     'play.flatlined': 'Flatlined',
+    'play.matchOutcome': 'Issue du match',
 
     // ── CyberConfirm dialogs ──
     'confirm.securityOverride': 'Contrôle de sécurité requis',

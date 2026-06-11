@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Campaign, MatchTeam, CatalogData, TokenState, MatchLogEntry, MatchLogRecruit } from '@/types';
 import { canHaveTiers, getBaseProfile, getTierLabel } from '@/lib/tiers';
@@ -21,6 +21,8 @@ interface PostGameDialogProps {
     activeMatchTeam: MatchTeam;
     catalog: CatalogData;
     onConfirm: (updates: Partial<Campaign>, logEntry: MatchLogEntry) => void;
+    /** Pre-selected result (from MatchResultScreen) — skips the 'result' step */
+    initialResult?: MatchResult;
 }
 
 const BTN = "flex items-center gap-2 px-4 py-2.5 font-display font-bold text-sm uppercase tracking-widest transition-colors";
@@ -29,7 +31,7 @@ const BTN_ACCENT = `${BTN} bg-accent text-white hover:bg-red-700 clip-corner-br`
 const BTN_OUTLINE = `${BTN} border border-border text-muted-foreground hover:text-white hover:border-white`;
 const STEP_LABEL = "font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground mb-3";
 
-export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catalog, onConfirm }: PostGameDialogProps) {
+export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catalog, onConfirm, initialResult }: PostGameDialogProps) {
     const t = useT();
     const [step, setStep] = useState<Step>('result');
     const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
@@ -102,6 +104,24 @@ export function PostGameDialog({ open, onClose, campaign, activeMatchTeam, catal
 
     // Street cred before
     const scBefore = MathService.calculateCampaignStreetCred(campaign, catalog);
+
+    // Reset wizard state each time the dialog opens; honor a pre-selected result
+    useEffect(() => {
+        if (!open) return;
+        setPromotionChoice('decline');
+        setSelectedPromoteId(null);
+        setSelectedMercLineageId(null);
+        setCasualtyDecisions({});
+        if (initialResult) {
+            setMatchResult(initialResult);
+            if (initialResult === 'victory') setStep('promotion');
+            else setStep(casualties.length > 0 ? 'casualties' : 'summary');
+        } else {
+            setMatchResult(null);
+            setStep('result');
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, initialResult]);
 
     // ── Navigation ──
 

@@ -18,6 +18,7 @@ import { useCyberConfirm } from '@/components/ui/CyberConfirm';
 import { TokenShape } from '@/components/play/TokenShape';
 import { ActionDock } from '@/components/play/ActionDock';
 import { MatchFX, type MatchFXEvent } from '@/components/play/MatchFX';
+import { MatchResultScreen } from '@/components/play/MatchResultScreen';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { LootTile } from '@/components/shared/LootTile';
@@ -182,6 +183,8 @@ export function ActiveMatchView() {
     // UI-only state (not persisted)
     const [selectedToken, setSelectedToken] = useState<{ recruitId: string; index: number } | null>(null);
     const [showPostGame, setShowPostGame] = useState(false);
+    const [showResultScreen, setShowResultScreen] = useState(false);
+    const [matchResult, setMatchResult] = useState<'victory' | 'defeat' | undefined>(undefined);
     const { confirm: confirmAction, confirmDialog } = useCyberConfirm();
 
     // Match cinematics (UI-only) — full-screen overlay + per-card animation
@@ -645,6 +648,12 @@ export function ActiveMatchView() {
 
     const handleEndMatch = async () => {
         if (!(await confirmAction({ title: t('confirm.endMatchTitle'), description: t('confirm.endMatchDescription'), variant: 'warning' }))) return;
+        setShowResultScreen(true);
+    };
+
+    const handleResultSelected = (result: 'victory' | 'defeat') => {
+        setMatchResult(result);
+        setShowResultScreen(false);
         setShowPostGame(true);
     };
 
@@ -1204,6 +1213,11 @@ export function ActiveMatchView() {
             </DialogContent>
         </Dialog>
 
+        <MatchResultScreen
+            open={showResultScreen}
+            onSelect={handleResultSelected}
+            onCancel={() => setShowResultScreen(false)}
+        />
         {campaign && activeMatchTeam && (
             <PostGameDialog
                 open={showPostGame}
@@ -1212,6 +1226,7 @@ export function ActiveMatchView() {
                 activeMatchTeam={activeMatchTeam}
                 catalog={catalog}
                 onConfirm={handlePostGameConfirm}
+                initialResult={matchResult}
             />
         )}
         {selectedToken && (() => {
