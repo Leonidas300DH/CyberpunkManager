@@ -12,16 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Edit, Trash2 } from 'lucide-react';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { CharacterCard } from '@/components/characters/CharacterCard';
-
-// ── Skill icons (same as CharacterCard) ──
-const SKILL_ICONS: Record<string, { src: string; color: string }> = {
-    Ranged:    { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png',    color: '#9333ea' },
-    Melee:     { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png',     color: '#a855f7' },
-    Reflexes:  { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png',  color: '#d946ef' },
-    Medical:   { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png',   color: '#ec4899' },
-    Tech:      { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png',      color: '#8b5cf6' },
-    Influence: { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png', color: '#c026d3' },
-};
+import { SKILL_ICONS } from '@/lib/constants/skills';
 
 // ── Range arrows (same coordinates as CharacterCard) ──
 const RA = {

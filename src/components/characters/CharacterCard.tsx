@@ -5,6 +5,7 @@ import { ModelLineage, ModelProfile, SkillType, RangeType, Weapon } from '@/type
 import { GLOSSARY_HIGHLIGHT_REGEX, REACT_TERM_REGEX, findGlossaryEntry } from '@/lib/glossary';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
+import { SKILL_ICONS, SKILL_ORDER } from '@/lib/constants/skills';
 import { useLocalized } from '@/i18n';
 import { Edit, Trash2 } from 'lucide-react';
 
@@ -127,19 +128,6 @@ function formatCardText(text: string, keyBase: number): React.ReactNode[] {
     }
     return result;
 }
-
-// ── Config ──
-
-const SKILL_ICONS: Record<string, { src: string; color: string }> = {
-    Ranged:    { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png',    color: '#9333ea' },
-    Melee:     { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png',     color: '#a855f7' },
-    Reflexes:  { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png',  color: '#d946ef' },
-    Medical:   { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png',   color: '#ec4899' },
-    Tech:      { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png',      color: '#8b5cf6' },
-    Influence: { src: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png', color: '#c026d3' },
-};
-
-const SKILL_ORDER: SkillType[] = ['Ranged', 'Melee', 'Reflexes', 'Medical', 'Tech', 'Influence'];
 
 // ── Sub-components ──
 

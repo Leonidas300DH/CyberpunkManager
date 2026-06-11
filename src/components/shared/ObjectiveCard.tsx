@@ -5,6 +5,7 @@ import { useStore } from '@/store/useStore';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useLocalized, useT } from '@/i18n';
 import type { Objective } from '@/types';
+import { SKILL_ICON_LOCAL as SKILL_ICON } from '@/lib/constants/skills';
 
 export const FACTION_COLOR_MAP: Record<string, string> = {
     'faction-arasaka': 'border-red-600',
@@ -65,15 +66,6 @@ export const REWARD_BADGE: Record<string, { cls: string }> = {
     recycle:   { cls: 'bg-amber-600 text-white' },
     cybergear: { cls: 'bg-cyan-600 text-white' },
     immediate: { cls: 'bg-red-600 text-white' },
-};
-
-const SKILL_ICON: Record<string, string> = {
-    Reflexes: '/images/Skills Icons/reflexes.png',
-    Ranged: '/images/Skills Icons/ranged.png',
-    Melee: '/images/Skills Icons/melee.png',
-    Medical: '/images/Skills Icons/medical.png',
-    Tech: '/images/Skills Icons/tech.png',
-    Influence: '/images/Skills Icons/influence.png',
 };
 
 const COLOR_WORDS: Record<string, string> = {

@@ -7,6 +7,7 @@ import { ProgramCard } from '@/components/programs/ProgramCard';
 import { useT, useLocalized } from '@/i18n';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { WeaponCard, FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
+import { SKILL_ICON } from '@/lib/constants/skills';
 import { formatCardText } from '@/lib/formatCardText';
 import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -863,7 +864,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                 {gearViewMode === 'list' && (() => {
                     const renderListCard = (weapon: Weapon, variant: FactionVariant, chevron?: 'expand' | 'collapse', variantCount?: number) => {
                         const showRange = weapon.rangeRed || weapon.rangeYellow || weapon.rangeGreen || weapon.rangeLong;
-                        const skillIcon = weapon.skillReq ? ({ Reflexes: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png', Ranged: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png', Melee: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png', Medical: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png', Tech: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png', Influence: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png' }[weapon.skillReq] ?? null) : null;
+                        const skillIcon = weapon.skillReq ? (SKILL_ICON[weapon.skillReq] ?? null) : null;
                         const variantFactionName = variant.factionId === 'universal' ? 'Universal' : (catalog.factions.find(f => f.id === variant.factionId)?.name ?? variant.factionId);
                         const variantTextColor = FACTION_TEXT_COLOR_MAP[variant.factionId] ?? 'text-gray-500';
                         return (

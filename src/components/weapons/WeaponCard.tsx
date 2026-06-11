@@ -7,16 +7,7 @@ import { formatCardText } from '@/lib/formatCardText';
 import { useLocalized } from '@/i18n';
 import { Edit, Trash2 } from 'lucide-react';
 import { getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
-
-// --- Skill icon URLs (same as ArmoryContent) ---
-const SKILL_ICONS: Record<string, string> = {
-    Reflexes: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png',
-    Ranged: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png',
-    Melee: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png',
-    Medical: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png',
-    Tech: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png',
-    Influence: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png',
-};
+import { SKILL_ICON as SKILL_ICONS } from '@/lib/constants/skills';
 
 // --- Range arrow constants (single set — must match all 4 files) ---
 const AP = {

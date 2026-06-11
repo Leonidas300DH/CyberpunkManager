@@ -3,6 +3,7 @@
 import { Loot } from '@/types';
 import { Shield } from 'lucide-react';
 import { useLocalized } from '@/i18n';
+import { SKILL_ICON } from '@/lib/constants/skills';
 
 const OFF = 'rgba(100,100,100,0.35)';
 const OFF_STROKE = 'rgba(255,255,255,0.3)';
@@ -14,15 +15,6 @@ const PTS = {
     green:  '103,1 145,1 150,11 145,21 103,21 108,11',
     long:   '153,1 218,1 223,11 218,21 153,21 158,11',
     plusCx: 188,
-};
-
-const SKILL_ICON: Record<string, string> = {
-    Reflexes: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png',
-    Ranged: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png',
-    Melee: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png',
-    Medical: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png',
-    Tech: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png',
-    Influence: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png',
 };
 
 interface LootTileProps {

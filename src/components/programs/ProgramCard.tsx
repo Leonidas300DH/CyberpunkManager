@@ -9,6 +9,7 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { CodeRainCanvas } from '@/components/effects/CodeRainCanvas';
 import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
+import { SKILL_ICON } from '@/lib/constants/skills';
 
 const RELOAD_KEY: Record<string, string> = {
     Inspire:  'program.reloadInspire',
@@ -304,7 +305,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
                         {/* Purple Hexagon — Tech Test */}
                         {program.techTest && (
                             <img
-                                src="https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png"
+                                src={SKILL_ICON.Tech}
                                 alt="Tech"
                                 className="w-[18%] object-contain shrink-0"
                             />

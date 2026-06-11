@@ -4,6 +4,7 @@ import { Weapon } from '@/types';
 import { resolveVariant, getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 import { formatCardText } from '@/lib/formatCardText';
 import { FACTION_SIDEBAR_COLOR } from '@/components/weapons/WeaponCard';
+import { SKILL_ICON } from '@/lib/constants/skills';
 import { useLocalized } from '@/i18n';
 
 const OFF = 'rgba(100,100,100,0.35)';
@@ -56,15 +57,6 @@ interface WeaponTileProps {
     campaignStreetCred?: number;
     equippedCount?: number;
 }
-
-const SKILL_ICON: Record<string, string> = {
-    Reflexes: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/reflexes.png',
-    Ranged: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/ranged.png',
-    Melee: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/melee.png',
-    Medical: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/medical.png',
-    Tech: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/tech.png',
-    Influence: 'https://nknlxlmmliccsfsndnba.supabase.co/storage/v1/object/public/app-images/skills/influence.png',
-};
 
 export function WeaponTile({ weapon, variantFactionId, activeFactionId, overlay, campaignStreetCred, equippedCount }: WeaponTileProps) {
     const loc = useLocalized();
