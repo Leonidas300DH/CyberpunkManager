@@ -11,6 +11,7 @@ import { CodeRainCanvas } from '@/components/effects/CodeRainCanvas';
 import { GlitchCanvas } from '@/components/effects/GlitchCanvas';
 import { SKILL_ICON } from '@/lib/constants/skills';
 import { RangeArrows, programRangeToSegments } from '@/components/shared/RangeArrows';
+import { useAutoNameSize, useAutoFontSize } from '@/hooks/useAutoFontSize';
 
 const RELOAD_KEY: Record<string, string> = {
     Inspire:  'program.reloadInspire',
@@ -139,79 +140,11 @@ function formatCardText(text: string): React.ReactNode[] {
     return result;
 }
 
-/* ── Auto-shrink vertical name to prevent 2-line wrapping ──────── */
-const NAME_BASE = 20;  // text-xl = 20px
-const NAME_MIN  = 11;
-const NAME_STEP = 0.5;
-
-function useAutoNameSize(name: string) {
-    const ref = useRef<HTMLSpanElement>(null);
-    const [size, setSize] = useState(NAME_BASE);
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-        let s = NAME_BASE;
-        el.style.fontSize = `${s}px`;
-        while (el.scrollWidth > s * 1.4 && s > NAME_MIN) {
-            s -= NAME_STEP;
-            el.style.fontSize = `${s}px`;
-        }
-        setSize(s);
-    }, [name]);
-
-    return { nameRef: ref, nameSize: size };
-}
-
 interface ProgramCardProps {
     program: HackingProgram;
     side: 'front' | 'back';
     enableCodeRain?: boolean;
     isFlipped?: boolean;
-}
-
-const BASE_FONT = 16;
-const MIN_FONT = 10;
-const BOTTOM_MARGIN = 5;  // % of card height
-const MAX_BOX_PCT = 80;   // % of card height (minus margins) before shrinking font
-
-/**
- * Let text box grow freely up to MAX_BOX_PCT of usable card height.
- * Only shrink font if text still overflows at that limit.
- */
-function useAutoFontSize(deps: unknown[]) {
-    const cardRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
-    const [fontSize, setFontSize] = useState(BASE_FONT);
-
-    const recalc = useCallback(() => {
-        const card = cardRef.current;
-        const text = textRef.current;
-        if (!card || !text) return;
-        const cardH = card.clientHeight;
-        // Usable height = card minus bottom margin (5%)
-        const usableH = cardH * (1 - BOTTOM_MARGIN / 100);
-        // Max text box height = 80% of usable height
-        const maxH = usableH * (MAX_BOX_PCT / 100);
-        // Start at base font — only shrink if text exceeds max box
-        let size = BASE_FONT;
-        text.style.fontSize = `${size}px`;
-        while (text.scrollHeight > maxH && size > MIN_FONT) {
-            size -= 0.5;
-            text.style.fontSize = `${size}px`;
-        }
-        setFontSize(size);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, deps);
-
-    useEffect(() => {
-        recalc();
-        const ro = new ResizeObserver(recalc);
-        if (cardRef.current) ro.observe(cardRef.current);
-        return () => ro.disconnect();
-    }, [recalc]);
-
-    return { cardRef, textRef, fontSize };
 }
 
 export function ProgramCard({ program, side, enableCodeRain, isFlipped }: ProgramCardProps) {
@@ -229,7 +162,7 @@ export function ProgramCard({ program, side, enableCodeRain, isFlipped }: Progra
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const reloadText = reloadKey ? t(reloadKey as any) : '';
 
-    const { cardRef, textRef, fontSize } = useAutoFontSize([program.id, side]);
+    const { cardRef, textRef, fontSize } = useAutoFontSize([program.id, side], { base: 16, min: 10 });
 
     // Quality → sidebar gradient (white top → color bottom)
     const sidebarColor = program.quality === 'Red'

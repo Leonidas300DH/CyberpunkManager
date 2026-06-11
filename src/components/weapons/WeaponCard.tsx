@@ -10,77 +10,9 @@ import { getWeaponImageUrl, WEAPON_IMG_DEFAULT } from '@/lib/variants';
 import { SKILL_ICON as SKILL_ICONS } from '@/lib/constants/skills';
 import { RangeArrows } from '@/components/shared/RangeArrows';
 import { FACTION_TEXT_CLASS as FACTION_TEXT_COLOR_MAP, getSidebarGradient } from '@/lib/constants/factionColors';
+import { useAutoNameSize, useAutoFontSize } from '@/hooks/useAutoFontSize';
 
 const DEFAULT_WEAPON_IMAGE = WEAPON_IMG_DEFAULT;
-
-/* ── Auto-shrink vertical name to prevent 2-line wrapping ──────── */
-const NAME_BASE = 20;  // text-xl = 20px
-const NAME_MIN  = 11;  // smallest allowed
-const NAME_STEP = 0.5;
-
-function useAutoNameSize(name: string) {
-    const ref = useRef<HTMLSpanElement>(null);
-    const [size, setSize] = useState(NAME_BASE);
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-        // In writing-mode: vertical-rl, wrapping adds width.
-        // A single line width ≈ fontSize * 1.3 (with stroke/tracking).
-        let s = NAME_BASE;
-        el.style.fontSize = `${s}px`;
-        while (el.scrollWidth > s * 1.4 && s > NAME_MIN) {
-            s -= NAME_STEP;
-            el.style.fontSize = `${s}px`;
-        }
-        setSize(s);
-    }, [name]);
-
-    return { nameRef: ref, nameSize: size };
-}
-
-// --- Auto font size (same logic as ProgramCard) ---
-const BASE_FONT = 14;
-const MIN_FONT = 9;
-const BOTTOM_MARGIN = 5;
-const MAX_BOX_PCT = 80;
-
-function useAutoFontSize(deps: unknown[]) {
-    const cardRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
-    const [fontSize, setFontSize] = useState(BASE_FONT);
-
-    const recalc = useCallback(() => {
-        const card = cardRef.current;
-        const text = textRef.current;
-        if (!card || !text) return;
-        const cardH = card.clientHeight;
-        const usableH = cardH * (1 - BOTTOM_MARGIN / 100);
-        const maxH = usableH * (MAX_BOX_PCT / 100);
-        let size = BASE_FONT;
-        text.style.fontSize = `${size}px`;
-        while (text.scrollHeight > maxH && size > MIN_FONT) {
-            size -= 0.5;
-            text.style.fontSize = `${size}px`;
-        }
-        // If text box is small (<15% of card height), bump font +1pt
-        if (cardH > 0 && text.scrollHeight < cardH * 0.15 && size + 1 <= BASE_FONT) {
-            size += 1;
-            text.style.fontSize = `${size}px`;
-        }
-        setFontSize(size);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, deps);
-
-    useEffect(() => {
-        recalc();
-        const ro = new ResizeObserver(recalc);
-        if (cardRef.current) ro.observe(cardRef.current);
-        return () => ro.disconnect();
-    }, [recalc]);
-
-    return { cardRef, textRef, fontSize };
-}
 
 interface WeaponCardProps {
     weapon: Weapon;
@@ -93,7 +25,7 @@ interface WeaponCardProps {
 export function WeaponCard({ weapon, variant, isAdmin, onEdit, onDelete }: WeaponCardProps) {
     const { catalog } = useStore();
     const loc = useLocalized();
-    const { cardRef, textRef, fontSize } = useAutoFontSize([weapon.id, variant.factionId]);
+    const { cardRef, textRef, fontSize } = useAutoFontSize([weapon.id, variant.factionId], { base: 14, min: 9, bumpWhenSmall: true });
     const weaponName = loc(weapon as unknown as Record<string, unknown>, 'name');
     const { nameRef, nameSize } = useAutoNameSize(weaponName);
 
