@@ -6,7 +6,7 @@ import { useStore } from '@/store/useStore';
 import { useT, useLocalized } from '@/i18n';
 import { Weapon, HackingProgram, Loot, TokenState, ProgramQuality } from '@/types';
 import { parseEquipmentId, resolveVariant } from '@/lib/variants';
-import { Swords, Skull, Zap, Heart, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal, Gift } from 'lucide-react';
+import { Swords, Skull, Zap, Heart, RotateCw, Cross, Minus, Plus, GripVertical, List, Square, Eye, EyeOff, ChevronDown, Rows3, Columns3, Terminal, Gift } from 'lucide-react';
 import { ObjectiveHand } from '@/components/play/ObjectiveHand';
 import { PostGameDialog } from '@/components/play/PostGameDialog';
 import { MatchLogEntry } from '@/types';
@@ -16,7 +16,6 @@ import { FACTION_BORDER_CLASS as FACTION_COLOR_MAP } from '@/lib/constants/facti
 import { notifySuccess, notifyInfo } from '@/lib/notify';
 import { useCyberConfirm } from '@/components/ui/CyberConfirm';
 import { TokenShape } from '@/components/play/TokenShape';
-import { ActionDock } from '@/components/play/ActionDock';
 import { MatchFX, type MatchFXEvent } from '@/components/play/MatchFX';
 import { MatchResultScreen } from '@/components/play/MatchResultScreen';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -45,6 +44,30 @@ import {
     arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+
+// ── Tiny contextual action button (next to selected token) ──
+
+function ActionBtn({
+    onClick,
+    title,
+    borderColor,
+    children,
+}: {
+    onClick: (e: React.MouseEvent) => void;
+    title: string;
+    borderColor: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <button
+            onClick={onClick}
+            title={title}
+            className={`w-[28px] h-[28px] bg-black/90 border flex items-center justify-center transition-colors hover:brightness-150 ${borderColor}`}
+        >
+            {children}
+        </button>
+    );
+}
 
 // ── Sortable wrapper for equipped items (reorder + transfer) ──
 
@@ -944,11 +967,37 @@ export function ActiveMatchView() {
                                     {tokens.map((token, idx) => {
                                         const displayColor = getDisplayColor(token);
                                         const isSel = selectedToken?.recruitId === recruit.id && selectedToken?.index === idx;
+                                        const canWound = token.baseColor !== 'red' && !token.wounded;
                                         return (
                                             <React.Fragment key={idx}>
                                                 {idx > 0 && <div className="-my-[3px] w-px h-2.5 bg-black/70 z-10" />}
-                                                <TokenShape color={displayColor} spent={token.spent} selected={isSel} size={40}
-                                                    onClick={(e) => { e.stopPropagation(); isSel ? setSelectedToken(null) : setSelectedToken({ recruitId: recruit.id, index: idx }); }} />
+                                                <div className="relative flex items-center">
+                                                    <TokenShape color={displayColor} spent={token.spent} selected={isSel} size={40}
+                                                        onClick={(e) => { e.stopPropagation(); isSel ? setSelectedToken(null) : setSelectedToken({ recruitId: recruit.id, index: idx }); }} />
+                                                    {isSel && (
+                                                        <div className="absolute left-full ml-1 flex gap-[3px] z-40">
+                                                            {!token.spent ? (
+                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); spendToken(recruit.id, idx); }} title={t('play.spend')} borderColor="border-white/40">
+                                                                    <svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M2 6.5L5 9.5L10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" /></svg>
+                                                                </ActionBtn>
+                                                            ) : (
+                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); reactivateToken(recruit.id, idx); }} title={t('play.reactivate')} borderColor="border-secondary/50">
+                                                                    <RotateCw className="w-3.5 h-3.5 text-secondary" />
+                                                                </ActionBtn>
+                                                            )}
+                                                            {canWound && (
+                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); woundToken(recruit.id, idx); }} title={t('play.wound')} borderColor="border-accent/50">
+                                                                    <Cross className="w-3.5 h-3.5 text-accent" />
+                                                                </ActionBtn>
+                                                            )}
+                                                            {token.wounded && (
+                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); healToken(recruit.id, idx); }} title={t('play.heal')} borderColor="border-green-500/50">
+                                                                    <Heart className="w-3.5 h-3.5 text-green-500" />
+                                                                </ActionBtn>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </React.Fragment>
                                         );
                                     })}
@@ -1219,27 +1268,6 @@ export function ActiveMatchView() {
                 initialResult={matchResult}
             />
         )}
-        {selectedToken && (() => {
-            const recruit = matchRoster.find(r => r.id === selectedToken.recruitId);
-            const token = (tokenStates[selectedToken.recruitId] ?? [])[selectedToken.index];
-            if (!recruit || !token) return null;
-            const profile = getProfile(recruit.currentProfileId);
-            const lineage = profile ? getLineage(profile.lineageId) : null;
-            return (
-                <ActionDock
-                    characterName={lineage ? loc(lineage as unknown as Record<string, unknown>, 'name') : ''}
-                    tokenColor={getDisplayColor(token)}
-                    spent={token.spent}
-                    wounded={!!token.wounded}
-                    canWound={token.baseColor !== 'red' && !token.wounded}
-                    onSpend={() => spendToken(selectedToken.recruitId, selectedToken.index)}
-                    onReactivate={() => reactivateToken(selectedToken.recruitId, selectedToken.index)}
-                    onWound={() => woundToken(selectedToken.recruitId, selectedToken.index)}
-                    onHeal={() => healToken(selectedToken.recruitId, selectedToken.index)}
-                    onDismiss={() => setSelectedToken(null)}
-                />
-            );
-        })()}
         <MatchFX event={fxEvent} />
         {confirmDialog}
         </>
