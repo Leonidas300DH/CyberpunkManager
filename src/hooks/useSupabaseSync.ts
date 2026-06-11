@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStore, TeamBuilderDraft } from '@/store/useStore';
 import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabase';
-import { toast } from 'sonner';
+import { notifySuccess } from '@/lib/notify';
 import type { Campaign, MatchTeam } from '@/types';
 
 interface PlayViewSettings {
@@ -146,7 +146,7 @@ export function useSupabaseSync() {
                         setSyncStatus('synced');
                         // Toast: local campaigns were pushed to Supabase
                         if (localOnlyCampaigns.length > 0) {
-                            toast.success(`${localOnlyCampaigns.length} campaign(s) synced to your account`);
+                            notifySuccess(`${localOnlyCampaigns.length} campaign(s) synced to your account`);
                         }
                     }
                     console.log('[Sync] pushed merged data back to Supabase');
@@ -167,7 +167,7 @@ export function useSupabaseSync() {
                 } else {
                     setSyncStatus('synced');
                     if (localCampaigns.length > 0) {
-                        toast.success(`${localCampaigns.length} campaign(s) synced to your account`);
+                        notifySuccess(`${localCampaigns.length} campaign(s) synced to your account`);
                     }
                 }
                 lastSavedJson.current = JSON.stringify(syncData);

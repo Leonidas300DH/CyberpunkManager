@@ -13,6 +13,8 @@ import { MatchLogEntry } from '@/types';
 import { useRef } from 'react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { FACTION_BORDER_CLASS as FACTION_COLOR_MAP } from '@/lib/constants/factionColors';
+import { notifySuccess, notifyInfo } from '@/lib/notify';
+import { useCyberConfirm } from '@/components/ui/CyberConfirm';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { LootTile } from '@/components/shared/LootTile';
@@ -266,6 +268,7 @@ export function ActiveMatchView() {
     // UI-only state (not persisted)
     const [selectedToken, setSelectedToken] = useState<{ recruitId: string; index: number } | null>(null);
     const [showPostGame, setShowPostGame] = useState(false);
+    const { confirm: confirmAction, confirmDialog } = useCyberConfirm();
 
     // Draw Loot state
     const [showLootDialog, setShowLootDialog] = useState(false);
@@ -525,8 +528,10 @@ export function ActiveMatchView() {
         map[lootAssignTarget] = [...existingEquip, equipId];
         const drawnIds = [...(activeMatchTeam.drawnLootIds ?? []), drawnLoot.id];
         setActiveMatchTeam({ ...activeMatchTeam, equipmentMap: map, drawnLootIds: drawnIds });
+        notifySuccess(t('notify.lootAcquired'), drawnLoot.name);
         setShowLootDialog(false);
         setDrawnLoot(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [drawnLoot, lootAssignTarget, activeMatchTeam, setActiveMatchTeam]);
 
     // Non-KIA recruits for loot assignment
@@ -701,7 +706,10 @@ export function ActiveMatchView() {
         );
     }
 
-    const handleEndMatch = () => setShowPostGame(true);
+    const handleEndMatch = async () => {
+        if (!(await confirmAction({ title: t('confirm.endMatchTitle'), description: t('confirm.endMatchDescription'), variant: 'warning' }))) return;
+        setShowPostGame(true);
+    };
 
     const handlePostGameConfirm = (updates: Partial<typeof campaign & Record<string, unknown>>, _logEntry: MatchLogEntry) => {
         if (campaign) {
@@ -1286,6 +1294,7 @@ export function ActiveMatchView() {
                 onConfirm={handlePostGameConfirm}
             />
         )}
+        {confirmDialog}
         </>
     );
 }

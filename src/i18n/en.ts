@@ -318,6 +318,7 @@ export const en: Translations = {
     'notify.saved': 'Database updated',
     'notify.deleted': 'Entry purged',
     'notify.saveFailed': 'Sync failed — change saved locally only',
+    'notify.insufficientFunds': 'Insufficient funds',
 
     // ── Empty states ──
     'empty.rosterTitle': 'No operatives',

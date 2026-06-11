@@ -318,6 +318,7 @@ export const fr: Translations = {
     'notify.saved': 'Base de données mise à jour',
     'notify.deleted': 'Entrée purgée',
     'notify.saveFailed': 'Échec de sync — changement sauvegardé localement uniquement',
+    'notify.insufficientFunds': 'Fonds insuffisants',
 
     // ── Empty states ──
     'empty.rosterTitle': 'Aucun opérateur',

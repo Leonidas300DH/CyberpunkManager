@@ -350,6 +350,7 @@ export type Translations = {
     'notify.saved': string;
     'notify.deleted': string;
     'notify.saveFailed': string;
+    'notify.insufficientFunds': string;
 
     // ── Empty states ──
     'empty.rosterTitle': string;

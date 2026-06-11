@@ -10,6 +10,7 @@ import { useCardGrid } from '@/hooks/useCardGrid';
 import { v4 as uuidv4 } from 'uuid';
 import { canHaveTiers, getRecruitBudgetCost, getSurchargeForLevel, getTierLabel } from '@/lib/tiers';
 import { useT } from '@/i18n';
+import { notifySuccess, notifyInfo, notifyError } from '@/lib/notify';
 import {
     DndContext,
     DragOverlay,
@@ -84,7 +85,11 @@ export function RosterList({ campaign }: RosterListProps) {
         const baseProfile = getBaseProfile(lineageId);
         const baseCost = baseProfile?.costEB ?? profile.costEB;
         const totalCost = baseCost + getSurchargeForLevel(level, catalog);
-        if (campaign.ebBank < totalCost) return;
+        const lineageName = getLineage(lineageId)?.name ?? '';
+        if (campaign.ebBank < totalCost) {
+            notifyError(t('notify.insufficientFunds'), `${totalCost} EB > ${campaign.ebBank} EB`);
+            return;
+        }
 
         updateCampaign(campaign.id, {
             hqRoster: [...campaign.hqRoster, {
@@ -98,17 +103,20 @@ export function RosterList({ campaign }: RosterListProps) {
             }],
             ebBank: campaign.ebBank - totalCost,
         });
+        notifySuccess(t('notify.recruited'), `${lineageName} · -${totalCost} EB`);
     };
 
     const handleDismiss = (recruitId: string) => {
         const recruit = campaign.hqRoster.find(r => r.id === recruitId);
         if (!recruit) return;
         const refund = getRecruitBudgetCost(recruit, catalog);
+        const lineageName = getLineage(recruit.lineageId)?.name ?? '';
 
         updateCampaign(campaign.id, {
             hqRoster: campaign.hqRoster.filter(r => r.id !== recruitId),
             ebBank: campaign.ebBank + refund,
         });
+        notifyInfo(t('notify.dismissed'), `${lineageName} · ${t('notify.refunded', { amount: refund })}`);
     };
 
     const factionName = catalog.factions.find(f => f.id === campaign.factionId)?.name ?? 'Faction';

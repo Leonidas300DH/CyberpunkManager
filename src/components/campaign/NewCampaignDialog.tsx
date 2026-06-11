@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { v4 as uuidv4 } from 'uuid';
 import { useT } from '@/i18n';
+import { notifySuccess } from '@/lib/notify';
 
 interface NewCampaignDialogProps {
     onCampaignCreated?: (id: string) => void;
@@ -37,6 +38,7 @@ export function NewCampaignDialog({ onCampaignCreated, trigger }: NewCampaignDia
         };
 
         addCampaign(newCampaign);
+        notifySuccess(t('notify.campaignCreated'), `${name} · 500 EB`);
         setIsOpen(false);
         setName('');
         setFactionId('');
