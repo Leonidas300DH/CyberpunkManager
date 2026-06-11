@@ -15,6 +15,8 @@ import { useCardGrid } from '@/hooks/useCardGrid';
 import { FACTION_BORDER_CLASS as FACTION_COLOR_MAP } from '@/lib/constants/factionColors';
 import { notifySuccess, notifyInfo } from '@/lib/notify';
 import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { TokenShape } from '@/components/play/TokenShape';
+import { ActionDock } from '@/components/play/ActionDock';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { WeaponTile } from '@/components/shared/WeaponTile';
 import { LootTile } from '@/components/shared/LootTile';
@@ -40,95 +42,6 @@ import {
     arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-
-// ── Token Shape (interactive, rendered on card) ──
-
-function TokenShape({
-    color,
-    spent,
-    size = 31,
-    selected = false,
-    onClick,
-}: {
-    color: 'green' | 'yellow' | 'red';
-    spent: boolean;
-    size?: number;
-    selected?: boolean;
-    onClick?: (e: React.MouseEvent) => void;
-}) {
-    const fills: Record<string, { active: string; dim: string; stroke: string }> = {
-        green:  { active: '#22c55e', dim: '#0f3d1e', stroke: '#166534' },
-        yellow: { active: '#eab308', dim: '#3d3003', stroke: '#854d0e' },
-        red:    { active: '#dc2626', dim: '#3d0a0a', stroke: '#991b1b' },
-    };
-    const { active, dim, stroke } = fills[color];
-    const fill = spent ? dim : active;
-    const strokeColor = spent ? stroke : 'black';
-    const glow = !spent ? `drop-shadow(0 0 3px ${active}80)` : 'none';
-    const selGlow = selected ? `drop-shadow(0 0 6px white)` : glow;
-
-    if (color === 'green') {
-        const cx = size / 2, cy = size / 2, r = size * 0.42;
-        const pts = Array.from({ length: 5 }, (_, i) => {
-            const angle = (2 * Math.PI / 5) * i + Math.PI / 2;
-            return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
-        }).join(' ');
-        return (
-            <button className="transition-transform" style={{ transform: selected ? 'scale(1.2)' : undefined }} onClick={onClick}>
-                <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: selGlow }}>
-                    <polygon points={pts} fill={fill} stroke={strokeColor} strokeWidth="1.2" />
-                </svg>
-            </button>
-        );
-    }
-
-    if (color === 'yellow') {
-        const s = size;
-        const pts = `${s * 0.1},${s * 0.15} ${s * 0.9},${s * 0.15} ${s * 0.5},${s * 0.88}`;
-        return (
-            <button className="transition-transform" style={{ transform: selected ? 'scale(1.2)' : undefined }} onClick={onClick}>
-                <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: selGlow }}>
-                    <polygon points={pts} fill={fill} stroke={strokeColor} strokeWidth="1.2" />
-                </svg>
-            </button>
-        );
-    }
-
-    // Red: square
-    const inset = size * 0.12;
-    return (
-        <button className="transition-transform" style={{ transform: selected ? 'scale(1.2)' : undefined }} onClick={onClick}>
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: selGlow }}>
-                <rect x={inset} y={inset} width={size - inset * 2} height={size - inset * 2}
-                    fill={fill} stroke={strokeColor} strokeWidth="1.2" rx="2" />
-            </svg>
-        </button>
-    );
-}
-
-// ── Tiny Action Button ──
-
-function ActionBtn({
-    onClick,
-    title,
-    borderColor,
-    children,
-}: {
-    onClick: (e: React.MouseEvent) => void;
-    title: string;
-    borderColor: string;
-    children: React.ReactNode;
-}) {
-    return (
-        <button
-            onClick={onClick}
-            title={title}
-            className={`w-[22px] h-[22px] bg-black/90 border flex items-center justify-center transition-colors hover:brightness-150 ${borderColor}`}
-        >
-            {children}
-        </button>
-    );
-}
 
 // ── Sortable wrapper for equipped items (reorder + transfer) ──
 
@@ -999,37 +912,11 @@ export function ActiveMatchView() {
                                     {tokens.map((token, idx) => {
                                         const displayColor = getDisplayColor(token);
                                         const isSel = selectedToken?.recruitId === recruit.id && selectedToken?.index === idx;
-                                        const canWound = token.baseColor !== 'red' && !token.wounded;
                                         return (
                                             <React.Fragment key={idx}>
                                                 {idx > 0 && <div className="-my-[3px] w-px h-2.5 bg-black/70 z-10" />}
-                                                <div className="relative flex items-center">
-                                                    <TokenShape color={displayColor} spent={token.spent} selected={isSel} size={31}
-                                                        onClick={(e) => { e.stopPropagation(); isSel ? setSelectedToken(null) : setSelectedToken({ recruitId: recruit.id, index: idx }); }} />
-                                                    {isSel && (
-                                                        <div className="absolute left-full ml-1 flex gap-[3px] z-40">
-                                                            {!token.spent ? (
-                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); spendToken(recruit.id, idx); }} title={t('play.activateModel')} borderColor="border-white/40">
-                                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5L5 9.5L10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" /></svg>
-                                                                </ActionBtn>
-                                                            ) : (
-                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); reactivateToken(recruit.id, idx); }} title={t('play.activateModel')} borderColor="border-secondary/50">
-                                                                    <RotateCw className="w-3 h-3 text-secondary" />
-                                                                </ActionBtn>
-                                                            )}
-                                                            {canWound && (
-                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); woundToken(recruit.id, idx); }} title={t('play.wound')} borderColor="border-accent/50">
-                                                                    <Cross className="w-3 h-3 text-accent" />
-                                                                </ActionBtn>
-                                                            )}
-                                                            {token.wounded && (
-                                                                <ActionBtn onClick={(e) => { e.stopPropagation(); healToken(recruit.id, idx); }} title={t('play.heal')} borderColor="border-green-500/50">
-                                                                    <Heart className="w-3 h-3 text-green-500" />
-                                                                </ActionBtn>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <TokenShape color={displayColor} spent={token.spent} selected={isSel} size={40}
+                                                    onClick={(e) => { e.stopPropagation(); isSel ? setSelectedToken(null) : setSelectedToken({ recruitId: recruit.id, index: idx }); }} />
                                             </React.Fragment>
                                         );
                                     })}
@@ -1294,6 +1181,27 @@ export function ActiveMatchView() {
                 onConfirm={handlePostGameConfirm}
             />
         )}
+        {selectedToken && (() => {
+            const recruit = matchRoster.find(r => r.id === selectedToken.recruitId);
+            const token = (tokenStates[selectedToken.recruitId] ?? [])[selectedToken.index];
+            if (!recruit || !token) return null;
+            const profile = getProfile(recruit.currentProfileId);
+            const lineage = profile ? getLineage(profile.lineageId) : null;
+            return (
+                <ActionDock
+                    characterName={lineage ? loc(lineage as unknown as Record<string, unknown>, 'name') : ''}
+                    tokenColor={getDisplayColor(token)}
+                    spent={token.spent}
+                    wounded={!!token.wounded}
+                    canWound={token.baseColor !== 'red' && !token.wounded}
+                    onSpend={() => spendToken(selectedToken.recruitId, selectedToken.index)}
+                    onReactivate={() => reactivateToken(selectedToken.recruitId, selectedToken.index)}
+                    onWound={() => woundToken(selectedToken.recruitId, selectedToken.index)}
+                    onHeal={() => healToken(selectedToken.recruitId, selectedToken.index)}
+                    onDismiss={() => setSelectedToken(null)}
+                />
+            );
+        })()}
         {confirmDialog}
         </>
     );

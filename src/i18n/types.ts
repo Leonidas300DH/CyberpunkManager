@@ -332,6 +332,10 @@ export type Translations = {
     'common.yes': string;
     'common.no': string;
 
+    // ── Action dock (play) ──
+    'play.spend': string;
+    'play.reactivate': string;
+
     // ── CyberConfirm dialogs ──
     'confirm.securityOverride': string;
     'confirm.confirmationRequired': string;

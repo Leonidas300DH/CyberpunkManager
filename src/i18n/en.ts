@@ -300,6 +300,10 @@ export const en: Translations = {
     'common.yes': 'Yes',
     'common.no': 'No',
 
+    // ── Action dock (play) ──
+    'play.spend': 'Spend',
+    'play.reactivate': 'Reactivate',
+
     // ── CyberConfirm dialogs ──
     'confirm.securityOverride': 'Security Override Required',
     'confirm.confirmationRequired': 'Confirmation Required',
