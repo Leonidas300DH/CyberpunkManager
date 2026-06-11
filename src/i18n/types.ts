@@ -331,4 +331,28 @@ export type Translations = {
     'common.empty': string;
     'common.yes': string;
     'common.no': string;
+
+    // ── CyberConfirm dialogs ──
+    'confirm.securityOverride': string;
+    'confirm.confirmationRequired': string;
+    'confirm.abort': string;
+    'confirm.deleteDescription': string;
+    'confirm.endMatchTitle': string;
+    'confirm.endMatchDescription': string;
+
+    // ── Notify toasts ──
+    'notify.recruited': string;
+    'notify.dismissed': string;
+    'notify.refunded': string;
+    'notify.campaignCreated': string;
+    'notify.lootAcquired': string;
+    'notify.lootDiscarded': string;
+    'notify.saved': string;
+    'notify.deleted': string;
+    'notify.saveFailed': string;
+
+    // ── Empty states ──
+    'empty.rosterTitle': string;
+    'empty.rosterDescription': string;
+    'empty.objectivesTitle': string;
 };

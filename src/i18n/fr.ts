@@ -299,4 +299,28 @@ export const fr: Translations = {
     'common.empty': 'Rien ici pour le moment.',
     'common.yes': 'Oui',
     'common.no': 'Non',
+
+    // ── CyberConfirm dialogs ──
+    'confirm.securityOverride': 'Contrôle de sécurité requis',
+    'confirm.confirmationRequired': 'Confirmation requise',
+    'confirm.abort': 'Annuler',
+    'confirm.deleteDescription': 'Cette entrée sera définitivement purgée de la base de données. Action irréversible.',
+    'confirm.endMatchTitle': 'Terminer le match',
+    'confirm.endMatchDescription': 'Passer au débriefing post-match ? L\'état du match sera finalisé.',
+
+    // ── Notify toasts ──
+    'notify.recruited': 'Opérateur recruté',
+    'notify.dismissed': 'Opérateur renvoyé',
+    'notify.refunded': '+{amount} EB remboursés',
+    'notify.campaignCreated': 'Campagne initialisée',
+    'notify.lootAcquired': 'Butin acquis',
+    'notify.lootDiscarded': 'Butin défaussé',
+    'notify.saved': 'Base de données mise à jour',
+    'notify.deleted': 'Entrée purgée',
+    'notify.saveFailed': 'Échec de sync — changement sauvegardé localement uniquement',
+
+    // ── Empty states ──
+    'empty.rosterTitle': 'Aucun opérateur',
+    'empty.rosterDescription': 'Recrutez votre première unité dans la liste des factions ci-dessous.',
+    'empty.objectivesTitle': 'Aucun objectif assigné',
 };

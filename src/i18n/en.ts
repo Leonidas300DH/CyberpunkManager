@@ -299,4 +299,28 @@ export const en: Translations = {
     'common.empty': 'Nothing here yet.',
     'common.yes': 'Yes',
     'common.no': 'No',
+
+    // ── CyberConfirm dialogs ──
+    'confirm.securityOverride': 'Security Override Required',
+    'confirm.confirmationRequired': 'Confirmation Required',
+    'confirm.abort': 'Abort',
+    'confirm.deleteDescription': 'This entry will be permanently purged from the database. This cannot be undone.',
+    'confirm.endMatchTitle': 'End Match',
+    'confirm.endMatchDescription': 'Proceed to post-game debriefing? Match state will be finalized.',
+
+    // ── Notify toasts ──
+    'notify.recruited': 'Operative recruited',
+    'notify.dismissed': 'Operative dismissed',
+    'notify.refunded': '+{amount} EB refunded',
+    'notify.campaignCreated': 'Campaign initialized',
+    'notify.lootAcquired': 'Loot acquired',
+    'notify.lootDiscarded': 'Loot discarded',
+    'notify.saved': 'Database updated',
+    'notify.deleted': 'Entry purged',
+    'notify.saveFailed': 'Sync failed — change saved locally only',
+
+    // ── Empty states ──
+    'empty.rosterTitle': 'No operatives',
+    'empty.rosterDescription': 'Recruit your first unit from the faction list below.',
+    'empty.objectivesTitle': 'No objectives assigned',
 };
