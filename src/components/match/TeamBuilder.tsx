@@ -37,6 +37,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useT, useLocalized } from '@/i18n';
+import { useCyberConfirm } from '@/components/ui/CyberConfirm';
 
 interface TeamBuilderProps {
     campaign: Campaign;
@@ -244,6 +245,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
     const { catalog } = useStore();
     const campaignStreetCred = MathService.calculateCampaignStreetCred(campaign, catalog);
     const { gridClass, cardStyle } = useCardGrid();
+    const { confirm: confirmDeploy, confirmDialog } = useCyberConfirm();
     const [filter, setFilter] = useState<FilterType>('all');
     const [squadCollapsed, setSquadCollapsed] = useState(true);
     const [rosterCollapsed, setRosterCollapsed] = useState(true);
@@ -366,6 +368,20 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
 
     const budgetPercent = Math.min(100, Math.round((totalCost / targetEB) * 100));
     const overBudget = totalCost > targetEB;
+    const overBank = totalCost > campaign.ebBank;
+    const bankPercent = targetEB > 0 ? Math.min(100, Math.round((campaign.ebBank / targetEB) * 100)) : 100;
+
+    const handleDeploy = async () => {
+        if (overBudget || overBank) {
+            const ok = await confirmDeploy({
+                title: t('confirm.budgetExceededTitle'),
+                description: t('confirm.budgetExceededDescription'),
+                variant: 'warning',
+            });
+            if (!ok) return;
+        }
+        handleStartMatch();
+    };
 
     // ── Equip picker ──
     const handleEquipPickerOpen = useCallback((equipId: string, e: React.MouseEvent) => {
@@ -610,16 +626,28 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
                                 />
                                 <span className="text-sm font-mono-tech text-muted-foreground">EB</span>
                             </div>
-                            <div className="flex-1 h-1.5 bg-black border border-border min-w-[60px]">
+                            <div className="relative flex-1 h-1.5 bg-black border border-border min-w-[60px]">
                                 <div
-                                    className={`h-full transition-all duration-300 ${overBudget ? 'bg-accent shadow-[0_0_8px_rgba(255,0,60,0.8)]' : 'bg-secondary shadow-[0_0_8px_rgba(0,240,255,0.8)]'}`}
+                                    className={`h-full transition-all duration-300 ${overBudget || overBank ? 'bg-accent shadow-[0_0_8px_rgba(255,0,60,0.8)]' : 'bg-secondary shadow-[0_0_8px_rgba(0,240,255,0.8)]'}`}
                                     style={{ width: `${budgetPercent}%` }}
                                 />
+                                {campaign.ebBank < targetEB && (
+                                    <div
+                                        className="absolute -top-1 -bottom-1 w-px bg-primary shadow-[0_0_6px_rgba(252,238,10,0.9)]"
+                                        style={{ left: `${bankPercent}%` }}
+                                        title={`BANK ${campaign.ebBank} EB`}
+                                    />
+                                )}
                             </div>
+                            {overBank && (
+                                <span className="font-mono-tech text-[10px] uppercase tracking-widest text-accent animate-redlined-pulse shrink-0">
+                                    {t('notify.insufficientFunds')}
+                                </span>
+                            )}
                         </div>
 
                         <button
-                            onClick={handleStartMatch}
+                            onClick={handleDeploy}
                             className={`font-display font-bold text-sm px-5 py-2 clip-corner-br uppercase tracking-widest transition-all flex items-center gap-2 shrink-0 ${
                                 isValid
                                     ? 'bg-primary hover:bg-white text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] active:scale-95'
@@ -1352,6 +1380,7 @@ export function TeamBuilder({ campaign }: TeamBuilderProps) {
             <DragOverlay dropAnimation={null}>
                 {renderDragOverlay()}
             </DragOverlay>
+            {confirmDialog}
         </DndContext>
     );
 }

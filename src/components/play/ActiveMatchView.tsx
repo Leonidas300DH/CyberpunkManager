@@ -11,7 +11,7 @@ import { ObjectiveHand } from '@/components/play/ObjectiveHand';
 import { PostGameDialog } from '@/components/play/PostGameDialog';
 import { MatchLogEntry } from '@/types';
 import { useRef } from 'react';
-import { useCardGrid } from '@/hooks/useCardGrid';
+import { useCardGrid, useEffectiveColumns } from '@/hooks/useCardGrid';
 import { FACTION_BORDER_CLASS as FACTION_COLOR_MAP } from '@/lib/constants/factionColors';
 import { notifySuccess, notifyInfo } from '@/lib/notify';
 import { useCyberConfirm } from '@/components/ui/CyberConfirm';
@@ -156,7 +156,7 @@ export function ActiveMatchView() {
     const loc = useLocalized();
     const { catalog, campaigns, activeMatchTeam, setActiveMatchTeam, updateCampaign, displaySettings, playViewSettings, setPlayViewSettings } = useStore();
     const { gridClass, cardStyle } = useCardGrid();
-    const cardColumns = displaySettings?.cardColumns ?? 4;
+    const cardColumns = useEffectiveColumns();
     // Column width matching CSS grid (gap-4 = 16px) — used for vertical layout
     const cardColW = `calc((100% - ${(cardColumns - 1) * 16}px) / ${cardColumns})`;
 

@@ -313,6 +313,8 @@ export const fr: Translations = {
     'confirm.deleteDescription': 'Cette entrée sera définitivement purgée de la base de données. Action irréversible.',
     'confirm.endMatchTitle': 'Terminer le match',
     'confirm.endMatchDescription': 'Passer au débriefing post-match ? L\'état du match sera finalisé.',
+    'confirm.budgetExceededTitle': 'Budget dépassé',
+    'confirm.budgetExceededDescription': 'Le coût de l\'équipe dépasse les fonds disponibles. Déployer quand même ?',
 
     // ── Notify toasts ──
     'notify.recruited': 'Opérateur recruté',

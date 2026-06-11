@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { useT } from '@/i18n';
 import { FACTION_BORDER_CLASS as FACTION_COLOR_MAP } from '@/lib/constants/factionColors';

@@ -313,6 +313,8 @@ export const en: Translations = {
     'confirm.deleteDescription': 'This entry will be permanently purged from the database. This cannot be undone.',
     'confirm.endMatchTitle': 'End Match',
     'confirm.endMatchDescription': 'Proceed to post-game debriefing? Match state will be finalized.',
+    'confirm.budgetExceededTitle': 'Budget exceeded',
+    'confirm.budgetExceededDescription': 'Team cost exceeds the available funds. Deploy anyway?',
 
     // ── Notify toasts ──
     'notify.recruited': 'Operative recruited',

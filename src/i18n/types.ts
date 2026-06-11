@@ -345,6 +345,8 @@ export type Translations = {
     'confirm.deleteDescription': string;
     'confirm.endMatchTitle': string;
     'confirm.endMatchDescription': string;
+    'confirm.budgetExceededTitle': string;
+    'confirm.budgetExceededDescription': string;
 
     // ── Notify toasts ──
     'notify.recruited': string;
