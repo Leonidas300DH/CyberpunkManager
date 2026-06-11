@@ -14,7 +14,9 @@ import {
     isPlaceholder,
 } from '@/components/shared/ObjectiveCard';
 import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { notify } from '@/lib/notify';
+import { SearchX } from 'lucide-react';
 
 
 const FACTION_SLUG: Record<string, string> = {
@@ -235,10 +237,7 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
             </div>
 
             {filteredObjectives.length === 0 && (
-                <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                    <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('database.noObjectivesFound')}</h3>
-                    <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
-                </div>
+                <EmptyState icon={SearchX} title={t('database.noObjectivesFound')} description={t('database.databaseQueryEmpty')} />
             )}
 
             {/* Edit / Create Dialog */}

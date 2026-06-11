@@ -9,10 +9,11 @@ import { useT, useLocalized } from '@/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Edit, Trash2, Shield } from 'lucide-react';
+import { Edit, Trash2, Shield, SearchX } from 'lucide-react';
 import { SKILL_ICONS } from '@/lib/constants/skills';
 import { RangeArrows } from '@/components/shared/RangeArrows';
 import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { notify } from '@/lib/notify';
 
 function RangeArrowsSmall({ rangeRed, rangeYellow, rangeGreen, rangeLong }: {
@@ -266,9 +267,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
             </div>
 
             {filteredLoots.length === 0 && (
-                <div className="border-2 border-dashed border-border rounded-lg p-12 text-center text-muted-foreground font-mono-tech text-sm uppercase tracking-widest">
-                    {t('database.noLootsFound')}
-                </div>
+                <EmptyState icon={SearchX} title={t('database.noLootsFound')} description={t('database.databaseQueryEmpty')} />
             )}
 
             {/* Edit / Create Dialog */}

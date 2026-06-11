@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useStore } from '@/store/useStore';
 import { supabase } from '@/lib/supabase';
+import { notifyError } from '@/lib/notify';
 import type {
     CatalogData,
     Faction,
@@ -451,19 +452,28 @@ export function useCatalog() {
 
     const saveFaction = useCallback(async (faction: Faction) => {
         const { error } = await supabase.from('factions').upsert(factionToRow(faction));
-        if (error) console.error('[Catalog] saveFaction error:', error.message);
+        if (error) {
+            console.error('[Catalog] saveFaction error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const deleteFaction = useCallback(async (factionId: string) => {
         const { error } = await supabase.from('factions').delete().eq('id', factionId);
-        if (error) console.error('[Catalog] deleteFaction error:', error.message);
+        if (error) {
+            console.error('[Catalog] deleteFaction error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const saveLineage = useCallback(async (lineage: ModelLineage) => {
         const { error } = await supabase.from('lineages').upsert(lineageToRow(lineage));
         if (error) {
             console.error('[Catalog] saveLineage error:', error.message);
-            return;
+            notifyError('Sync failed', error.message);
+            return { error };
         }
         // Sync faction associations
         await supabase.from('lineage_factions').delete().eq('lineage_id', lineage.id);
@@ -472,61 +482,106 @@ export function useCatalog() {
                 lineage.factionIds.map(fid => ({ lineage_id: lineage.id, faction_id: fid }))
             );
         }
+        return { error: null };
     }, []);
 
     const deleteLineage = useCallback(async (lineageId: string) => {
         const { error } = await supabase.from('lineages').delete().eq('id', lineageId);
-        if (error) console.error('[Catalog] deleteLineage error:', error.message);
+        if (error) {
+            console.error('[Catalog] deleteLineage error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const saveProfile = useCallback(async (profile: ModelProfile) => {
         const { error } = await supabase.from('profiles').upsert(profileToRow(profile));
-        if (error) console.error('[Catalog] saveProfile error:', error.message);
+        if (error) {
+            console.error('[Catalog] saveProfile error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const deleteProfile = useCallback(async (profileId: string) => {
         const { error } = await supabase.from('profiles').delete().eq('id', profileId);
-        if (error) console.error('[Catalog] deleteProfile error:', error.message);
+        if (error) {
+            console.error('[Catalog] deleteProfile error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const saveWeapon = useCallback(async (weapon: Weapon) => {
         const { error } = await supabase.from('weapons').upsert(weaponToRow(weapon));
-        if (error) console.error('[Catalog] saveWeapon error:', error.message);
+        if (error) {
+            console.error('[Catalog] saveWeapon error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const deleteWeapon = useCallback(async (weaponId: string) => {
         const { error } = await supabase.from('weapons').delete().eq('id', weaponId);
-        if (error) console.error('[Catalog] deleteWeapon error:', error.message);
+        if (error) {
+            console.error('[Catalog] deleteWeapon error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const saveItem = useCallback(async (item: ItemCard) => {
         const { error } = await supabase.from('items').upsert(itemToRow(item));
-        if (error) console.error('[Catalog] saveItem error:', error.message);
+        if (error) {
+            console.error('[Catalog] saveItem error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const saveProgram = useCallback(async (program: HackingProgram) => {
         const { error } = await supabase.from('programs').upsert(programToRow(program));
-        if (error) console.error('[Catalog] saveProgram error:', error.message);
+        if (error) {
+            console.error('[Catalog] saveProgram error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const saveObjective = useCallback(async (objective: Objective) => {
         const { error } = await supabase.from('objectives').upsert(objectiveToRow(objective));
-        if (error) console.error('[Catalog] saveObjective error:', error.message);
+        if (error) {
+            console.error('[Catalog] saveObjective error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const deleteObjective = useCallback(async (objectiveId: string) => {
         const { error } = await supabase.from('objectives').delete().eq('id', objectiveId);
-        if (error) console.error('[Catalog] deleteObjective error:', error.message);
+        if (error) {
+            console.error('[Catalog] deleteObjective error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const saveLoot = useCallback(async (loot: Loot) => {
         const { error } = await supabase.from('loots').upsert(lootToRow(loot));
-        if (error) console.error('[Catalog] saveLoot error:', error.message);
+        if (error) {
+            console.error('[Catalog] saveLoot error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const deleteLoot = useCallback(async (lootId: string) => {
         const { error } = await supabase.from('loots').delete().eq('id', lootId);
-        if (error) console.error('[Catalog] deleteLoot error:', error.message);
+        if (error) {
+            console.error('[Catalog] deleteLoot error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     const saveTierSurcharges = useCallback(async (surcharges: { veteran: number; elite: number }) => {
@@ -535,7 +590,11 @@ export function useCatalog() {
             value: surcharges,
             updated_at: new Date().toISOString(),
         });
-        if (error) console.error('[Catalog] saveTierSurcharges error:', error.message);
+        if (error) {
+            console.error('[Catalog] saveTierSurcharges error:', error.message);
+            notifyError('Sync failed', error.message);
+        }
+        return { error };
     }, []);
 
     return {

@@ -11,13 +11,14 @@ import { SKILL_ICON } from '@/lib/constants/skills';
 import { FACTION_SIDEBAR_COLOR, FACTION_BORDER_CLASS as FACTION_COLOR_MAP, FACTION_TEXT_CLASS as FACTION_TEXT_COLOR_MAP } from '@/lib/constants/factionColors';
 import { RangeArrows } from '@/components/shared/RangeArrows';
 import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { notify } from '@/lib/notify';
 import { formatCardText } from '@/lib/formatCardText';
 import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, Edit, Trash2, Upload, X as XIcon, FlipVertical2 } from 'lucide-react';
+import { ChevronLeft, Edit, Trash2, Upload, X as XIcon, FlipVertical2, SearchX } from 'lucide-react';
 import { useCardGrid } from '@/hooks/useCardGrid';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
@@ -567,10 +568,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                 )}
 
                 {filteredPrograms.length === 0 && (
-                    <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('database.noResultsFound')}</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
-                    </div>
+                    <EmptyState icon={SearchX} title={t('database.noResultsFound')} description={t('database.databaseQueryEmpty')} />
                 )}
 
                 {/* Program Edit/Create Dialog */}
@@ -1029,10 +1027,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                 })()}
 
                 {variantCards.length === 0 && (
-                    <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('database.noResultsFound')}</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
-                    </div>
+                    <EmptyState icon={SearchX} title={t('database.noResultsFound')} description={t('database.databaseQueryEmpty')} />
                 )}
                 {confirmDialog}
             </>
@@ -1097,10 +1092,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
             </div>
 
             {filteredItems.length === 0 && (
-                <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                    <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('database.noResultsFound')}</h3>
-                    <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
-                </div>
+                <EmptyState icon={SearchX} title={t('database.noResultsFound')} description={t('database.databaseQueryEmpty')} />
             )}
             {confirmDialog}
         </>

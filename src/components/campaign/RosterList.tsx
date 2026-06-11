@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Campaign } from '@/types';
 import { useStore } from '@/store/useStore';
-import { Plus, Search, X, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Plus, Search, X, Trash2, ChevronRight, ChevronDown, Users } from 'lucide-react';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { useCardGrid } from '@/hooks/useCardGrid';
@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { canHaveTiers, getRecruitBudgetCost, getSurchargeForLevel, getTierLabel } from '@/lib/tiers';
 import { useT } from '@/i18n';
 import { notifySuccess, notifyInfo, notifyError } from '@/lib/notify';
+import { EmptyState } from '@/components/ui/EmptyState';
 import {
     DndContext,
     DragOverlay,
@@ -191,10 +192,7 @@ export function RosterList({ campaign }: RosterListProps) {
 
                 <OwnedDropZone>
                 {campaign.hqRoster.length === 0 ? (
-                    <div className="border-2 border-dashed border-border bg-black/50 p-12 text-center clip-corner-tl-br">
-                        <h3 className="text-xl font-display font-bold uppercase text-muted-foreground mb-2">{t('hq.rosterEmpty')}</h3>
-                        <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('hq.dragMercHere')}</p>
-                    </div>
+                    <EmptyState icon={Users} title={t('empty.rosterTitle')} description={t('empty.rosterDescription')} />
                 ) : !expandedSections.has('owned') ? (
                     /* Capsule View */
                     <div className="flex flex-wrap gap-1.5 mt-2">
