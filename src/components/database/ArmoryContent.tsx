@@ -10,6 +10,8 @@ import { WeaponCard } from '@/components/weapons/WeaponCard';
 import { SKILL_ICON } from '@/lib/constants/skills';
 import { FACTION_SIDEBAR_COLOR, FACTION_BORDER_CLASS as FACTION_COLOR_MAP, FACTION_TEXT_CLASS as FACTION_TEXT_COLOR_MAP } from '@/lib/constants/factionColors';
 import { RangeArrows } from '@/components/shared/RangeArrows';
+import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { notify } from '@/lib/notify';
 import { formatCardText } from '@/lib/formatCardText';
 import { resolveVariant, getWeaponImageUrl } from '@/lib/variants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -144,6 +146,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
     const { saveWeapon: saveWeaponDb, deleteWeapon: deleteWeaponDb, saveProgram: saveProgramDb } = useCatalog();
     const t = useT();
     const loc = useLocalized();
+    const { confirm, confirmDialog } = useCyberConfirm();
     // Weapon CRUD
     const [weaponDialogOpen, setWeaponDialogOpen] = useState(false);
     const [editingWeapon, setEditingWeapon] = useState<Weapon | null>(null);
@@ -419,6 +422,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
             : updatedPrograms[updatedPrograms.length - 1];
         setCatalog({ ...catalog, programs: updatedPrograms });
         if (isAdmin) saveProgramDb(savedProg);
+        notify(t('notify.saved'), { variant: 'success', description: savedProg.name });
         setProgramDialogOpen(false);
         setEditingProgram(null);
         setProgramForm({});
@@ -465,17 +469,19 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
             : updatedWeapons[updatedWeapons.length - 1];
         setCatalog({ ...catalog, weapons: updatedWeapons });
         if (isAdmin) saveWeaponDb(savedWeapon);
+        notify(t('notify.saved'), { variant: 'success', description: savedWeapon.name });
         setWeaponDialogOpen(false);
         setEditingWeapon(null);
         setWeaponForm(EMPTY_WEAPON);
     };
 
-    const deleteWeapon = (id: string) => {
+    const deleteWeapon = async (id: string) => {
         const weapon = (catalog.weapons ?? []).find(w => w.id === id);
-        if (!weapon || !window.confirm(`Delete "${weapon.name}"? This cannot be undone.`)) return;
+        if (!weapon || !(await confirm({ title: weapon.name, description: t('confirm.deleteDescription') }))) return;
         const updatedWeapons = (catalog.weapons ?? []).filter(w => w.id !== id);
         setCatalog({ ...catalog, weapons: updatedWeapons });
         if (isAdmin) deleteWeaponDb(id);
+        notify(t('notify.deleted'), { variant: 'destructive', description: weapon.name });
     };
 
     const toggleFlip = (id: string) => {
@@ -657,6 +663,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                         </div>
                     </DialogContent>
                 </Dialog>
+                {confirmDialog}
             </>
         );
     }
@@ -1027,6 +1034,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                         <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
                     </div>
                 )}
+                {confirmDialog}
             </>
         );
     }
@@ -1094,6 +1102,7 @@ export function ArmoryContent({ activeTab, highlightId, highlightFactionId, high
                     <p className="text-xs font-mono-tech text-muted-foreground uppercase tracking-widest">{t('database.databaseQueryEmpty')}</p>
                 </div>
             )}
+            {confirmDialog}
         </>
     );
 }

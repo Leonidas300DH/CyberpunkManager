@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Edit, Trash2, Shield } from 'lucide-react';
 import { SKILL_ICONS } from '@/lib/constants/skills';
 import { RangeArrows } from '@/components/shared/RangeArrows';
+import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { notify } from '@/lib/notify';
 
 function RangeArrowsSmall({ rangeRed, rangeYellow, rangeGreen, rangeLong }: {
     rangeRed: boolean; rangeYellow: boolean; rangeGreen: boolean; rangeLong: boolean;
@@ -42,6 +44,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
     const { saveLoot, deleteLoot: deleteLootDb } = useCatalog();
     const t = useT();
     const loc = useLocalized();
+    const { confirm: cyberConfirm, confirmDialog } = useCyberConfirm();
 
     const [editingLoot, setEditingLoot] = useState<Loot | null>(null);
     const [lootForm, setLootForm] = useState(EMPTY_LOOT_FORM);
@@ -91,12 +94,13 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
         setDialogOpen(true);
     };
 
-    const handleDelete = (loot: Loot) => {
+    const handleDelete = async (loot: Loot) => {
         if (!catalog) return;
-        if (!confirm(`Delete loot "${loot.name}"?`)) return;
+        if (!(await cyberConfirm({ title: loot.name, description: t('confirm.deleteDescription') }))) return;
         const updatedLoots = (catalog.loots ?? []).filter(l => l.id !== loot.id);
         setCatalog({ ...catalog, loots: updatedLoots });
         deleteLootDb(loot.id);
+        notify(t('notify.deleted'), { variant: 'destructive', description: loot.name });
     };
 
     const handleSave = () => {
@@ -138,6 +142,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
             saveLoot(newLoot);
         }
 
+        notify(t('notify.saved'), { variant: 'success', description: lootForm.name || 'Loot' });
         setDialogOpen(false);
         setEditingLoot(null);
     };
@@ -392,6 +397,7 @@ export function LootsContent({ search = '', triggerCreate = 0 }: { search?: stri
                     </div>
                 </DialogContent>
             </Dialog>
+            {confirmDialog}
         </div>
     );
 }

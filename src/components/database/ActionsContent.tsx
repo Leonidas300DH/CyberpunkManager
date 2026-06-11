@@ -14,6 +14,8 @@ import { CardPreviewTooltip } from '@/components/ui/CardPreviewTooltip';
 import { CharacterCard } from '@/components/characters/CharacterCard';
 import { SKILL_ICONS } from '@/lib/constants/skills';
 import { RangeArrows } from '@/components/shared/RangeArrows';
+import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { notify } from '@/lib/notify';
 
 function RangeArrowsSmall({ rangeRed, rangeYellow, rangeGreen, rangeLong }: {
     rangeRed: boolean; rangeYellow: boolean; rangeGreen: boolean; rangeLong: boolean;
@@ -42,6 +44,7 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
     const { saveWeapon, deleteWeapon: deleteWeaponDb } = useCatalog();
     const t = useT();
     const loc = useLocalized();
+    const { confirm: cyberConfirm, confirmDialog } = useCyberConfirm();
 
     const [editingAction, setEditingAction] = useState<Weapon | null>(null);
     const [actionForm, setActionForm] = useState(EMPTY_ACTION_FORM);
@@ -116,12 +119,13 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
     };
 
     // Delete action
-    const handleDelete = (action: Weapon) => {
+    const handleDelete = async (action: Weapon) => {
         if (!catalog) return;
-        if (!confirm(`Delete action "${action.name}"?`)) return;
+        if (!(await cyberConfirm({ title: action.name, description: t('confirm.deleteDescription') }))) return;
         const updatedWeapons = catalog.weapons.filter(w => w.id !== action.id);
         setCatalog({ ...catalog, weapons: updatedWeapons });
         deleteWeaponDb(action.id);
+        notify(t('notify.deleted'), { variant: 'destructive', description: action.name });
     };
 
     // Save action
@@ -166,6 +170,7 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
             saveWeapon(newAction);
         }
 
+        notify(t('notify.saved'), { variant: 'success', description: actionForm.name || 'Action' });
         setDialogOpen(false);
         setEditingAction(null);
     };
@@ -403,6 +408,7 @@ export function ActionsContent({ search = '', triggerCreate = 0 }: { search?: st
                     </div>
                 </DialogContent>
             </Dialog>
+            {confirmDialog}
         </div>
     );
 }

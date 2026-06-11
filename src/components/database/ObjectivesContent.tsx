@@ -13,6 +13,8 @@ import {
     ObjectiveCard,
     isPlaceholder,
 } from '@/components/shared/ObjectiveCard';
+import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { notify } from '@/lib/notify';
 
 
 const FACTION_SLUG: Record<string, string> = {
@@ -63,6 +65,7 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
     const isAdmin = useIsAdmin();
     const { saveObjective: saveObjectiveDb, deleteObjective: deleteObjectiveDb } = useCatalog();
     const t = useT();
+    const { confirm, confirmDialog } = useCyberConfirm();
 
     // Highlight scroll-to effect
     useEffect(() => {
@@ -141,12 +144,13 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
         setDialogOpen(true);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         const obj = catalog.objectives.find(o => o.id === id);
-        if (!obj || !window.confirm(`Delete "${obj.name}"? This cannot be undone.`)) return;
+        if (!obj || !(await confirm({ title: obj.name, description: t('confirm.deleteDescription') }))) return;
         const updated = catalog.objectives.filter(o => o.id !== id);
         setCatalog({ ...catalog, objectives: updated });
         deleteObjectiveDb(id);
+        notify(t('notify.deleted'), { variant: 'destructive', description: obj.name });
     };
 
     const handleSave = () => {
@@ -188,6 +192,7 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
 
         setCatalog({ ...catalog, objectives: updatedObjectives });
         saveObjectiveDb(savedObjective);
+        notify(t('notify.saved'), { variant: 'success', description: savedObjective.name });
         setDialogOpen(false);
         setEditingObjective(null);
         setObjectiveForm({ ...EMPTY_OBJECTIVE });
@@ -380,6 +385,7 @@ export function ObjectivesContent({ highlightId, highlightKey, factionFilter = '
                     </div>
                 </DialogContent>
             </Dialog>
+            {confirmDialog}
         </>
     );
 }

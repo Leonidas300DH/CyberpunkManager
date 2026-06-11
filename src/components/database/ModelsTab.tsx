@@ -15,6 +15,8 @@ import { Plus, X, Upload, FlipVertical2, ChevronDown, ChevronRight, Edit } from 
 import { v4 as uuidv4 } from 'uuid';
 import { canHaveTiers, getTierLabel } from '@/lib/tiers';
 import { RangeArrows } from '@/components/shared/RangeArrows';
+import { useCyberConfirm } from '@/components/ui/CyberConfirm';
+import { notify } from '@/lib/notify';
 
 const SKILL_TYPES: SkillType[] = ['Ranged', 'Melee', 'Reflexes', 'Medical', 'Tech', 'Influence'];
 const RANGE_TYPES: RangeType[] = ['Reach', 'Red', 'Yellow', 'Green', 'Long', 'Self'];
@@ -190,6 +192,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
     const { saveLineage, saveProfile, deleteLineage: deleteLineageDb, deleteProfile: deleteProfileDb, saveWeapon } = useCatalog();
     const t = useT();
     const loc = useLocalized();
+    const { confirm, confirmDialog } = useCyberConfirm();
 
     // Highlight scroll-to effect
     useEffect(() => {
@@ -458,9 +461,9 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
         setEditingProfile(null);
     };
 
-    const deleteCharacter = (lineageId: string) => {
+    const deleteCharacter = async (lineageId: string) => {
         const lineage = catalog.lineages.find(l => l.id === lineageId);
-        if (!lineage || !window.confirm(`Delete "${lineage.name}" and all its profiles? This cannot be undone.`)) return;
+        if (!lineage || !(await confirm({ title: lineage.name, description: t('confirm.deleteDescription') }))) return;
 
         const updatedCatalog = {
             ...catalog,
@@ -469,12 +472,13 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
         };
         setCatalog(updatedCatalog);
         if (isAdmin) deleteLineageDb(lineageId);
+        notify(t('notify.deleted'), { variant: 'destructive', description: lineage.name });
     };
 
-    const deleteTier = (profile: ModelProfile) => {
+    const deleteTier = async (profile: ModelProfile) => {
         const lineage = catalog.lineages.find(l => l.id === profile.lineageId);
         const label = profile.level === 1 ? 'Veteran' : 'Elite';
-        if (!lineage || !window.confirm(`Delete ${label} tier of "${lineage.name}"?`)) return;
+        if (!lineage || !(await confirm({ title: `${lineage.name} — ${label}`, description: t('confirm.deleteDescription') }))) return;
 
         const updatedCatalog = {
             ...catalog,
@@ -482,6 +486,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
         };
         setCatalog(updatedCatalog);
         if (isAdmin) deleteProfileDb(profile.id);
+        notify(t('notify.deleted'), { variant: 'destructive', description: `${lineage.name} — ${label}` });
     };
 
     // ── Tier creation ──
@@ -1084,6 +1089,7 @@ export function ModelsTab({ highlightId, highlightKey, factionFilter = 'all', se
                 </DialogContent>
             </Dialog>
 
+            {confirmDialog}
         </div>
     );
 }
